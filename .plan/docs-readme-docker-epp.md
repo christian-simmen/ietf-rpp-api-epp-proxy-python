@@ -11,3 +11,8 @@
 - Run from `src/`, `./config.yaml` is the symlink and `./config.local.yaml` is not looked for at the root:
   `RPP_CONFIG_FILE=../config.yaml` makes the root config.local.yaml apply.
 - Verified: image on `epptest_epp_net`, `HEAD /domainNames/x.example/availability` answers 200 (EPP 1000).
+
+## Corrections
+- Added on request: a chapter on choosing EPP or RRI (`rpp_backend`), and running both as two proxies. Verified: the
+  image with config.rri-mtest.yaml as `RPP_CONFIG_FILE` starts and serves /ui/ (config put in with `docker cp`, since
+  a bind mount from the devcontainer names a host path).
