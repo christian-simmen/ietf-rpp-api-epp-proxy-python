@@ -1,415 +1,1041 @@
-# The DENIC RRI extension of RPP
+%%%
+title = "DENIC RRI Extension for the RESTful Provisioning Protocol (RPP)"
+abbrev = "RPP DENIC RRI Extension"
+area = "Applications and Real-Time"
+workgroup = "Network Working Group"
+submissiontype = "IETF"
+keyword = ["RPP", "provisioning", "registry", "extension", "RRI"]
+TocDepth = 4
+date = 2026-11-14
 
-A private RPP extension of this proxy, for a deployment whose registry speaks DENIC RRI 5.0. It follows the structure
-of [draft-wullink-rpp-extension-guidelines-00](../../.spec/draft-wullink-rpp-extension-guidelines.clean.txt) §9
-(cited as "guidelines"). The base specifications are draft-ietf-rpp-core ("core"), draft-ietf-rpp-data-objects
-("data-objects") and draft-ietf-rpp-json ("json") in [.spec/](../../.spec/). The RRI facts behind it are in
-[rri-5.0-reference.md](rri-5.0-reference.md) ("ref"), the gaps it closes in [gap-analysis.md](gap-analysis.md). Where
-the guidelines are unclear, [spec-issues.md](../../.spec/spec-issues.md#extension-guidelines) says what this
-document does.
+[seriesInfo]
+name = "Internet-Draft"
+value = "draft-kowalik-rpp-denic-rri-00"
+stream = "IETF"
+status = "informational"
 
-## 1. Introduction
+[[author]]
+initials="P."
+surname="Kowalik"
+fullname="Pawel Kowalik"
+organization = "DENIC"
 
-RRI holds data that the RPP base specifications have no place for:
+%%%
 
-- **Request contacts.** A domain has, besides its 1 to 5 holders, a General Request contact and an Abuse contact.
-  Both are RRI contacts of type `REQUEST`: a handle and a URI template (RFC 6570, level 1) that tells where requests
-  about the domain go, such as `https://example.com/contact?domain={Alabel}` (ref §5.1, §5.2). They have no name,
-  address or status, so they are no Contact Data Object (data-objects §12), whose `contactInfo` (a JSContact Card) and
-  `status` are required. This extension defines them as a data object of their own, the Request Contact, and adds
-  the two roles to the Domain Name Data Object as data elements of their own.
-- **The data of a transfer.** RRI's only transfer, CHPROV (ref §6.18), is requested by the gaining registrar with the
-  complete data of the domain: holders, request contacts and DNS data, all of them the gainer's own. The RPP transfer
-  request carries none of it (gap Q3). This extension adds them to the Create operation of the Domain Transfer
-  Process Object.
+.# Abstract
 
-Why the request contact is a new data object and not one derived from the Contact Data Object (data-objects §2.5,
-`Extends`): a derived object inherits every data element of its base object with its cardinality, and cannot relax
-it. A Request Contact would carry an empty Card as `contactInfo` and a made-up `status`. The template cannot go into
-the Card's `links` either, since `{Alabel}` makes it no URI. Adding a `uriTemplate` element to the Contact Data
-Object leaves `contactInfo` required as well. The new object repeats only `id` and `provMetadata` of the Contact Data
-Object (guidelines §6, item 4).
+This document defines a private extension of the RESTful Provisioning Protocol (RPP) for a server whose registry operates the DENIC Registry Robot Interface (RRI) version 5.0. The extension defines the Request Contact Data Object, adds the General Request and Abuse contacts to the Domain Name Data Object, and adds the data of the domain to the Create operation of the Domain Transfer Process Object.
 
-## 2. Extension Overview
+{mainmatter}
 
-| Field | Value |
-|---|---|
-| Name | DENIC RRI |
-| Identifier | `de.denic.rpp.rri` |
-| Version | 0.2.0 |
-| RPP version | the drafts of `.spec/` (core -00, data-objects -01, json -00) |
-| Schema `$id` | `https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json` |
-| Changed base objects | `domainName`, `domainTransferProcess` |
-| New objects | `requestContact`, `requestContactAvailability` |
+# Introduction {#introduction}
 
-Version 0.1.0 (#133) had the identifier `rri` and carried the request contacts of a transfer as `contacts` labelled
-`generalRequest` and `abuse`. 0.2.0 replaces both.
+This section states the purpose of the extension, the specifications it builds upon, and the reasons for the extension points it uses.
 
-## 3. External Data Types
+The RESTful Provisioning Protocol (RPP) is defined by [@!I-D.ietf-rpp-core], [@!I-D.ietf-rpp-data-objects], and [@!I-D.ietf-rpp-json]. This document extends these base specifications for a server that provisions objects in a registry operating the DENIC Registry Robot Interface (RRI) version 5.0 [@DENIC-RRI]. It follows the extension specification format of [@!I-D.wullink-rpp-extension-guidelines, section 9].
+
+The registry holds data for which the base specifications define no data element:
+
+Request contacts
+: A domain name has, in addition to its holders, at most one General Request contact and at most one Abuse contact. Both are registry contacts of type `REQUEST`, which consist of a handle and a URI Template [@!RFC6570] that states where requests about the domain name are sent. A request contact has no name, no postal address, and no status. It therefore cannot be represented as a Contact Data Object [@!I-D.ietf-rpp-data-objects, section 12], whose Contact Information (`contactInfo`) and Status (`status`) data elements are required.
+
+Transfer data
+: The only transfer of the registry (CHPROV) is requested by the gaining client together with the complete data of the domain name: its holders, its request contacts, and its DNS data, all of which belong to the gaining client. The Domain Transfer Process Object has no data element for this data.
+
+## Conventions and Terminology {#terminology}
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [@!RFC2119] [@!RFC8174] when, and only when, they appear in all capitals, as shown here.
+
+Terms of the RPP data model, such as Data Object, Component Object, Process Object, data element, cardinality, mutability, Identifier, Unique Identifier, Input Data Element, Reference, Owner Data Object, and This Object, are used as defined in [@!I-D.ietf-rpp-data-objects]. The terms Extension Mapper (`rpp:extends`) and Effective Schema are used as defined in [@!I-D.ietf-rpp-json].
+
+The following terms are used in this document:
+
+RRI
+: The DENIC Registry Robot Interface, version 5.0 [@DENIC-RRI].
+
+RegAcc
+: A registrar account of the registry. A client of an RPP server that implements this extension acts for one RegAcc, identified by its RegAccId (for example `DENIC-1000022`).
+
+Handle
+: The identifier of a contact in the registry, of the form `DENIC-<RegAccId number>-<suffix>`, with 9 to 32 characters. Contacts of all types share one namespace of handles.
+
+Request contact
+: A contact of the registry of type `REQUEST`, represented by the Request Contact Data Object (#request-contact).
+
+## Choice of Extension Points {#choice}
+
+This section is non-normative.
+
+A request contact is defined as a new Data Object and not as an object that extends the Contact Data Object by inheritance [@!I-D.ietf-rpp-data-objects, section 2.5]. A derived object inherits every data element of its base object with its cardinality and cannot relax it. A Request Contact derived from the Contact Data Object would therefore carry an empty Contact Information and a status that the registry does not hold. The URI Template cannot be carried in the `links` of the Contact Information either, as a template with a variable such as `{Alabel}` is not a URI. Adding a URI Template data element to the Contact Data Object leaves Contact Information required as well. The new Data Object repeats only the Handle ID and the Provisioning Metadata of the Contact Data Object, see [@!I-D.wullink-rpp-extension-guidelines, section 6].
+
+The General Request and Abuse contacts are defined as data elements of their own and not as labels of the `contacts` data element of the Domain Name Data Object, because they refer to Request Contact Data Objects and not to Contact Data Objects.
+
+# Extension Overview {#overview}
+
+This section identifies the extension.
+
+| Field                | Value                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------------------- |
+| Name                 | DENIC RRI                                                                                     |
+| Identifier           | `de.denic.rpp.rri`                                                                            |
+| Version              | 0.2.0                                                                                         |
+| RPP version          | [@!I-D.ietf-rpp-core], [@!I-D.ietf-rpp-data-objects], [@!I-D.ietf-rpp-json]                   |
+| Schema `$id`         | <https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json> |
+| Changed base objects | `domainName`, `domainTransferProcess`                                                         |
+| New objects          | `requestContact`, `requestContactAvailability`                                                |
+Table: Extension Overview
+
+# External Data Types {#external-data-types}
 
 None.
 
-## 4. Result Codes
+# Result Codes {#result-codes}
 
-None. The refusals of RRI are mapped to the result codes of core §18, see the operations below.
+None. The extension uses the result codes of [@!I-D.ietf-rpp-core, section 18].
 
-## 5. Problem Details
+# Problem Details {#problem-details}
 
 None.
 
-## 6. HTTP Headers
+# HTTP Headers {#http-headers}
 
-None. The AuthInfo of a transfer travels in `RPP-Authorization` (core §6.1), as for any transfer.
+None. The Object Authorisation of a transfer request is conveyed in the `RPP-Authorization` header field [@!I-D.ietf-rpp-core, section 6.1], as for any transfer request.
 
-## 7. Discovery Document
+# Discovery Document {#discovery}
 
-None beyond the entry in `extensions`:
+This section states the additions of the extension to the Discovery document.
 
-```json
-{"@type": "extension", "name": "DENIC RRI", "id": "de.denic.rpp.rri", "version": "0.2.0",
- "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json"}
-```
+A server that supports the extension lists it in the `extensions` of its Discovery document with the values of (#overview).
 
-A server that offers the extension also lists `requestContact` in `objects`.
+A server that supports the extension lists `requestContact` in the `objects` of its Discovery document.
 
-## 8. Updated Data Objects
+# Updated Data Objects {#updated-data-objects}
 
-### 8.1 Domain Name Data Object
+This section defines the data elements that the extension adds to existing Data Objects.
 
-- Identifier: `domainName`
+## Domain Name Data Object {#domain-name}
 
-#### 8.1.1 Data Elements
+* Identifier: domainName
+
+### Data Elements {#domain-name-data-elements}
 
 The following data elements are added to the Domain Name Data Object.
 
-- General Request Contact
-  - Identifier: `generalRequest`
-  - Cardinality: 0-1
-  - Mutability: read-write
-  - Data Type: Aggregation[Request Contact Data Object]
-  - Description: The request contact that general requests about the domain go to (RRI role `generalrequest`).
-  - Constraints:
-    - The relation MUST correspond to a Request Contact Data Object of the sponsoring client.
-- Abuse Contact
-  - Identifier: `abuse`
-  - Cardinality: 0-1
-  - Mutability: read-write
-  - Data Type: Aggregation[Request Contact Data Object]
-  - Description: The request contact that reports of abuse of the domain go to (RRI role `abusecontact`).
-  - Constraints:
-    - The relation MUST correspond to a Request Contact Data Object of the sponsoring client.
+* General Request Contact
+  * Identifier: generalRequest
+  * Cardinality: 0-1
+  * Mutability: read-write
+  * Data Type: Aggregation[Request Contact Data Object]
+  * Description: The request contact to which general requests about the domain name are sent.
+  * Constraints:
+    * The relation MUST correspond to a Request Contact Data Object of the sponsoring client.
+* Abuse Contact
+  * Identifier: abuse
+  * Cardinality: 0-1
+  * Mutability: read-write
+  * Data Type: Aggregation[Request Contact Data Object]
+  * Description: The request contact to which reports of abuse of the domain name are sent.
+  * Constraints:
+    * The relation MUST correspond to a Request Contact Data Object of the sponsoring client.
 
-A domain needs neither: RRI holds 0 to 1 of each (ref §5.2), which the backend profile states as
-`domainName.generalRequest` and `domainName.abuse` (`min_count` 0, `max_count` 1).
+The roles of these data elements are not labels of the `contacts` data element. A server that supports the extension MUST reject a `contacts` entry with the label `generalRequest` or `abuse`.
 
-The roles are not labels of `contacts`: a server that offers the extension refuses a `contacts` entry labelled
-`generalRequest` or `abuse` with 501 (`02102`), as any label it has no role for. On RRI, `contacts` holds only the
-holders after the first, labelled `registrant` (gap Q1).
+On a server that supports the extension, the `contacts` data element holds only the holders after the first, labelled `registrant`.
 
-The Create, Read and Update operations (data-objects §11.3) take and show the two elements as the other read-write
-elements. An Update that omits one removes it (RRI deletes a role an UPDATE does not state). A partial update
-addresses them as `/generalRequest` and `/abuse` (json §5.2); a `remove` of one the domain does not have is not
-applicable (422, `02308`).
+The Create, Read, and Update operations [@!I-D.ietf-rpp-data-objects, section 11.3] process these data elements as any other read-write data element. A full update that omits one of them removes it from the domain name.
 
-#### 8.1.2 Operations
+### Operations {#domain-name-operations}
 
 None.
 
-## 9. New Data Objects
+# New Data Objects {#new-data-objects}
 
-### 9.1 Request Contact Data Object
+This section defines the Data Objects and Component Objects that the extension introduces.
 
-- Name: Request Contact Data Object
-- Identifier: `requestContact`
-- Unique Identifier: `id`
-- Description: A contact that is only a URI template: where requests about a domain go. The registry expands the
-  template for a domain where it publishes it (RRI: in its web whois); a read shows it as stored.
+## Request Contact Data Object {#request-contact}
 
-#### 9.1.1 Data Elements
+### Object Description
 
-- Handle ID
-  - Identifier: `id`
-  - Cardinality: 1
-  - Mutability: create-only
-  - Data Type: Identifier
-  - Description: External unique identifier of the request contact.
-  - Constraints:
-    - This value MUST be provided by the client.
-    - On RRI, request contacts and contacts share one namespace of handles (`DENIC-<RegAccId>-<suffix>`, 9 to 32
-      characters).
-- Provisioning Metadata
-  - Identifier: `provMetadata`
-  - Cardinality: 1
-  - Mutability: read-only
-  - Data Type: Provisioning Metadata Object
-  - Description: Standard metadata about the object's lifecycle and ownership.
-  - Constraints: (None). RRI shows `spClientId` (the RegAccId of the handle) and `upDate` only.
-- URI Template
-  - Identifier: `uriTemplate`
-  - Cardinality: 1
-  - Mutability: read-write
-  - Data Type: String
-  - Description: An RFC 6570 URI template of where requests go, with the variables `{Alabel}` and `{Ulabel}` for
-    the domain name in its A-label and U-label form.
-  - Constraints:
-    - The value MUST contain between 8 and 1024 characters.
-    - On RRI: level 1 of RFC 6570, the schemes `http`, `https` and `mailto`, and no variables but `{Alabel}` and
-      `{Ulabel}` (case-sensitive). The registry checks this; a template it refuses (`83000000005`) answers 400
-      (`02005`).
+* Name: Request Contact Data Object
+* Identifier: requestContact
+* Unique Identifier: id
+* Description: A Request Contact Data Object represents a URI Template to which requests about the domain names that refer to it are sent. The server expands the template for a domain name where it publishes it, for example in a registration data directory service.
 
-The object has no status and no authorisation information.
+### Data Elements {#request-contact-data-elements}
 
-#### 9.1.2 Operations
+The following data elements are defined for the Request Contact Data Object.
 
-The uniform interface of data-objects §2.7.4. Only the sponsoring client may read, update or use a request contact;
-another client's request contact is refused with 403 (`02201`).
+* Handle ID
+  * Identifier: id
+  * Cardinality: 1
+  * Mutability: create-only
+  * Data Type: Identifier
+  * Description: External unique identifier of the request contact.
+  * Constraints:
+    * This value MUST be provided by the client.
+    * Request contacts and Contact Data Objects share one namespace of identifiers.
+* Provisioning Metadata
+  * Identifier: provMetadata
+  * Cardinality: 1
+  * Mutability: read-only
+  * Data Type: Provisioning Metadata Object
+  * Description: Standard metadata about the object's lifecycle and ownership.
+  * Constraints: (None)
+* URI Template
+  * Identifier: uriTemplate
+  * Cardinality: 1
+  * Mutability: read-write
+  * Data Type: String
+  * Description: A URI Template [@!RFC6570] that states where requests are sent. The variables `{Alabel}` and `{Ulabel}` stand for the domain name in its A-label and U-label form.
+  * Constraints:
+    * The value MUST contain between 8 and 1024 characters.
+    * The value MUST be a URI Template of level 1 [@!RFC6570, section 1.2] with the scheme `http`, `https`, or `mailto`.
+    * The value MUST NOT contain variables other than `{Alabel}` and `{Ulabel}`. Variable names are case-sensitive.
 
-- Availability (`availability`): whether a request contact with the given Handle ID can be created. Output: Request
-  Contact Availability Object. On RRI a handle of a contact is not available either.
-- Create (`create`): input `id` and `uriTemplate`. Output: the request contact. Answers 201 with `Location`.
-- Read (`read`): output the request contact. A Handle ID of a contact (an RRI `PERSON` or `ORG`) is no request
-  contact, 404 (`02303`); likewise a contact read of a request contact's handle.
-- Update (`update`): input `uriTemplate`, as a full update (PUT) or a partial update (PATCH, json §5.2), which can
-  only replace the template. An update that changes nothing sends nothing and answers 200.
-- Delete (`delete`): RRI has no delete of a contact; the registry deletes unused ones itself (ref §5.1). Answers 501
-  (`02101`).
+The Request Contact Data Object has no status and no authorisation information.
 
-### 9.2 Request Contact Availability Object
+### Operations {#request-contact-operations}
 
-- Name: Request Contact Availability Object
-- Identifier: `requestContactAvailability`
-- Extends: Base Availability Object (data-objects §9.18.1)
-- Description: The availability of a Handle ID for a request contact.
+#### Availability Operation
 
-#### 9.2.1 Data Elements
+* Identifier: availability
 
-None beyond those of the Base Availability Object.
+The Availability operation allows a client to determine whether a Request Contact resource with the given Handle ID can be created.
 
-#### 9.2.2 Operations
+The operation has no input data elements and takes no object representation as input. The client identifies the resource by its Reference only.
+
+* Authorisation:
+  * Any authenticated client is authorised to perform this operation.
+
+* Output:
+  * Object: Request Contact Availability Object
+
+A Handle ID of a Contact Data Object is not available for a Request Contact Data Object, and vice versa.
+
+#### Create Operation
+
+* Identifier: create
+
+The Create operation allows a client to provision a new Request Contact resource. The operation accepts as input all create-only and read-write data elements defined for the Request Contact Data Object.
+
+* Authorisation:
+  * Each client is authorised to create new request contact objects, becoming their sponsoring client.
+
+* Input:
+  * Object: This Object
+* Output:
+  * Object: This Object
+
+The server MUST reject a URI Template that does not satisfy the constraints of (#request-contact-data-elements).
+
+#### Read Operation
+
+* Identifier: read
+
+The Read operation allows a client to retrieve the data elements of a Request Contact resource.
+
+* Authorisation:
+  * Only the sponsoring client is authorised to perform this operation.
+
+* Input:
+  * Reference: This Object
+* Output:
+  * Object: This Object
+
+The server MUST respond to a Read operation for the Handle ID of a Contact Data Object as for an object that does not exist. Likewise, the server MUST respond to a Read operation on a Contact Data Object for the Handle ID of a Request Contact Data Object as for an object that does not exist.
+
+#### Update Operation
+
+* Identifier: update
+
+The Update operation allows a client to modify the URI Template of an existing Request Contact resource.
+
+* Authorisation:
+  * Only the sponsoring client is authorised to perform this operation.
+
+* Input:
+  * Reference: This Object
+  * Object: This Object
+* Output:
+  * Object: This Object
+
+An update that does not change the URI Template completes successfully without a change.
+
+#### Delete Operation
+
+* Identifier: delete
+
+The Delete operation is not supported. The registry deletes request contacts that are not referred to by any domain name itself, after a retention period [@DENIC-RRI].
+
+### Processes
+
+The Request Contact Data Object supports no Process Objects.
+
+## Request Contact Availability Object {#request-contact-availability}
+
+* Name: Request Contact Availability Object
+* Identifier: requestContactAvailability
+* Extends: Base Availability Object
+* Description: The result of an Availability operation on a Request Contact Data Object.
+* Data Elements: (None)
+
+# Updated Process Objects {#updated-process-objects}
+
+This section defines the additions of the extension to existing Process Objects.
+
+## Domain Transfer Process Object {#domain-transfer-process}
+
+* Identifier: domainTransferProcess
+
+### Data Elements
 
 None.
 
-## 10. Updated Process Objects
+### Operations
 
-### 10.1 Domain Transfer Process Object
+#### Create (Transfer Request) {#transfer-create}
 
-- Identifier: `domainTransferProcess`
+* Identifier: transferCreate
 
-#### 10.1.1 Data Elements
+The extension adds the following Input Data Elements to the Create operation [@!I-D.ietf-rpp-data-objects, section 10.1.1.1]. They state the domain name as the gaining client holds it after the transfer.
 
-The following Input Data Elements are added to the Create operation (Transfer Request, data-objects §10.1.1.1). They
-are the data of the domain as the gainer will hold it, and mean what they mean for the Create operation of the
-Domain Name Data Object.
+* Input:
+  * Reference: Owner Data Object
+  * Object: Domain Transfer Process Object
+  * Input Data Elements:
+    * Registrant
+      * Identifier: registrant
+      * Cardinality: 1
+      * Data Type: Aggregation[Contact Data Object]
+      * Description: The first holder of the domain name.
+      * Constraints:
+        * The relation MUST correspond to a Contact Data Object of the gaining client.
+    * Contacts
+      * Identifier: contacts
+      * Cardinality: 0+
+      * Data Type: LabelledAggregation[Contact Data Object]
+        * Label Description: The role of the associated contact.
+        * Label Constraints:
+          * The value MUST be `registrant`.
+      * Description: The holders of the domain name after the first.
+      * Constraints:
+        * Each relation MUST correspond to a Contact Data Object of the gaining client.
+    * General Request Contact
+      * Identifier: generalRequest
+      * Cardinality: 0-1
+      * Data Type: Aggregation[Request Contact Data Object]
+      * Description: As defined in (#domain-name-data-elements).
+      * Constraints:
+        * The relation MUST correspond to a Request Contact Data Object of the gaining client.
+    * Abuse Contact
+      * Identifier: abuse
+      * Cardinality: 0-1
+      * Data Type: Aggregation[Request Contact Data Object]
+      * Description: As defined in (#domain-name-data-elements).
+      * Constraints:
+        * The relation MUST correspond to a Request Contact Data Object of the gaining client.
+    * DNS
+      * Identifier: dns
+      * Cardinality: 1
+      * Data Type: DNS Data Object
+      * Description: The DNS data of the domain name.
+      * Constraints:
+        * The records MUST be of the types `ns`, `a`, `aaaa`, `mx`, or `dnskey`.
+* Output:
+  * Object: Domain Transfer Process Object
 
-| Identifier | Cardinality | Data Type | Description |
-|---|---|---|---|
-| `registrant` | 1 | Aggregation[Contact Data Object] | The first holder |
-| `contacts` | 0+ | Labelled Aggregation[Contact Data Object] | The further holders, labelled `registrant` |
-| `generalRequest` | 0-1 | Aggregation[Request Contact Data Object] | As in §8.1 |
-| `abuse` | 0-1 | Aggregation[Request Contact Data Object] | As in §8.1 |
-| `dns` | 1 | DNS Data Object | `ns` records with glue, `a`, `aaaa`, `mx`, `dnskey` |
+The transfer is completed immediately. The server MUST respond with the Domain Transfer Process Object in the state `serverApproved`, with `reqClientId` and `actClientId` set to the identifier of the gaining client, and `requestDate` and `actionDate` set to the time of completion. The server informs the losing client with a message.
 
-Every contact and request contact MUST be one of the gaining client. They are converted as those of a domain create,
-with the same refusals: no `nameservers` (RRI has no host objects), no `ds` records, no other contact labels.
+The server MUST reject a transfer request without Object Authorisation, and a transfer request whose Input Data Elements refer to an object of another client.
 
-#### 10.1.2 Operations
+The Read (Transfer Query), Delete (Transfer Cancel), Approve, and Reject operations are not supported. A push transfer is not supported.
 
-Create (Transfer Request) is CHPROV, which moves the domain at once: 200 without `Location`, the "completed at once"
-answer of core §16.1.4. The RRI reply has no transfer state, so the process is stated as the registry completed it:
-`transferDir` `pull`, `trStatus` `serverApproved`, `reqClientId` and `actClientId` the gainer's RegAccId,
-`requestDate` and `actionDate` the time of the reply, no `expiryDate` (an RRI domain has none). The losing
-registrar learns of it from a `chprovAuthInfo` queue message, which the proxy shows as a service notice.
-
-| Case | Answer |
-|---|---|
-| `registrant` or `dns` missing | 400 (`02001`), no command sent |
-| no `RPP-Authorization` | 400 (`02003`), no command sent |
-| the AuthInfo does not match (`63370088701`), or no AuthInfo2 exists (`56000088709`) | 401 (`02202`) |
-| a contact of another registrar (`63200020603`) | 403 (`02201`) |
-| the gainer already sponsors the domain (`63380063209`) | 409 (`02002`) |
-| required CHPROV data missing (`53370080005`) | 400 (`02003`) |
-
-Read (query), Delete (cancel), Approve and Reject: RRI has none, so they answer 501 (`02101`). A push transfer is 501
-(`02102`), TRANSIT is not mapped (gap Q8). A transfer of a domain in its redemption period with an AuthInfo2, which
-RRI allows, works as any other but is not tested: RPP has no way to request an AuthInfo2 (gap Q9). The operator
-change of a DNSSEC domain (DENIC's separate document) is not described here.
-
-## 11. New Process Objects
+# New Process Objects {#new-process-objects}
 
 None.
 
-## 12. Endpoints
+# Endpoints {#endpoints}
 
-Informative, derived by the rules of core §16.1 from the identifier `requestContact` (`plural()` gives
-`requestContacts`):
+This section lists the endpoints that result from the new Data Object, derived by the rules of [@!I-D.ietf-rpp-core, section 16.1]. The `plural()` function applied to the Identifier `requestContact` gives the collection path segment `requestContacts`. This section is non-normative.
 
-| Operation | Method and path |
-|---|---|
-| Create | `POST /requestContacts` |
-| Read | `GET /requestContacts/{id}` |
-| Update | `PUT /requestContacts/{id}`, `PATCH /requestContacts/{id}` |
-| Delete | `DELETE /requestContacts/{id}` |
-| Availability | `GET /requestContacts/{id}/availability`, `HEAD /requestContacts/{id}/availability` |
+| Operation                     | HTTP Method | URL path                             |
+| ----------------------------- | ----------- | ------------------------------------ |
+| Request Contact: read         | GET         | /requestContacts/{id}                |
+| Request Contact: create       | POST        | /requestContacts                     |
+| Request Contact: update       | PUT or PATCH | /requestContacts/{id}               |
+| Request Contact: delete       | DELETE      | /requestContacts/{id}                |
+| Request Contact: availability | HEAD or GET | /requestContacts/{id}/availability   |
+Table: Endpoints of the Request Contact Data Object
 
-The added data elements of `domainName` and `domainTransferProcess` add no endpoints: they are not Direct Access.
+The data elements that the extension adds to the Domain Name Data Object and the Domain Transfer Process Object do not have Direct Access and add no endpoints.
 
-## 13. JSON Schema
+The endpoints behave as defined for the corresponding operations in [@!I-D.ietf-rpp-core, section 16]:
 
-The one schema document of the extension is [.spec/rri-extension.schema.json](../../.spec/rri-extension.schema.json).
-It follows guidelines §8, except where the base drafts give it nothing to refer to
-([spec-issues.md](../../.spec/spec-issues.md#extension-guidelines)):
+* Availability for Creation [@!I-D.ietf-rpp-core, section 16.4]
+  * Request: HEAD|GET /requestContacts/{id}/availability
+  * Request message: None
+  * Response message: Request Contact Availability Object (GET only)
+* Resource Information [@!I-D.ietf-rpp-core, section 16.5]
+  * Request: GET /requestContacts/{id}
+  * Request message: None
+  * Response message: Request Contact Data Object
+* Create Resource [@!I-D.ietf-rpp-core, section 16.6]
+  * Request: POST /requestContacts
+  * Request message: Request Contact Data Object
+  * Response message: Request Contact Data Object
+* Update Resource [@!I-D.ietf-rpp-core, section 16.8]
+  * Request: PUT|PATCH /requestContacts/{id}
+  * Request message: Request Contact Data Object (PUT) or partial update (PATCH)
+  * Response message: Request Contact Data Object
+* Delete Resource [@!I-D.ietf-rpp-core, section 16.7]
+  * Request: DELETE /requestContacts/{id}
+  * Response: HTTP status code 501 (Not Implemented), RPP result code 02101
 
-- `rpp:extends` maps `domainName.create`, `domainName.read`, `domainName.update` and `domainTransferProcess.create`
-  to the extension's definitions (`ext.rri.…`), which are composed with them by `allOf` into the Effective Schema
-  (json §7.2).
-- `rpp:extends` and the `$ref`s name the base definitions by their local names (`#/$defs/contact.reference`): the
-  bundle of the drafts has no `$id` to refer to. The proxy adds the extension's definitions to the bundle.
-- `rpp:extension` holds the name, identifier and version of §2 and the new objects. The guidelines do not say where
-  a schema states them.
-- The new objects are `ext.rri.requestContact.{create,read,update,reference}` and
-  `ext.rri.requestContactAvailability.read`, validated under the names a base object's definitions would have
-  (`requestContact.create`).
+Example Request Contact Create request:
 
-## 14. Examples
-
-Each block below names the definition it is an instance of, and whether it is valid against the Effective Schema
-of a deployment that offers the extension. [test_rri_extension_doc.py](../../tests/unit/test_rri_extension_doc.py)
-validates every one.
-
-Create a request contact:
-
-```json valid requestContact.create
-{"@type": "requestContact", "id": "DENIC-1000022-GR", "uriTemplate": "https://example.com/contact?domain={Alabel}"}
+```http
+POST /requestContacts HTTP/1.1
+Host: rpp.example
+Authorization: Bearer <token>
+Accept: application/rpp+json
+Content-Type: application/rpp+json
+RPP-Cltrid: ABC-12345
+Content-Length: 104
 ```
 
-Read it:
+Example Request Contact Create response:
 
-```json valid requestContact.read
-{"@type": "requestContact", "id": "DENIC-1000022-GR",
- "provMetadata": {"@type": "provMetadata", "spClientId": "DENIC-1000022", "upDate": "2026-11-12T00:20:20.000Z"},
- "uriTemplate": "https://example.com/contact?domain={Alabel}"}
+```http
+HTTP/1.1 201 Created
+Date: Sat, 14 Nov 2026 12:00:00 GMT
+Content-Type: application/rpp+json
+Location: https://rpp.example/rpp/requestContacts/DENIC-1000022-GR
+RPP-Svtrid: XYZ-12345
+RPP-Cltrid: ABC-12345
+RPP-Code: 01000
 ```
 
-Replace its template (PUT), and change it by a partial update (PATCH):
+Example Domain Transfer request with the Input Data Elements of the extension and Object Authorisation:
 
-```json valid requestContact.update
-{"@type": "requestContact", "uriTemplate": "mailto:abuse@example.com"}
+```http
+POST /domainNames/foo.example/processes/transferProcesses HTTP/1.1
+Host: rpp.example
+Authorization: Bearer <token>
+Accept: application/rpp+json
+Content-Type: application/rpp+json
+RPP-Cltrid: ABC-12346
+RPP-Authorization: authinfo value=QWJjMjM0NTY3OA==
+Content-Length: 420
 ```
+
+Example Domain Transfer response for a transfer that is completed immediately [@!I-D.ietf-rpp-core, section 16.1.4]:
+
+```http
+HTTP/1.1 200 OK
+Date: Sat, 14 Nov 2026 12:00:00 GMT
+Content-Type: application/rpp+json
+RPP-Svtrid: XYZ-12346
+RPP-Cltrid: ABC-12346
+RPP-Code: 01000
+```
+
+# JSON Schema {#json-schema}
+
+This section defines the JSON representation of the new and updated objects, following the rules of [@!I-D.ietf-rpp-json, section 4] and the Extension Framework of [@!I-D.ietf-rpp-json, section 7].
+
+The extension defines one JSON Schema document, <https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json>. Its definitions are shown below. Every definition of the extension has the prefix `ext.rri.`.
+
+## Extension Mapping {#extension-mapping}
+
+The Extension Mapper maps the base definitions to the definitions of the extension:
 
 ```json
-[{"op": "replace", "path": "/uriTemplate", "value": "https://example.com/abuse/{Ulabel}"}]
+{
+  "rpp:extends": {
+    "#/$defs/domainName.create": "#/$defs/ext.rri.domainName.create",
+    "#/$defs/domainName.read": "#/$defs/ext.rri.domainName.read",
+    "#/$defs/domainName.update": "#/$defs/ext.rri.domainName.update",
+    "#/$defs/domainTransferProcess.create": "#/$defs/ext.rri.domainTransferProcess.create"
+  }
+}
 ```
 
-Its availability:
+The keys of the Extension Mapper and the `$ref` values refer to the base definitions by their keys in the shared `$defs` object [@!I-D.ietf-rpp-json, section 4.10], because the JSON Schema document of the base specifications has no `$id` yet.
 
-```json valid requestContactAvailability.read
-{"@type": "requestContactAvailability", "available": false}
-```
-
-A domain with its request contacts, as created and read:
-
-```json valid domainName.create
-{"@type": "domainName", "name": "example.de",
- "registrant": {"@type": "contact", "id": "DENIC-1000022-HOLDER"},
- "generalRequest": {"@type": "requestContact", "id": "DENIC-1000022-GR"},
- "abuse": {"@type": "requestContact", "id": "DENIC-1000022-AB"},
- "dns": {"@type": "dnsData", "records": [
-   {"@type": "dnsRecord", "name": "@", "type": "a", "rdata": {"address": "192.0.2.10"}}]}}
-```
-
-```json valid domainName.read
-{"@type": "domainName", "name": "example.de",
- "provMetadata": {"@type": "provMetadata", "spClientId": "DENIC-1000022"},
- "status": [{"@type": "domainStatus", "label": "ok"}],
- "registrant": {"@type": "contact", "id": "DENIC-1000022-HOLDER"},
- "contacts": [{"label": "registrant", "object": {"@type": "contact", "id": "DENIC-1000022-HOLDER2"}}],
- "generalRequest": {"@type": "requestContact", "id": "DENIC-1000022-GR"},
- "abuse": {"@type": "requestContact", "id": "DENIC-1000022-AB"}}
-```
-
-A partial update that replaces the abuse contact and removes the general request contact:
+The schema document states the Name, Identifier, Version, and New objects of (#overview) in the property `rpp:extension`:
 
 ```json
-[{"op": "replace", "path": "/abuse", "value": {"@type": "requestContact", "id": "DENIC-1000022-AB2"}},
- {"op": "remove", "path": "/generalRequest"}]
+{
+  "rpp:extension": {
+    "name": "DENIC RRI",
+    "id": "de.denic.rpp.rri",
+    "version": "0.2.0",
+    "objects": ["requestContact"]
+  }
+}
 ```
 
-A transfer request (`POST /domainNames/example.de/processes/transferProcesses`, with
-`RPP-Authorization: authinfo value=QWJjMjM0NTY3OA==`):
+## Domain Name Data Object {#json-domain-name}
 
-```json valid domainTransferProcess.create
-{"@type": "domainTransferProcess",
- "registrant": {"@type": "contact", "id": "DENIC-1000002-HOLDER"},
- "generalRequest": {"@type": "requestContact", "id": "DENIC-1000002-GENERAL"},
- "abuse": {"@type": "requestContact", "id": "DENIC-1000002-ABUSE"},
- "dns": {"@type": "dnsData", "records": [
-   {"@type": "dnsRecord", "name": "@", "type": "ns", "rdata": {"nsdname": "ns1.example.com."}},
-   {"@type": "dnsRecord", "name": "@", "type": "ns", "rdata": {"nsdname": "ns2.example.com."}}]}}
+Create request schema:
+
+<!-- definition ext.rri.domainName.create -->
+```json
+{
+  "$defs": {
+    "ext.rri.domainName.create": {
+      "type": "object",
+      "properties": {
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference" },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference" }
+      }
+    }
+  }
+}
 ```
 
-Invalid: a request contact without a template, one with a template under 8 characters, a contact where a request
-contact belongs, and a transfer without its domain data.
+Read response schema:
 
-```json invalid requestContact.create
-{"@type": "requestContact", "id": "DENIC-1000022-GR"}
+<!-- definition ext.rri.domainName.read -->
+```json
+{
+  "$defs": {
+    "ext.rri.domainName.read": {
+      "type": "object",
+      "properties": {
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference" },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference" }
+      }
+    }
+  }
+}
 ```
 
-```json invalid requestContact.create
-{"@type": "requestContact", "id": "DENIC-1000022-GR", "uriTemplate": "http://"}
+Update request schema:
+
+<!-- definition ext.rri.domainName.update -->
+```json
+{
+  "$defs": {
+    "ext.rri.domainName.update": {
+      "type": "object",
+      "properties": {
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference" },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference" }
+      }
+    }
+  }
+}
 ```
 
-```json invalid domainName.update
-{"@type": "domainName", "abuse": {"@type": "contact", "id": "DENIC-1000022-HOLDER"}}
+## Request Contact Data Object {#json-request-contact}
+
+### Availability
+
+The response of the Availability operation is the Request Contact Availability Object:
+
+<!-- definition ext.rri.requestContactAvailability.read -->
+```json
+{
+  "$defs": {
+    "ext.rri.requestContactAvailability.read": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContactAvailability", "readOnly": true },
+        "available": { "type": "boolean", "readOnly": true },
+        "reason": { "type": "string", "readOnly": true }
+      },
+      "required": ["@type", "available"]
+    }
+  }
+}
 ```
 
-```json invalid domainTransferProcess.create
-{"@type": "domainTransferProcess"}
+### Create
+
+Create request schema (create-only and read-write properties):
+
+<!-- definition ext.rri.requestContact.create -->
+```json
+{
+  "$defs": {
+    "ext.rri.requestContact.create": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact" },
+        "id": { "$ref": "#/$defs/identifier" },
+        "uriTemplate": { "$ref": "#/$defs/ext.rri.uriTemplate" }
+      },
+      "required": ["@type", "id", "uriTemplate"]
+    }
+  }
+}
 ```
 
-Valid by the schema, but refused by a server that offers the extension: a role as a contact label (501, `02102`).
+The URI Template is a String with the length constraints of (#request-contact-data-elements). The other constraints of the URI Template cannot be expressed in JSON Schema and MUST be enforced by implementations.
 
-```json valid domainName.update
-{"@type": "domainName", "contacts": [{"label": "abuse", "object": {"@type": "contact", "id": "DENIC-1000022-AB"}}]}
+<!-- definition ext.rri.uriTemplate -->
+```json
+{
+  "$defs": {
+    "ext.rri.uriTemplate": { "type": "string", "minLength": 8, "maxLength": 1024 }
+  }
+}
 ```
 
-## 15. IANA Considerations
+### Read
 
-None. The extension is private (guidelines §10): it registers nothing, and its identifier is reverse-domain
-(guidelines §7). Its identifiers do not conflict with registered ones.
+Read response schema (read-write and read-only properties):
 
-## 16. Security Considerations
+<!-- definition ext.rri.requestContact.read -->
+```json
+{
+  "$defs": {
+    "ext.rri.requestContact.read": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact", "readOnly": true },
+        "id": { "$ref": "#/$defs/identifier", "readOnly": true },
+        "provMetadata": { "$ref": "#/$defs/provMetadata.read", "readOnly": true },
+        "uriTemplate": { "$ref": "#/$defs/ext.rri.uriTemplate" }
+      },
+      "required": ["@type", "id", "provMetadata", "uriTemplate"]
+    }
+  }
+}
+```
 
-The extension inherits the authentication and authorisation of the objects it extends (guidelines §12). A request
-contact is the sponsoring client's own: RRI refuses another RegAcc's request contact on every operation and on a
-domain (`63200020603`, 403). The AuthInfo of a transfer is sent in plaintext to RRI, so the proxy never logs that
-command. The proxy does not validate a template beyond its length; RRI test-expands it on CREATE and refuses what it
-cannot expand, so a template is not a vector into the proxy.
+### Update
 
-## 17. Privacy Considerations
+Update request schema (read-write properties):
 
-A request contact is published: RRI's web whois shows the expanded template of a domain's General Request and Abuse
-contacts. A `mailto` template that names a natural person's mailbox makes that address public. A request contact
-holds no other personal data, and RRI refuses verification data on it (`63450064002`). The proxy logs the codes of
-RRI's messages only, never their texts (docs/agents/security.project.md).
+<!-- definition ext.rri.requestContact.update -->
+```json
+{
+  "$defs": {
+    "ext.rri.requestContact.update": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact" },
+        "uriTemplate": { "$ref": "#/$defs/ext.rri.uriTemplate" }
+      },
+      "required": ["@type", "uriTemplate"]
+    }
+  }
+}
+```
 
-## 18. Internationalization Considerations
+### Reference
 
-`{Ulabel}` expands to the U-label of the domain. How RRI encodes it in the expanded URI is not documented (ref
-§5.1). The template itself is ASCII by the syntax of RFC 6570.
+Reference schema (identifier only):
 
-## Appendix A. Mapping to RRI
+<!-- definition ext.rri.requestContact.reference -->
+```json
+{
+  "$defs": {
+    "ext.rri.requestContact.reference": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact" },
+        "id": { "$ref": "#/$defs/identifier" }
+      },
+      "required": ["@type", "id"]
+    }
+  }
+}
+```
 
-| RPP | RRI (XML 5.0) |
-|---|---|
-| `requestContact` | `contact:*` of `contact:type` `REQUEST` |
-| `id` | `contact:handle` |
-| `uriTemplate` | `contact:uri-template` |
-| `provMetadata.spClientId` | the RegAccId the handle starts with |
-| `provMetadata.upDate` | `contact:changed` |
-| Create / Read / Update / Availability | contact CREATE / INFO / UPDATE / CHECK |
-| `domainName.generalRequest` | `domain:contact role="generalrequest"` |
-| `domainName.abuse` | `domain:contact role="abusecontact"` |
-| `domainTransferProcess` Create | CHPROV with the full domain data |
+## Domain Transfer Process Object {#json-domain-transfer-process}
 
-The proxy keeps the two roles in its core model as contact references by role, as it keeps the holders, so the RRI
-domain commands write them as before; only the RPP representation holds them as data elements of their own.
+### Create
+
+Create request schema:
+
+<!-- definition ext.rri.domainTransferProcess.create -->
+```json
+{
+  "$defs": {
+    "ext.rri.domainTransferProcess.create": {
+      "type": "object",
+      "properties": {
+        "registrant": { "$ref": "#/$defs/contact.reference", "writeOnly": true },
+        "contacts": {
+          "type": "array",
+          "writeOnly": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "object": { "$ref": "#/$defs/contact.reference" }
+            },
+            "required": ["label", "object"]
+          }
+        },
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference", "writeOnly": true },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference", "writeOnly": true },
+        "dns": { "$ref": "#/$defs/dnsData.create", "writeOnly": true }
+      },
+      "required": ["registrant", "dns"]
+    }
+  }
+}
+```
+
+# Examples {#examples}
+
+This section contains examples of the new and updated objects. Each valid example validates against the Effective Schema [@!I-D.ietf-rpp-json, section 7.2] of a server that supports the extension, and each invalid example fails it. This section is non-normative.
+
+## Request Contact {#examples-request-contact}
+
+### Availability
+
+Example request contact availability response for a request contact that cannot be created:
+
+<!-- example valid requestContactAvailability.read -->
+```json
+{
+    "@type": "requestContactAvailability",
+    "available": false,
+    "reason": "In use"
+}
+```
+
+### Create
+
+Example request contact create request:
+
+<!-- example valid requestContact.create -->
+```json
+{
+    "@type": "requestContact",
+    "id": "DENIC-1000022-GR",
+    "uriTemplate": "https://www.example.com/contact?domain={Alabel}"
+}
+```
+
+### Read
+
+Example request contact read response:
+
+<!-- example valid requestContact.read -->
+```json
+{
+    "@type": "requestContact",
+    "id": "DENIC-1000022-GR",
+    "provMetadata": {
+        "@type": "provMetadata",
+        "spClientId": "DENIC-1000022",
+        "upDate": "2026-11-12T00:20:20.0Z"
+    },
+    "uriTemplate": "https://www.example.com/contact?domain={Alabel}"
+}
+```
+
+### Update
+
+Example request contact full update request:
+
+<!-- example valid requestContact.update -->
+```json
+{
+    "@type": "requestContact",
+    "uriTemplate": "mailto:abuse@example.com"
+}
+```
+
+Example request contact partial update request:
+
+```json
+[
+  {
+    "op": "replace",
+    "path": "/uriTemplate",
+    "value": "https://www.example.com/abuse/{Ulabel}"
+  }
+]
+```
+
+## Domain Name {#examples-domain-name}
+
+### Create
+
+Example domain create request with request contacts:
+
+<!-- example valid domainName.create -->
+```json
+{
+    "@type": "domainName",
+    "name": "foo.example",
+    "registrant": { "@type": "contact", "id": "DENIC-1000022-HOLDER" },
+    "generalRequest": { "@type": "requestContact", "id": "DENIC-1000022-GR" },
+    "abuse": { "@type": "requestContact", "id": "DENIC-1000022-AB" },
+    "dns": {
+        "@type": "dnsData",
+        "records": [
+            { "@type": "dnsRecord", "name": "@", "type": "a", "rdata": { "address": "192.0.2.10" } }
+        ]
+    }
+}
+```
+
+### Read
+
+Example domain read response with a second holder and request contacts:
+
+<!-- example valid domainName.read -->
+```json
+{
+    "@type": "domainName",
+    "name": "foo.example",
+    "provMetadata": { "@type": "provMetadata", "spClientId": "DENIC-1000022" },
+    "status": [ { "@type": "domainStatus", "label": "ok" } ],
+    "registrant": { "@type": "contact", "id": "DENIC-1000022-HOLDER" },
+    "contacts": [
+        { "label": "registrant", "object": { "@type": "contact", "id": "DENIC-1000022-HOLDER2" } }
+    ],
+    "generalRequest": { "@type": "requestContact", "id": "DENIC-1000022-GR" },
+    "abuse": { "@type": "requestContact", "id": "DENIC-1000022-AB" }
+}
+```
+
+### Update
+
+Example partial update request that replaces the abuse contact and removes the general request contact:
+
+```json
+[
+  {
+    "op": "replace",
+    "path": "/abuse",
+    "value": { "@type": "requestContact", "id": "DENIC-1000022-AB2" }
+  },
+  {
+    "op": "remove",
+    "path": "/generalRequest"
+  }
+]
+```
+
+### Transfer Request
+
+Example domain transfer request with the Input Data Elements of the extension:
+
+<!-- example valid domainTransferProcess.create -->
+```json
+{
+    "@type": "domainTransferProcess",
+    "registrant": { "@type": "contact", "id": "DENIC-1000002-HOLDER" },
+    "generalRequest": { "@type": "requestContact", "id": "DENIC-1000002-GENERAL" },
+    "abuse": { "@type": "requestContact", "id": "DENIC-1000002-ABUSE" },
+    "dns": {
+        "@type": "dnsData",
+        "records": [
+            { "@type": "dnsRecord", "name": "@", "type": "ns", "rdata": { "nsdname": "ns1.example.com." } },
+            { "@type": "dnsRecord", "name": "@", "type": "ns", "rdata": { "nsdname": "ns2.example.com." } }
+        ]
+    }
+}
+```
+
+## Invalid Examples {#examples-invalid}
+
+Example request contact create request without a URI Template:
+
+<!-- example invalid requestContact.create -->
+```json
+{
+    "@type": "requestContact",
+    "id": "DENIC-1000022-GR"
+}
+```
+
+Example request contact create request with a URI Template of fewer than 8 characters:
+
+<!-- example invalid requestContact.create -->
+```json
+{
+    "@type": "requestContact",
+    "id": "DENIC-1000022-GR",
+    "uriTemplate": "http://"
+}
+```
+
+Example domain update request with a Contact Data Object as abuse contact:
+
+<!-- example invalid domainName.update -->
+```json
+{
+    "@type": "domainName",
+    "abuse": { "@type": "contact", "id": "DENIC-1000022-HOLDER" }
+}
+```
+
+Example domain transfer request without the data of the domain name:
+
+<!-- example invalid domainTransferProcess.create -->
+```json
+{
+    "@type": "domainTransferProcess"
+}
+```
+
+The following domain update request validates against the Effective Schema, but a server that supports the extension rejects it, because `abuse` is not a label of the `contacts` data element (see (#domain-name-data-elements)):
+
+<!-- example valid domainName.update -->
+```json
+{
+    "@type": "domainName",
+    "contacts": [
+        { "label": "abuse", "object": { "@type": "contact", "id": "DENIC-1000022-AB" } }
+    ]
+}
+```
+
+# IANA Considerations {#iana}
+
+This document has no IANA actions. The extension is a private extension [@!I-D.wullink-rpp-extension-guidelines, section 10], and its Identifier is formed by reverse domain name notation [@!I-D.wullink-rpp-extension-guidelines, section 7].
+
+For a standardised version of the extension, the following entries would be registered in the RPP Data Object Registry [@!I-D.ietf-rpp-data-objects].
+
+Object: requestContact
+
+Object Name: Request Contact Data Object
+
+Object Type: Resource
+
+Description: Represents a URI Template to which requests about domain names are sent.
+
+Reference: [This-ID]
+
+Data Elements
+
+| Element Identifier | Element Name          | Card. | Mutability  | Data Type                    | Description                                              |
+| ------------------ | --------------------- | ----- | ----------- | ---------------------------- | -------------------------------------------------------- |
+| id                 | Handle ID             | 1     | create-only | Identifier                   | External unique identifier of the request contact.       |
+| provMetadata       | Provisioning Metadata | 1     | read-only   | Provisioning Metadata Object | Standard metadata about the object's lifecycle and ownership. |
+| uriTemplate        | URI Template          | 1     | read-write  | String                       | A URI Template that states where requests are sent.      |
+
+Operations: availability, create, read, update, delete. Input Data Elements: (None). Parameters: (None).
+
+Object: requestContactAvailability
+
+Object Name: Request Contact Availability Object
+
+Object Type: Component
+
+Extends: baseAvailability
+
+Description: The result of an Availability operation on a Request Contact Data Object.
+
+Reference: [This-ID]
+
+Data Elements: (None)
+
+Object: domainName (additions)
+
+Data Elements
+
+| Element Identifier | Element Name            | Card. | Mutability | Data Type                               | Description                                                           |
+| ------------------ | ----------------------- | ----- | ---------- | --------------------------------------- | --------------------------------------------------------------------- |
+| generalRequest     | General Request Contact | 0-1   | read-write | Aggregation[Request Contact Data Object] | The request contact to which general requests about the domain name are sent. |
+| abuse              | Abuse Contact           | 0-1   | read-write | Aggregation[Request Contact Data Object] | The request contact to which reports of abuse of the domain name are sent.   |
+
+Object: domainTransferProcess (additions)
+
+Operation: transferCreate
+
+Input Data Elements
+
+| Identifier     | Name                    | Card. | Data Type                                 | Description                                      |
+| -------------- | ----------------------- | ----- | ----------------------------------------- | ------------------------------------------------ |
+| registrant     | Registrant              | 1     | Aggregation[Contact Data Object]          | The first holder of the domain name.             |
+| contacts       | Contacts                | 0+    | LabelledAggregation[Contact Data Object]  | The holders of the domain name after the first.  |
+| generalRequest | General Request Contact | 0-1   | Aggregation[Request Contact Data Object]  | The general request contact of the domain name.  |
+| abuse          | Abuse Contact           | 0-1   | Aggregation[Request Contact Data Object]  | The abuse contact of the domain name.            |
+| dns            | DNS                     | 1     | DNS Data Object                           | The DNS data of the domain name.                 |
+
+Parameters: (None)
+
+# Security Considerations {#security}
+
+The extension inherits the authentication and authorisation services of the objects it extends [@!I-D.wullink-rpp-extension-guidelines, section 12]. A request contact is accessible to its sponsoring client only. A server MUST reject the use of another client's request contact in any operation, including as a data element of a domain name.
+
+The Object Authorisation of a transfer request is forwarded to the registry. A server MUST NOT record it in logs.
+
+A server forwards the URI Template to the registry, which expands it with a sample domain name on creation and rejects a template that it cannot expand. A server that does not forward the template to such a registry MUST check the constraints of (#request-contact-data-elements) itself before it stores or publishes the template.
+
+# Privacy Considerations {#privacy}
+
+The expanded URI Template of a domain name's request contacts is published in the registry's registration data directory service. A `mailto` template that names the mailbox of a natural person makes that address public. A client SHOULD use a role mailbox or a web form in a request contact, because the template is published for every domain name that refers to it. A request contact holds no other personal data, and the registry rejects verification data on it.
+
+# Internationalisation Considerations {#i18n}
+
+The variable `{Ulabel}` expands to the U-label of the domain name. The encoding of a U-label in the expanded URI is defined by [@!RFC6570, section 3.2.1]. The URI Template itself consists of ASCII characters.
+
+{removeInRFC="true"}
+{toc="exclude"}
+# Changes History
+
+{toc="exclude"}
+{numbered="false"}
+## 0.1.0 - 0.2.0
+
+* add the request contact data object #131
+* add generalRequest and abuse to the domain name data object and the transfer request, instead of contacts labels #131
+* rename the extension identifier from rri to de.denic.rpp.rri #131
+* restructure the document to the extension specification format #131
+
+{toc="exclude"}
+{numbered="false"}
+## 0.1.0
+
+* initial version: the data of the domain name in the transfer request #133
+
+{backmatter}
+
+# Mapping to DENIC RRI {#rri-mapping}
+
+This appendix describes how a server that implements the extension maps it to RRI version 5.0 [@DENIC-RRI]. The facts are collected in rri-5.0-reference.md of the implementation, the gaps in gap-analysis.md.
+
+| RPP                                     | RRI (XML 5.0)                                         |
+| --------------------------------------- | ----------------------------------------------------- |
+| `requestContact`                        | contact of `contact:type` `REQUEST`                   |
+| `requestContact.id`                     | `contact:handle`                                      |
+| `requestContact.uriTemplate`            | `contact:uri-template`                                |
+| `provMetadata.spClientId`               | the RegAccId that the handle starts with              |
+| `provMetadata.upDate`                   | `contact:changed`                                     |
+| availability, create, read, update      | contact CHECK, CREATE, INFO, UPDATE                   |
+| `domainName.generalRequest`             | `domain:contact role="generalrequest"`                |
+| `domainName.abuse`                      | `domain:contact role="abusecontact"`                  |
+| `domainTransferProcess` transferCreate  | domain CHPROV with the complete data of the domain    |
+Table: Mapping to RRI
+
+The registry holds 0 to 1 request contact of each role per domain name, so a domain name needs none. The backend profile of the implementation states this as `domainName.generalRequest` and `domainName.abuse` with `min_count` 0 and `max_count` 1.
+
+The implementation maps the refusals of the registry to RPP result codes as follows:
+
+| Case                                                                 | HTTP status | RPP result code |
+| -------------------------------------------------------------------- | ----------- | --------------- |
+| `registrant` or `dns` missing in a transfer request                  | 400         | 02001           |
+| no `RPP-Authorization` in a transfer request                         | 400         | 02003           |
+| AuthInfo does not match (63370088701), or no AuthInfo2 (56000088709) | 401         | 02202           |
+| contact or request contact of another RegAcc (63200020603)           | 403         | 02201           |
+| the gaining client already sponsors the domain name (63380063209)   | 409         | 02002           |
+| required CHPROV data missing (53370080005)                           | 400         | 02003           |
+| URI Template refused by the registry (83000000005)                   | 400         | 02005           |
+| Read of a handle of the other kind of contact                        | 404         | 02303           |
+| `contacts` entry labelled `generalRequest` or `abuse`                | 501         | 02102           |
+| Delete of a request contact                                          | 501         | 02101           |
+| Transfer Query, Cancel, Approve, or Reject                           | 501         | 02101           |
+Table: Refusals of the implementation
+
+The registry does not document how it encodes a U-label in an expanded template.
+
+<reference anchor="DENIC-RRI" target="https://www.denic.de/">
+  <front>
+    <title>Registry Robot Interface (RRI), Version 5.0</title>
+    <author>
+      <organization>DENIC eG</organization>
+    </author>
+  </front>
+</reference>

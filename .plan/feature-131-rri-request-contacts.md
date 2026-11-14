@@ -83,6 +83,12 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
   `max_count` at least 1, and `request_contact/` on the object. `limits_domain/test20` lost its skip (it creates two
   handles now) and is pinned to 400 `02001`.
 
+- C4 (T2, maintainer review) `docs/rri/rri-extension.md` is I-D markdown for mmark: each section in the structure
+  of the base drafts (data objects and operations as data-objects, endpoints as core §16, schemas and examples as
+  json §6 and §8, IANA entries as the Data Object Registry) and the writing style of the data-objects repo's
+  Agents.md (BCP 14 boilerplate, ASCII only, reserved example names). The test checks the marked examples and that
+  every shown definition is the schema's. Json -01's Identifier pattern rejects DENIC handles (spec-issues.md).
+
 ## Checks (2026-11-14)
 
 - `lint-imports`: 15 contracts kept. Unit: 2168 passed.
@@ -94,6 +100,8 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
 
 - After C3: `lint-imports` kept, unit 2170 passed, smoke 60 passed and 12 skipped on both, the changed cases and
   `request_contact/` 45 passed and 27 skipped by their selectors.
+
+- After C4: unit 2183 passed (docs and the doc test only).
 
 ## Open questions
 

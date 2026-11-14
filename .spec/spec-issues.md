@@ -520,3 +520,8 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
   extensions from adding a member of the same name to the same object, whose Effective Schema then requires both
   definitions at once.
 - **Proxy:** offers one extension, so the case does not arise.
+
+## Identifier pattern and registry handles
+
+- Json -01 §6.1.1 gives the Identifier the pattern `^(\w|_){1,8}-\w{1,}$` (one hyphen, after one to eight word characters), from the EPP `roidType`. EPP contact ids are `clIDType` (RFC 5730 §2.8 gives `roidType` to repository ids only), and DENIC handles have several hyphens (`DENIC-1000022-GR`), so neither fits.
+- **Proxy:** the bundle in `src/` predates json -01 and has no pattern for `identifier`; the examples of [docs/rri/rri-extension.md](../docs/rri/rri-extension.md) use DENIC handles.
