@@ -2,6 +2,7 @@ import pytest
 
 from rpp.http.app import create_app
 from tests.helper.profiles import EPP_PROFILE
+from tests.unit.test_app_injection import OBJECT_DOES_NOT_EXIST, auth_header, client_for
 
 MEDIA_TYPE = "application/rpp+json"
 RPP_ERROR = "urn:ietf:params:rpp:error"
@@ -39,7 +40,10 @@ def test_wrong_method_on_discovery_is_an_rpp_error_with_allow(client):
 
     assert_rpp_error(response, 405)
     assert allowed(response) == {"GET", "HEAD"}
-    assert response.json()["title"] == "Method Not Allowed"
+    body = response.json()
+    assert body["title"] == "Method Not Allowed"
+    assert body["detail"] is None
+    assert body["errors"][0]["reason"] == "Method Not Allowed"
 
 
 def test_wrong_method_on_messages_is_an_rpp_error_with_allow(client):
@@ -47,19 +51,28 @@ def test_wrong_method_on_messages_is_an_rpp_error_with_allow(client):
 
     assert_rpp_error(response, 405)
     assert allowed(response) == {"POST"}
+    body = response.json()
+    assert body["detail"] is None
+    assert body["errors"][0]["reason"] == "Method Not Allowed"
 
 
 def test_unknown_path_is_an_rpp_error(client):
     response = client.get("/nonexistent", headers=HEADERS)
 
     assert_rpp_error(response, 404)
-    assert response.json()["title"] == "Not Found"
+    body = response.json()
+    assert body["title"] == "Not Found"
+    assert isinstance(body["errors"][0]["reason"], str) and body["errors"][0]["reason"]
 
 
-def test_problem_exception_is_still_rendered_by_its_own_handler(client):
-    response = client.delete("/domainNames/any.example", headers=HEADERS)
+def test_problem_exception_is_still_rendered_by_its_own_handler():
+    http, _ = client_for(reply=(False, "2303", OBJECT_DOES_NOT_EXIST))
 
-    assert response.status_code == 401
-    assert response.headers["RPP-Code"] == "02200"
-    assert response.json()["type"] == RPP_ERROR
-    assert response.json()["errors"][0]["result"] == "02200"
+    response = http.delete("/domainNames/missing.example", headers=auth_header("user", "pw"))
+
+    assert response.status_code == 404
+    assert response.headers["RPP-Code"] == "02303"
+    body = response.json()
+    assert body["type"] == RPP_ERROR
+    assert body["title"] == "Object does not exist"
+    assert body["errors"][0]["result"] == "02303"

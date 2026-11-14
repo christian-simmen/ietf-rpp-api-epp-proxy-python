@@ -39,6 +39,14 @@ Branch `fix/101-405-problem`, from `main`. Follow-up #98 is stacked on this bran
 lint-imports 15 kept; unit 2187 passed; smoke with `RPP_TEST_ENV=epp-docker` 34 passed, 38 skipped.
 DENIC MTEST smoke: pending (no allowlisted machine).
 
+## Review round 1
+
+Fixes: spec issue "Result code of an HTTP-level error" in `.spec/spec-issues.md` (no code change); the 405 and 404
+tests assert the reason; the ProblemException test now uses a registry error (404/02303, title "Object does not
+exist") and fails when the ProblemException handler registration is removed (mutation checked); one clause in
+`architecture.project.md`. `detail` is `null` in the body (Connexion `problem` always emits it), so the tests assert
+`is None`, not absence. Checks re-run: lint-imports 15 kept, unit 2187 passed, smoke 34 passed, 38 skipped.
+
 ## Open questions
 
 None.

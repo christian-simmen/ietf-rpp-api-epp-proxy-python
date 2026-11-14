@@ -113,7 +113,8 @@ flow, the port and the EPP commands of one object.
 3. **`rpp/http/`:** what every handler shares. `operation.py` holds `rpp_operation` (anything unexpected is a 500
    Problem Detail) and `map_request`, which runs a mapper and turns what it refuses into a Problem Detail.
    `problem.py` applies core §18.1 to registry errors (`raise_registry_error`) and renders every error as a core §9
-   Problem Detail (`handle_rpp_error`). `headers.py` builds the `RPP-*` headers. `context.py` is the only reader of
+   Problem Detail (`handle_rpp_error`); a framework `HTTPException` (unknown path, wrong method) is converted by
+   `handle_http_exception` and rendered through `handle_rpp_error`. `headers.py` builds the `RPP-*` headers. `context.py` is the only reader of
    the app configuration and the request context: the backend, the `BackendProfile` and the discovery settings.
 4. **`rpp/mapping/`:** converts inbound RPP JSON dicts ↔ the `core.model` dataclasses, through the RPP dataclasses in
    `rpp/dto/`. Validates every payload against a JSON Schema via `validate_schema(...)` (`rpp/schema/validator.py`)

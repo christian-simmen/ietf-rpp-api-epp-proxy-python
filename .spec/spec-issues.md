@@ -525,3 +525,8 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 
 - Json -01 §6.1.1 gives the Identifier the pattern `^(\w|_){1,8}-\w{1,}$` (one hyphen, after one to eight word characters), from the EPP `roidType`. EPP contact ids are `clIDType` (RFC 5730 §2.8 gives `roidType` to repository ids only), and DENIC handles have several hyphens (`DENIC-1000022-GR`), so neither fits.
 - **Proxy:** the bundle in `src/` predates json -01 and has no pattern for `identifier`; the examples of [docs/rri/rri-extension.md](../docs/rri/rri-extension.md) use DENIC handles.
+
+## Result code of an HTTP-level error
+
+- Core has no result code for a 404 on an unknown path, a 405, a 406 or a 415. Core §18.1 maps a code missing from Table 9 by Table 10, which would make `02001` (x20zz) a 400, so a 404 or 405 with `02001` goes against it.
+- **Proxy:** keeps the HTTP status of the framework and sends `02001` through `_default_result` in `problem.py`.
