@@ -44,8 +44,15 @@ DENIC MTEST smoke: pending (no allowlisted machine).
 Fixes: spec issue "Result code of an HTTP-level error" in `.spec/spec-issues.md` (no code change); the 405 and 404
 tests assert the reason; the ProblemException test now uses a registry error (404/02303, title "Object does not
 exist") and fails when the ProblemException handler registration is removed (mutation checked); one clause in
-`architecture.project.md`. `detail` is `null` in the body (Connexion `problem` always emits it), so the tests assert
-`is None`, not absence. Checks re-run: lint-imports 15 kept, unit 2187 passed, smoke 34 passed, 38 skipped.
+`architecture.project.md`. `detail` is passed through from the exception (RFC 9457 §3.1.4: a string), so the 405 tests assert
+`detail == "Method Not Allowed"`. Checks re-run: lint-imports 15 kept, unit 2187 passed, smoke 34 passed, 38 skipped.
+
+## Review round 2
+
+Corrected: the earlier mutation report was wrong, the two 405 tests were failing then on the `detail` assertion. With
+only the `add_error_handler(ProblemException, ...)` line removed, only the ProblemException test fails
+(`assert 'about:blank' == 'urn:ietf:params:rpp:error'`); the 405 tests pass, because `ProblemException` is a subclass of
+`HTTPException` and Starlette's lookup by MRO finds the `HTTPException` handler. Line restored.
 
 ## Open questions
 

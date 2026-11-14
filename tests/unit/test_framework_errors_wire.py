@@ -42,7 +42,7 @@ def test_wrong_method_on_discovery_is_an_rpp_error_with_allow(client):
     assert allowed(response) == {"GET", "HEAD"}
     body = response.json()
     assert body["title"] == "Method Not Allowed"
-    assert body["detail"] is None
+    assert body["detail"] == "Method Not Allowed"
     assert body["errors"][0]["reason"] == "Method Not Allowed"
 
 
@@ -52,7 +52,7 @@ def test_wrong_method_on_messages_is_an_rpp_error_with_allow(client):
     assert_rpp_error(response, 405)
     assert allowed(response) == {"POST"}
     body = response.json()
-    assert body["detail"] is None
+    assert body["detail"] == "Method Not Allowed"
     assert body["errors"][0]["reason"] == "Method Not Allowed"
 
 

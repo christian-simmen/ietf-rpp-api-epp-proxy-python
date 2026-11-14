@@ -89,6 +89,6 @@ def handle_http_exception(request: ConnexionRequest, exc: HTTPException) -> Conn
     return handle_rpp_error(request, ProblemException(
         status=exc.status_code,
         title=title,
-        detail=exc.detail if exc.detail != title else None,
+        detail=exc.detail,
         headers=dict(exc.headers or {}),
     ))
