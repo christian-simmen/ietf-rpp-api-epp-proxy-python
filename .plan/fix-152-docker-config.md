@@ -2,8 +2,8 @@
 
 ## Tasks
 - [x] Reproduce: image built from main dies with FileNotFoundError on ./config.yaml
-- [~] Dockerfile: ship config.yaml where the src/config.yaml symlink points
-- [ ] Verify: image starts; lint-imports, unit tests, smoke
+- [x] Dockerfile: ship config.yaml where the src/config.yaml symlink points
+- [~] Verify: image starts and serves /ui/ (200); lint-imports 15 kept, unit 2183 passed, smoke 60 passed 12 skipped
 
 ## Findings
 - `src/config.yaml -> ../config.yaml` (since #25). Dockerfile copies `./src` to `/app`, so the link points to
