@@ -51,8 +51,9 @@ exist") and fails when the ProblemException handler registration is removed (mut
 
 Corrected: the earlier mutation report was wrong, the two 405 tests were failing then on the `detail` assertion. With
 only the `add_error_handler(ProblemException, ...)` line removed, only the ProblemException test fails
-(`assert 'about:blank' == 'urn:ietf:params:rpp:error'`); the 405 tests pass, because `ProblemException` is a subclass of
-`HTTPException` and Starlette's lookup by MRO finds the `HTTPException` handler. Line restored.
+(`assert 'about:blank' == 'urn:ietf:params:rpp:error'`); the 405 tests pass because the 405 is a plain
+`HTTPException`, handled by `handle_http_exception` directly; without the line, a `ProblemException` falls to
+Connexion's own `problem_handler` (registered in its `ExceptionMiddleware.__init__`), hence `about:blank`. Line restored.
 
 ## Open questions
 
