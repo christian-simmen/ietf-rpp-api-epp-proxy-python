@@ -127,8 +127,13 @@ def test_a_profile_reads_as_a_tree():
 
 def test_only_rri_offers_an_extension_and_transfers_with_it():
     assert EPP_PROFILE.extensions == ()
-    assert RRI_PROFILE.extensions == ("rri",)
+    assert RRI_PROFILE.extensions == ("de.denic.rpp.rri",)
     assert RRI_PROFILE.domainName.processes.transfer.operations == ("request",)
+
+
+def test_rri_has_request_contacts_and_no_contact_labels():
+    assert "requestContact" in RRI_PROFILE.objects and "requestContact" not in EPP_PROFILE.objects
+    assert RRI_PROFILE.domainName.contacts.labels == ()
 
 
 @pytest.mark.parametrize("path", ["contact.fax", "contact.nope", "nope", "contact.fax.supported.x"])

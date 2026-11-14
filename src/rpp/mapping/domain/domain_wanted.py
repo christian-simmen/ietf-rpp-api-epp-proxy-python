@@ -5,7 +5,7 @@ from core.model.domain.domains import ContactReferenceNew, HostObj, NS
 from core.model.shared.client_statuses import is_client_label
 from core.model.shared.common import AuthInfo
 from rpp.dto.rpp_dns_data import RPPDnsData
-from rpp.mapping.domain import domain_dns
+from rpp.mapping.domain import domain_dns, domain_request_contacts
 from rpp.mapping.domain.domains import (
     REGISTRANT, check_client_statuses, check_contact_label, check_host_objects, check_registrants,
 )
@@ -17,8 +17,13 @@ CHANGEABLE = ("nameservers", "registrant", "contacts", "status", "dns", "authInf
 NAMESERVER_RECORDS = ("ns", "a", "aaaa")
 
 
-def reject_other_changes(current: dict, patched: dict):
-    for member in (current.keys() | patched.keys()) - set(CHANGEABLE):
+def changeable(profile: BackendProfile) -> tuple[str, ...]:
+    """The members a client may replace, with the request contacts the offered extensions add."""
+    return CHANGEABLE + domain_request_contacts.members("domainName.update", profile.extensions)
+
+
+def reject_other_changes(current: dict, patched: dict, profile: BackendProfile):
+    for member in (current.keys() | patched.keys()) - set(changeable(profile)):
         if current.get(member) != patched.get(member):
             raise ValueError(f"'{member}' cannot be changed")
 
@@ -66,10 +71,12 @@ def rpp_to_model(
     statuses = _client_statuses(domain)
     check_client_statuses(statuses, profile)
     registrant = (domain.get("registrant") or {}).get("id")
+    domain, requests = domain_request_contacts.split(domain, "domainName.update", profile.extensions)
     contacts = [
         ContactReferenceNew(type=check_contact_label(contact["label"], profile), contact=ContactMinimal(id=contact["object"]["id"]))
         for contact in domain.get("contacts") or []
     ]
+    contacts += [ContactReferenceNew(type=role, contact=ContactMinimal(id=contact_id)) for role, contact_id in requests]
     check_registrants((registrant is not None) + sum(c.type == REGISTRANT for c in contacts), profile)
     return DomainReplacement(
         name=domain_name,

@@ -3,13 +3,87 @@
   "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json",
   "rpp:extension": {
     "name": "DENIC RRI",
-    "id": "rri",
-    "version": "0.1.0"
+    "id": "de.denic.rpp.rri",
+    "version": "0.2.0",
+    "objects": ["requestContact"]
   },
   "rpp:extends": {
+    "#/$defs/domainName.create": "#/$defs/ext.rri.domainName.create",
+    "#/$defs/domainName.read": "#/$defs/ext.rri.domainName.read",
+    "#/$defs/domainName.update": "#/$defs/ext.rri.domainName.update",
     "#/$defs/domainTransferProcess.create": "#/$defs/ext.rri.domainTransferProcess.create"
   },
   "$defs": {
+    "ext.rri.requestContact.reference": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact" },
+        "id": { "$ref": "#/$defs/identifier" }
+      },
+      "required": ["@type", "id"]
+    },
+    "ext.rri.requestContact.create": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact" },
+        "id": { "$ref": "#/$defs/identifier" },
+        "uriTemplate": { "$ref": "#/$defs/ext.rri.uriTemplate" }
+      },
+      "required": ["@type", "id", "uriTemplate"]
+    },
+    "ext.rri.requestContact.read": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact", "readOnly": true },
+        "id": { "$ref": "#/$defs/identifier", "readOnly": true },
+        "provMetadata": { "$ref": "#/$defs/provMetadata.read", "readOnly": true },
+        "uriTemplate": { "$ref": "#/$defs/ext.rri.uriTemplate" }
+      },
+      "required": ["@type", "id", "provMetadata", "uriTemplate"]
+    },
+    "ext.rri.requestContact.update": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContact" },
+        "uriTemplate": { "$ref": "#/$defs/ext.rri.uriTemplate" }
+      },
+      "required": ["@type", "uriTemplate"]
+    },
+    "ext.rri.requestContactAvailability.read": {
+      "type": "object",
+      "properties": {
+        "@type": { "type": "string", "const": "requestContactAvailability", "readOnly": true },
+        "available": { "type": "boolean", "readOnly": true },
+        "reason": { "type": "string", "readOnly": true }
+      },
+      "required": ["@type", "available"]
+    },
+    "ext.rri.uriTemplate": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 1024
+    },
+    "ext.rri.domainName.create": {
+      "type": "object",
+      "properties": {
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference" },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference" }
+      }
+    },
+    "ext.rri.domainName.read": {
+      "type": "object",
+      "properties": {
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference" },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference" }
+      }
+    },
+    "ext.rri.domainName.update": {
+      "type": "object",
+      "properties": {
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference" },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference" }
+      }
+    },
     "ext.rri.domainTransferProcess.create": {
       "type": "object",
       "properties": {
@@ -26,6 +100,8 @@
             "required": ["label", "object"]
           }
         },
+        "generalRequest": { "$ref": "#/$defs/ext.rri.requestContact.reference", "writeOnly": true },
+        "abuse": { "$ref": "#/$defs/ext.rri.requestContact.reference", "writeOnly": true },
         "dns": { "$ref": "#/$defs/dnsData.create", "writeOnly": true }
       },
       "required": ["registrant", "dns"]

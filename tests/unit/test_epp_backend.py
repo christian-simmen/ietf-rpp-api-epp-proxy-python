@@ -67,3 +67,14 @@ def test_a_registry_error_is_an_error_response_not_an_exception():
     result = backend(reply=MISSING).domains.info("a.example", client_transaction_id="cl-1")
 
     assert isinstance(result, ErrorResponse) and result.code == ResultCode.OBJECT_DOES_NOT_EXIST
+
+
+def test_epp_has_no_request_contacts():
+    epp = backend()
+
+    answers = [epp.request_contacts.check("GR"), epp.request_contacts.info("GR"),
+               epp.request_contacts.create(None), epp.request_contacts.replace(None),
+               epp.request_contacts.delete("GR")]
+
+    assert all(isinstance(a, ErrorResponse) and a.code == ResultCode.UNIMPLEMENTED_COMMAND for a in answers)
+    assert not epp.epp_client.sent

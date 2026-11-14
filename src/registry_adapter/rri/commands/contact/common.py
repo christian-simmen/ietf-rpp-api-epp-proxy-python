@@ -48,6 +48,13 @@ def _text(value) -> str | None:
     return value.value if value is not None else None
 
 
+def changed_of(data: rri.InfoData) -> str | None:
+    """The `changed` of an INFO, in the UTC form the EPP adapter gives too."""
+    if not data.changed:
+        return None
+    return data.changed.to_datetime().astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
 def contact_from_rri(data: rri.InfoData) -> Contact:
     """A contact from its INFO. RRI has no contact status, so it is `ok` (gap Q14). Its verification data is
     carried over, so a full update can send it again."""
@@ -58,8 +65,6 @@ def contact_from_rri(data: rri.InfoData) -> Contact:
     if postal is not None:
         address = Address(street=[line.value for line in postal.address] or None, city=_text(postal.city),
                           postalCode=_text(postal.postal_code), country=_text(postal.country_code))
-    changed = data.changed.to_datetime().astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ") \
-        if data.changed else None
     handle = data.handle.value
     return Contact(
         id=handle,
@@ -71,6 +76,6 @@ def contact_from_rri(data: rri.InfoData) -> Contact:
         address=address,
         status=["ok"],
         clID=regacc_of(handle),
-        upDate=changed,
+        upDate=changed_of(data),
         carried_over=list(data.verification_information),
     )

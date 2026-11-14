@@ -9,7 +9,7 @@ from rpp.dto.rpp_contact_reference import RPPContactReference
 from rpp.dto.rpp_host_reference import RPPHostReference
 from rpp.dto.rpp_labelled_contact import RPPLabelledContact
 from rpp.dto.rpp_patch_operation import RPPPatchOperation
-from rpp.mapping.domain import domain_wanted
+from rpp.mapping.domain import domain_request_contacts, domain_wanted
 from rpp.mapping.domain.domains import check_contact_label, check_host_objects, REGISTRANT
 from rpp.mapping.shared import auth_info, include_elements, json_patch, patch_statuses
 from rpp.mapping.shared.common import parse_rpp
@@ -56,6 +56,9 @@ class _PatchedUpdate:
 
     def __init__(self, profile: BackendProfile):
         self.profile = profile
+        # A request contact is one value, which the patch applied to the read domain sets or clears.
+        self.request_paths = tuple(
+            f"/{member}" for member in domain_request_contacts.members("domainName.update", profile.extensions))
         self.add_hosts: list[HostObj] = []
         self.remove_hosts: list[HostObj] = []
         self.add_contacts: list[ContactReferenceNew] = []
@@ -66,7 +69,7 @@ class _PatchedUpdate:
     def apply(self, operation: RPPPatchOperation):
         if operation.op not in ("add", "remove", "replace"):
             raise ValueError(f"Operation '{operation.op}' is not allowed")
-        if operation.path in STATE_PATHS:
+        if operation.path in STATE_PATHS or operation.path in self.request_paths:
             raise NeedsCurrentState()
         if operation.path in ARRAY_PATHS:
             self._apply_to_array(operation)
@@ -181,8 +184,8 @@ def rpp_to_model_with_current(domain_name: str, rpp: list, current: dict, *, pro
         ignored_paths=include_elements.on_demand_paths(OBJECT), absent_parents=DNS_PARENTS,
     )
     patched = patch_statuses.with_server_statuses(patched, current, "domainStatus")
-    validate_schema("domainName.read", patched)
-    domain_wanted.reject_other_changes(current, patched)
+    validate_schema("domainName.read", patched, extensions=profile.extensions)
+    domain_wanted.reject_other_changes(current, patched, profile)
     auth_info_update = _PatchedUpdate(profile)
     for operation in operations:
         if operation.path == AUTH_INFO_PATH:

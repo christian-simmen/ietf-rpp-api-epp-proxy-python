@@ -25,7 +25,7 @@ def _requested():
 
 def _domain_output(domain, requested):
     """The domain as a response shows it: with the onDemand data elements the request includes."""
-    return include_elements.visible(OBJECT, domains.model_to_rpp(domain), requested)
+    return include_elements.visible(OBJECT, domains.model_to_rpp(domain, backend_profile().extensions), requested)
 
 
 def _mutation_answer(result, requested, status=200, extra_headers=None):
@@ -95,7 +95,8 @@ def domainNames_updatePartial(name, body):
 
     def wanted_from_current(current):
         return map_request(
-            domain_patch.rpp_to_model_with_current, name, body, domains.model_to_rpp(current),
+            domain_patch.rpp_to_model_with_current, name, body,
+            domains.model_to_rpp(current, backend_profile().extensions),
             profile=backend_profile(),
         )
 

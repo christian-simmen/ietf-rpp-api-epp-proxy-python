@@ -18,6 +18,7 @@ from rpp.http.problem import handle_rpp_error
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
+from rpp.http.extension_paths import add_extension_paths
 from rpp.schema.extensions import check_known
 
 OPENAPI_SPEC = Path(__file__).parent.parent / "openapi.yaml"
@@ -59,7 +60,8 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
         allow_headers=["*"],
     )
     # connexion changes the spec it is given, so each app gets its own copy.
-    app.add_api(copy.deepcopy(parsed_spec()), resolver=RelativeResolver('rpp.handlers'), resolver_error=501,
+    spec = add_extension_paths(copy.deepcopy(parsed_spec()), profile.extensions)
+    app.add_api(spec, resolver=RelativeResolver('rpp.handlers'), resolver_error=501,
                 validate_responses=True, options={"swagger_ui": True, "serve_spec": True},
                 validator_map={
                     "body": MediaTypeDict({**VALIDATOR_MAP["body"], "*/*json": RppRequestBodyValidator}),

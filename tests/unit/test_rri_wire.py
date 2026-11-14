@@ -99,7 +99,7 @@ def test_a_domain_is_read_with_its_records():
     assert response.status_code == 200
     body = response.json()
     assert body["registrant"]["id"] == "DENIC-1000022-HOLDER"
-    assert {"label": "abuse", "object": {"@type": "contact", "id": "DENIC-1000022-GENREQ"}} in body["contacts"]
+    assert body["abuse"] == {"@type": "requestContact", "id": "DENIC-1000022-GENREQ"}
     assert {"@type": "dnsRecord", "name": "www.rpp-exp-caa50f65.de.", "type": "aaaa",
             "rdata": {"address": "2001:db8::1"}} in body["dns"]["records"]
     assert body["provMetadata"]["spClientId"] == "DENIC-1000022"
@@ -123,7 +123,7 @@ def test_discovery_states_the_objects_of_rri():
     response = client.get("/.well-known/rpp", headers={"Accept": MEDIA_TYPE, "RPP-Cltrid": "cl-1"})
 
     assert response.status_code == 200, response.text
-    assert response.json()["objects"] == ["domainName", "contact"]
+    assert response.json()["objects"] == ["domainName", "contact", "requestContact"]
 
 
 def test_a_deleted_domain_reads_with_a_placeholder_sponsor():
@@ -220,5 +220,5 @@ def test_discovery_states_the_rri_extension():
 
     body = client.get("/.well-known/rpp", headers={"Accept": MEDIA_TYPE, "RPP-Cltrid": "cl-1"}).json()
 
-    assert [(e["@type"], e["id"], e["name"]) for e in body["extensions"]] == [("extension", "rri", "DENIC RRI")]
+    assert [(e["@type"], e["id"], e["name"]) for e in body["extensions"]] == [("extension", "de.denic.rpp.rri", "DENIC RRI")]
     assert body["extensions"][0]["url"].startswith("https://")

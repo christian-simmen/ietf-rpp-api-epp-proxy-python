@@ -4,24 +4,24 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
 
 ## Tasks
 
-- [~] T1 Plan, agreed with the maintainer
-- [ ] T2 Spec. `docs/rri/rri-extension.md` in the structure of guidelines §9, which replaces
+- [x] T1 Plan, agreed with the maintainer
+- [~] T2 Spec. `docs/rri/rri-extension.md` in the structure of guidelines §9, which replaces
       `.spec/spec-rri-extension.md` (transfer and request contacts). Schema `.spec/rri-extension.schema.json` →
       version `0.2.0`, id `de.denic.rpp.rri`. Unclear points of the guidelines → `.spec/spec-issues.md`. Gap analysis
       Q2 and §3.2 settled, links fixed. `.spec/draft-wullink-rpp-extension-guidelines.clean.txt` added
-- [ ] T3 Schema and routing. Extension defs `ext.rri.requestContact.{create,read,update,reference}` and
+- [x] T3 Schema and routing. Extension defs `ext.rri.requestContact.{create,read,update,reference}` and
       `ext.rri.domainName.{create,read,update}`. `rpp:extends` adds `generalRequest` and `abuse` to
       `domainName.create/read/update` and to `domainTransferProcess.create`, and drops them from that one's
       `contacts`. The validator validates an extension's own objects. The `/requestContacts` paths are derived from
       the `/contacts` ones when the app is built, only where the profile offers the extension
-- [ ] T4 Core. `RequestContact` model (id, uriTemplate, sponsor, upDate). `RequestContactGateway` port (check,
+- [x] T4 Core. `RequestContact` model (id, uriTemplate, sponsor, upDate). `RequestContactGateway` port (check,
       info, create, replace), `RegistryBackend.request_contacts`, flows for create, replace and patch (read-modify-
       write). `Domain` and `DomainReplacement` get `generalRequest` and `abuse` as fields of their own, out of
       `contacts`. Profile: `objects` + `requestContact`, `domainName.contacts.labels: []`
-- [ ] T5 RRI adapter. CREATE, INFO, UPDATE, CHECK of type REQUEST. Contact INFO of a REQUEST handle, and request
+- [x] T5 RRI adapter. CREATE, INFO, UPDATE, CHECK of type REQUEST. Contact INFO of a REQUEST handle, and request
       contact INFO of a PERSON/ORG handle → 404. The domain state reads and writes the new fields. EPP adapter: no
       request contact gateway (the paths do not exist there)
-- [ ] T6 RPP adapter. DTOs, mapping, handlers `requestContacts_*`. Domain mapping of `generalRequest` and `abuse`.
+- [x] T6 RPP adapter. DTOs, mapping, handlers `requestContacts_*`. Domain mapping of `generalRequest` and `abuse`.
       PATCH of `/generalRequest` and `/abuse` reads first
 - [ ] T7 Tests. Unit: mapping, schema, RRI wire and adapter, profile. Integration: a group `request_contact/`
       (where the backend has the object). The 26 cases with `{gen_req:a}` and `{abuse:a}` create their REQUEST
@@ -65,5 +65,15 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
 - D8 The proxy checks only the length of a template (schema). DENIC checks the rest (`83000000005`) → 400.
 
 ## Corrections
+
+- C1 (T4) The core does not get fields of its own for the two roles. `Domain.contacts` and
+  `DomainReplacement.contacts` already carry a reference per role, which `domain_difference`, `domain_application`
+  and the RRI domain state compare and write. The roles `generalRequest` and `abuse` stay there, and the separation
+  is in the RPP representation: `rpp/mapping/domain/domain_request_contacts.py` maps the members an offered
+  extension adds to and from those roles, and `contacts` no longer shows them. Changing the core would touch the EPP
+  adapter and both model conversions for no difference on the wire.
+- C2 (T3) The extension states the objects it defines in `rpp:extension.objects`; the validator takes their
+  definitions by the name without `ext.rri.` (`requestContact.create`). The OpenAPI schemas of the derived paths are
+  plain objects, the mappers validate with the extension's schema.
 
 ## Open questions

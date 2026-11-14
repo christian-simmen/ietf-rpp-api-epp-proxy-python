@@ -34,8 +34,8 @@ def test_no_tlds_is_invalid():
 
 def test_an_offered_extension_is_described():
     """Json §6.2.12, from the extension's schema file."""
-    extensions = discovery.model_to_rpp(a_discovery(extensions=["rri"]))["extensions"]
+    extensions = discovery.model_to_rpp(a_discovery(extensions=["de.denic.rpp.rri"]))["extensions"]
 
-    assert extensions == [{"@type": "extension", "name": "DENIC RRI", "id": "rri", "version": "0.1.0",
+    assert extensions == [{"@type": "extension", "name": "DENIC RRI", "id": "de.denic.rpp.rri", "version": "0.2.0",
                            "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/"
                                   "rri-extension.schema.json"}]
