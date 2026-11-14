@@ -5,15 +5,14 @@ targets `main`; its description says it is stacked on #150 and that #150 merges 
 
 ## Tasks
 
-- [~] T1 `src/rpp/http/middleware/line_feed_path_middleware.py`: `LineFeedPathMiddleware`, one class per file,
-      re-exported per the package convention (`middleware/__init__.py` is empty today: check the convention before
-      adding an export)
-- [ ] T2 `app.py`: `app.add_middleware(LineFeedPathMiddleware, position=MiddlewarePosition.BEFORE_ROUTING)`
-- [ ] T3 Unit wire tests: GET and DELETE `/messages/a%0Ab`, GET `/hosts/a%0Ab`: 404, type, `errors[0].result` 02001,
+- [x] T1 `src/rpp/http/middleware/line_feed_path_middleware.py`: `LineFeedPathMiddleware`, one class per file,
+      re-exported per the package convention (no re-export; imported from its module as for BodyBufferingMiddleware)
+- [x] T2 `app.py`: `app.add_middleware(LineFeedPathMiddleware, position=MiddlewarePosition.BEFORE_ROUTING)`
+- [x] T3 Unit wire tests: GET and DELETE `/messages/a%0Ab`, GET `/hosts/a%0Ab`: 404, type, `errors[0].result` 02001,
       RPP-Code, RPP-Svtrid, RPP-Cltrid echo; `%0D`/`%09` not caught by the guard; Swagger UI paths unaffected
-- [ ] T4 Docs: `architecture.project.md` middleware paragraph; `.spec/spec-issues.md` entry "Result code of an
+- [x] T4 Docs: `architecture.project.md` middleware paragraph; `.spec/spec-issues.md` entry "Result code of an
       HTTP-level error" gets a line for the line-feed path
-- [ ] T5 Checks: lint-imports, `pytest -n 4 tests/unit`, smoke `RPP_TEST_ENV=epp-docker pytest -n 8 -m smoke tests/integration`
+- [~] T5 Checks: lint-imports, `pytest -n 4 tests/unit`, smoke `RPP_TEST_ENV=epp-docker pytest -n 8 -m smoke tests/integration`
       (MTEST pending, no allowlisted machine)
 
 ## Findings (evidence)
@@ -34,12 +33,20 @@ targets `main`; its description says it is stacked on #150 and that #150 merges 
    via `_default_result`, consistent with #101. The spec-issues entry gets a line saying so.
 2. Only the line feed is refused. Other control characters keep their behaviour.
 3. Mechanism: one ASGI guard middleware at `BEFORE_ROUTING` raising `HTTPException(404)` when `"\n"` is in
-   `scope["path"]`; the #101 handler renders it. (Confirmed below in the plan report, see open questions.)
+   `scope["path"]`; the #101 handler renders it. 
 4. Deliberate wire change, 500 to 404 Problem; stated in the commit message.
 
 ## Check results
 
-(pending)
+lint-imports 15 kept; unit 2194 passed; smoke `RPP_TEST_ENV=epp-docker` 34 passed, 38 skipped.
+DENIC MTEST smoke: pending (no allowlisted machine).
+Mutation: with the `add_middleware(LineFeedPathMiddleware, ...)` line removed, the 3 line-feed tests fail with
+`RuntimeError: Working outside of operation context` (the old 500); the 4 others pass. Line restored.
+
+## Decisions at approval
+
+5. No re-export; import from the module. Wire tests in the new file `tests/unit/test_line_feed_path_wire.py`.
+6. Prove the guard by mutation (done, see check results).
 
 ## Open questions
 
