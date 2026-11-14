@@ -1,8 +1,8 @@
 # docs/readme-docker-epp
 
 ## Tasks
-- [~] README: set up the local EPP test server (EPP-server-docker), run the proxy against it from source and in docker
-- [ ] Draft PR (docs only: the test steps are skipped)
+- [x] README: set up the local EPP test server (EPP-server-docker), run the proxy against it from source and in docker
+- [~] Draft PR (docs only: the test steps are skipped)
 
 ## Findings
 - EPP-server-docker README: setup and run profiles, registrars foo/bar (FO-) and baz/qux (BZ-), TLS on 743 inside,
