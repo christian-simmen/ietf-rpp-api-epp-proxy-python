@@ -451,3 +451,77 @@ The "ensure gone" case is the same with `remove` and `match`, and EPP answers 23
 - Data-objects §2.1 says type violations "MUST be treated as errors", without a code. EPP answers 2004 (range), 2005 (syntax) or 2306 (policy) for the same kind of value, depending on the server. Core Table 9 lists `02306` (422) but not `02004` or `02005`, which fall to 400 by class (Table 10). So a name one character too long is 400 on one server and 422 on another.
 - A server that cannot announce its limits (discovery has no member for them) leaves the client to learn each by failing.
 - **Proxy:** passes the registry's code on. An RRI refusal by its XSD (`83000000004`) or with a class-5 code (e.g. `53300102920`, name servers out of range) is 500 (`02400`), which is wrong for a value the client sent.
+
+## Extension guidelines
+
+Points of [draft-wullink-rpp-extension-guidelines-00](draft-wullink-rpp-extension-guidelines.clean.txt) that are
+unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extension.md) (#131).
+
+### Identifier of a private extension
+
+- §7 requires of a private extension "a URL using the reverse domain name notation, for example
+  example.rpp.myextension". Reverse domain notation is no URL. Data-objects §2.3.1 recommends the same prefix for
+  "private extension identifiers" of data elements (`org.example.rpp.myElement`), while the guidelines' example
+  extension (Appendix A) adds `extProperty1` unprefixed. Whether a private extension prefixes the names of its members,
+  objects and `@type` values is not said.
+- **Proxy:** the extension's identifier is `de.denic.rpp.rri`; its members (`generalRequest`, `abuse`, `uriTemplate`)
+  and its object (`requestContact`) are not prefixed.
+
+### Inheritance in an extension
+
+- Data-objects §2.5 lets an object inherit another (`Extends`), and §2.3.2 lets an extension define objects. The
+  guidelines name neither as an extension point (§5, §6), give the specification format no place to state a base object
+  (§9, items 9 and 11), and do not say whether a derived data object has a collection endpoint of its own or is served
+  in its base object's (§5.7), nor how its schema refers to the base definition. The keyword `Extends` and the
+  Extension Mapper `rpp:extends` also read alike but mean different things.
+- A derived object inherits every data element with its cardinality (data-objects §2.5), so a base object with a
+  required element cannot be the base of an object that lacks it, such as a contact without a Card.
+- **Proxy:** the request contact is a data object of its own, not derived from the Contact Data Object. Its
+  availability object states `Extends: Base Availability Object`, as data-objects §9.18 does for the base objects.
+
+### Referring to a base definition
+
+- §8.1 and §8.2 require an extension to refer to a base definition by the fully qualified `$id` of the base schema.
+  The JSON Schema bundle of the drafts has no `$id`.
+- **Proxy:** `rpp:extends` and the `$ref`s name base definitions by their local names (`#/$defs/contact.reference`),
+  and the proxy adds the extension's definitions to the bundle.
+
+### Where a schema states its extension
+
+- §9 requires the Extension Overview (name, identifier, version, RPP version, schema `$id`, changed and new objects),
+  and §8.5 a registration with the same values, but the schema document has no place for them: json §7 and the example
+  of Appendix A.13 have only `$id` and `rpp:extends`.
+- **Proxy:** the schema states them in `rpp:extension` (`name`, `id`, `version`, `objects`); `url` is the `$id`.
+
+### RPP version of an extension
+
+- §9 item 2 requires "the minimum RPP version with which the extension is compatible". The drafts define no version
+  of RPP beyond the `version` of discovery, which a server states.
+- **Proxy:** the overview names the draft versions in `.spec/`.
+
+### New data objects in discovery
+
+- §5.13 requires a server to list every supported extension in discovery, but not whether it lists the data objects
+  an extension defines in `objects` (core §12.3).
+- **Proxy:** lists `requestContact` in `objects` where the extension is offered.
+
+### Endpoints and operations of a new data object
+
+- §5.7 derives the endpoints of a new data object from its identifier, and §9 item 9.2 asks for "the operations of
+  each new object". Whether a new data object has the uniform interface of data-objects §2.7.4 (and an Availability
+  Object of its own, data-objects §9.18) by default, or only the operations its specification lists, is not said.
+  Neither is how the OpenAPI document of a deployment gets the paths of an extension's objects.
+- **Proxy:** the specification lists every operation; Delete answers 501 on RRI. The paths are made when the app is
+  built, from those of the Contact Data Object.
+
+### Members of two extensions with the same name
+
+- §8.3 makes extensions independent and §8.4 merges their members flat into the base object, but nothing keeps two
+  extensions from adding a member of the same name to the same object, whose Effective Schema then requires both
+  definitions at once.
+- **Proxy:** offers one extension, so the case does not arise.
+
+## Identifier pattern and registry handles
+
+- Json -01 §6.1.1 gives the Identifier the pattern `^(\w|_){1,8}-\w{1,}$` (one hyphen, after one to eight word characters), from the EPP `roidType`. EPP contact ids are `clIDType` (RFC 5730 §2.8 gives `roidType` to repository ids only), and DENIC handles have several hyphens (`DENIC-1000022-GR`), so neither fits.
+- **Proxy:** the bundle in `src/` predates json -01 and has no pattern for `identifier`; the examples of [docs/rri/rri-extension.md](../docs/rri/rri-extension.md) use DENIC handles.

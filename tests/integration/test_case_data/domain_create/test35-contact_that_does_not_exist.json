@@ -150,35 +150,47 @@
               }
             ]
           },
-          "contacts": [
-            {
-              "select": [
-                {
-                  "when": {
-                    "profile.domainName.contacts.labels": {
-                      "contains": "tech"
-                    }
-                  },
-                  "then": {
+          "contacts": {
+            "select": [
+              {
+                "when": {
+                  "profile.domainName.contacts.labels": {
+                    "contains": "tech"
+                  }
+                },
+                "then": [
+                  {
                     "label": "tech",
                     "object": {
                       "@type": "contact",
                       "id": "{handle:a:N35}"
                     }
                   }
-                },
-                {
-                  "then": {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{handle:a:N35}"
-                    }
+                ]
+              },
+              {
+                "omit": true
+              }
+            ]
+          },
+          "abuse": {
+            "select": [
+              {
+                "when": {
+                  "profile.domainName.abuse.max_count": {
+                    "min": 1
                   }
+                },
+                "then": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:N35}"
                 }
-              ]
-            }
-          ]
+              },
+              {
+                "omit": true
+              }
+            ]
+          }
         }
       },
       "response": {

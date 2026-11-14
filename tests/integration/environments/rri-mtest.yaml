@@ -9,14 +9,10 @@ registrars:                            # the slots the cases name, each naming i
     user: TEST_RRI_REGACC1
     password: TEST_RRI_REGACC1_PASSWORD
     prefix: TEST_RRI_REGACC1_PREFIX
-    gen_req: TEST_RRI_REGACC1_GEN_REQ
-    abuse: TEST_RRI_REGACC1_ABUSE
   b:
     user: TEST_RRI_REGACC2
     password: TEST_RRI_REGACC2_PASSWORD
     prefix: TEST_RRI_REGACC2_PREFIX
-    gen_req: TEST_RRI_REGACC2_GEN_REQ
-    abuse: TEST_RRI_REGACC2_ABUSE
 # Not a secret: a user MTEST does not know, for the failed logins. No case logs in to a test account with a wrong
 # password: 10 failed LOGINs lock a user for an hour.
 unknown_user:

@@ -8,7 +8,8 @@ class RppExtension:
 
     `extends` maps the name of a base definition (`domainTransferProcess.create`) to the name of the extension's
     definition composed with it. `defs` are the extension's definitions; they refer to the base definitions by their
-    names in the bundle (`#/$defs/contact.reference`), so they are added to it.
+    names in the bundle (`#/$defs/contact.reference`), so they are added to it. `objects` are the data objects the
+    extension defines (the "new objects" of its overview), whose definitions are `defs` named `ext.<x>.<object>.<op>`.
     """
     id: str
     name: str
@@ -16,3 +17,4 @@ class RppExtension:
     url: str
     extends: dict
     defs: dict
+    objects: tuple = ()

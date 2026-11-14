@@ -4,7 +4,7 @@ from functools import cache
 
 from jsonschema import Draft202012Validator
 
-from rpp.schema.extensions import EXTENSIONS
+from rpp.schema.extensions import EXTENSIONS, own_definitions
 
 SCHEMA_FILE = os.path.join(os.path.dirname(__file__), 'schemas', 'rpp.schema.normalized.json')
 
@@ -21,6 +21,10 @@ def _validator_for(schema_name):
 
 
 validators = {name: _validator_for(name) for name in _bundle["$defs"]}
+
+# An extension's own objects (`requestContact.create`), validated by the names a base object's would have.
+validators.update({name: _validator_for(definition) for name, definition in own_definitions().items()
+                   if name not in validators})
 
 
 @cache

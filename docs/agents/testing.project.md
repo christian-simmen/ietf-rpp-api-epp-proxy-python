@@ -121,7 +121,6 @@ into the `Authorization` header when it sends the request, never into the case, 
 | `{auth:unknown_user}` | a user the backend does not know. No case logs in to a test account with a wrong password, which could lock it |
 | `{handle:a:SUFFIX}` | `<prefix of a>{random_id_10}SUFFIX`, a contact id `a` may create |
 | `{regacc:a}` | the sponsor id of `a`: its login on EPP, the RegAccId of its login on RRI |
-| `{gen_req:a}`, `{abuse:a}` | the REQUEST contacts of `a` (RRI only) |
 | `{tld}` | the TLD the environment registers under, the first of `rpp_tlds` of its config |
 | `{env:environment_name}` | `rpp_environment_name` of its config |
 | `{env:<path>}` | a fact of the environment. A list fact is a whole value only, and the response may hold any of its entries: `"label": "{env:domainName.processes.create.success_status}"` |
@@ -132,9 +131,8 @@ into the `Authorization` header when it sends the request, never into the case, 
 `RPP_TEST_ENV=rri-mtest pytest -n 4 tests/integration` runs the suite against DENIC's RRI test environment alone through
 [config.rri-mtest.yaml](../../config.rri-mtest.yaml). It needs the IPv4 address of the machine on the allowlist of
 both RegAccs (the devcontainer goes out with the host's address), and the `TEST_RRI_*` variables in `.env`: the two
-logins, their passwords, the prefix of the handles the cases create (it starts with the RegAccId), and a REQUEST
-contact of each RegAcc for the General Request and Abuse roles, created beforehand outside the suite (RPP cannot
-create one yet, gap Q2). Of the run's limits: 4 sessions and 100 RRI requests a minute per RegAcc, so at most 4
+logins, their passwords, and the prefix of the handles the cases create (it starts with the RegAccId; with the 10
+random characters it leaves 4 for a case's suffix, as a handle has at most 32). Of the run's limits: 4 sessions and 100 RRI requests a minute per RegAcc, so at most 4
 workers and 25 RPP requests a minute per registrar, paced by the runner. A session dropped without LOGOUT counts
 until its idle timeout of 5 minutes, and a LOGIN past the limit is refused with `73100000005`, so each worker logs its
 sessions out when the run ends (`pytest_sessionfinish`, `SessionPool.close`); a killed run cannot, and the next run
@@ -143,13 +141,17 @@ so the failed logins are of an unknown user. A RESTORE is one step and needs no 
 take up to two days, which a run waits for only with `RPP_TEST_MAX_WAIT` of `P2DT6H` or more. MTEST keeps what the cases create: they delete their domains, and the contacts stay (RRI cannot delete
 one), which the random part of the handle keeps apart. Every case runs on both backends unless it needs a function one of them lacks, which its `when`
 names: host objects, client statuses, `ds` records, registration periods, renew, a transfer process (`domain_transfer/`, which RRI's
-immediate CHPROV has not; `domain_transfer_ext/` is its counterpart with the `rri` extension, run on MTEST only), contact transfers, a restore report, a period longer than the run waits,
+immediate CHPROV has not; `domain_transfer_ext/` is its counterpart with the `rri` extension, run on MTEST only), the
+request contact object (`request_contact/`, `profile.objects` contains `requestContact`) or a domain's request contacts
+(`profile.domainName.abuse.max_count` at least 1: `domain_update/test37`, `limits_domain/test20`), contact transfers, a restore report, a period longer than the run waits,
 contact delete, a contact's authInfo, a localization, a fax, a region, a changeable contact name, a person's name
 on an organisation, a readable domain authInfo, or the admin, tech and billing roles. Where the
 backends differ in what a case sends or expects, the case selects by the fact: a contact has a phone and a full
 address on both (RRI requires them); a domain gets an `a` record (`profile.domainName.dns.min_count`) and a
-registrant, created in a first step of its own (`profile.domainName.registrant.min_count`); the roles are
-`generalRequest` and `abuse` where the backend has no `admin`; `expiryDate`, the provisioning metadata RRI does not
+registrant, created in a first step of its own (`profile.domainName.registrant.min_count`); a domain gets no
+General Request or Abuse contact, which RRI does not require (`profile.domainName.generalRequest.min_count` and
+`abuse.min_count` are 0), so the cases that work alike on both backends leave them out, and only the cases about them
+create them, in first steps of their own; `expiryDate`, the provisioning metadata RRI does not
 show (`profile.domainName.metadata`) and a domain's authInfo are left out where they do not apply; the status a domain
 reads with right after its create is one of `env.domainName.processes.create.success_status` (`ok` on the EPP test
 server; on MTEST `pendingCreate` while the predelegation check runs, `ok` once it passed). A case gives DNS data that

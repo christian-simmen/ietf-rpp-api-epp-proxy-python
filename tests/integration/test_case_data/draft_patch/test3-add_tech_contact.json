@@ -476,22 +476,7 @@
                 ]
               },
               {
-                "then": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
-                  }
-                ]
+                "omit": true
               }
             ]
           },
@@ -557,22 +542,7 @@
                 ]
               },
               {
-                "then": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
-                  }
-                ]
+                "omit": true
               }
             ]
           },
@@ -728,22 +698,7 @@
                 ]
               },
               {
-                "then": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
-                  }
-                ]
+                "omit": true
               }
             ]
           }

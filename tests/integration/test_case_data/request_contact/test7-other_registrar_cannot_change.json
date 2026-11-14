@@ -1,0 +1,64 @@
+{
+  "description": "A request contact is the RegAcc's own: another one cannot read or change it.",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ7}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ7}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        },
+        "fields": {
+          "provMetadata.spClientId": {
+            "type": "not_null"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/requestContacts/{handle:a:RQ7}",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "RPP-Code": "02201"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

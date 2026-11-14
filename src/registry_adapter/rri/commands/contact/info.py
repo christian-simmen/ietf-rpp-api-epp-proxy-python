@@ -4,16 +4,28 @@ from registry_adapter.rri.commands.shared.rri_command import data_of, refused, r
 from registry_adapter.rri.xml.generated.contact_5_0 import Info, InfoData
 
 
+def rri_info(client, handle: str, client_transaction_id=None):
+    """Contact INFO, of the RegAcc's own handles only, with the `InfoData` as its payload: a contact of any type."""
+    return run(client, client_transaction_id, codes=CONTACT_CODES, write=False,
+               payload_of=lambda t: data_of(t, InfoData), info=Info(handle=handle))
+
+
+def is_request(data: InfoData) -> bool:
+    return data.type_value is not None and data.type_value.value == REQUEST
+
+
+def not_found(handle: str, what: str, client_transaction_id):
+    """A handle of the other kind: RRI's contacts and request contacts share one namespace, RPP's do not."""
+    return refused(ResultCode.OBJECT_DOES_NOT_EXIST, f"{handle} is not {what}", client_transaction_id)
+
+
 def rri_contact_info(client, handle: str, client_transaction_id=None):
-    """Contact INFO, of the RegAcc's own handles only. A REQUEST contact (a URI template for the General Request or
-    Abuse role) has no form in RPP yet (gap Q2)."""
-    resp = run(client, client_transaction_id, codes=CONTACT_CODES, write=False, payload_of=lambda t: data_of(t, InfoData),
-               info=Info(handle=handle))
+    """Contact INFO of a PERSON or an ORG. A REQUEST contact is a request contact, not a contact (gap Q2)."""
+    resp = rri_info(client, handle, client_transaction_id)
     data = getattr(resp, "payload", None)
     if data is None:
         return resp
-    if data.type_value is not None and data.type_value.value == REQUEST:
-        return refused(ResultCode.UNIMPLEMENTED_OPTION, "A REQUEST contact of RRI has no form in RPP",
-                       client_transaction_id)
+    if is_request(data):
+        return not_found(handle, "a contact", client_transaction_id)
     resp.payload = contact_from_rri(data)
     return resp

@@ -127,8 +127,20 @@ def test_a_profile_reads_as_a_tree():
 
 def test_only_rri_offers_an_extension_and_transfers_with_it():
     assert EPP_PROFILE.extensions == ()
-    assert RRI_PROFILE.extensions == ("rri",)
+    assert RRI_PROFILE.extensions == ("de.denic.rpp.rri",)
     assert RRI_PROFILE.domainName.processes.transfer.operations == ("request",)
+
+
+def test_rri_has_request_contacts_and_no_contact_labels():
+    assert "requestContact" in RRI_PROFILE.objects and "requestContact" not in EPP_PROFILE.objects
+    assert RRI_PROFILE.domainName.contacts.labels == ()
+
+
+@pytest.mark.parametrize("role", ["generalRequest", "abuse"])
+def test_a_domain_may_have_one_request_contact_of_each_role_on_rri_only(role):
+    assert RRI_PROFILE.fact(f"domainName.{role}.min_count") == 0  # ref §5.2: 0-1, a domain needs none
+    assert RRI_PROFILE.fact(f"domainName.{role}.max_count") == 1
+    assert EPP_PROFILE.fact(f"domainName.{role}.min_count") == EPP_PROFILE.fact(f"domainName.{role}.max_count") == 0
 
 
 @pytest.mark.parametrize("path", ["contact.fax", "contact.nope", "nope", "contact.fax.supported.x"])

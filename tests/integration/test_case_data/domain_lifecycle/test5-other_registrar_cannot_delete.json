@@ -153,22 +153,6 @@
                   "@type": "contact",
                   "id": "{handle:a:L5}"
                 },
-                "contacts": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
-                  }
-                ],
                 "dns": {
                   "@type": "dnsData",
                   "records": [

@@ -3,6 +3,7 @@ from registry_adapter.rri.gateways.rri_contact_gateway import RriContactGateway
 from registry_adapter.rri.gateways.rri_domain_gateway import RriDomainGateway
 from registry_adapter.rri.gateways.rri_host_gateway import RriHostGateway
 from registry_adapter.rri.gateways.rri_message_gateway import RriMessageGateway
+from registry_adapter.rri.gateways.rri_request_contact_gateway import RriRequestContactGateway
 from registry_adapter.rri.session.rri_client import RriClient
 
 
@@ -17,6 +18,7 @@ class RriBackend:
         self.contacts = RriContactGateway(rri_client)
         self.hosts = RriHostGateway()
         self.messages = RriMessageGateway(rri_client)
+        self.request_contacts = RriRequestContactGateway(rri_client)
 
     @property
     def sponsor_id(self) -> str:

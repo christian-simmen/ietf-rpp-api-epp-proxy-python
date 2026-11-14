@@ -24,6 +24,7 @@ def _load(path: Path) -> RppExtension:
         id=about["id"], name=about["name"], version=about["version"], url=schema["$id"],
         extends={_name(base): _name(ext) for base, ext in schema["rpp:extends"].items()},
         defs=schema["$defs"],
+        objects=tuple(about.get("objects", ())),
     )
 
 
@@ -47,3 +48,16 @@ def check_known(extensions):
     unknown = sorted(set(extensions) - set(EXTENSIONS))
     if unknown:
         raise ValueError(f"backend profile: unknown RPP extension {', '.join(unknown)}")
+
+
+def own_definitions() -> dict[str, str]:
+    """The definitions of the objects and types the extensions define, by the name a mapper validates with
+    (`requestContact.create`), to the name of the extension's definition (`ext.rri.requestContact.create`). The
+    definitions an extension composes with a base one are not among them."""
+    names = {}
+    for extension in EXTENSIONS.values():
+        composed = set(extension.extends.values())
+        for name in extension.defs:
+            if name not in composed and name.startswith("ext."):
+                names[name.split(".", 2)[2]] = name
+    return names

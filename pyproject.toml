@@ -48,7 +48,9 @@ layers = ["flows", "ports", "model | capabilities", "result"]
 id = "core-model-objects"
 name = "The object packages of core.model are independent, except domain -> contact"
 type = "independence"
-modules = ["core.model.contact", "core.model.domain", "core.model.host", "core.model.message"]
+modules = [
+    "core.model.contact", "core.model.domain", "core.model.host", "core.model.message", "core.model.request_contact",
+]
 ignore_imports = ["core.model.domain.** -> core.model.contact.**"]
 
 [[tool.importlinter.contracts]]
@@ -56,7 +58,9 @@ id = "core-model-shared"
 name = "core.model.shared imports no object package of core.model"
 type = "forbidden"
 source_modules = ["core.model.shared"]
-forbidden_modules = ["core.model.contact", "core.model.domain", "core.model.host", "core.model.message"]
+forbidden_modules = [
+    "core.model.contact", "core.model.domain", "core.model.host", "core.model.message", "core.model.request_contact",
+]
 
 [[tool.importlinter.contracts]]
 id = "rpp-not-registry-adapter"

@@ -6,6 +6,114 @@
     {
       "request": {
         "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG08}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG08}"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA08}",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA08}"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:b:RG08}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:b:RG08}"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:b:RA08}",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:b:RA08}"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
@@ -86,22 +194,14 @@
             "@type": "contact",
             "id": "{handle:a:X1}"
           },
-          "contacts": [
-            {
-              "label": "generalRequest",
-              "object": {
-                "@type": "contact",
-                "id": "{gen_req:a}"
-              }
-            },
-            {
-              "label": "abuse",
-              "object": {
-                "@type": "contact",
-                "id": "{abuse:a}"
-              }
-            }
-          ],
+          "generalRequest": {
+            "@type": "requestContact",
+            "id": "{handle:a:RG08}"
+          },
+          "abuse": {
+            "@type": "requestContact",
+            "id": "{handle:a:RA08}"
+          },
           "dns": {
             "@type": "dnsData",
             "records": [
@@ -217,22 +317,14 @@
             "@type": "contact",
             "id": "{handle:b:X1}"
           },
-          "contacts": [
-            {
-              "label": "generalRequest",
-              "object": {
-                "@type": "contact",
-                "id": "{gen_req:b}"
-              }
-            },
-            {
-              "label": "abuse",
-              "object": {
-                "@type": "contact",
-                "id": "{abuse:b}"
-              }
-            }
-          ],
+          "generalRequest": {
+            "@type": "requestContact",
+            "id": "{handle:b:RG08}"
+          },
+          "abuse": {
+            "@type": "requestContact",
+            "id": "{handle:b:RA08}"
+          },
           "dns": {
             "@type": "dnsData",
             "records": [

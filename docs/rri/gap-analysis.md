@@ -86,7 +86,8 @@ Legend for **Fit**: ✅ direct; 🟡 maps, with new orchestration or partial dat
 | `uName` | `Domain` | EPP needs the IDN extension for this. RRI takes it natively. |
 | `lgr` | — | DENIC has one fixed character repertoire (ref §5.2). Accept no `lgr`, or one configured name, see Q11. |
 | `registrant` | `Holder` (1) | RRI allows 1–5 holders. RPP has one `registrant`, so a create sends one holder. See §4.4 for reading several. |
-| `contacts[label]` | `GeneralRequest` / `AbuseContact` (REQUEST handles) | RPP labels are open. Proposal: `generalRequest` and `abuse`. `admin`, `tech` and `billing` do not exist in RRI → 501 (`NotSupportedByBackend`). See Q2. |
+| `contacts[label]` | — | `admin`, `tech` and `billing` do not exist in RRI → 501 (`NotSupportedByBackend`). Further holders are labelled `registrant` (Q1). |
+| `generalRequest`, `abuse` (`rri` extension) | `GeneralRequest` / `AbuseContact` (REQUEST handles) | Members of their own, each a reference to a request contact, not `contacts` labels. See Q2 and [rri-extension.md](rri-extension.md). |
 | `nameservers[]` (host references) | `Nserver: <host>` (2–13) | There is no host object to reference, so the name becomes an attribute. In-bailiwick hosts need glue, which a reference does not carry, so DENIC refuses them (`53300102902`). |
 | `dns.records` `ns` + glue `a`/`aaaa` | `Nserver: <host> <ip>` | Same shape as EPP `hostAttr`. The K/V syntax for several IPs is unverified (ref §14.2). XML (`dnsentry:NS` with `address*` and `addressV6*`) is clear. |
 | `dns.records` `a`/`aaaa`/`mx` at the apex or below | `Nsentry` (1–5), instead of `Nserver` | RRI can do this and EPP cannot, so the EPP proxy answers 501 today. It is a new capability. |
@@ -179,7 +180,7 @@ RRI contact types: `PERSON` and `ORG` (holders), and `REQUEST` (a URI template f
 | `phones` fax | — | No fax in RRI 5.0 → 501. |
 | `status`, `authInfo`, `disclose` | — | 501. |
 | — | verification blocks (0–5) | NIS2 pre-verification has no place in RPP, see §4.5. Omitting it in an UPDATE **deletes** it, so the adapter must carry it over from the INFO it read. |
-| `REQUEST` contacts | `Type: REQUEST`, `URI-Template` | Possible RPP form: a Card with only `links[{uri}]`. But an RFC 6570 template is not a URI. See Q2. |
+| `REQUEST` contacts | `Type: REQUEST`, `URI-Template` | Not a contact: the data object `requestContact` of the `rri` extension (`/requestContacts`), see Q2. A contact read of a REQUEST handle answers 404. |
 
 **Read (`contacts_read` → contact INFO)**: own contacts only. `provMetadata.spClientId` is required in RPP. RRI does
 not return it, but it is the RegAccId encoded in the handle prefix. `upDate` ← `Changed`. There is no `crDate`.
@@ -278,9 +279,9 @@ Options (Q3):
   (without handles) and the DNS data. It creates new contacts in the gainer's RegAcc, with generated handles, then
   sends CHPROV. This leaves contacts behind if CHPROV fails, and it re-registers personal data the gainer may not
   be permitted to process (NIS2 verification). Not recommended without the maintainer's agreement.
-- **B. A request extension.** The client passes `registrant`, `contacts` and `dns` with the transfer request. That is
+- **B. A request extension.** The client passes `registrant`, `contacts`, `generalRequest`, `abuse` and `dns` with the transfer request. That is
   not in the RPP drafts, so it is the `rri` extension, described in
-  [spec-rri-extension.md](../../.spec/spec-rri-extension.md). **Chosen by the maintainer (#133).**
+  [rri-extension.md](rri-extension.md). **Chosen by the maintainer (#133).**
 - **C. 501.** Transfer is not available over RPP on RRI.
 
 Whichever option is chosen, the result is immediate. That matches the existing "completed at once" path of
@@ -389,8 +390,8 @@ Each needs the maintainer's decision before implementation.
 | # | Question | Proposal |
 |---|---|---|
 | Q1 | How to read and write domains with 2–5 holders, given one RPP `registrant`. | First holder as `registrant`, the others as `contacts` labelled `registrant`. Spec issue. |
-| Q2 | Contact labels for GeneralRequest and Abuse, and how a `REQUEST` contact (URI template) appears in RPP. | Labels `generalRequest` and `abuse`. A REQUEST contact is a Card with only one `links` entry. Spec issue. |
-| Q3 | Transfer (CHPROV): proxy-built data (A), a request extension (B), or 501 (C). | B, the `rri` extension ([spec-rri-extension.md](../../.spec/spec-rri-extension.md)). Confirmed by the maintainer (#133). |
+| Q2 | Contact labels for GeneralRequest and Abuse, and how a `REQUEST` contact (URI template) appears in RPP. | The data object `requestContact` of the `rri` extension, and the domain members `generalRequest` and `abuse` ([rri-extension.md](rri-extension.md)). Confirmed by the maintainer (#131). |
+| Q3 | Transfer (CHPROV): proxy-built data (A), a request extension (B), or 501 (C). | B, the `rri` extension ([rri-extension.md](rri-extension.md)). Confirmed by the maintainer (#133). |
 | Q4 | AuthInfo1: lifetime (always 30 days, or from a client value), and whether the proxy checks the 8–16 character charset itself. | Default 30 days. Check up front → 422 `2306`. |
 | Q5 | RPP status for `failed` and for DISPUTE. | `failed` → `inactive` with `due`. DISPUTE left out. |
 | Q6 | Restore: one-step RESTORE on `restoreProcesses_create`, and what to do with a `restoreReport`. | RESTORE when no report is given. With a report → 501. |

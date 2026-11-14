@@ -110,7 +110,7 @@ def test_approve_reason_is_not_allowed_in_the_epp_profile():
 
 RRI_DATA = {
     "registrant": {"@type": "contact", "id": "DENIC-1000022-HOLDER"},
-    "contacts": [{"label": "abuse", "object": {"@type": "contact", "id": "DENIC-1000022-ABUSE"}}],
+    "abuse": {"@type": "requestContact", "id": "DENIC-1000022-ABUSE"},
     "dns": {"@type": "dnsData", "records": [
         {"@type": "dnsRecord", "name": "@", "type": "a", "rdata": {"address": "192.0.2.10"}}]},
 }
