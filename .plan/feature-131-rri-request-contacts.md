@@ -29,7 +29,7 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
       go (`.env.example`, `rri-mtest.yaml`, `test_environment.py`, `testing.project.md`)
 - [x] T8 Docs. `architecture.project.md` (extension endpoints), `overview.project.md` link, `testing.project.md`
 - [x] T9 Checks: `lint-imports`, unit, smoke. MTEST smoke from an allowlisted machine (or recorded as pending)
-- [~] T10 Draft PR
+- [x] T10 Draft PR #148, waiting for the maintainer
 
 ## Findings (evidence)
 
