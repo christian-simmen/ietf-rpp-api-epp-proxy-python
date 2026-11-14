@@ -3,11 +3,6 @@
   "description": "The contacts must belong to the gainer: the loser's holder is refused (63200020603).",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -35,11 +30,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -67,11 +57,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -99,11 +84,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",

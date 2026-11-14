@@ -177,8 +177,8 @@
             "select": [
               {
                 "when": {
-                  "profile.objects": {
-                    "contains": "requestContact"
+                  "profile.domainName.abuse.max_count": {
+                    "min": 1
                   }
                 },
                 "then": {

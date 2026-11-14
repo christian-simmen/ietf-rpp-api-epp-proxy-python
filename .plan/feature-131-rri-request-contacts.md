@@ -76,6 +76,13 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
   definitions by the name without `ext.rri.` (`requestContact.create`). The OpenAPI schemas of the derived paths are
   plain objects, the mappers validate with the extension's schema.
 
+- C3 (T7, maintainer review) A domain needs no request contact on RRI (ref §5.2: 0-1 each; a create without them
+  passes on MTEST). The profile states it as `domainName.generalRequest` and `domainName.abuse`, `min_count` 0 and
+  `max_count` 1 (0 and 0 on EPP). The cases that work alike on both backends no longer create or send request
+  contacts; only `domain_transfer_ext/`, `domain_update/test37` and `limits_domain/test20` do, selected on
+  `max_count` at least 1, and `request_contact/` on the object. `limits_domain/test20` lost its skip (it creates two
+  handles now) and is pinned to 400 `02001`.
+
 ## Checks (2026-11-14)
 
 - `lint-imports`: 15 contracts kept. Unit: 2168 passed.
@@ -84,6 +91,9 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
 - The 28 changed case files and `request_contact/` on both environments: all passed or skipped by their selectors
   (the RRI branches of the cases that need `admin` or hosts were skipped there before too). MTEST answers 403
   (`02201`) to another RegAcc's request contact (`request_contact/test7`) and 400 (`02005`) to an `ftp` template.
+
+- After C3: `lint-imports` kept, unit 2170 passed, smoke 60 passed and 12 skipped on both, the changed cases and
+  `request_contact/` 45 passed and 27 skipped by their selectors.
 
 ## Open questions
 

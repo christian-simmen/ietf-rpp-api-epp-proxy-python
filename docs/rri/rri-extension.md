@@ -99,6 +99,9 @@ The following data elements are added to the Domain Name Data Object.
   - Constraints:
     - The relation MUST correspond to a Request Contact Data Object of the sponsoring client.
 
+A domain needs neither: RRI holds 0 to 1 of each (ref §5.2), which the backend profile states as
+`domainName.generalRequest` and `domainName.abuse` (`min_count` 0, `max_count` 1).
+
 The roles are not labels of `contacts`: a server that offers the extension refuses a `contacts` entry labelled
 `generalRequest` or `abuse` with 501 (`02102`), as any label it has no role for. On RRI, `contacts` holds only the
 holders after the first, labelled `registrant` (gap Q1).

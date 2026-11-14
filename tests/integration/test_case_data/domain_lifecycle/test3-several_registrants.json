@@ -8,70 +8,6 @@
   "description": "Registrants after the first are contacts labelled registrant.",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG05}",
-          "uriTemplate": "https://example.com/contact?domain={Alabel}"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG05}"
-        }
-      }
-    },
-    {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA05}",
-          "uriTemplate": "mailto:abuse@example.com"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA05}"
-        }
-      }
-    },
-    {
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -348,14 +284,6 @@
                   "@type": "contact",
                   "id": "{handle:a:L3}"
                 },
-                "generalRequest": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RG05}"
-                },
-                "abuse": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RA05}"
-                },
                 "dns": {
                   "@type": "dnsData",
                   "records": [
@@ -454,13 +382,7 @@
                 "id": "{handle:a:L3B}"
               }
             }
-          ],
-          "generalRequest": {
-            "@type": "requestContact"
-          },
-          "abuse": {
-            "@type": "requestContact"
-          }
+          ]
         }
       }
     },

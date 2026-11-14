@@ -18,6 +18,12 @@ domainName:
     max_count: 5                       # gap Q1: further holders are contacts labelled `registrant`
   contacts:
     labels: []                         # no admin, tech or billing; General Request and Abuse are members of their own
+  generalRequest:                      # a request contact of the extension, 0 to 1 (ref §5.2): a domain needs none
+    min_count: 0
+    max_count: 1
+  abuse:
+    min_count: 0
+    max_count: 1
   status:
     client_supported: false            # every status is the registry's
   authInfo:

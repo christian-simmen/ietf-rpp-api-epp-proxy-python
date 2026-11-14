@@ -1,7 +1,5 @@
 {
-  "markers": [
-    "smoke"
-  ],
+  "markers": ["smoke"],
   "description": "A request contact is created, read, replaced with PUT and changed with PATCH (docs/rri/rri-extension.md).",
   "steps": [
     {

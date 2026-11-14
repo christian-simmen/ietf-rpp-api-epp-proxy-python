@@ -3,11 +3,6 @@
   "description": "CHPROV needs the AuthInfo: without RPP-Authorization the proxy sends nothing.",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -35,11 +30,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -67,11 +57,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -99,11 +84,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",

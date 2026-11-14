@@ -1,18 +1,16 @@
 {
   "when": {
-    "profile.objects": {
-      "contains": "requestContact"
+    "profile.domainName.generalRequest.max_count": {
+      "min": 1
+    },
+    "profile.domainName.abuse.max_count": {
+      "min": 1
     }
   },
   "test_id": "test37-remove_and_add_a_request_contact",
   "description": "A request contact of a domain is removed and added again: the counterpart of the admin and tech cases (test4, test9) for the members of RRI. A second removal answers 422, which proves the first.",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -40,11 +38,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",

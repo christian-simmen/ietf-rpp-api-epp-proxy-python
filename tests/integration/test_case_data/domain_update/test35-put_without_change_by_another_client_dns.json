@@ -3,70 +3,6 @@
   "description": "A full update by a client that is not the sponsor is refused, also when it changes nothing (core §16.8): the counterpart of test30 without host objects.",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG17}",
-          "uriTemplate": "https://example.com/contact?domain={Alabel}"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG17}"
-        }
-      }
-    },
-    {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA17}",
-          "uriTemplate": "mailto:abuse@example.com"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA17}"
-        }
-      }
-    },
-    {
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -217,14 +153,6 @@
                   "@type": "contact",
                   "id": "{handle:a:U35}"
                 },
-                "generalRequest": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RG17}"
-                },
-                "abuse": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RA17}"
-                },
                 "dns": {
                   "@type": "dnsData",
                   "records": [
@@ -305,14 +233,6 @@
                 "registrant": {
                   "@type": "contact",
                   "id": "{handle:a:U35}"
-                },
-                "generalRequest": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RG17}"
-                },
-                "abuse": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RA17}"
                 },
                 "dns": {
                   "@type": "dnsData",

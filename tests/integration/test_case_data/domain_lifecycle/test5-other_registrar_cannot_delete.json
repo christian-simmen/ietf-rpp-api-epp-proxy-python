@@ -3,70 +3,6 @@
   "description": "Only the sponsor deletes a domain.",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG07}",
-          "uriTemplate": "https://example.com/contact?domain={Alabel}"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG07}"
-        }
-      }
-    },
-    {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA07}",
-          "uriTemplate": "mailto:abuse@example.com"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA07}"
-        }
-      }
-    },
-    {
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -216,14 +152,6 @@
                 "registrant": {
                   "@type": "contact",
                   "id": "{handle:a:L5}"
-                },
-                "generalRequest": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RG07}"
-                },
-                "abuse": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RA07}"
                 },
                 "dns": {
                   "@type": "dnsData",

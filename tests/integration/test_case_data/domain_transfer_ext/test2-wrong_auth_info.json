@@ -3,11 +3,6 @@
   "description": "An AuthInfo that does not match is refused, and the domain stays where it was.",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -35,11 +30,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -67,11 +57,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -99,11 +84,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",

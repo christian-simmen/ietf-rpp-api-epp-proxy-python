@@ -8,70 +8,6 @@
   "description": "Address records the registry serves itself are added by PATCH and read back.",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG04}",
-          "uriTemplate": "https://example.com/contact?domain={Alabel}"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RG04}"
-        }
-      }
-    },
-    {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
-      "request": {
-        "method": "POST",
-        "url": "/requestContacts",
-        "headers": {
-          "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
-        },
-        "body_json": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA04}",
-          "uriTemplate": "mailto:abuse@example.com"
-        }
-      },
-      "response": {
-        "status": 201,
-        "headers": {
-          "RPP-Code": "01000"
-        },
-        "body": {
-          "@type": "requestContact",
-          "id": "{handle:a:RA04}"
-        }
-      }
-    },
-    {
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -221,14 +157,6 @@
                 "registrant": {
                   "@type": "contact",
                   "id": "{handle:a:L2}"
-                },
-                "generalRequest": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RG04}"
-                },
-                "abuse": {
-                  "@type": "requestContact",
-                  "id": "{handle:a:RA04}"
                 },
                 "dns": {
                   "@type": "dnsData",

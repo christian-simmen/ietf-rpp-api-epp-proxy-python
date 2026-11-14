@@ -385,8 +385,10 @@ the EPP Compatibility Profile takes them, with the gaps commented) or `rri.yaml`
 `rpp_backend_profile` in the config, which names the generic one with `extends` and states only what differs. Another
 EPP server starts from `extends: epp` alone. `main.py` adds `lgrs` from the config (`Settings.lgrs`: the LGRs of
 `rpp_idn_lgr_tables`, or `rpp_rri_lgr`). A missing, unknown or mistyped leaf stops the app at start.
-`domainName.registrant.min_count`, `domainName.dns.min_count`, `contact.phone.min_count`, `contact.name.changeable`
-and `contact.processes.delete.supported` are left to the registry to enforce and read by the test selectors only.
+`domainName.registrant.min_count`, `domainName.dns.min_count`, `domainName.generalRequest.*` and
+`domainName.abuse.*` (how many request contacts of the role a domain has: 0 to 1 on RRI, none on EPP),
+`contact.phone.min_count`, `contact.name.changeable` and `contact.processes.delete.supported` are left to the registry
+to enforce and read by the test selectors only.
 
 A value that is not in the form the backend requires (a phone number, the parts of a restore report) is a 400. The
 mapper raises `BackendRequirement` (`core/capabilities/`) with `{backend}` in its text, and `map_request` names the

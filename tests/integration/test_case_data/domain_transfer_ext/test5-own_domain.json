@@ -3,11 +3,6 @@
   "description": "The sponsor cannot transfer its own domain (63380063209).",
   "steps": [
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",
@@ -35,11 +30,6 @@
       }
     },
     {
-      "when": {
-        "profile.objects": {
-          "contains": "requestContact"
-        }
-      },
       "request": {
         "method": "POST",
         "url": "/requestContacts",

@@ -136,6 +136,13 @@ def test_rri_has_request_contacts_and_no_contact_labels():
     assert RRI_PROFILE.domainName.contacts.labels == ()
 
 
+@pytest.mark.parametrize("role", ["generalRequest", "abuse"])
+def test_a_domain_may_have_one_request_contact_of_each_role_on_rri_only(role):
+    assert RRI_PROFILE.fact(f"domainName.{role}.min_count") == 0  # ref §5.2: 0-1, a domain needs none
+    assert RRI_PROFILE.fact(f"domainName.{role}.max_count") == 1
+    assert EPP_PROFILE.fact(f"domainName.{role}.min_count") == EPP_PROFILE.fact(f"domainName.{role}.max_count") == 0
+
+
 @pytest.mark.parametrize("path", ["contact.fax", "contact.nope", "nope", "contact.fax.supported.x"])
 def test_a_path_that_names_no_leaf_is_a_key_error(path):
     with pytest.raises(KeyError):
