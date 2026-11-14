@@ -307,8 +307,9 @@ aborted uploads reach no handler half-received. It has no size limit (#93).
 
 `LineFeedPathMiddleware` in `rpp/http/middleware/` is added before routing, inside Connexion's exception handling and
 before security. A path with a line feed is not matched by Connexion's mount pattern (`.` does not match `\n`) and
-used to fall through to Flask as a 500, so the middleware raises a 404, which `handle_http_exception` renders like
-any unknown path (#98). Only the line feed is refused.
+used to fall through to Flask as a 500, so the middleware raises a 404, which `handle_http_exception` renders as a
+404 Problem with 02001, as for an unknown path (detail `Not Found`) (#98). Only the line feed is refused. Swagger UI
+paths are matched before the guard, so `/ui/` or `/openapi.json` followed by a trailing line feed still serves them.
 
 The restore handlers are `domainNameRestoreProcesses_create`, `_update`, `_updatePartial` and `_read` in
 `rpp/handlers/domain/domain_handlers.py`. A request and a report are a domain update with the RFC 3915 `rgp:restore`

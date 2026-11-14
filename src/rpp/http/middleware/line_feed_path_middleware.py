@@ -2,7 +2,7 @@ from starlette.exceptions import HTTPException
 
 
 class LineFeedPathMiddleware:
-    """Answers 404 to a path with a line feed, as for any path the API does not have.
+    """Answers a path with a line feed with a 404 Problem with 02001, as for an unknown path (detail `Not Found`).
 
     Connexion mounts the API on a pattern in which `.` does not match a line feed, so such a path is not routed
     but falls through to the Flask app, which fails with a 500 (#98). Raised here, inside Connexion's exception

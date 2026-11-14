@@ -48,6 +48,14 @@ Mutation: with the `add_middleware(LineFeedPathMiddleware, ...)` line removed, t
 5. No re-export; import from the module. Wire tests in the new file `tests/unit/test_line_feed_path_wire.py`.
 6. Prove the guard by mutation (done, see check results).
 
+## Review round 1
+
+Clean apart from two Low findings, fixed as given: docstring and architecture doc say "a 404 Problem with 02001, as for
+an unknown path (detail `Not Found`)", the line-feed tests assert detail and `errors[0].reason` `Not Found`; the doc
+says Swagger UI paths are matched before the guard (verified: `/ui/%0A` and `/openapi.json%0A` give 200). Checks
+re-run on the final commit, see check results. No further round. Parked, waiting for #150 to merge and for the DENIC
+MTEST smoke run.
+
 ## Open questions
 
 None. Note: the guard checks `scope["path"]` (decoded), http scope only (websocket and lifespan pass).

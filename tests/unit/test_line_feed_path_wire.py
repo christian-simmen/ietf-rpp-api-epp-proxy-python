@@ -30,6 +30,8 @@ def test_path_with_line_feed_is_an_unknown_path(client, method, path):
     body = response.json()
     assert body["type"] == RPP_ERROR
     assert body["status"] == 404
+    assert body["detail"] == "Not Found"
+    assert body["errors"][0]["reason"] == "Not Found"
     assert body["errors"][0]["result"] == "02001"
     assert response.headers["RPP-Code"] == "02001"
     assert response.headers["RPP-Svtrid"]
