@@ -1,0 +1,32 @@
+{
+  "description": "The registry takes http, https and mailto templates only (83000000005), a syntax error of the value.",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ5}",
+          "uriTemplate": "ftp://example.com/{Alabel}"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "RPP-Code": "02005"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

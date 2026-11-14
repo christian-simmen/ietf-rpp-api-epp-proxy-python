@@ -1,0 +1,136 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "description": "A request contact is created, read, replaced with PUT and changed with PATCH (docs/rri/rri-extension.md).",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ1}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ1}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        },
+        "fields": {
+          "provMetadata.spClientId": {
+            "type": "not_null"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/requestContacts/{handle:a:RQ1}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ1}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}",
+          "provMetadata": {
+            "spClientId": "{regacc:a}"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/requestContacts/{handle:a:RQ1}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "id": "{handle:a:RQ1}",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "/requestContacts/{handle:a:RQ1}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": [
+          {
+            "op": "replace",
+            "path": "/uriTemplate",
+            "value": "https://example.com/abuse/{Ulabel}"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "id": "{handle:a:RQ1}",
+          "uriTemplate": "https://example.com/abuse/{Ulabel}"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/requestContacts/{handle:a:RQ1}/availability",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 404,
+        "body": {
+          "@type": "requestContactAvailability",
+          "available": false
+        }
+      }
+    }
+  ]
+}

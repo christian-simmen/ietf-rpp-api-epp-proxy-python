@@ -172,35 +172,36 @@
         },
         "body_json": [
           {
-            "op": "add",
-            "path": "/contacts",
-            "value": {
-              "select": [
-                {
-                  "when": {
-                    "profile.domainName.contacts.labels": {
-                      "contains": "tech"
-                    }
-                  },
-                  "then": {
+            "select": [
+              {
+                "when": {
+                  "profile.domainName.contacts.labels": {
+                    "contains": "tech"
+                  }
+                },
+                "then": {
+                  "op": "add",
+                  "path": "/contacts",
+                  "value": {
                     "label": "tech",
                     "object": {
                       "@type": "contact",
                       "id": "{handle:a:N64}"
                     }
                   }
-                },
-                {
-                  "then": {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{handle:a:N64}"
-                    }
+                }
+              },
+              {
+                "then": {
+                  "op": "add",
+                  "path": "/abuse",
+                  "value": {
+                    "@type": "requestContact",
+                    "id": "{handle:a:N64}"
                   }
                 }
-              ]
-            }
+              }
+            ]
           }
         ]
       },

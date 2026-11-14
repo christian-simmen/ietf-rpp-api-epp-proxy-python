@@ -33,7 +33,7 @@ def test_selector_holds(selector):
 
 @pytest.mark.parametrize("selector", [
     {"profile.objects": {"not": {"contains": "host"}}},
-    {"profile.domainName.contacts.labels": {"contains": "abuse"}},
+    {"profile.objects": {"contains": "requestContact"}},
     {"profile.domainName.registrant.max_count": {"min": 2}},
     {"env.tld": "de", "profile.domainName.processes.renew.supported": True},
     [{"profile.objects": {"not": {"contains": "host"}}}, {"env.tld": "de"}],
@@ -124,14 +124,11 @@ def test_no_case_logs_in_to_a_test_account_with_a_wrong_password():
 def test_rri_values_come_from_the_variables_and_the_login():
     environ = {"TEST_RRI_REGACC1": "DENIC-99995-RRI", "TEST_RRI_REGACC1_PASSWORD": "pw",
                "TEST_RRI_REGACC1_PREFIX": "DENIC-99995-T-", "TEST_RRI_REGACC2_PREFIX": "DENIC-99996-T-",
-               "TEST_RRI_REGACC1_GEN_REQ": "DENIC-99995-GR", "TEST_RRI_REGACC1_ABUSE": "DENIC-99995-AB",
-               "TEST_RRI_REGACC2": "DENIC-99996-RRI", "TEST_RRI_REGACC2_PASSWORD": "pw",
-               "TEST_RRI_REGACC2_GEN_REQ": "DENIC-99996-GR", "TEST_RRI_REGACC2_ABUSE": "DENIC-99996-AB"}
+               "TEST_RRI_REGACC2": "DENIC-99996-RRI", "TEST_RRI_REGACC2_PASSWORD": "pw"}
     if "rri-mtest" not in environment_names():
         pytest.skip("no RRI environment yet")
     env = load("rri-mtest", environ=environ)
-    assert replace_values("{handle:a:x} {regacc:b} {gen_req:a} {abuse:b} {tld}", env, "r") == \
-        "DENIC-99995-T-rx DENIC-99996 DENIC-99995-GR DENIC-99996-AB de"
+    assert replace_values("{handle:a:x} {regacc:b} {tld}", env, "r") == "DENIC-99995-T-rx DENIC-99996 de"
 
 
 def test_pacer_spaces_the_requests_of_each_registrar():

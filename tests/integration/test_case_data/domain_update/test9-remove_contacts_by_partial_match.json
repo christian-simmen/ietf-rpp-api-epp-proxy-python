@@ -7,6 +7,70 @@
   "test_id": "test9-remove_contacts_by_partial_match",
   "steps": [
     {
+      "when": {
+        "profile.objects": {
+          "contains": "requestContact"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG21}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG21}"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.objects": {
+          "contains": "requestContact"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA21}",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA21}"
+        }
+      }
+    },
+    {
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -223,22 +287,43 @@
                 ]
               },
               {
-                "then": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
+                "omit": true
+              }
+            ]
+          },
+          "generalRequest": {
+            "select": [
+              {
+                "when": {
+                  "profile.objects": {
+                    "contains": "requestContact"
                   }
-                ]
+                },
+                "then": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RG21}"
+                }
+              },
+              {
+                "omit": true
+              }
+            ]
+          },
+          "abuse": {
+            "select": [
+              {
+                "when": {
+                  "profile.objects": {
+                    "contains": "requestContact"
+                  }
+                },
+                "then": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RA21}"
+                }
+              },
+              {
+                "omit": true
               }
             ]
           },
@@ -322,22 +407,43 @@
                 ]
               },
               {
-                "then": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
+                "omit": true
+              }
+            ]
+          },
+          "generalRequest": {
+            "select": [
+              {
+                "when": {
+                  "profile.objects": {
+                    "contains": "requestContact"
                   }
-                ]
+                },
+                "then": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RG21}"
+                }
+              },
+              {
+                "omit": true
+              }
+            ]
+          },
+          "abuse": {
+            "select": [
+              {
+                "when": {
+                  "profile.objects": {
+                    "contains": "requestContact"
+                  }
+                },
+                "then": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RA21}"
+                }
+              },
+              {
+                "omit": true
               }
             ]
           }

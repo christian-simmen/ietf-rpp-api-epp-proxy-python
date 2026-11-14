@@ -8,6 +8,7 @@ from core.capabilities.not_supported_by_backend import NotSupportedByBackend
 from core.model.contact.contacts import ContactMinimal
 from core.model.domain.domains import ContactReference, ContactReferenceNew, Domain
 from rpp.mapping.domain import domain_patch, domain_replacement, domains
+from rpp.mapping.shared.patch_not_applicable import PatchNotApplicable
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 
 NAME = "example.de"
@@ -128,3 +129,11 @@ def test_a_patch_removes_a_request_contact():
         NAME, [{"op": "remove", "path": "/generalRequest"}], current, profile=RRI_PROFILE)
 
     assert wanted.contacts == [ContactReferenceNew(type="abuse", contact=ContactMinimal(id="DENIC-1000022-AB"))]
+
+
+def test_a_patch_cannot_remove_a_request_contact_the_domain_has_not():
+    current = domains.model_to_rpp(Domain(name=NAME, status=["ok"], clID="DENIC-1000022", contacts=STORED.contacts[:1]),
+                                   extensions=EXTENSIONS)
+
+    with pytest.raises(PatchNotApplicable, match="/abuse"):
+        domain_patch.rpp_to_model_with_current(NAME, [{"op": "remove", "path": "/abuse"}], current, profile=RRI_PROFILE)

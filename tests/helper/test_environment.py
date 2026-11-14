@@ -36,8 +36,6 @@ class Registrar:
     password: str = field(repr=False)
     regacc: str
     handle_prefix: str
-    gen_req: str | None = None
-    abuse: str | None = None
 
     def basic(self) -> str:
         token = f"{self.user}:{self.password}".encode()
@@ -123,8 +121,7 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
         # The prefix the backend requires of the handles of this registrar, which differs between accounts.
         prefix = variable(spec["prefix"])
         registrars[slot] = Registrar(
-            slot=slot, user=user or "", password=password or "", regacc=regacc, handle_prefix=prefix or "",
-            gen_req=variable(spec.get("gen_req")), abuse=variable(spec.get("abuse")))
+            slot=slot, user=user or "", password=password or "", regacc=regacc, handle_prefix=prefix or "")
     if missing:
         raise EnvironmentError(f"Test environment {name!r} needs {', '.join(missing)} in .env or the environment")
     unknown = data.get("unknown_user")
@@ -139,13 +136,13 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
         unknown_user=(unknown["user"], unknown["password"]) if unknown else None)
 
 
-VALUE_PLACEHOLDER = re.compile(r"\{(handle|regacc|gen_req|abuse):([a-z])(?::([^{}]*))?\}")
+VALUE_PLACEHOLDER = re.compile(r"\{(handle|regacc):([a-z])(?::([^{}]*))?\}")
 TLD_PLACEHOLDER = "{tld}"
 FACT_PLACEHOLDER = re.compile(r"\{env:([A-Za-z_.]+)\}")
 
 
 def replace_values(value: str, env: TestEnvironment, random_id: str) -> str:
-    """Replaces `{handle:a:SUFFIX}`, `{regacc:a}`, `{gen_req:a}`, `{abuse:a}`, `{tld}` and `{env:<path>}` (a fact of
+    """Replaces `{handle:a:SUFFIX}`, `{regacc:a}`, `{tld}` and `{env:<path>}` (a fact of
     the environment that is not a list, see `replace_fact`). None of them is a secret."""
     def replace(match):
         kind, slot, suffix = match.groups()
@@ -154,12 +151,7 @@ def replace_values(value: str, env: TestEnvironment, random_id: str) -> str:
             raise EnvironmentError(f"{match.group(0)}: no registrar {slot!r} in {env.name}")
         if kind == "handle":
             return f"{registrar.handle_prefix}{random_id}{suffix or ''}"
-        if kind == "regacc":
-            return registrar.regacc
-        result = getattr(registrar, kind)
-        if result is None:
-            raise EnvironmentError(f"{match.group(0)}: {env.name} has no {kind} handle for registrar {slot!r}")
-        return result
+        return registrar.regacc
 
     def fact(match):
         value = _fact(match, env)

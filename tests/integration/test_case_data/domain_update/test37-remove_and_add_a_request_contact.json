@@ -1,12 +1,76 @@
 {
   "when": {
-    "profile.domainName.contacts.labels": {
-      "contains": "abuse"
+    "profile.objects": {
+      "contains": "requestContact"
     }
   },
   "test_id": "test37-remove_and_add_a_request_contact",
-  "description": "A contact role is removed by match and added again: the counterpart of the admin and tech cases (test4, test9) for the roles of RRI.",
+  "description": "A request contact of a domain is removed and added again: the counterpart of the admin and tech cases (test4, test9) for the members of RRI. A second removal answers 422, which proves the first.",
   "steps": [
+    {
+      "when": {
+        "profile.objects": {
+          "contains": "requestContact"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG19}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG19}"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.objects": {
+          "contains": "requestContact"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA19}",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA19}"
+        }
+      }
+    },
     {
       "request": {
         "method": "POST",
@@ -158,22 +222,14 @@
                   "@type": "contact",
                   "id": "{handle:a:U37}"
                 },
-                "contacts": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
-                  }
-                ],
+                "generalRequest": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RG19}"
+                },
+                "abuse": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RA19}"
+                },
                 "dns": {
                   "@type": "dnsData",
                   "records": [
@@ -244,25 +300,45 @@
         "body_json": [
           {
             "op": "remove",
-            "path": "/contacts",
-            "match": {
-              "label": "abuse"
-            }
+            "path": "/abuse"
           }
         ]
       },
       "response": {
         "status": 200,
         "body": {
-          "contacts": [
-            {
-              "label": "generalRequest",
-              "object": {
-                "@type": "contact",
-                "id": "{gen_req:a}"
-              }
-            }
-          ]
+          "generalRequest": {
+            "@type": "requestContact",
+            "id": "{handle:a:RG19}"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "/domainNames/t37-{random_name}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": [
+          {
+            "op": "remove",
+            "path": "/abuse"
+          }
+        ]
+      },
+      "response": {
+        "status": 422,
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
         }
       }
     },
@@ -279,13 +355,10 @@
         "body_json": [
           {
             "op": "add",
-            "path": "/contacts",
+            "path": "/abuse",
             "value": {
-              "label": "abuse",
-              "object": {
-                "@type": "contact",
-                "id": "{abuse:a}"
-              }
+              "@type": "requestContact",
+              "id": "{handle:a:RA19}"
             }
           }
         ]
@@ -293,22 +366,14 @@
       "response": {
         "status": 200,
         "body": {
-          "contacts": [
-            {
-              "label": "generalRequest",
-              "object": {
-                "@type": "contact",
-                "id": "{gen_req:a}"
-              }
-            },
-            {
-              "label": "abuse",
-              "object": {
-                "@type": "contact",
-                "id": "{abuse:a}"
-              }
-            }
-          ]
+          "generalRequest": {
+            "@type": "requestContact",
+            "id": "{handle:a:RG19}"
+          },
+          "abuse": {
+            "@type": "requestContact",
+            "id": "{handle:a:RA19}"
+          }
         }
       }
     },

@@ -1,0 +1,37 @@
+{
+  "description": "A handle nobody has is available, by GET and by HEAD.",
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/requestContacts/{handle:a:RQ2}/availability",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "@type": "requestContactAvailability",
+          "available": true
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "HEAD",
+        "url": "/requestContacts/{handle:a:RQ2}/availability",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    }
+  ]
+}

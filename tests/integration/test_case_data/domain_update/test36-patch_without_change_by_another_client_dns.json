@@ -3,6 +3,70 @@
   "description": "A partial update by a client that is not the sponsor is refused: the counterpart of test31 without host objects.",
   "steps": [
     {
+      "when": {
+        "profile.objects": {
+          "contains": "requestContact"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG18}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RG18}"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.objects": {
+          "contains": "requestContact"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA18}",
+          "uriTemplate": "mailto:abuse@example.com"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "requestContact",
+          "id": "{handle:a:RA18}"
+        }
+      }
+    },
+    {
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -153,22 +217,14 @@
                   "@type": "contact",
                   "id": "{handle:a:U36}"
                 },
-                "contacts": [
-                  {
-                    "label": "generalRequest",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{gen_req:a}"
-                    }
-                  },
-                  {
-                    "label": "abuse",
-                    "object": {
-                      "@type": "contact",
-                      "id": "{abuse:a}"
-                    }
-                  }
-                ],
+                "generalRequest": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RG18}"
+                },
+                "abuse": {
+                  "@type": "requestContact",
+                  "id": "{handle:a:RA18}"
+                },
                 "dns": {
                   "@type": "dnsData",
                   "records": [
