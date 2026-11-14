@@ -5,7 +5,7 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
 ## Tasks
 
 - [x] T1 Plan, agreed with the maintainer
-- [~] T2 Spec. `docs/rri/rri-extension.md` in the structure of guidelines §9, which replaces
+- [x] T2 Spec. `docs/rri/rri-extension.md` in the structure of guidelines §9, which replaces
       `.spec/spec-rri-extension.md` (transfer and request contacts). Schema `.spec/rri-extension.schema.json` →
       version `0.2.0`, id `de.denic.rpp.rri`. Unclear points of the guidelines → `.spec/spec-issues.md`. Gap analysis
       Q2 and §3.2 settled, links fixed. `.spec/draft-wullink-rpp-extension-guidelines.clean.txt` added
@@ -23,13 +23,13 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
       request contact gateway (the paths do not exist there)
 - [x] T6 RPP adapter. DTOs, mapping, handlers `requestContacts_*`. Domain mapping of `generalRequest` and `abuse`.
       PATCH of `/generalRequest` and `/abuse` reads first
-- [ ] T7 Tests. Unit: mapping, schema, RRI wire and adapter, profile. Integration: a group `request_contact/`
+- [x] T7 Tests. Unit: mapping, schema, RRI wire and adapter, profile. Integration: a group `request_contact/`
       (where the backend has the object). The 26 cases with `{gen_req:a}` and `{abuse:a}` create their REQUEST
       contacts in a first step and use the new properties. The placeholders, `TEST_RRI_REGACCn_GEN_REQ` and `_ABUSE`
       go (`.env.example`, `rri-mtest.yaml`, `test_environment.py`, `testing.project.md`)
-- [ ] T8 Docs. `architecture.project.md` (extension endpoints), `overview.project.md` link, `testing.project.md`
-- [ ] T9 Checks: `lint-imports`, unit, smoke. MTEST smoke from an allowlisted machine (or recorded as pending)
-- [ ] T10 Draft PR
+- [x] T8 Docs. `architecture.project.md` (extension endpoints), `overview.project.md` link, `testing.project.md`
+- [x] T9 Checks: `lint-imports`, unit, smoke. MTEST smoke from an allowlisted machine (or recorded as pending)
+- [~] T10 Draft PR
 
 ## Findings (evidence)
 
@@ -76,4 +76,15 @@ Branch `feature/131-rri-request-contacts` from `main` @ 038f736. Builds on the `
   definitions by the name without `ext.rri.` (`requestContact.create`). The OpenAPI schemas of the derived paths are
   plain objects, the mappers validate with the extension's schema.
 
+## Checks (2026-11-14)
+
+- `lint-imports`: 15 contracts kept. Unit: 2168 passed.
+- Smoke, both environments, MTEST from this machine: 60 passed, 12 skipped. `draft_discovery/test1` now expects
+  `requestContact` in the objects of RRI.
+- The 28 changed case files and `request_contact/` on both environments: all passed or skipped by their selectors
+  (the RRI branches of the cases that need `admin` or hosts were skipped there before too). MTEST answers 403
+  (`02201`) to another RegAcc's request contact (`request_contact/test7`) and 400 (`02005`) to an `ftp` template.
+
 ## Open questions
+
+- `.env` still holds `TEST_RRI_REGACCn_GEN_REQ` and `_ABUSE`, which nothing reads now; the maintainer removes them.

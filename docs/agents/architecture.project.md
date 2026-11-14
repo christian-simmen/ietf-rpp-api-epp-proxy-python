@@ -15,16 +15,17 @@ src/
 ├── settings/                loads config.yaml once into typed sections, which main.py passes on
 │   └── profiles/            epp.yaml, rri.yaml: the generic backend profile of each protocol
 ├── core/                    pure Python: no I/O, no framework, no protocol
-│   ├── model/{shared,domain,contact,host,message}/
+│   ├── model/{shared,domain,contact,host,message,request_contact}/
 │   ├── result/              ResultCode, UnknownResultCode, OperationResponse, ErrorResponse
 │   ├── capabilities/        BackendProfile, NotSupportedByBackend, NotSupportedByProxy
 │   ├── ports/               RegistryBackend, *Gateway, ReplaceOutcome, ReplacementSteps, derived_update
 │   ├── session/             SessionPool
-│   └── flows/               read_back.py, mutation_result.py, sponsor.py, {domain,contact,host,message}/
+│   └── flows/               read_back.py, mutation_result.py, sponsor.py, {domain,contact,host,message,request_contact}/
 ├── rpp/                     receiving adapter: RPP over HTTP
-│   ├── http/                app (create_app), middleware/, validators/, security/, problem, headers, context, operation
-│   ├── handlers/            {domain,contact,host,message}/, shared/, discovery.py
-│   ├── mapping/             shared/, {domain,contact,host,message,discovery}/
+│   ├── http/                app (create_app), extension_paths, middleware/, validators/, security/, problem, headers,
+│   │                        context, operation
+│   ├── handlers/            {domain,contact,host,message,request_contact}/, shared/, discovery.py
+│   ├── mapping/             shared/, {domain,contact,host,message,discovery,request_contact}/
 │   ├── dto/                 the RPP dataclasses
 │   ├── schema/              validator, data_objects, extensions, schemas/ (generated; extensions/ copied)
 │   └── openapi.yaml         (generated)
@@ -171,8 +172,8 @@ flow, the port and the EPP commands of one object.
    `MessageErrorResponse` (in `core/model/message`) one that knows the size of the queue. A code the proxy has no name
    for is an `UnknownResultCode`.
 7. **`core/ports/`:** the backend port. `RegistryBackend` is one user's session with
-   the registry: `domains`, `contacts`, `hosts` and `messages` are its gateways (`DomainGateway` …, each a
-   `typing.Protocol`), `sponsor_id` is the id the registry stores as sponsor, and `profile` the `BackendProfile`. A
+   the registry: `domains`, `contacts`, `hosts`, `messages` and `request_contacts` are its gateways (`DomainGateway` …,
+   each a `typing.Protocol`; a backend without request contacts answers `UNIMPLEMENTED_COMMAND` to each), `sponsor_id` is the id the registry stores as sponsor, and `profile` the `BackendProfile`. A
    gateway method returns an `OperationResponse` or an `ErrorResponse`, and callers branch on `isinstance`.
    `update(delta)` is a partial update and
    `replace(wanted, current=None)` a full one, which answers a `ReplaceOutcome`. `derived_update.replace` derives a
@@ -220,8 +221,8 @@ flow, the port and the EPP commands of one object.
     are native (UPDATE, or CHHOLDER when the holders change, then DELETE-/CREATE-AUTHINFO1; a contact UPDATE sends
     the verification data it read again, from `Contact.carried_over`), and `update(delta)` is derived through
     `derived_update.update`, which reads, applies the delta with `<object>_application.apply` and replaces. A
-    domain's further holders are contacts labelled `registrant`, General Request and Abuse are `generalRequest` and
-    `abuse`, and `a`/`aaaa`/`mx` entries are `ZoneRecord`s. An IDN is sent with its U-label as `handle` and its
+    domain's further holders are contacts labelled `registrant`, General Request and Abuse are contact references of
+    the roles `generalRequest` and `abuse`, and `a`/`aaaa`/`mx` entries are `ZoneRecord`s. An IDN is sent with its U-label as `handle` and its
     A-label as `ace`. A domain in its redemption period has no sponsor in INFO and reads with the sponsor `unknown`
     (spec-issues.md, "Sponsor of a deleted domain"). A request whose second command fails answers a
     `PartiallyApplied` (core/result) with the first command's transaction ids and the refusal, which `read_back` does
@@ -235,7 +236,9 @@ flow, the port and the EPP commands of one object.
     update keeps the type RRI holds. A transfer request is CHPROV (`commands/domain/update.py`), with the domain's data
     from the `rri` extension and the AuthInfo in plaintext, so it is sent with `loggable=False`; its reply has no
     transfer state, so the gateway answers a process `serverApproved` by the gainer at the time of the reply
-    ([spec-rri-extension.md](../../.spec/spec-rri-extension.md)). Hosts, the other transfer operations, renew and
+    ([rri-extension.md](../rri/rri-extension.md)). A contact of type REQUEST is a request contact
+    (`RriRequestContactGateway`, `commands/request_contact/`), not a contact: each INFO answers 404 for a handle of the
+    other kind, and a check is the contact CHECK, as both share the handles. Hosts, the other transfer operations, renew and
     contact delete answer `UNIMPLEMENTED_COMMAND`. Every queue
     message is a service notice naming its RRI type and the domains and handles it is about, with 1301 or 1300 as a
     poll has.
@@ -254,19 +257,31 @@ functions over `TransferHandlers` in `rpp/handlers/shared/transfer_handlers.py`.
 the state of the transfer, so they need no follow-up Info. `epp_domains_Transfer` and
 `epp_contacts_Transfer` run all five operations, chosen by the model's `operation`. EPP has no process ids, so only
 `latest` is implemented, see [spec-issues.md](../../.spec/spec-issues.md#transfer-process). Where the backend profile
-offers an extension that adds members to `domainTransferProcess.create` (`rri`), `domain_transfer_process` takes them
+offers an extension that adds members to `domainTransferProcess.create` (`de.denic.rpp.rri`), `domain_transfer_process` takes them
 out of the request and converts them with `domains.rpp_to_model`, as a create's, into `DomainTransfer.domain`.
 
 ## RPP extensions
 
 An RPP extension (json §7) is a schema file in `.spec/`, copied by [copy_models.sh](../../copy_models.sh) to
-`src/rpp/schema/schemas/extensions/`, and described next to it (`rri`:
-[spec-rri-extension.md](../../.spec/spec-rri-extension.md)). `rpp/schema/extensions.py` loads them (`RppExtension`):
-the Extension Object discovery states, and the definitions each adds to a base definition. A deployment offers those
-its backend profile lists in `extensions`; `create_app` refuses one the proxy does not know. `validate_schema(name,
-data, extensions=profile.extensions)` composes the effective schema (json §7.2) with `allOf`, and
-`added_members` names the members an extension adds, so a mapper names no extension. Without the extension those
-members are undeclared, a 400 as before.
+`src/rpp/schema/schemas/extensions/`, and specified in the structure of the extension guidelines (§9) under
+`docs/` (`de.denic.rpp.rri`: [rri-extension.md](../rri/rri-extension.md), whose examples
+`tests/unit/test_rri_extension_doc.py` validates). `rpp/schema/extensions.py` loads them (`RppExtension`): the
+Extension Object discovery states, the definitions each adds to a base definition, and the data objects it defines
+(`objects` of `rpp:extension`). A deployment offers those its backend profile lists in `extensions`; `create_app`
+refuses one the proxy does not know. `validate_schema(name, data, extensions=profile.extensions)` composes the
+effective schema (json §7.2) with `allOf`, and `added_members` names the members an extension adds, so a mapper names
+no extension. Without the extension those members are undeclared, a 400 as before. An extension's own objects are
+validated by the names a base object's definitions would have (`requestContact.create` for
+`ext.rri.requestContact.create`).
+
+The objects an offered extension defines get their paths in `create_app`: `rpp/http/extension_paths.py` copies the
+paths of the base object whose uniform interface they share (`TEMPLATES`: `requestContact` → `contact`, without its
+processes) under the plural of the object's identifier (core §16.1), with their own operationIds
+(`requestContacts_read`) and plain object schemas, as the mappers validate with the extension's. Without the
+extension the paths do not exist (404). The request contacts of a domain are members the extension adds
+(`generalRequest`, `abuse`), which `rpp/mapping/domain/domain_request_contacts.py` maps to and from contact references
+whose role is the member's name, so the core and the RRI adapter hold them as roles; `contacts` does not show them,
+and a PATCH of one reads the domain first.
 
 Messages are in `rpp/handlers/message/message_handlers.py`. `GET /messages` is EPP `poll req`,
 `DELETE /messages/{id}` is `poll ack`, and `GET /messages/{id}` is `poll req` followed by a comparison of ids in

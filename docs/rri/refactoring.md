@@ -199,7 +199,7 @@ New classes go into files of their own: the known debt of several classes per fi
 
 | Fact | EPP | RRI |
 |---|---|---|
-| `contact_labels` | `admin`, `billing`, `tech` | `generalRequest`, `abuse` (gap Q2) |
+| `contact_labels` | `admin`, `billing`, `tech` | none: `generalRequest` and `abuse` are members of their own (gap Q2, #131) |
 | `max_registrants` | 1 | 5 (gap Q1) |
 | `domain_record_types` | `ns`, `ds`, `dnskey` | `ns`, `a`, `aaaa`, `mx`, `dnskey` |
 | `host_objects` | yes | no |
@@ -406,12 +406,9 @@ names the variables with no values:
 | `TEST_RRI_REGACC1_GEN_REQ`, `TEST_RRI_REGACC2_GEN_REQ` | The handle of a `REQUEST` contact of that RegAcc for the General Request role |
 | `TEST_RRI_REGACC1_ABUSE`, `TEST_RRI_REGACC2_ABUSE` | The handle of a `REQUEST` contact of that RegAcc for the Abuse role |
 
-The General Request and Abuse handles are created on MTEST beforehand, outside the suite. They are the one
-exception to the rule that a case creates the contacts it uses
-([testing.project.md](../agents/testing.project.md#isolating-cases)): a domain on RRI needs both roles, and they
-are `REQUEST` contacts, which RPP cannot create yet (gap Q2). The cases use the pre-created handles as long as RPP
-has no way to create a `REQUEST` contact. Once it has, the cases create their own, and the `*_GEN_REQ` and `*_ABUSE`
-variables are removed. The runner puts a credential into a request header when it sends the request,
+The cases create the General Request and Abuse contacts they use as request contacts of the `rri` extension (#131,
+[rri-extension.md](rri-extension.md)), as they create every contact
+([testing.project.md](../agents/testing.project.md#isolating-cases)). The runner puts a credential into a request header when it sends the request,
 never into the case dictionary, so a failure report cannot print it ([security.md](../agents/security.md)).
 
 ### 5.4 RRI integration tests on MTEST

@@ -180,7 +180,7 @@ class RriDomainGateway:
 
     def transfer(self, transfer: DomainTransfer, client_transaction_id=None):
         """A transfer request is CHPROV, which states the domain's data with the gainer's contacts (the request
-        extension of .spec/spec-rri-extension.md) and moves the domain at once. RRI has no other transfer operation."""
+        extension, docs/rri/rri-extension.md) and moves the domain at once. RRI has no other transfer operation."""
         if transfer.operation != TransferOperation.REQUEST:
             return refused(ResultCode.UNIMPLEMENTED_COMMAND, f"RRI has no transfer {transfer.operation.value}",
                            client_transaction_id)

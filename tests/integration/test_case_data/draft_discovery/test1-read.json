@@ -67,7 +67,8 @@
               {
                 "then": [
                   "domainName",
-                  "contact"
+                  "contact",
+                  "requestContact"
                 ]
               }
             ]

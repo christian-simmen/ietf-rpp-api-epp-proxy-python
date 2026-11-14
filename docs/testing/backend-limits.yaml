@@ -395,7 +395,7 @@ contact:
     kind: count
     rpp: {defined: true, rule: "url, contact-uri"}
     epp-docker: {max: 0, over: "501 02102 by the proxy", source: code}
-    rri-mtest: {note: "a REQUEST contact is a Card with one link (gap Q2); uri-template 8-1024 characters", source: doc}
+    rri-mtest: {note: "a REQUEST contact is a requestContact of the rri extension, not a Card (docs/rri/rri-extension.md); uri-template 8-1024 characters", source: doc}
     probe: [limits_contact/test24-link]
     verified: {epp-docker: "passed", rri-mtest: "passed"}
   - path: /authInfo/authdata
