@@ -9,12 +9,13 @@ from connexion.exceptions import ProblemException
 from connexion.middleware import MiddlewarePosition
 from connexion.resolver import RelativeResolver
 from connexion.validators import VALIDATOR_MAP
+from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 
 from core.capabilities.backend_profile import BackendProfile
 from rpp.http.context import BACKEND_PROFILE, DISCOVERY_SETTINGS
 from rpp.http.middleware.body_buffering_middleware import BodyBufferingMiddleware
-from rpp.http.problem import handle_rpp_error
+from rpp.http.problem import handle_http_exception, handle_rpp_error
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
@@ -70,5 +71,6 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
     app.app.config[DISCOVERY_SETTINGS] = discovery_settings
     app.app.config[BACKEND_PROFILE] = profile
     app.add_error_handler(ProblemException, handle_rpp_error)
+    app.add_error_handler(HTTPException, handle_http_exception)
 
     return app
