@@ -79,6 +79,8 @@ On the commit before this note (no edits during the runs):
 - `pytest -n 4 -m smoke tests/integration` (epp-docker and rri-mtest, run from this machine): 64 passed, 12 skipped
   (hosts on RRI, requestContact and the rri transfer on EPP).
 - `profile_signalling/` (all three cases) also passed on both environments.
+- Review round 1, on the commit that fixes it: lint-imports 15 kept; unit 2275 passed; smoke (epp-docker and rri-mtest)
+  64 passed, 12 skipped.
 - The #165 rename commit: lint-imports, 2212 unit, smoke 60 passed and 12 skipped; noted in the description of #165.
 
 ## Open questions
