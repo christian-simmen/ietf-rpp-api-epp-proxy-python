@@ -178,7 +178,7 @@ On the commit of the draft PR (`PYTHONPATH=src` from the repository root):
 
 ## Notes for the reviewer
 
-- Cases that asserted 02101 for RRI `/hosts`: `tests/unit/test_rri_wire.py` only (now 02307, own test). No integration case did.
+- Cases that asserted 02101 for RRI `/hosts`: `tests/unit/test_rri_wire.py` only (now 02307, own test, for every `/hosts` operation that has a handler). The host transfer operations have no handler and answer Connexion's 501 `02101` before authentication. No integration case asserted it.
 - Wire change W5 (discovery) is deliberate: `tests/unit/test_discovery_wire.py` and `draft_discovery/test1-read.json`.
 
 ## Review round 1

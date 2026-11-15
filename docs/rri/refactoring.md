@@ -76,8 +76,8 @@ after #120 phase 6 (the result envelope).
 
 RRI has no host objects. `RriBackend.hosts` is `RriHostGateway`, whose every method answers
 `ErrorResponse(UNIMPLEMENTED_COMMAND)`, the convention of the port for a command the backend lacks, so, were a request to reach it,
-every `/hosts` operation would answer 501 `02101`. None does: the profile middleware refuses `/hosts` with 501 `02307`
-because the rri profile has no host, see [RPP profiles](../agents/architecture.project.md#rpp-profiles). A flow asks the profile first only where it would otherwise send a wasted
+every `/hosts` operation would answer 501 `02101`. The profile middleware refuses every `/hosts` operation that has a
+handler with 501 `02307`, because the rri profile has no host (see [RPP profiles](../agents/architecture.project.md#rpp-profiles)). The host transfer operations have no handler and answer Connexion's 501 `02101` before authentication. A flow asks the profile first only where it would otherwise send a wasted
 read (renew without `expiryDate`, §3.5.5).
 
 ### 3.2 Session and authentication
