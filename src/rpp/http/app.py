@@ -15,6 +15,7 @@ from starlette.middleware.cors import CORSMiddleware
 from core.capabilities.backend_profile import BackendProfile
 from rpp.http.context import BACKEND_PROFILE, DISCOVERY_SETTINGS
 from rpp.http.middleware.body_buffering_middleware import BodyBufferingMiddleware
+from rpp.http.middleware.line_feed_path_middleware import LineFeedPathMiddleware
 from rpp.http.problem import handle_http_exception, handle_rpp_error
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
@@ -51,6 +52,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
         __name__,
         security_map={"basic": lambda: SessionSecurityHandler(sessions)},
     )
+    app.add_middleware(LineFeedPathMiddleware, position=MiddlewarePosition.BEFORE_ROUTING)
     app.add_middleware(BodyBufferingMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION)
     app.add_middleware(
         CORSMiddleware,
