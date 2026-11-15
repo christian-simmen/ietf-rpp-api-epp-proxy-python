@@ -15,7 +15,7 @@ Status: approved, implemented, checks running.
 - [x] T7 Environment yamls (`profile: epp`, `profile: rri`), configs (`rpp_profile_signalling: header`)
 - [x] T8 Mixed cases 1 to 3 of the issue
 - [x] T9 Docs (architecture.project.md, testing.project.md, README config) and `.spec/spec-issues.md`
-- [~] T10 Checks, draft PR
+- [x] T10 Checks, draft PR
 
 ## Findings (evidence)
 
@@ -62,7 +62,13 @@ Status: approved, implemented, checks running.
 
 ## Results
 
-(see the PR)
+On the commit before this note (no edits during the runs):
+- `PYTHONPATH=src lint-imports`: 15 kept, 0 broken.
+- `pytest -n 4 tests/unit`: 2258 passed.
+- `pytest -n 4 -m smoke tests/integration` (epp-docker and rri-mtest, run from this machine): 64 passed, 12 skipped
+  (hosts on RRI, requestContact and the rri transfer on EPP).
+- `profile_signalling/` (all three cases) also passed on both environments.
+- The #165 rename commit: lint-imports, 2212 unit, smoke 60 passed and 12 skipped; noted in the description of #165.
 
 ## Open questions
 
