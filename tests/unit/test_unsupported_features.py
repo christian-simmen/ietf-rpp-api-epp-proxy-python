@@ -14,7 +14,8 @@ from rpp.mapping.domain import domain_patch, domains
 from rpp.mapping.host import host_patch, host_replacement, hosts
 from tests.helper.epp_app_context import epp_app_context  # noqa: F401, a fixture
 
-pytestmark = pytest.mark.usefixtures("epp_app_context")
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = [pytest.mark.usefixtures("epp_app_context"), pytest.mark.lazy_schemas]
 
 create_domain = partial(domains.rpp_to_model, profile=EPP_PROFILE)
 

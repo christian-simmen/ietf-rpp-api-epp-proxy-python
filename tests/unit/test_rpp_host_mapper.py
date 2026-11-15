@@ -6,6 +6,9 @@ from core.model.host.host import Host
 from core.model.shared.availability import Availability
 from rpp.mapping.host import host_availability, host_replacement, hosts
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 NAME = "ns1.example.example"
 
 

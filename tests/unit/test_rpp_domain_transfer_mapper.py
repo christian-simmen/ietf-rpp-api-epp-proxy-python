@@ -9,6 +9,9 @@ from core.model.shared.transfer_operation import TransferOperation
 from rpp.mapping.domain import domain_transfer_approve, domain_transfer_process, domain_transfer_reject, domains
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 PROCESS = {"@type": "domainTransferProcess"}
 
 

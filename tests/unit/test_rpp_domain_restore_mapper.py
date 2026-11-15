@@ -10,6 +10,9 @@ from tests.helper.profiles import EPP_PROFILE
 from rpp.mapping.domain import domain_restore_patch, domain_restore_process, domain_restore_report
 from rpp.mapping.shared.patch_not_applicable import PatchNotApplicable
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 REPORT = {
     "@type": "restoreReport",
     "preData": "Domain example.example was registered on 2024-01-15 with registrant JD-1234.",

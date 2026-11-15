@@ -1,3 +1,4 @@
+import pytest
 from core.model.domain.dns_sec import DnsSec
 from core.model.domain.domains import (
     DomainUpdate, DomainUpdateAdd, DomainUpdateChange, DomainUpdateRemove, HostAttr, NS,
@@ -7,6 +8,9 @@ from registry_adapter.epp.commands.domain.update import create_domain_update_xml
 from tests.helper.profiles import EPP_PROFILE
 from rpp.mapping.domain import domain_patch
 from tests.helper.epp_ns_map import EPP_NS_MAP
+
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
 
 
 def update_xml(body):

@@ -15,6 +15,9 @@ from tests.helper.epp_ns_map import EPP_NS_MAP
 from tests.unit.test_rpp_domain_restore_mapper import REPORT
 from tests.helper.epp_app_context import epp_app_context  # noqa: F401, a fixture
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 NAME = "foo.example"
 
 OTHER = EPP_PROFILE.with_changes({"name": "Other", "domainName": {

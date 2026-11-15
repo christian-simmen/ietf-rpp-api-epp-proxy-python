@@ -8,6 +8,9 @@ from core.model.domain.key_data import KeyData
 from tests.helper.profiles import EPP_PROFILE
 from rpp.mapping.domain import domains
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 DS_RDATA = {"keyTag": "12345", "algorithm": "3", "digestType": "1", "digest": "49FD46E6C4B45C55D4AC"}
 
 KEY_RDATA = {"flags": "257", "protocol": "3", "algorithm": "8", "publicKey": "AQPJ////4Q=="}

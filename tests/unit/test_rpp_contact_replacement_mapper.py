@@ -10,7 +10,8 @@ from rpp.mapping.contact.contact_capabilities import check_contact
 from tests.helper.contact_fixtures import ADDRESS, card, current_contact, derived_update, localized, put_body
 from tests.helper.epp_app_context import epp_app_context  # noqa: F401, a fixture
 
-pytestmark = pytest.mark.usefixtures("epp_app_context")
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = [pytest.mark.usefixtures("epp_app_context"), pytest.mark.lazy_schemas]
 
 ID = "JD-1234"
 

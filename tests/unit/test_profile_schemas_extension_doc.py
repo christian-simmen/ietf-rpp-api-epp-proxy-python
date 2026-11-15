@@ -11,6 +11,9 @@ from jsonschema import ValidationError
 from rpp.schema.extensions import SERVER_EXTENSIONS
 from rpp.schema.validator import validate_schema
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 ROOT = Path(__file__).parents[2]
 DOC = (ROOT / "docs" / "profile-schemas-extension.md").read_text(encoding="utf-8")
 SCHEMA = json.loads((ROOT / ".spec" / "profile-schemas.schema.json").read_text(encoding="utf-8"))
