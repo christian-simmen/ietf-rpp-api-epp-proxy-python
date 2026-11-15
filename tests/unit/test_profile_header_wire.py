@@ -107,7 +107,7 @@ def test_versions_1_10_and_1_1_are_one_number_so_a_profile_cannot_have_both():
         == ("x", profile_header.Decimal("1.1"))
 
 
-def test_the_server_compares_the_version_as_a_decimal_so_1_10_is_not_1_0():
+def test_an_unoffered_version_1_10_is_refused():
     response = epp_client().get(DISCOVERY, headers=named(EPP, "1.10"))
 
     assert response.status_code == 400
@@ -209,3 +209,21 @@ def test_a_handler_failure_that_is_a_problem_detail_names_the_profile():
     assert response.status_code == 500
     assert applied(response) == f"profile={BASE};version=1.0"
     assert "RPP-Profile" in response.headers["Vary"]
+
+
+def test_a_response_with_a_vary_header_gets_one_vary_header_that_lists_the_profile_too():
+    import asyncio
+
+    from rpp.http.profile_middleware import with_profile_header
+
+    sent = []
+
+    async def fake_send(message):
+        sent.append(message)
+
+    start = {"type": "http.response.start", "status": 200, "headers": [(b"vary", b"Accept"), (b"x", b"y")]}
+    asyncio.run(with_profile_header(fake_send, PROFILES["base"])(start))
+
+    headers = sent[0]["headers"]
+    assert [value for name, value in headers if name == b"vary"] == [b"Accept, RPP-Profile"]
+    assert (b"x", b"y") in headers
