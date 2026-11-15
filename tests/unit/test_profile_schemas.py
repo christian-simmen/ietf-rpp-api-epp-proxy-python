@@ -77,7 +77,10 @@ class TestTheSchemaIsADocumentOutsideProfileSignalling:
         return client_of().get(f"/profiles/{BASE}/schema", headers=headers)
 
     @pytest.mark.parametrize("accept", ["application/schema+json", "application/json", "application/*", "*/*",
-                                        "text/html, application/json;q=0.5", 'application/schema+json; profile="x"'])
+                                        "text/html, application/json;q=0.5", 'application/schema+json; profile="x"',
+                                        "application/json;q=0, */*",                       # the schema, by the wildcard
+                                        "application/schema+json;q=0, application/json",   # also application/json
+                                        "application/schema+json;q=0, */*"])
     def test_an_accept_that_allows_the_document_is_answered(self, client_of, accept):
         response = self.fetch(client_of, {"Accept": accept})
 
@@ -90,7 +93,8 @@ class TestTheSchemaIsADocumentOutsideProfileSignalling:
         assert response.status_code == 200
 
     @pytest.mark.parametrize("accept", ["text/html", "application/rpp+json", "application/xml, application/schema+json;q=0",
-                                        "application/schema+json;q=0, */*"])
+                                        "application/schema+json;q=0",
+                                        "application/schema+json;q=0, application/json;q=0, */*"])
     def test_an_accept_that_does_not_allow_it_is_a_406_problem_detail(self, client_of, accept):
         response = self.fetch(client_of, {"Accept": accept})
 
@@ -244,6 +248,7 @@ def test_the_published_schema_accepts_the_discovery_document_of_the_server(clien
         assert list(schema.iter_errors(discovery)) == [], name
 
 
+@pytest.mark.lazy_schemas
 def test_an_undeclared_member_is_the_error_a_mapper_turns_into_a_400():
     with pytest.raises(ValueError, match="Undeclared property: 'bogus'"):
         validator.validate_schema("domainName.create", {"@type": "domainName", "name": "foo.de", "bogus": 1})
@@ -321,6 +326,7 @@ def test_without_a_configured_base_url_a_document_has_no_id():
     {"@type": "domainName", "name": "foo.de", "contacts": [{"label": "admin", "object": {"@type": "contact", "id": "X-1"}, "bogus": 1}]},
 ])
 @pytest.mark.parametrize("key", ["base", "epp", "rri"])
+@pytest.mark.lazy_schemas
 def test_an_undeclared_member_in_an_array_item_is_refused_under_every_profile(key, body):
     profile = PROFILES[key]
     client = rri_client() if key == "rri" else epp_client()

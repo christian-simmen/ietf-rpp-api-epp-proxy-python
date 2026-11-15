@@ -268,3 +268,12 @@ on requestContact; (5) `profiles_schemaRead` is outside profile signalling in bo
 `application/schema+json`, `application/json`, `application/*` or `*/*` (406 `02004`), `RPP-Cltrid` optional, relaxation of core
 §6.1 recorded; (6) `minItems: 1` on `profileSchemas`; (7) `_inject` leaves nodes reached through applicators alone but enters
 their `properties` and `items`.
+
+## Review round 3 of #171
+
+(1) Request contacts are rendered and validated with the request profile's extensions in all four places (the object exists
+only in the request profile); `LAZY_BUILD` is off in every test (an autouse fixture in tests/conftest.py), and only a test that maps
+without an app opts in with `@pytest.mark.lazy_schemas` (the request-contact and extension mapper tests, two others): no
+failure was a production path. The reviewer's read test is added (200, `LAZY_BUILD` False) and fails under the old render.
+(2) The schema `Accept` weights each of `application/schema+json` and `application/json` by its most specific range.
+(3) The doc example sends `Accept: application/schema+json`.

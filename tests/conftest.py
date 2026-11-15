@@ -5,8 +5,14 @@ from tests.helper.test_environment import config_file, selected_name
 
 os.environ.setdefault("RPP_CONFIG_FILE", config_file(selected_name()))
 
-# The tests map without an app (a mapper called with the extensions it is given): a validator the app did not build is built
-# on first use. The app itself never does that, and its tests switch this off to prove it (test_profile_schemas.py).
+import pytest  # noqa: E402
+
 from rpp.schema import validator  # noqa: E402
 
-validator.LAZY_BUILD = True
+
+@pytest.fixture(autouse=True)
+def lazy_schemas(request, monkeypatch):
+    """A test runs like production: a validator the app did not build is `SchemaNotBuilt`. A test that maps without an app
+    (a mapper called with the extensions it is given) opts in to building on first use with `@pytest.mark.lazy_schemas`
+    or a module-level `pytestmark`."""
+    monkeypatch.setattr(validator, "LAZY_BUILD", request.node.get_closest_marker("lazy_schemas") is not None)

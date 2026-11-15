@@ -8,7 +8,7 @@ from core.flows.request_contact.request_contact_flows import (
 )
 from core.result.error_response import ErrorResponse
 from rpp.handlers.shared.requested_elements import INCLUDE_ELEMENTS
-from rpp.http.context import get_backend, request_profile, response_profile
+from rpp.http.context import get_backend, request_profile
 from rpp.http.headers import client_transaction_id, generate_rpp_response_headers
 from rpp.http.operation import map_request, require_empty_body, rpp_operation
 from rpp.http.problem import raise_registry_error
@@ -28,7 +28,7 @@ def _mutation_answer(result, status=200, extra_headers=None):
     headers = {**generate_rpp_response_headers(result.mutation), **(extra_headers or {})}
     if result.stored is None:
         return None, 202, headers
-    return request_contacts.model_to_rpp(result.stored, response_profile().extensions), status, headers
+    return request_contacts.model_to_rpp(result.stored, request_profile().extensions), status, headers
 
 
 @rpp_operation
@@ -45,7 +45,7 @@ def requestContacts_read(id):
     response = get_backend().request_contacts.info(id, client_transaction_id=client_transaction_id())
     if isinstance(response, ErrorResponse):
         raise_registry_error(response)
-    return (request_contacts.model_to_rpp(response.payload, response_profile().extensions), 200,
+    return (request_contacts.model_to_rpp(response.payload, request_profile().extensions), 200,
             generate_rpp_response_headers(response))
 
 
@@ -94,5 +94,5 @@ def requestContacts_availabilityHead(id):
 @rpp_operation
 def requestContacts_availability(id):
     response = _availability(id)
-    return (request_contact_availability.model_to_rpp(response.payload, response_profile().extensions), 200 if response.payload.available else 404,
+    return (request_contact_availability.model_to_rpp(response.payload, request_profile().extensions), 200 if response.payload.available else 404,
             generate_rpp_response_headers(response))

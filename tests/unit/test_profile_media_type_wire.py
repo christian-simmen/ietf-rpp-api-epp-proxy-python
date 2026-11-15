@@ -3,6 +3,7 @@ import pytest
 
 from core.session.session_pool import SessionPool
 from rpp.http.app import create_app
+from rpp.schema import validator
 from tests.helper.epp_backends import epp_backends
 from tests.helper.fake_epp_client import FakeEppClient
 from tests.helper.fake_rri_client import FakeRriClient, rri_backends
@@ -10,6 +11,7 @@ from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 from tests.unit.test_profiles_wire import BASE, EPP, RRI
 from tests.unit.test_rpp_wire import check_reply
 from tests.unit.test_rri_adapter import DOMAIN_INFO, NAME
+from tests.unit.test_rri_request_contacts import HANDLE, REQUEST_INFO
 from tests.unit.test_rri_wire import DISCOVERY, HEADERS, MEDIA_TYPE
 
 PATH = "/.well-known/rpp"
@@ -21,8 +23,8 @@ def epp_client():
     return create_app(sessions, EPP_PROFILE, discovery_settings=DISCOVERY, signalling="media-type").test_client()
 
 
-def rri_client():
-    sessions = SessionPool(rri_backends(lambda username, password: FakeRriClient(username, password, replies=[])))
+def rri_client(*replies):
+    sessions = SessionPool(rri_backends(lambda username, password: FakeRriClient(username, password, replies=list(replies))))
     return create_app(sessions, RRI_PROFILE, discovery_settings=DISCOVERY, signalling="media-type").test_client()
 
 
@@ -214,10 +216,24 @@ def test_an_object_outside_the_request_profile_is_a_501_that_names_it():
 
 
 def test_an_object_the_request_profile_has_is_not_refused_for_the_response_profile():
-    response = rri_client().get("/requestContacts/x", headers={
+    response = rri_client(REQUEST_INFO).get(f"/requestContacts/{HANDLE}", headers={
         **AUTH, "Accept": f"{media(BASE)}, {media(RRI, weight='0.5')}", "Content-Type": media(RRI)})
 
-    assert response.headers["RPP-Code"] != "02307"
+    assert response.status_code == 200
+    assert response.json()["id"] == HANDLE
+    assert applied(response) == media(BASE)
+
+
+def test_a_request_contact_is_read_and_rendered_under_the_request_profile_where_nothing_is_built_lazily(monkeypatch):
+    # The object exists in the request profile only: rendering it under the response profile, which lacks it, would look for a
+    # schema no profile built (SchemaNotBuilt, a 500). The app builds what a request needs, and builds nothing later.
+    monkeypatch.setattr(validator, "LAZY_BUILD", False)
+
+    response = rri_client(REQUEST_INFO).get(f"/requestContacts/{HANDLE}", headers={
+        **AUTH, "Accept": f"{media(BASE)}, {media(RRI, weight='0.5')}", "Content-Type": media(RRI)})
+
+    assert response.status_code == 200, response.text
+    assert response.json()["uriTemplate"]
 
 
 def test_a_problem_detail_after_the_selection_has_no_profile_parameters_and_lists_accept_in_vary():

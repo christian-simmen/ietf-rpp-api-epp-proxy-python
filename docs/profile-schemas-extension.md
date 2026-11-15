@@ -251,8 +251,7 @@ Example request of the Effective Schema of the profile of the DENIC RRI extensio
 ```
 GET /profiles/de.denic.rpp.profile.rri/schema HTTP/1.1
 Host: rpp.example
-Accept: application/rpp+json
-RPP-Cltrid: ABC-12345
+Accept: application/schema+json
 
 HTTP/1.1 200 OK
 Content-Type: application/schema+json

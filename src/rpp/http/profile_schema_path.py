@@ -14,8 +14,7 @@ SCHEMA_PATH = PROFILE_PATH + "/schema"
 RPP_MEDIA_TYPE = "application/rpp+json"
 OPERATION = "profiles_schemaRead"
 
-# What an `Accept` may name for the document, by how specific it is (RFC 9110 §12.5.1).
-_ACCEPTED = {MEDIA_TYPE: 3, "application/json": 3, "application/*": 2, "*/*": 1}
+JSON = "application/json"
 
 
 def _header(name: str, description: str) -> dict:
@@ -44,12 +43,17 @@ def add_profile_schema_path(spec: dict) -> dict:
     return spec
 
 
+def _weight(ranges, target: str) -> Decimal:
+    """The weight an `Accept` gives a media type: that of the most specific range that covers it (RFC 9110 §12.5.1), 0 where
+    none does."""
+    matching = [(3 if item.kind == target else 2 if item.kind == "application/*" else 1, item.quality)
+                for item in ranges if item.kind in (target, "application/*", "*/*")]
+    return max(matching)[1] if matching else Decimal(0)
+
+
 def accepts_schema(accept_values: list[str]) -> bool:
-    """Whether an `Accept` allows the document: absent does, else the most specific range that names `application/schema+json`
-    or `application/json`, or the wildcards that cover them, is not weighted 0. Parameters are ignored. Raises
-    `MediaRangeError` for a value that does not parse."""
+    """Whether an `Accept` allows the document, which is `application/schema+json` and also `application/json`: absent does,
+    else one of the two has a weight above 0. Parameters are ignored. Raises `MediaRangeError` for a value that does not
+    parse."""
     ranges = media_range.parse_accept(accept_values)
-    if not ranges:
-        return True
-    matches = [(_ACCEPTED[item.kind], item.quality) for item in ranges if item.kind in _ACCEPTED]
-    return bool(matches) and max(matches)[1] > Decimal(0)
+    return not ranges or _weight(ranges, MEDIA_TYPE) > 0 or _weight(ranges, JSON) > 0
