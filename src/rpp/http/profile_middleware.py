@@ -3,7 +3,7 @@ from connexion import ProblemException
 from core.result.result_code import ResultCode
 from rpp.http.extension_paths import plural
 from rpp.http.headers import problem_headers
-from rpp.http.profile_header import HEADER, format_profile
+from rpp.http.profile_header import HEADER, format_profile, vary_with_profile
 from rpp.http.profile_resolver import ProfileResolver
 from rpp.http.request_profiles import RequestProfiles
 from rpp.schema.extensions import EXTENSIONS
@@ -20,8 +20,11 @@ def with_profile_header(send, profile: RppProfile):
     """`send` that adds the `RPP-Profile` header of the applied profile to the response (core §6.2)."""
     async def send_with_profile(message):
         if message["type"] == "http.response.start":
-            message = {**message, "headers": [*message.get("headers", []),
-                                              (HEADER.lower().encode(), format_profile(profile).encode())]}
+            headers = [(name, value) for name, value in message.get("headers", []) if name.lower() != b"vary"]
+            vary = b", ".join(value for name, value in message.get("headers", []) if name.lower() == b"vary")
+            message = {**message, "headers": [
+                *headers, (HEADER.lower().encode(), format_profile(profile).encode()),
+                (b"vary", vary_with_profile(vary.decode("latin-1")).encode("latin-1"))]}
         await send(message)
     return send_with_profile
 

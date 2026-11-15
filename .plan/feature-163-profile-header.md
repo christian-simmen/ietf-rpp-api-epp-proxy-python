@@ -50,7 +50,7 @@ Status: approved, implemented, checks running.
   Display String types, so it implements RFC 9651. After parsing: `profile` is a Token, `version` a Decimal; an Integer
   (`version=1`) is 400 `02005`.
 - D8 Default `header` when `rpp_profile_signalling` is absent.
-- D9 Codes, all 400: `02005` (malformed, wrong type, header twice), `02003` (no profile member or version), `02004`
+- D9 Codes, all 400: `02005` (malformed, wrong type; the header twice is not one, see D13), `02003` (no profile member or version), `02004`
   (profile or version unknown or not offered), `02001` (profile parameters in Accept/Content-Type). Extra members and
   parameters are ignored; recorded as a gap. Decimal comparison (1.10 is 1.1), recorded.
 - D10 Only routed operations select a profile. `RPP-Profile` on every response after selection (also discovery,
@@ -59,6 +59,17 @@ Status: approved, implemented, checks running.
 - D11 Mixed case 2 on `profile.profiles contains rri`; cases 1 and 3 are `smoke`, case 2 is not.
 - D12 The base profile is named `urn:ietf:params:rpp:profile:base` (maintainer, via the orchestrator). Done on
   `feature/162-profiles` (PR #165), checks run there, and this branch rebased onto it.
+
+## Decisions of review round 1
+
+- D13 Corrects D9: a repeated header's lines are combined with ", " and parsed as one Dictionary (RFC 9651 §4.2), a
+  repeated key is the last; "header given twice" is not a 02005 case. Blank lines add nothing.
+- D14 Corrects D10: `RPP-Profile` is on every response after selection, a handler's 5xx Problem Detail too (core
+  §6.2); absent where no profile was selected, and on an uncaught non-Problem 500.
+- D15 Profile parameters are flagged only on media ranges `application/rpp+*` (case-insensitive), ranges split on
+  commas outside quotes.
+- D16 `Vary` gets `RPP-Profile`, merged, on every response with the header.
+- D17 The runner omits its `RPP-Profile` when the step sets one itself (any case).
 
 ## Results
 

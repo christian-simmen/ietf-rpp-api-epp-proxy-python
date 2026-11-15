@@ -9,8 +9,6 @@ from rpp.schema.rpp_profile import RppProfile
 from rpp.schema.rpp_profiles import RppProfiles
 
 HEADER_SIGNALLING = "header"
-MEDIA_TYPE_SIGNALLING = "media-type"
-SIGNALLING_METHODS = (HEADER_SIGNALLING, MEDIA_TYPE_SIGNALLING)
 
 
 def _refused(code: ResultCode, detail: str) -> ProblemException:

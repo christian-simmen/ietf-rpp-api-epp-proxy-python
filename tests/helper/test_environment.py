@@ -205,7 +205,9 @@ def with_profiles(case: dict, env: TestEnvironment) -> dict:
     steps = []
     for step in case["steps"]:
         key = step.get("profile", case.get("profile", env.rpp_profile))
-        request = {**step["request"], "headers": {**profile_headers(env, key), **step["request"].get("headers", {})}}
+        own = step["request"].get("headers", {})
+        named = {} if any(name.lower() == profile_header.HEADER.lower() for name in own) else profile_headers(env, key)
+        request = {**step["request"], "headers": {**named, **own}}
         steps.append({**{k: v for k, v in step.items() if k != "profile"}, "request": request})
     return {**case, "steps": steps}
 

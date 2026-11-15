@@ -283,15 +283,15 @@ not be held.
 A request has a selected profile. `ProfileResolver.resolve(scope)` in `rpp/http/profile_resolver.py` is the one place
 that chooses it. The signalling is the `rpp_profile_signalling` of the config (`Settings.profile_signalling`, default
 `header`; `media-type`, core §14.3, is not implemented). With `header` it reads `RPP-Profile` (core §14.2), an RFC 9651
-Dictionary parsed by `http-sfv` and checked in `rpp/http/profile_header.py`: the `profile` member is a Token, its
+Dictionary (a repeated header's lines combined with a comma, the last repeated key winning) parsed by `http-sfv` and checked in `rpp/http/profile_header.py`: the `profile` member is a Token, its
 `version` parameter a Decimal, compared as one (1.10 is 1.1); other members and parameters are ignored. No header
 selects the default profile. A value it cannot read, a missing member or parameter, a profile or version the server does
-not offer, or profile parameters in `Accept` or `Content-Type` (both methods in use, core §14) are a 400 with `02005`,
+not offer, or profile parameters on an `application/rpp+*` media range of `Accept` or `Content-Type` (both methods in use, core §14) are a 400 with `02005`,
 `02003`, `02004` and `02001` (core §12.4 asks for an RPP client error code). Only a routed operation selects a profile:
 an unrouted path is the router's 404, and a 401 comes before the profile. `ProfileMiddleware` (after the authentication)
 stores it in the request context (`selected_profile()`), adds `RPP-Profile` with the applied profile and version to
-the response (`handle_rpp_error` does it for the Problem Details an outer handler renders, so the header is on every
-response after the selection and on none before it), and refuses a routed operation on a data object that the profile does not have or the backend does not hold
+the response, with `RPP-Profile` in `Vary` (`handle_rpp_error` does it for the Problem Details an outer handler renders, so the header is on every
+response after the selection, a handler's 500 Problem Detail too, and on none before it or on a framework-level 500), and refuses a routed operation on a data object that the profile does not have or the backend does not hold
 with 501 `02307` before validation and any object command (the session login of authentication comes first; core §16.1.6, "404 or 501" for an endpoint a server does not
 implement, and the result code table). `request_profile()` is the backend profile as the request sees it
 (`RequestProfiles`): `extensions` those of the selected profile, so the combined schema of

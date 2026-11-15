@@ -27,13 +27,14 @@ def parse(values: list[str]) -> tuple[str, Decimal] | None:
     """The profile name and version a request names, None when it has no `RPP-Profile` header."""
     if not values:
         return None
-    if len(values) > 1:
-        raise ProfileHeaderError(ResultCode.PARAMETER_VALUE_SYNTAX_ERROR, f"{HEADER} is given more than once")
-    if not values[0].strip(" "):  # an empty Dictionary (RFC 9651 §4.2), which http-sfv does not parse
+    # RFC 9651 §4.2: the field lines are combined with a comma into one Dictionary, where a repeated key is the last.
+    # An empty line is an empty Dictionary, which http-sfv does not parse, and adds nothing.
+    combined = ", ".join(value.strip(" \t") for value in values if value.strip(" \t"))
+    if not combined:
         raise ProfileHeaderError(ResultCode.REQUIRED_PARAMETER_MISSING, f"{HEADER} has no profile member")
     dictionary = http_sfv.Dictionary()
     try:
-        dictionary.parse(values[0].encode("ascii"))
+        dictionary.parse(combined.encode("ascii"))
     except (ValueError, UnicodeEncodeError):
         raise ProfileHeaderError(
             ResultCode.PARAMETER_VALUE_SYNTAX_ERROR, f"{HEADER} is not a Structured Field Dictionary") from None
@@ -61,10 +62,46 @@ def format_profile(profile: RppProfile) -> str:
     return str(dictionary)
 
 
-_QUOTED = re.compile(r'"(?:[^"\\]|\\.)*"')
-_PROFILE_PARAMETER = re.compile(r";\s*profile(?:-version)?\s*=", re.IGNORECASE)
+def vary_with_profile(existing: str | None) -> str:
+    """A `Vary` value that holds `RPP-Profile` besides what `existing` lists (RFC 9110 §12.5.5): the response depends on
+    the profile the request names."""
+    names = [name.strip() for name in (existing or "").split(",") if name.strip()]
+    if "*" in names or any(name.lower() == HEADER.lower() for name in names):
+        return ", ".join(names)
+    return ", ".join([*names, HEADER])
+
+
+_PROFILE_PARAMETER = re.compile(r"^profile(?:-version)?$", re.IGNORECASE)
+_RPP_MEDIA_TYPE = re.compile(r"^application/rpp\+", re.IGNORECASE)
+
+
+def _split(value: str, separator: str) -> list[str]:
+    """The parts of `value` at a separator outside quoted strings."""
+    parts, start, quoted, escaped = [], 0, False, False
+    for index, char in enumerate(value):
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+        elif char == separator:
+            parts.append(value[start:index])
+            start = index + 1
+    return [*parts, value[start:]]
 
 
 def has_profile_parameters(media_types: list[str]) -> bool:
-    """Whether an Accept or Content-Type value carries the media type parameters of core §14.3."""
-    return any(_PROFILE_PARAMETER.search(_QUOTED.sub('""', value)) for value in media_types)
+    """Whether an Accept or Content-Type value carries the media type parameters of core §14.3 on an RPP media range
+    (`application/rpp+*`): another media type may use a `profile` parameter of its own (RFC 6906)."""
+    for value in media_types:
+        for media_range in _split(value, ","):
+            kind, *parameters = _split(media_range, ";")
+            if not _RPP_MEDIA_TYPE.match(kind.strip()):
+                continue
+            if any(_PROFILE_PARAMETER.match(parameter.partition("=")[0].strip()) for parameter in parameters):
+                return True
+    return False

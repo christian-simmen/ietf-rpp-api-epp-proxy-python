@@ -33,7 +33,7 @@ def test_the_header_selects_an_offered_profile(name):
 
 
 def test_the_selected_profile_decides_what_an_object_is():
-    # host is in base, RRI does not hold it: the refusal is the profile's of the request, and it names it.
+    # requestContact is not in the base profile: the refusal is the profile's of the request, and it names it.
     response = rri_client().get("/requestContacts/x", headers=named(BASE))
 
     assert response.status_code == 501
@@ -77,12 +77,12 @@ def test_a_value_that_is_not_one_the_header_defines_is_a_400(value, code):
     assert applied(response) is None
 
 
-def test_the_header_given_twice_is_a_400():
-    response = epp_client().get(
-        DISCOVERY, headers=[*named(EPP).items(), ("RPP-Profile", f"profile={BASE};version=1.0")])
+def test_field_lines_are_combined_into_one_dictionary_and_a_repeated_key_is_the_last():
+    other = epp_client().get(DISCOVERY, headers=[*named(EPP).items(), ("RPP-Profile", "other=1")])
+    last = epp_client().get(DISCOVERY, headers=[*named(EPP).items(), ("RPP-Profile", f"profile={BASE};version=1.0")])
 
-    assert response.status_code == 400
-    assert response.headers["RPP-Code"] == "02005"
+    assert other.status_code == 200 and applied(other) == f"profile={EPP};version=1.0"
+    assert last.status_code == 200 and applied(last) == f"profile={BASE};version=1.0"
 
 
 @pytest.mark.parametrize("client, profile, version", [
@@ -102,12 +102,23 @@ def test_a_profile_or_version_the_server_does_not_offer_is_a_400_with_a_range_er
     assert applied(response) is None
 
 
-def test_a_version_is_compared_as_a_decimal_so_1_10_is_1_1(monkeypatch):
-    # The Decimal problem of RFC 9651: 1.10 and 1.1 are one number. No profile has version 1.1 here, so 1.10 is refused.
+def test_versions_1_10_and_1_1_are_one_number_so_a_profile_cannot_have_both():
+    assert profile_header.parse(["profile=x;version=1.10"]) == profile_header.parse(["profile=x;version=1.1"]) \
+        == ("x", profile_header.Decimal("1.1"))
+
+
+def test_the_server_compares_the_version_as_a_decimal_so_1_10_is_not_1_0():
     response = epp_client().get(DISCOVERY, headers=named(EPP, "1.10"))
 
     assert response.status_code == 400
     assert response.headers["RPP-Code"] == "02004"
+
+
+def test_a_version_that_is_a_boolean_is_not_a_decimal():
+    with pytest.raises(profile_header.ProfileHeaderError) as error:
+        profile_header.parse([f"profile={EPP};version"])
+
+    assert error.value.code.value[0] == "2005"
 
 
 @pytest.mark.parametrize("headers", [
@@ -115,6 +126,8 @@ def test_a_version_is_compared_as_a_decimal_so_1_10_is_1_1(monkeypatch):
     {"Accept": MEDIA_TYPE + ";Profile-Version=1.0"},
     {"Accept": f"text/html, {MEDIA_TYPE};q=0.8; profile=\"{EPP}\""},
     {"Content-Type": MEDIA_TYPE + f";profile={EPP}"},
+    {"Accept": "application/RPP+JSON;profile=x"},
+    {"Accept": f"application/ld+json, {MEDIA_TYPE};q=0.5, application/rpp+yaml;profile-version=1.0"},
 ])
 def test_profile_parameters_of_the_media_type_mean_both_methods_are_in_use(headers):
     response = epp_client().get(DISCOVERY, headers={**named(EPP), **headers})
@@ -122,6 +135,12 @@ def test_profile_parameters_of_the_media_type_mean_both_methods_are_in_use(heade
     assert response.status_code == 400
     assert response.headers["RPP-Code"] == "02001"
     assert applied(response) is None
+
+
+def test_the_profile_parameter_of_another_media_type_is_its_own():
+    headers = {**HEADERS, "Accept": MEDIA_TYPE + ', application/ld+json;profile="https://x"'}
+
+    assert epp_client().get(DISCOVERY, headers=headers).status_code == 200
 
 
 def test_other_media_type_parameters_and_quoted_text_are_not_profile_parameters():
@@ -166,3 +185,27 @@ def test_the_value_of_the_response_header_parses_back_to_the_profile(key):
     profile = PROFILES[key]
 
     assert profile_header.parse([profile_header.format_profile(profile)]) == (profile.name, profile_header.Decimal(profile.version))
+
+
+def test_the_response_depends_on_the_profile_header_so_it_varies_on_it():
+    assert "RPP-Profile" in epp_client().get(DISCOVERY, headers=HEADERS).headers["Vary"]
+    assert "RPP-Profile" in rri_client().get("/hosts/ns1.example.de", headers=HEADERS).headers["Vary"]  # a Problem Detail
+
+
+@pytest.mark.parametrize("existing, expected", [
+    (None, "RPP-Profile"), ("Accept", "Accept, RPP-Profile"), ("Accept, rpp-profile", "Accept, rpp-profile"),
+    ("*", "*"), ("Origin,Accept", "Origin, Accept, RPP-Profile"),
+])
+def test_vary_keeps_what_is_there(existing, expected):
+    assert profile_header.vary_with_profile(existing) == expected
+
+
+def test_a_handler_failure_that_is_a_problem_detail_names_the_profile():
+    from tests.unit.test_domain_readback import AUTH, INFO_FAILED, client_with
+
+    client = client_with([INFO_FAILED])
+    response = client.get("/domainNames/foo.example", headers={**AUTH, **named(BASE)})
+
+    assert response.status_code == 500
+    assert applied(response) == f"profile={BASE};version=1.0"
+    assert "RPP-Profile" in response.headers["Vary"]
