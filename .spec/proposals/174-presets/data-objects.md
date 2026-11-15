@@ -2,7 +2,7 @@
 
 - Issue: #174 (this repository)
 - Base: draft-ietf-rpp-data-objects-02, upstream `src/draft-ietf-rpp-data-objects.md` at commit `5867f10`
-- Status: draft for review
+- Status: accepted by the maintainer, with the maintainer's edits
 
 This proposal separates the current notion of a profile into three concepts: the extension, which adds functionality,
 the profile, which narrows, and the preset, which a client signals and which names a set of extensions and profiles.
@@ -34,8 +34,10 @@ Choices made while drafting that the requirements in #174 do not settle:
   an operation of the Preset Data Object here.
 - R7. Two initial preset registrations demonstrate the concept: `urn:ietf:params:rpp:preset:base` (no extension, no
   profile) and `urn:ietf:params:rpp:preset:epp-compatible` (built on `base`, with the EPP Compatibility Profile).
-- R8. Two SHOULDs guard against fragmentation: a server SHOULD offer a standardised preset rather than a private one
-  with the same extensions, and SHOULD state every constraint on the form of a request in a bound profile.
+- R8. A server SHOULD offer a standardised preset rather than a private one with the same extensions, to avoid
+  fragmentation. (The maintainer removed the binding rules that bound profiles do not depend on the client or the
+  request, that every constraint on the form of a request SHOULD be in a profile, and that a change of the bound
+  profiles SHOULD be announced.)
 
 ## C1. Abstract and Introduction
 
@@ -168,10 +170,7 @@ A server MAY bind profiles to a preset it offers, in addition to the profiles of
 The following rules apply to a profile binding:
 
 * A server MUST NOT bind a profile to a preset that does not contain every extension the profile requires, directly or through its base profiles.
-* The bound profiles of a preset do not depend on the client or on the request.
 * A server publishes the bound profiles of each preset it offers in the Preset Data Object (#preset-data-object) and in the Discovery Data Object.
-* A server SHOULD state every constraint it applies to the form of a request, independent of the state of the repository, in an applicable profile. A client cannot learn a constraint that no applicable profile states before it sends a request, so its behaviour would depend on the individual server.
-* A server SHOULD announce a change of its bound profiles before the change takes effect, for example with a notice in the Discovery Data Object, because a client may depend on the constraints it has learnt.
 
 ## Inheritance of Presets and Profiles {#preset-profile-inheritance}
 
