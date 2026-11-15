@@ -1,5 +1,7 @@
 {
-  "markers": ["smoke"],
+  "markers": [
+    "smoke"
+  ],
   "test_id": "test1-read",
   "steps": [
     {
@@ -42,11 +44,15 @@
                   }
                 },
                 "then": [
+                  "io.github.pawel-kow.rpp.profile.base",
                   "urn:ietf:params:rpp:profile:epp-compatibility"
                 ]
               },
               {
-                "then": []
+                "then": [
+                  "io.github.pawel-kow.rpp.profile.base",
+                  "de.denic.rpp.profile.rri"
+                ]
               }
             ]
           },
@@ -69,6 +75,37 @@
                   "domainName",
                   "contact",
                   "requestContact"
+                ]
+              }
+            ]
+          },
+          "extensions": {
+            "select": [
+              {
+                "when": {
+                  "profile.objects": {
+                    "contains": "host"
+                  }
+                },
+                "then": [
+                  {
+                    "@type": "extension",
+                    "name": "RPP EPP Compatibility",
+                    "id": "urn:ietf:params:rpp:extension:epp-compatibility",
+                    "version": "1.0",
+                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/epp-compatibility.schema.json"
+                  }
+                ]
+              },
+              {
+                "then": [
+                  {
+                    "@type": "extension",
+                    "name": "DENIC RRI",
+                    "id": "de.denic.rpp.rri",
+                    "version": "0.2.0",
+                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json"
+                  }
                 ]
               }
             ]
