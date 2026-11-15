@@ -21,7 +21,7 @@
         },
         "body_json": {
           "@type": "domainName",
-          "name": "b2-{random_name}.{tld}",
+          "name": "b2-{random_id_10}.{tld}",
           "generalRequest": {
             "@type": "requestContact",
             "id": "{handle:a:RG2}"

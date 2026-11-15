@@ -122,8 +122,7 @@ descriptor's `profile` and the `rpp_profile_signalling` of its config (`with_rpp
 
 A header the case writes literally is sent as written, so a case can send what the runner would not (a value of another
 media type, a profile the server does not offer). The signalling method is the environment fact `env.profile_signalling`
-(`header` or `media-type`, read from the config, not stated twice). The cases of `profile_signalling_header/` and
-`profile_signalling_media_type/` hold literal headers and are each active for one method (a case-level `when` on that
+(`header` or `media-type`, read from the config, not stated twice). The cases of `profile_signalling_header/` hold literal headers and are active for that method (a case-level `when` on that
 fact); a step that differs per server selects by the facts, for example `profile.profiles` contains `rri`, never by the
 backend's name.
 

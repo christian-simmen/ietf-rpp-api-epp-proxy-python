@@ -18,7 +18,7 @@
       },
       "request": {
         "method": "GET",
-        "url": "/domainNames/b3-{random_name}.{tld}",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
@@ -49,7 +49,7 @@
       },
       "request": {
         "method": "GET",
-        "url": "/domainNames/b3-{random_name}.{tld}",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",

@@ -1,8 +1,10 @@
 """How the integration runner resolves the placeholders of the profile headers: it adds nothing of its own."""
 from dataclasses import replace
+from datetime import datetime
 
 import pytest
 
+from tests.integration.file_cases import process_placeholders
 from tests.helper.test_environment import EnvironmentError, load, with_rpp_headers
 
 ENV = load("epp-docker", with_credentials=False)
@@ -54,3 +56,11 @@ def test_an_unknown_placeholder_or_one_inside_a_value_is_an_error(value):
 
 def test_the_signalling_of_the_config_is_a_fact_of_the_environment():
     assert ENV.facts["profile_signalling"] == "header"
+
+
+@pytest.mark.parametrize("where", [{"url": "/x/{rpp:accept}"}, {"body_json": {"a": ["{rpp:profile}"]}},
+                                   {"response": {"headers": {"Content-Type": "{rpp:content-type}"}}}])
+def test_a_placeholder_left_after_the_headers_are_resolved_is_an_error(where):
+    case = {"test_id": "t", "steps": [{"request": {"method": "GET", "url": "/x", "headers": {}}, **where}]}
+    with pytest.raises(EnvironmentError, match="rpp"):
+        process_placeholders(with_rpp_headers(case, ENV), ENV, started=datetime.now())

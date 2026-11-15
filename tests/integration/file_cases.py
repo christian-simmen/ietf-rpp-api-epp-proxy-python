@@ -195,7 +195,11 @@ def process_placeholders(json_data, environment: TestEnvironment, obj=None, star
             .replace("{test_start}", started.isoformat())# type: ignore
         replaced = replace_values(replaced, environment, random_id_10)
         replaced = replace_upper_placeholders(replace_pad_placeholders(replace_idn_placeholders(replaced, random_id_10)))
-        return replaced.replace("{unique_cltrid}", str(uuid.uuid4())) # RPP-Cltrid is unique per request
+        replaced = replaced.replace("{unique_cltrid}", str(uuid.uuid4()))  # RPP-Cltrid is unique per request
+        if "{rpp:" in replaced:
+            # `with_rpp_headers` resolved the placeholders of the request headers, the only place they may stand
+            raise EnvironmentError(f"{replaced!r}: a {{rpp:...}} placeholder is only a whole value of a request header")
+        return replaced
     else:
         return json_data
 
