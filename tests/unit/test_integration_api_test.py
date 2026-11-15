@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from tests.helper.integration_api_test import (endpoint_test, field_value, replace_pad_placeholders,
+from tests.helper.integration_api_test import (assert_response, endpoint_test, field_value, replace_pad_placeholders,
                                                replace_upper_placeholders, substitute_captures)
 from tests.helper.recursive_compare_existing import recusive_compare_existing
 
@@ -195,8 +195,13 @@ def typed(content_type):
     return reply
 
 
-def test_an_expected_media_type_without_parameters_matches_one_with_the_profile_parameters():
-    run(FakeClient(typed(PROFILED)), {**CREATED, "content_type": "application/rpp+json"})
+def test_with_the_media_type_signalling_an_expected_media_type_without_parameters_matches_one_with_the_parameters():
+    assert_response({**CREATED, "content_type": "application/rpp+json"}, typed(PROFILED), "t", "media-type")
+
+
+def test_with_the_header_signalling_the_whole_media_type_is_compared():
+    with pytest.raises(AssertionError, match="Content-Type mismatch"):
+        assert_response({**CREATED, "content_type": "application/rpp+json"}, typed(PROFILED), "t")
 
 
 @pytest.mark.parametrize("actual, expected", [
@@ -206,4 +211,4 @@ def test_an_expected_media_type_without_parameters_matches_one_with_the_profile_
 ])
 def test_another_media_type_or_other_parameters_are_a_mismatch(actual, expected):
     with pytest.raises(AssertionError, match="Content-Type mismatch"):
-        run(FakeClient(typed(actual)), {**CREATED, "content_type": expected})
+        assert_response({**CREATED, "content_type": expected}, typed(actual), "t", "media-type")

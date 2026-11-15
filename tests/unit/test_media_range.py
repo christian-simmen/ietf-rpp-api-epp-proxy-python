@@ -84,3 +84,20 @@ def test_a_content_type_has_no_weight():
     item = media_range.parse_media_type("application/rpp+json; q=0.5; charset=utf-8")
 
     assert item.quality == 1 and item.parameter("q") == "0.5"
+
+
+def test_a_range_of_another_media_type_only_has_to_split():
+    items = media_range.parse_accept(["application/ld+json; profile=a; profile=b; q=x, application/rpp+json"])
+
+    assert [item.kind for item in items] == ["application/ld+json", "application/rpp+json"]
+
+
+def test_a_quote_that_is_not_closed_in_another_media_type_is_still_refused():
+    with pytest.raises(MediaRangeError) as error:
+        media_range.parse_accept(['text/html; x="a, application/rpp+json'])
+
+    assert error.value.code.value[0] == "2005"
+
+
+def test_an_empty_accept_has_no_ranges():
+    assert media_range.parse_accept([""]) == [] == media_range.parse_accept([])

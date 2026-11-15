@@ -8,6 +8,8 @@ from tests.helper.fake_epp_client import FakeEppClient
 from tests.helper.fake_rri_client import FakeRriClient, rri_backends
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 from tests.unit.test_profiles_wire import BASE, EPP, RRI
+from tests.unit.test_rpp_wire import check_reply
+from tests.unit.test_rri_adapter import DOMAIN_INFO, NAME
 from tests.unit.test_rri_wire import DISCOVERY, HEADERS, MEDIA_TYPE
 
 PATH = "/.well-known/rpp"
@@ -39,7 +41,7 @@ def applied(response):
 def assert_refused(response, status, code):
     assert response.status_code == status
     assert response.headers["RPP-Code"] == code
-    assert response.headers["Content-Type"].startswith("application/problem+json")  # no profile parameters
+    assert response.headers["Content-Type"] == "application/problem+json"  # no profile parameters
     assert response.headers["Vary"] == "Accept"
     assert "RPP-Profile" not in response.headers
 
@@ -239,3 +241,54 @@ def test_the_header_server_refuses_the_parameters_unchanged():
 
     assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
     assert "RPP-Profile" not in response.headers
+
+
+def test_an_empty_accept_is_an_absent_one_and_the_default_profile_applies():
+    response = get("")
+
+    assert response.status_code == 200 and applied(response) == media(EPP)
+
+
+def test_an_availability_answer_that_is_a_404_has_the_profile_parameters_too():
+    def factory(username, password):
+        return FakeEppClient(username, password, replies=[check_reply(False)])
+
+    client = create_app(SessionPool(epp_backends(factory)), EPP_PROFILE, discovery_settings=DISCOVERY,
+                        signalling="media-type").test_client()
+    response = client.get("/domainNames/foo.example/availability", headers={**AUTH, "Accept": media(EPP)})
+
+    assert response.status_code == 404
+    assert response.json() == {"@type": "domainNameAvailability", "available": False}
+    assert applied(response) == media(EPP)
+
+
+def test_the_most_specific_range_gives_the_weight_of_a_profile():
+    base = {"Content-Type": media(BASE)}
+
+    # the exact range at 0 excludes epp, though the wildcard accepts it; a request under epp is then refused
+    assert applied(get(f"{media(EPP, weight='0')}, */*", **base)) == media(BASE)
+    assert_refused(get(f"{media(EPP, weight='0')}, */*"), 400, "02001")
+    # the exact range at 0.5 for base beats the wildcard at 1 for base, so epp (1, by the wildcard) is preferred
+    assert applied(get(f"{media(BASE, weight='0.5')}, */*", **base)) == media(EPP)
+    # the exact range for epp at 0.1 beats the bare range at 0.5 for epp, so base (0.3) is preferred
+    exact_over_bare = f"{MEDIA_TYPE}; q=0.5, {media(EPP, weight='0.1')}, {media(BASE, weight='0.3')}"
+    assert applied(get(exact_over_bare)) == media(BASE)
+
+
+def test_the_response_is_rendered_with_the_extensions_of_the_response_profile():
+    def read(request_profile, accept):
+        def factory(username, password):
+            return FakeRriClient(username, password, replies=[DOMAIN_INFO])
+
+        client = create_app(SessionPool(rri_backends(factory)), RRI_PROFILE, discovery_settings=DISCOVERY,
+                            signalling="media-type").test_client()
+        return client.get(f"/domainNames/{NAME}", headers={
+            **AUTH, "Accept": accept, "Content-Type": media(request_profile)})
+
+    in_base = read(RRI, f"{media(BASE)}, {media(RRI, weight='0.5')}")
+    in_rri = read(BASE, f"{media(RRI)}, {media(BASE, weight='0.5')}")
+
+    assert in_base.status_code == 200 and applied(in_base) == media(BASE)
+    assert "abuse" not in in_base.json() and in_base.json()["registrant"]["id"]    # an rri member is left out
+    assert in_rri.status_code == 200 and applied(in_rri) == media(RRI)
+    assert in_rri.json()["abuse"]["id"]

@@ -61,8 +61,8 @@ rpp_tlds:
 ```
 A client names the profile of a request with `RPP-Profile: profile=<name>;version=1.0` (core §14.2), or, with
 `rpp_profile_signalling: media-type`, with the parameters of the media type, `Accept: application/rpp+json;
-profile="<name>"; profile-version="1.0"` and the same in the `Content-Type` of a request with content (core §14.3); the
-two methods are not mixed. Without either the request gets `default_profile`. The response names the profile applied, in
+profile="<name>"; profile-version="1.0"` and the same in the `Content-Type` of every request, with content or without (core §13); without it the request is
+under `default_profile`, which the `Accept` must then list. The two methods are not mixed. With the header method a request that names none gets `default_profile`. The response names the profile applied, in
 `RPP-Profile` or in its `Content-Type`. `rpp_backend_profile.extends` names the generic profile of the protocol and defaults to `rpp_backend`. HTTP Basic is
 passed through as the RRI LOGIN, as it is as the EPP login. DENIC lets in only addresses on the allowlist of the
 RegAcc.

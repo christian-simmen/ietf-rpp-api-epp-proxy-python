@@ -17,6 +17,9 @@ PROFILE_VERSION = "profile-version"
 _TOKEN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
 _QUALITY = re.compile(r"^(?:0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$")
 _VERSION = re.compile(r"^\d+\.\d+$")
+RPP_PREFIX = "application/rpp+"
+# The ranges whose weight and parameters are read: the RPP media types, and the wildcards that stand for them.
+_READ_IN_FULL = ("*/*", "application/*")
 
 
 @dataclass(frozen=True)
@@ -64,6 +67,22 @@ def split(value: str, separator: str) -> list[str]:
     return [*parts, value[start:]]
 
 
+def _unclosed(value: str) -> bool:
+    """Whether `value` ends inside a quoted string."""
+    quoted, escaped = False, False
+    for char in value:
+        if quoted:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = False
+        elif char == '"':
+            quoted = True
+    return quoted
+
+
 def _syntax(message: str) -> MediaRangeError:
     return MediaRangeError(ResultCode.PARAMETER_VALUE_SYNTAX_ERROR, message)
 
@@ -86,6 +105,12 @@ def _parse(text: str, weighted: bool) -> MediaRange:
     if not slash or not _TOKEN.match(main) or not _TOKEN.match(sub):
         raise _syntax("A media range is not type/subtype")
     parameters, quality = [], Decimal(1)
+    if kind not in _READ_IN_FULL and not kind.startswith(RPP_PREFIX):
+        # A range of another media type is no concern of the profile: it only has to split, so an unclosed quote is
+        # refused (it would swallow the ranges after it), and a parameter the grammar may not like is not.
+        if _unclosed(text):
+            raise _syntax("A quoted string of a media range is not closed")
+        return MediaRange(kind=kind)
     for part in parts:
         if not part.strip():
             continue

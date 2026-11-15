@@ -212,3 +212,15 @@ Confirmed by the orchestrator: where the response profile lacks something the re
   `profile_signalling_header/test4` (both methods) added; `profile_signalling_header/test2` (rri-only refusals) removed,
   since no environment runs RRI with the header method and the harness refuses a case no environment runs. Its content is
   `profile_signalling_media_type/test2`; the header method on RRI stays covered by `test_profile_header_wire.py`.
+
+## Review round 1 of #171
+
+Fixed: (1) the profile parameters go on every RPP `Content-Type` of a response, availability 404s included, test added;
+(2) the precedence is pinned (exact beats wildcard beats nothing; exact beats bare): mutations "bare as specific as
+exact", "specificity ignored" and "wildcard more specific than exact" each fail `test_the_most_specific_range_gives_the_weight_of_a_profile`;
+(3) rendering with the response profile is tested on an RRI domain read (`abuse` absent under base, present under rri),
+reverting `response_profile()` to `request_profile()` fails it; (4) README; (5) spec-issues cut and folded; (6) exact
+Problem Detail type in the test; (7) the relaxed content_type comparison only for `env.profile_signalling` media-type
+(`assert_response(..., signalling)`); (8) only `application/rpp+*`, `*/*` and `application/*` ranges are read in full, any
+other range only has to split (an unclosed quote is still `02005`); (9) an empty `Accept` is an absent one: unit test and
+spec-issues entry; (10) no change.

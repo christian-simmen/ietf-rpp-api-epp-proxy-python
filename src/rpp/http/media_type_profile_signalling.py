@@ -120,15 +120,16 @@ class MediaTypeProfileSignalling:
         return [(EXACT, profile)] if profile is not None else []
 
     def announce(self, send, selection: ProfileSelection):
-        """`send` that gives a successful RPP response the profile applied in its `Content-Type` (§14.3), and lists
-        `Accept` in `Vary`."""
+        """`send` that gives an RPP response (a Problem Detail is another media type) the profile applied in its
+        `Content-Type` (§14.3), and lists `Accept` in `Vary`."""
         profile = selection.response
         applied = f'{RPP_MEDIA_TYPE}; profile="{profile.name}"; profile-version="{profile.version}"'
 
         def rewrite(status, headers):
             vary = ", ".join(values_of(headers, "Vary"))
             headers = [*without(headers, "Vary"), (b"vary", vary_with(vary, "Accept").encode("latin-1"))]
-            if 200 <= status < 300 and [value.lower() for value in values_of(headers, "Content-Type")] == [RPP_MEDIA_TYPE]:
+            # any RPP answer, an availability 404 included: core §13 has a client refuse an RPP type it did not ask for
+            if [value.lower() for value in values_of(headers, "Content-Type")] == [RPP_MEDIA_TYPE]:
                 headers = [*without(headers, "Content-Type"), (b"content-type", applied.encode("latin-1"))]
             return headers
         return rewriting_start(send, rewrite)
