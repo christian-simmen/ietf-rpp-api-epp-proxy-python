@@ -157,7 +157,7 @@
               },
               "then": {
                 "@type": "domainName",
-                "name": "b1-{random_name}.{tld}",
+                "name": "b1-{random_id_10}.{tld}",
                 "registrant": {
                   "@type": "contact",
                   "id": "{handle:a:PB1}"
@@ -185,7 +185,7 @@
             {
               "then": {
                 "@type": "domainName",
-                "name": "b1-{random_name}.{tld}",
+                "name": "b1-{random_id_10}.{tld}",
                 "registrant": {
                   "@type": "contact",
                   "id": "{handle:a:PB1}"
@@ -208,7 +208,7 @@
         },
         "body": {
           "@type": "domainName",
-          "name": "b1-{random_name}.{tld}",
+          "name": "b1-{random_id_10}.{tld}",
           "registrant": {
             "id": "{handle:a:PB1}"
           }
@@ -223,7 +223,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/domainNames/b1-{random_name}.{tld}",
+        "url": "/domainNames/b1-{random_id_10}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
@@ -249,7 +249,7 @@
     {
       "request": {
         "method": "DELETE",
-        "url": "/domainNames/b1-{random_name}.{tld}",
+        "url": "/domainNames/b1-{random_id_10}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
@@ -268,7 +268,7 @@
     {
       "request": {
         "method": "GET",
-        "url": "/domainNames/b1-{random_name}.{tld}",
+        "url": "/domainNames/b1-{random_id_10}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
