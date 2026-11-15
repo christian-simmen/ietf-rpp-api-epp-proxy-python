@@ -28,7 +28,7 @@ Spec: data-objects §4 and §18, json §6.11 and §8.8, core §11, §12.3, §12.
 - D8 Q4 approved (501, 02307). Citation: core line ~1211 ("MUST return 404 Not Found or 501 Not Implemented", §16.1.6
   being Process Listing) plus the result code table for 02307. Every case asserting 02101 for RRI `/hosts` is updated;
   say so in the PR. W1 to W5 approved; W5 is a deliberate wire change, recorded in the PR description.
-- MTEST: pending unless this machine is on the allowlist (to be recorded).
+- MTEST: the smoke run covered rri-mtest from this machine (see Results).
 
 ## Tasks
 
@@ -44,7 +44,7 @@ Spec: data-objects §4 and §18, json §6.11 and §8.8, core §11, §12.3, §12.
 - [x] T6 `create_app`: extension paths for the union of the offered profiles' extensions
 - [x] T7 `GET /profiles/{name}`: handler `rpp/handlers/profiles.py`, mapper `rpp/mapping/profile/profile.py`
 - [x] T8 Discovery from the catalog (profiles, extensions, objects)
-- [~] T9 Config files, tests (unit, wire, startup checks), docs (`architecture.project.md`, `testing.project.md`,
+- [x] T9 Config files, tests (unit, wire, startup checks), docs (`architecture.project.md`, `testing.project.md`,
       `spec-issues.md` for gaps), full checks, draft PR
 
 ## Findings (evidence)
@@ -166,3 +166,17 @@ repository like the RRI one (there is no IANA registry entry to point at)? Recom
 that `$id`.
 Q6 Profile YAMLs list objects and extensions explicitly and `baseProfile` is informational plus the startup checks, no
 inherited merging. Recommend yes (simple, matches D1).
+
+## Results
+
+On the commit of the draft PR (`PYTHONPATH=src` from the repository root):
+- `lint-imports`: 15 kept, 0 broken.
+- `pytest -n 4 tests/unit`: 2210 passed.
+- `pytest -n 4 -m smoke tests/integration` (epp-docker and rri-mtest, credentials from `.env`): 60 passed, 12 skipped.
+  The first run failed `draft_discovery/test1-read` on both environments (expected `profiles`); fixed, rerun green.
+- Full `pytest -n 4` not run (maintainer's call).
+
+## Notes for the reviewer
+
+- Cases that asserted 02101 for RRI `/hosts`: `tests/unit/test_rri_wire.py` only (now 02307, own test). No integration case did.
+- Wire change W5 (discovery) is deliberate: `tests/unit/test_discovery_wire.py` and `draft_discovery/test1-read.json`.
