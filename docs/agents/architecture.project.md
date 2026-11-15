@@ -283,8 +283,8 @@ not be held.
 A request has a selected profile. `ProfileResolver.resolve(scope)` in `rpp/http/profile_resolver.py` is the one place
 that chooses it, and today returns the default; the signalling methods of core §14 (`RPP-Profile`, media type
 parameters) read the request there. `ProfileMiddleware` (after the authentication) stores it in the request context
-(`selected_profile()`), and refuses a path of a data object that the profile does not have or the backend does not hold
-with 501 `02307` before validation and any command (core §16.1.6, "404 or 501" for an endpoint a server does not
+(`selected_profile()`), and refuses a routed operation on a data object that the profile does not have or the backend does not hold
+with 501 `02307` before validation and any object command (the session login of authentication comes first; core §16.1.6, "404 or 501" for an endpoint a server does not
 implement, and the result code table). `request_profile()` is the backend profile as the request sees it
 (`RequestProfiles`): `extensions` those of the selected profile, so the combined schema of
 [RPP extensions](#rpp-extensions) holds only them (guidelines §8.6), and `objects` those of the profile the backend

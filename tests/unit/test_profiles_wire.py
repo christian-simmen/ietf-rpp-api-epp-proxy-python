@@ -1,8 +1,12 @@
 """The profiles over the wire: the Profile Data Object, discovery, the selected profile and what it allows."""
+from dataclasses import replace
+
 import pytest
 
 from core.session.session_pool import SessionPool
 from rpp.http.app import create_app
+from rpp.http.profile_resolver import ProfileResolver
+from rpp.schema.profiles import PROFILES
 from tests.helper.epp_backends import epp_backends
 from tests.helper.fake_epp_client import FakeEppClient
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
@@ -98,6 +102,12 @@ def test_a_request_that_is_not_authenticated_is_a_401_not_a_hint_of_the_profiles
     assert response.status_code == 401
 
 
+def test_a_path_no_operation_serves_stays_a_404_even_under_an_object_outside_the_profile():
+    response = rri_client().get("/hosts/a/b/c/d", headers={"Accept": MEDIA_TYPE})
+
+    assert response.status_code == 404
+
+
 def test_an_object_the_backend_does_not_hold_is_refused_under_a_profile_that_lists_it():
     backend = RRI_PROFILE.with_changes({"profiles": ["base"], "default_profile": "base"})
     client = rri_client(backend)
@@ -124,12 +134,17 @@ def test_a_wrong_choice_of_profiles_stops_the_app(change, message):
         create_app(None, EPP_PROFILE.with_changes(change))
 
 
+def test_two_offered_profiles_with_one_name_stop_the_app(monkeypatch):
+    monkeypatch.setitem(PROFILES, "epp", replace(PROFILES["epp"], name=BASE, base_profile=None))
+
+    with pytest.raises(ValueError, match="the same name"):
+        create_app(None, EPP_PROFILE)
+
+
 class Selecting:
     """Stands for a signalling method of #163 or #164: the resolver is the one place a profile is chosen."""
 
     def __init__(self, monkeypatch, key):
-        from rpp.http.profile_resolver import ProfileResolver
-        from rpp.schema.profiles import PROFILES
         monkeypatch.setattr(ProfileResolver, "resolve", lambda self, scope: PROFILES[key])
 
 

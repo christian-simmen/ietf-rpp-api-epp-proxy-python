@@ -27,6 +27,8 @@ class RppProfiles:
             raise ValueError(f"backend profile: default_profile {default_key!r} is not one of the offered profiles")
         offered = tuple(PROFILES[key] for key in keys)
         names = [profile.name for profile in offered]
+        if len(set(names)) != len(names):
+            raise ValueError("backend profile: two offered RPP profiles have the same name")
         for profile in offered:
             cls._check(profile, names, held_extensions)
         return cls(offered, PROFILES[default_key])
