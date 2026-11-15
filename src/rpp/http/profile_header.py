@@ -29,6 +29,8 @@ def parse(values: list[str]) -> tuple[str, Decimal] | None:
         return None
     if len(values) > 1:
         raise ProfileHeaderError(ResultCode.PARAMETER_VALUE_SYNTAX_ERROR, f"{HEADER} is given more than once")
+    if not values[0].strip(" "):  # an empty Dictionary (RFC 9651 §4.2), which http-sfv does not parse
+        raise ProfileHeaderError(ResultCode.REQUIRED_PARAMETER_MISSING, f"{HEADER} has no profile member")
     dictionary = http_sfv.Dictionary()
     try:
         dictionary.parse(values[0].encode("ascii"))

@@ -124,4 +124,5 @@ def test_202_carries_the_same_rpp_headers_as_a_success(method, url, body, res_da
         "rpp-cltrid": "cl-1",
         "rpp-svtrid": "sv-1",
         "rpp-code": "01000",
+        "rpp-profile": "profile=urn:ietf:params:rpp:profile:epp-compatibility;version=1.0",
     }
