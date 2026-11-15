@@ -5,6 +5,7 @@ from core.capabilities.backend_profile import BackendProfile
 from rpp.http.profile_middleware import SELECTED_PROFILE
 from rpp.http.request_profiles import RequestProfiles
 from rpp.http.profile_selection import ProfileSelection
+from rpp.schema.profile_schemas import ProfileSchemas
 from rpp.schema.rpp_profiles import RppProfiles
 
 # The key of the token info that holds the request's backend.
@@ -16,6 +17,8 @@ BACKEND_PROFILE = "RPP_BACKEND_PROFILE"
 DISCOVERY_SETTINGS = "RPP_DISCOVERY_SETTINGS"
 
 RPP_PROFILES = "RPP_PROFILES"
+
+PROFILE_SCHEMAS = "RPP_PROFILE_SCHEMAS"
 
 REQUEST_PROFILES = "RPP_REQUEST_PROFILES"
 
@@ -37,6 +40,11 @@ def backend_profile() -> BackendProfile:
 def rpp_profiles() -> RppProfiles:
     """The RPP profiles this application offers."""
     return current_app.config[RPP_PROFILES]
+
+
+def profile_schemas() -> ProfileSchemas:
+    """The effective schemas of the offered profiles, built with the app."""
+    return current_app.config[PROFILE_SCHEMAS]
 
 
 def profile_selection() -> ProfileSelection:

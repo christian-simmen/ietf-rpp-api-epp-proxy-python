@@ -82,10 +82,10 @@ def test_discovery_states_the_offered_profiles_and_their_extensions():
     rri = rri_client().get("/.well-known/rpp", headers=HEADERS).json()
 
     assert epp["profiles"] == [BASE, EPP]
-    assert [e["id"] for e in epp["extensions"]] == [EPP_EXTENSION]
+    assert [e["id"] for e in epp["extensions"]] == [EPP_EXTENSION, "urn:ietf:params:rpp:extension:profile-schemas"]
     assert epp["objects"] == ["domainName", "host", "contact"]
     assert rri["profiles"] == [BASE, RRI]
-    assert [e["id"] for e in rri["extensions"]] == ["de.denic.rpp.rri"]
+    assert [e["id"] for e in rri["extensions"]] == ["de.denic.rpp.rri", "urn:ietf:params:rpp:extension:profile-schemas"]
     assert rri["objects"] == ["domainName", "contact", "requestContact"]
 
 

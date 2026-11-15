@@ -76,8 +76,9 @@ def test_discovery_states_what_the_proxy_is_configured_and_built_for(client):
 def test_discovery_advertises_nothing_the_proxy_does_not_do(client):
     body = client.get("/.well-known/rpp", headers=HEADERS).json()
 
-    # The extensions are those of the offered profiles, here the constraints of the EPP profile (see test_profiles_wire).
-    assert [e["id"] for e in body["extensions"]] == ["urn:ietf:params:rpp:extension:epp-compatibility"]
+    # The extensions are those of the offered profiles, here the constraints of the EPP profile (see test_profiles_wire),
+    # and the server's own, which lists the schemas of the profiles.
+    assert [e["id"] for e in body["extensions"]] == ["urn:ietf:params:rpp:extension:epp-compatibility", "urn:ietf:params:rpp:extension:profile-schemas"]
     for member in ("links", "idnLgr", "notices"):
         assert member not in body
 
@@ -229,4 +230,4 @@ def test_the_objects_are_the_backends_and_the_profiles_those_it_offers():
 
     assert body["objects"] == ["domainName", "contact"]
     assert body["profiles"] == ["urn:ietf:params:rpp:profile:base"]
-    assert "extensions" not in body
+    assert [e["id"] for e in body["extensions"]] == ["urn:ietf:params:rpp:extension:profile-schemas"]      # no profile has an extension: the server's own is left

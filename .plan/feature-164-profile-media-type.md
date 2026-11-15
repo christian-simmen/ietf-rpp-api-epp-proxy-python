@@ -224,3 +224,21 @@ Problem Detail type in the test; (7) the relaxed content_type comparison only fo
 (`assert_response(..., signalling)`); (8) only `application/rpp+*`, `*/*` and `application/*` ranges are read in full, any
 other range only has to split (an unclosed quote is still `02005`); (9) an empty `Accept` is an absent one: unit test and
 spec-issues entry; (10) no change.
+
+## Effective schemas (maintainer requirements A to C)
+
+- A: `ProfileSchemas` (one per app) builds, for each offered profile, `build_effective(extensions)` (the validator of every
+  definition for the profile's extension tuple, replacing the lazy `functools.cache`) and a 2020-12 document. The published
+  `$defs` hold the bundle, the profile's extensions' definitions and each extended definition as `allOf[base, ext...]` in
+  place; equivalent to validation because no other definition of the bundle references an extended one (checked).
+  Startup cost: `ProfileSchemas` 5 to 10 ms for two profiles (documents about 46 to 49 KB), the server tuple 2 ms; loading the
+  bundle (an existing cost) 0.58 s.
+- B: `GET /profiles/{name}/schema`, added programmatically (`profile_schema_path.py`, no security), 404 `02303`; the
+  discovery extension `urn:ietf:params:rpp:extension:profile-schemas` 1.0, member `profileSchemas` (the id, name and member
+  as suggested), `.spec/profile-schemas.schema.json` copied by copy_models.sh, in `SERVER_EXTENSIONS`; discovery `extensions`
+  lists it after the profiles'.
+- C: finding: the drafts' schemas do not forbid undeclared members, so "an rri member valid under rri and invalid under
+  base" does not hold at the schema; the tests use a malformed rri member, which rri's schema refuses and base's ignores,
+  and a well-formed one that both admit. A base URL that cannot be read at app build gives a document without `$id`.
+- Discovery's own `extensions` list now has the server-wide extension, so the discovery tests and
+  `draft_discovery/test1-read` changed; new smoke case `draft_discovery/test2-profile_schemas`.

@@ -96,6 +96,13 @@
                     "id": "urn:ietf:params:rpp:extension:epp-compatibility",
                     "version": "1.0",
                     "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/epp-compatibility.schema.json"
+                  },
+                  {
+                    "@type": "extension",
+                    "name": "RPP Profile Schemas",
+                    "id": "urn:ietf:params:rpp:extension:profile-schemas",
+                    "version": "1.0",
+                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/profile-schemas.schema.json"
                   }
                 ]
               },
@@ -107,6 +114,13 @@
                     "id": "de.denic.rpp.rri",
                     "version": "0.2.0",
                     "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json"
+                  },
+                  {
+                    "@type": "extension",
+                    "name": "RPP Profile Schemas",
+                    "id": "urn:ietf:params:rpp:extension:profile-schemas",
+                    "version": "1.0",
+                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/profile-schemas.schema.json"
                   }
                 ]
               }

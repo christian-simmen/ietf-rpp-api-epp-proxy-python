@@ -28,6 +28,9 @@ def _load(path: Path) -> RppExtension:
     )
 
 
+# The extensions that belong to the server and to no profile: discovery lists them next to those of the profiles.
+SERVER_EXTENSIONS = ("urn:ietf:params:rpp:extension:profile-schemas",)
+
 EXTENSIONS: dict[str, RppExtension] = {
     extension.id: extension for extension in map(_load, sorted(FOLDER.glob("*.json")))
 }

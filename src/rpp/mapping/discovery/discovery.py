@@ -6,7 +6,7 @@ from rpp.dto.rpp_discovery import RPPDiscovery
 from rpp.dto.rpp_discovery_environment import RPPDiscoveryEnvironment
 from rpp.dto.rpp_discovery_version import RPPDiscoveryVersion
 from rpp.mapping.shared.extension import extension_to_rpp
-from rpp.schema.extensions import EXTENSIONS
+from rpp.schema.extensions import EXTENSIONS, SERVER_EXTENSIONS
 from rpp.schema.validator import validate_schema
 
 
@@ -20,7 +20,14 @@ def model_to_rpp(discovery: Discovery) -> dict:
         objects=discovery.objects,
         datetime=discovery.datetime,
     ).to_rpp()
-    validate_schema("discovery.read", rpp)
+    extensions = ()
+    if discovery.profile_schemas is not None:
+        # a member of the extension `profile-schemas`, which the server has whatever profile a request has
+        rpp["profileSchemas"] = [
+            {"profile": reference.profile, "version": reference.version, "url": reference.url}
+            for reference in discovery.profile_schemas]
+        extensions = SERVER_EXTENSIONS
+    validate_schema("discovery.read", rpp, extensions)
     return rpp
 
 
