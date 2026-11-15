@@ -7,7 +7,10 @@ objects:                               # an RRI host is not an object: name serv
   - domainName
   - contact
   - requestContact                     # a contact of type REQUEST, from the extension (docs/rri/rri-extension.md)
-profiles: []                           # the EPP Compatibility Profile does not describe RRI (refactoring.md §3.10)
+profiles:                              # the RPP profiles offered (src/rpp/schema/schemas/profiles): not the EPP one
+  - base
+  - rri
+default_profile: rri                   # applied when a request names none
 lgrs: []                               # rpp_rri_lgr of the config, not set here
 extensions:                            # docs/rri/rri-extension.md: request contacts, and CHPROV with the gainer's data
   - de.denic.rpp.rri

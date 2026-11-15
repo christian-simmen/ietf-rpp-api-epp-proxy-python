@@ -77,8 +77,14 @@ def test_a_client_status_is_refused():
     assert response.status_code == 501 and response.headers["RPP-Code"] == "02102"
 
 
+def test_hosts_are_outside_the_rri_profile():
+    """RRI has no host objects, so the profile has none: 501 02307 before any command (it was 02101 from the backend)."""
+    client, clients = setup()
+
+    assert_refused(client.get("/hosts/ns1.example.de", headers=HEADERS), clients, "02307")
+
+
 @pytest.mark.parametrize("method, url", [
-    ("GET", "/hosts/ns1.example.de"),
     ("POST", f"/domainNames/{NAME}/processes/renewProcesses"),
     ("DELETE", "/contacts/DENIC-1000022-X"),
 ])

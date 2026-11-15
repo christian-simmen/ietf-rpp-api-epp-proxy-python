@@ -70,13 +70,15 @@ def test_discovery_states_what_the_proxy_is_configured_and_built_for(client):
     assert body["environment"] == {"@type": "discoveryEnvironment", "name": "rpp.example", "status": "test"}
     assert body["tlds"] == ["example", "test"]
     assert body["objects"] == ["domainName", "host", "contact"]
-    assert body["profiles"] == ["urn:ietf:params:rpp:profile:epp-compatibility"]
+    assert body["profiles"] == ["io.github.pawel-kow.rpp.profile.base", "urn:ietf:params:rpp:profile:epp-compatibility"]
 
 
 def test_discovery_advertises_nothing_the_proxy_does_not_do(client):
     body = client.get("/.well-known/rpp", headers=HEADERS).json()
 
-    for member in ("extensions", "links", "idnLgr", "notices"):
+    # The extensions are those of the offered profiles, here the constraints of the EPP profile (see test_profiles_wire).
+    assert [e["id"] for e in body["extensions"]] == ["urn:ietf:params:rpp:extension:epp-compatibility"]
+    for member in ("links", "idnLgr", "notices"):
         assert member not in body
 
 
@@ -219,11 +221,12 @@ def test_an_unexpected_failure_is_still_a_problem_detail_with_an_rpp_code():
     assert response.headers["Content-Type"].startswith("application/problem+json")
 
 
-def test_the_objects_and_profiles_are_the_backends():
-    profile = EPP_PROFILE.with_changes({"objects": ["domainName", "contact"], "profiles": ["urn:example:profile"]})
+def test_the_objects_are_the_backends_and_the_profiles_those_it_offers():
+    profile = EPP_PROFILE.with_changes({"objects": ["domainName", "contact"], "profiles": ["base"], "default_profile": "base"})
     http = create_app(NoSessions(), profile, discovery_settings=SETTINGS).test_client()
 
     body = http.get("/.well-known/rpp", headers=HEADERS).json()
 
     assert body["objects"] == ["domainName", "contact"]
-    assert body["profiles"] == ["urn:example:profile"]
+    assert body["profiles"] == ["io.github.pawel-kow.rpp.profile.base"]
+    assert "extensions" not in body

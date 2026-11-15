@@ -12,14 +12,18 @@ from connexion.validators import VALIDATOR_MAP
 from starlette.middleware.cors import CORSMiddleware
 
 from core.capabilities.backend_profile import BackendProfile
-from rpp.http.context import BACKEND_PROFILE, DISCOVERY_SETTINGS
+from rpp.http.context import BACKEND_PROFILE, DISCOVERY_SETTINGS, REQUEST_PROFILES, RPP_PROFILES
 from rpp.http.middleware.body_buffering_middleware import BodyBufferingMiddleware
 from rpp.http.problem import handle_rpp_error
+from rpp.http.profile_middleware import ProfileMiddleware
+from rpp.http.profile_resolver import ProfileResolver
+from rpp.http.request_profiles import RequestProfiles
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
 from rpp.http.extension_paths import add_extension_paths
 from rpp.schema.extensions import check_known
+from rpp.schema.rpp_profiles import RppProfiles
 
 OPENAPI_SPEC = Path(__file__).parent.parent / "openapi.yaml"
 
@@ -46,11 +50,16 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
             rpp_environment_status, which the discovery document states.
     """
     check_known(profile.extensions)
+    profiles = RppProfiles.build(profile.profiles, profile.default_profile, profile.extensions)
+    request_profiles = RequestProfiles(profile, profiles)
     app = FlaskApp(
         __name__,
         security_map={"basic": lambda: SessionSecurityHandler(sessions)},
     )
     app.add_middleware(BodyBufferingMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION)
+    app.add_middleware(ProfileMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION,
+                       resolver=ProfileResolver(profiles), request_profiles=request_profiles,
+                       extensions=profiles.extensions())
     app.add_middleware(
         CORSMiddleware,
         position=MiddlewarePosition.BEFORE_EXCEPTION,
@@ -60,7 +69,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
         allow_headers=["*"],
     )
     # connexion changes the spec it is given, so each app gets its own copy.
-    spec = add_extension_paths(copy.deepcopy(parsed_spec()), profile.extensions)
+    spec = add_extension_paths(copy.deepcopy(parsed_spec()), profiles.extensions())
     app.add_api(spec, resolver=RelativeResolver('rpp.handlers'), resolver_error=501,
                 validate_responses=True, options={"swagger_ui": True, "serve_spec": True},
                 validator_map={
@@ -69,6 +78,8 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
                 })
     app.app.config[DISCOVERY_SETTINGS] = discovery_settings
     app.app.config[BACKEND_PROFILE] = profile
+    app.app.config[RPP_PROFILES] = profiles
+    app.app.config[REQUEST_PROFILES] = request_profiles
     app.add_error_handler(ProblemException, handle_rpp_error)
 
     return app

@@ -525,3 +525,14 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 
 - Json -01 §6.1.1 gives the Identifier the pattern `^(\w|_){1,8}-\w{1,}$` (one hyphen, after one to eight word characters), from the EPP `roidType`. EPP contact ids are `clIDType` (RFC 5730 §2.8 gives `roidType` to repository ids only), and DENIC handles have several hyphens (`DENIC-1000022-GR`), so neither fits.
 - **Proxy:** the bundle in `src/` predates json -01 and has no pattern for `identifier`; the examples of [docs/rri/rri-extension.md](../docs/rri/rri-extension.md) use DENIC handles.
+
+## Profiles
+
+- Core §12.4 and json §6.11 do not say whether a profile inherits the objects and extensions of its `baseProfile`, nor
+  what a request may do with a data object the selected profile lacks. Neither gives the profile of the EPP constraints
+  (data-objects §2.8, json §8.7.1) an extension of its own.
+- **Proxy:** every profile definition is complete, `baseProfile` is informational and checked at start. The EPP
+  constraints are the extension `urn:ietf:params:rpp:extension:epp-compatibility`, which adds no schema member. A path of
+  a data object outside the selected profile, or that the backend does not hold, is 501 `02307` (core §16.1.6 allows
+  404 or 501 for an endpoint a server does not implement). The Profile Data Object is the same on every server, whatever
+  the backend holds.

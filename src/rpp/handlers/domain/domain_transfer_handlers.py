@@ -1,6 +1,6 @@
 from core.model.domain.domain_transfer import DomainTransfer
 from rpp.handlers.shared.transfer_handlers import TransferHandlers
-from rpp.http.context import backend_profile
+from rpp.http.context import request_profile
 from rpp.http.operation import rpp_operation
 from rpp.mapping.domain import domain_transfer_approve, domain_transfer_process, domain_transfer_reject
 
@@ -8,7 +8,7 @@ _handlers = TransferHandlers(
     gateway_of=lambda backend: backend.domains,
     operations_of=lambda profile: profile.domainName.processes.transfer.operations,
     create_mapper=lambda name, body, authorization: domain_transfer_process.rpp_to_model(
-        name, body, authorization, profile=backend_profile()),
+        name, body, authorization, profile=request_profile()),
     approve_mapper=domain_transfer_approve.rpp_to_model,
     reject_mapper=domain_transfer_reject.rpp_to_model,
     response_mapper=domain_transfer_process.model_to_rpp,

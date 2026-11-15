@@ -19,21 +19,32 @@ Spec: data-objects §4 and §18, json §6.11 and §8.8, core §11, §12.3, §12.
   Paths outside the profile are refused before any backend command.
 - D5 With the default profile nothing changes on the wire (discovery excepted, see W5); existing tests stay green.
 
+## Decisions (orchestrator, plan approval)
+
+- D6 Q1: the published profile is not narrowed: `GET /profiles/base` lists host on RRI too. The effective objects a request
+  may use = selected profile objects ∩ backend objects. Under base on RRI `/hosts` gets W1 (501, 02307). Profile objects
+  need not be a subset of the backend's; profile extensions must be held. Discovery `objects` stays the backend's.
+- D7 Q2 approved (offered set and `default_profile` in `BackendProfile`). Q3 approved (404, 02303). Q5 and Q6 approved.
+- D8 Q4 approved (501, 02307). Citation: core line ~1211 ("MUST return 404 Not Found or 501 Not Implemented", §16.1.6
+  being Process Listing) plus the result code table for 02307. Every case asserting 02101 for RRI `/hosts` is updated;
+  say so in the PR. W1 to W5 approved; W5 is a deliberate wire change, recorded in the PR description.
+- MTEST: pending unless this machine is on the allowlist (to be recorded).
+
 ## Tasks
 
-- [~] T0 Plan pushed, waiting for approval
-- [ ] T1 Extension file for the epp constraint extension (`.spec/epp-compatibility.schema.json`, `rpp:extends` and
+- [x] T0 Plan approved
+- [x] T1 Extension file for the epp constraint extension (`.spec/epp-compatibility.schema.json`, `rpp:extends` and
       `$defs` empty), copied by `copy_models.sh`; the loader and `check_known` take it unchanged
-- [ ] T2 Profile definitions and catalog (`rpp/schema`): `RppProfile`, `RppProfiles`, the three YAMLs, startup checks
-- [ ] T3 `BackendProfile`: `profiles` leaf holds the offered profile keys, new leaf `default_profile`; epp.yaml and
+- [x] T2 Profile definitions and catalog (`rpp/schema`): `RppProfile`, `RppProfiles`, the three YAMLs, startup checks
+- [x] T3 `BackendProfile`: `profiles` leaf holds the offered profile keys, new leaf `default_profile`; epp.yaml and
       rri.yaml set them; `extensions` of epp gets the constraint extension
-- [ ] T4 Resolver and per-request context in `rpp/http`: `ProfileResolver` (returns the default today), middleware that
+- [x] T4 Resolver and per-request context in `rpp/http`: `ProfileResolver` (returns the default today), middleware that
       stores the selected profile and refuses paths outside it, `request_profile()` in `rpp/http/context.py`
-- [ ] T5 Handlers and mappers read the request's profile for `extensions` and `objects` instead of the static one
-- [ ] T6 `create_app`: extension paths for the union of the offered profiles' extensions
-- [ ] T7 `GET /profiles/{name}`: handler `rpp/handlers/profiles.py`, mapper `rpp/mapping/profile/profile.py`
-- [ ] T8 Discovery from the catalog (profiles, extensions, objects)
-- [ ] T9 Config files, tests (unit, wire, startup checks), docs (`architecture.project.md`, `testing.project.md`,
+- [x] T5 Handlers and mappers read the request's profile for `extensions` and `objects` instead of the static one
+- [x] T6 `create_app`: extension paths for the union of the offered profiles' extensions
+- [x] T7 `GET /profiles/{name}`: handler `rpp/handlers/profiles.py`, mapper `rpp/mapping/profile/profile.py`
+- [x] T8 Discovery from the catalog (profiles, extensions, objects)
+- [~] T9 Config files, tests (unit, wire, startup checks), docs (`architecture.project.md`, `testing.project.md`,
       `spec-issues.md` for gaps), full checks, draft PR
 
 ## Findings (evidence)
@@ -68,10 +79,9 @@ New in `src/rpp/schema/` (mirrors `extensions.py` and its `schemas/extensions/`,
   the startup checks: every key known; exactly one default and it is offered; inheritance depth 1 (a base profile has no
   `baseProfile`); no profile is its own base; a `baseProfile` must itself be offered (so `baseProfile` is readable);
   no extension twice in a profile; every extension implemented (`EXTENSIONS`) and held by the backend
-  (`BackendProfile.extensions`); every object of a profile that is held by the backend (see Q1). Names unique.
+  (`BackendProfile.extensions`); (objects need not be held, D6). Names unique.
   A failure is a `ValueError` at start, like `check_known`.
-- `RppProfile` objects/extensions as served and used are the definition's, restricted to what the backend holds
-  (`objects` ∩ `BackendProfile.objects`), so the base profile on the RRI server has no host (Q1).
+- (Superseded by D6) The published profile is the definition as is; only `request_profile()` intersects objects.
 
 ### B. Configuration and BackendProfile (reconciling the existing `profiles` leaf)
 

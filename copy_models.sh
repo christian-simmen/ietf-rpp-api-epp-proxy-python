@@ -7,3 +7,4 @@ cp -v $SPEC_FOLDER/json-schema/rpp.schema.normalized.json ./src/rpp/schema/schem
 cp -v .spec/draft-ietf-rpp-data-objects.yaml ./src/rpp/schema/schemas/
 # The RPP extensions of the proxy (json §7), described in docs/rri/rri-extension.md.
 cp -v .spec/rri-extension.schema.json ./src/rpp/schema/schemas/extensions/
+cp -v .spec/epp-compatibility.schema.json ./src/rpp/schema/schemas/extensions/

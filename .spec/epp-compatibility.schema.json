@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/epp-compatibility.schema.json",
+  "title": "RPP EPP Compatibility constraints extension",
+  "description": "Lists the constraints of the EPP Compatibility Profile (data-objects §2.8, json §8.7.1) as an extension. It adds no member to any object: the EPP backend enforces the constraints under every profile, so this schema changes no validation.",
+  "rpp:extension": {
+    "name": "RPP EPP Compatibility",
+    "id": "urn:ietf:params:rpp:extension:epp-compatibility",
+    "version": "1.0"
+  },
+  "rpp:extends": {},
+  "$defs": {}
+}
