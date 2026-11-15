@@ -10,7 +10,8 @@ from rpp.mapping.contact.contact_capabilities import check_contact
 from tests.helper.contact_fixtures import ADDRESS, card, current_contact, derived_update, localized, put_body
 from tests.helper.epp_app_context import epp_app_context  # noqa: F401, a fixture
 
-pytestmark = pytest.mark.usefixtures("epp_app_context")
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = [pytest.mark.usefixtures("epp_app_context"), pytest.mark.lazy_schemas]
 
 ID = "JD-1234"
 
@@ -203,10 +204,13 @@ def test_a_server_status_is_a_400():
     assert rejected(put_body(status=[{"@type": "contactStatus", "label": "serverUpdateProhibited"}])) == 400
 
 
-def test_a_due_date_is_a_501():
+def test_a_due_date_on_a_contact_status_is_an_undeclared_property():
+    # json §6.2.3: only the domain status has `due`; contactStatus.create has `@type`, `label` and `reason`, so under
+    # json §4.9.1 the member is undeclared: 400 (02001), no longer the 501 of EPP not holding it, which a permissive schema
+    # let through to the mapper
     status = {"@type": "contactStatus", "label": "clientUpdateProhibited", "due": "2030-01-01T00:00:00Z"}
 
-    assert rejected(put_body(status=[status])) == 501
+    assert rejected(put_body(status=[status])) == 400
 
 
 def test_disclose_is_a_501():

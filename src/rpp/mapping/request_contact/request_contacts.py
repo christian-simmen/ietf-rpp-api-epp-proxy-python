@@ -13,19 +13,19 @@ def check_requested(identifiers: list[str]) -> frozenset[str]:
     return frozenset()
 
 
-def rpp_to_model(rpp: dict) -> RequestContact:
+def rpp_to_model(rpp: dict, extensions: tuple[str, ...] = ()) -> RequestContact:
     """Converts a create request. The registry checks the template beyond its length."""
-    validate_schema("requestContact.create", rpp)
+    validate_schema("requestContact.create", rpp, extensions)
     contact = parse_rpp(RPPRequestContact, rpp)
     return RequestContact(id=contact.id, uriTemplate=contact.uriTemplate)
 
 
-def model_to_rpp(contact: RequestContact) -> dict:
+def model_to_rpp(contact: RequestContact, extensions: tuple[str, ...] = ()) -> dict:
     """Converts a request contact to its read representation."""
     contact_dict = RPPRequestContact(
         id=contact.id,
         provMetadata=prov_metadata.model_to_rpp(contact),
         uriTemplate=contact.uriTemplate,
     ).to_rpp()
-    validate_schema("requestContact.read", contact_dict)
+    validate_schema("requestContact.read", contact_dict, extensions)
     return contact_dict

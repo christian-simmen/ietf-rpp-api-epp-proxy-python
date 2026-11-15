@@ -1,0 +1,74 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-the_profile_of_the_other_server_is_refused",
+  "description": "A profile the server does not offer in the Accept of a request whose Content-Type is offered (base): the Accept lists no profile the server offers, 406 with RPP-Code 02004 (core 14.3).",
+  "when": {
+    "env.profile_signalling": "media-type"
+  },
+  "steps": [
+    {
+      "when": {
+        "profile.profiles": {
+          "not": {
+            "contains": "epp"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:epp-compatibility\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.profiles": {
+          "not": {
+            "contains": "rri"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"de.denic.rpp.profile.rri\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

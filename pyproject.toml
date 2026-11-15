@@ -17,6 +17,7 @@ pythonpath = [
 # A case file of the integration suite names its markers in "markers" (docs/agents/testing.project.md).
 markers = [
     "smoke: a happy path of each operation, run on every iteration: pytest -m smoke",
+    "lazy_schemas: the test maps without an app, so a validator is built on first use (tests/conftest.py)",
 ]
 addopts = "--strict-markers --tb=short -p no:warnings"
 

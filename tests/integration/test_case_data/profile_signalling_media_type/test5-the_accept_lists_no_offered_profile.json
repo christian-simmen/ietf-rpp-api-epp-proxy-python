@@ -1,0 +1,108 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test5-the_accept_lists_no_offered_profile",
+  "description": "An Accept without a profile the server offers (an unknown profile or version, a weight of 0, another media type) is 406 with RPP-Code 02004 (core 14.3).",
+  "when": {
+    "env.profile_signalling": "media-type"
+  },
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:example:nope\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"2.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"; q=0",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "text/html",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

@@ -51,7 +51,7 @@ def assert_headers(expected_headers, response, test_name):
         else:
             raise ValueError(f"Header '{header}' has unexpected type or value for test case: {test_name}")
 
-def assert_response(expected, response, test_name):
+def assert_response(expected, response, test_name, signalling="header"):
     # 1. Check the HTTP status code
     if isinstance(expected["status"], list):
         # Check if the response status code is in the list of expected status codes
@@ -61,7 +61,13 @@ def assert_response(expected, response, test_name):
 
     if "content_type" in expected:
         # Check the Content-Type header
-        assert response.headers["Content-Type"].lower() == expected["content_type"].lower(), f"Content-Type mismatch for test case: {test_name}"
+        # With the media type signalling (core §14.3) the profile is in the parameters: an expected type without
+        # parameters is then the media type of the response, whatever its parameters. Otherwise, and for an expected
+        # type with parameters, the whole value is compared.
+        actual = response.headers["Content-Type"].lower()
+        if signalling == "media-type" and ";" not in expected["content_type"]:
+            actual = actual.partition(";")[0].strip()
+        assert actual == expected["content_type"].lower(), f"Content-Type mismatch for test case: {test_name}"
 
     # 2. Check the response body (if one is expected)
     if "body" in expected:
@@ -84,12 +90,12 @@ def assert_response(expected, response, test_name):
 
     assert_headers(expected.get("headers", {}), response, test_name)
 
-def assert_any_response(alternatives, response, test_name):
+def assert_any_response(alternatives, response, test_name, signalling="header"):
     """Passes when one alternative matches, for behaviour the protocol leaves to the server."""
     failures = []
     for i, expected in enumerate(alternatives):
         try:
-            assert_response(expected, response, test_name)
+            assert_response(expected, response, test_name, signalling)
             return
         except AssertionError as failure:
             failures.append(f"[{i}] {failure}")
@@ -162,6 +168,7 @@ def endpoint_test(client, case_sequence, sleep=time.sleep, credentials=None, pac
     if "skip" in case_sequence:
         pytest.skip(reason=f"Skipping test case: {case_sequence['test_id']} - {case_sequence['skip']}")
     captures = {}
+    signalling = credentials.env.profile_signalling if credentials is not None else "header"
     for i, case in enumerate(case_sequence["steps"]):
         case = substitute_captures(case, captures)
         if case.get("delay_seconds"):
@@ -190,9 +197,9 @@ def endpoint_test(client, case_sequence, sleep=time.sleep, credentials=None, pac
         test_name = f"{case_sequence['test_id']}[{i}]"
         assert_rpp_headers(case["request"]["headers"], response, test_name)
         if "any_of" in case["response"]:
-            assert_any_response(case["response"]["any_of"], response, test_name)
+            assert_any_response(case["response"]["any_of"], response, test_name, signalling)
         else:
-            assert_response(case["response"], response, test_name)
+            assert_response(case["response"], response, test_name, signalling)
 
         # A step's "capture" maps a name to a dotted field of its response body, for {capture:name} in later steps.
         for name, path in case.get("capture", {}).items():

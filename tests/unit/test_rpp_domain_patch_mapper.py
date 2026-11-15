@@ -8,6 +8,9 @@ from core.model.shared.common import AuthInfo
 from tests.helper.profiles import EPP_PROFILE
 from rpp.mapping.domain import domain_patch
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 CONTACT = {"@type": "contact", "id": "SH-8014"}
 
 HOST = {"@type": "host", "hostName": "ns1.foo.example"}

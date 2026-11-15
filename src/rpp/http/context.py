@@ -4,7 +4,8 @@ from flask import current_app
 from core.capabilities.backend_profile import BackendProfile
 from rpp.http.profile_middleware import SELECTED_PROFILE
 from rpp.http.request_profiles import RequestProfiles
-from rpp.schema.rpp_profile import RppProfile
+from rpp.http.profile_selection import ProfileSelection
+from rpp.schema.profile_schemas import ProfileSchemas
 from rpp.schema.rpp_profiles import RppProfiles
 
 # The key of the token info that holds the request's backend.
@@ -16,6 +17,8 @@ BACKEND_PROFILE = "RPP_BACKEND_PROFILE"
 DISCOVERY_SETTINGS = "RPP_DISCOVERY_SETTINGS"
 
 RPP_PROFILES = "RPP_PROFILES"
+
+PROFILE_SCHEMAS = "RPP_PROFILE_SCHEMAS"
 
 REQUEST_PROFILES = "RPP_REQUEST_PROFILES"
 
@@ -39,16 +42,29 @@ def rpp_profiles() -> RppProfiles:
     return current_app.config[RPP_PROFILES]
 
 
-def selected_profile() -> RppProfile:
-    """The RPP profile of the request, which the profile middleware selected."""
+def profile_schemas() -> ProfileSchemas:
+    """The effective schemas of the offered profiles, built with the app."""
+    return current_app.config[PROFILE_SCHEMAS]
+
+
+def profile_selection() -> ProfileSelection:
+    """The RPP profiles of the request, which the profile middleware selected."""
     return request.context[SELECTED_PROFILE]
 
 
 def request_profile() -> BackendProfile:
-    """What the backend can hold as the request's profile allows: its extensions and its data objects. Handlers pass
-    this, not `backend_profile()`, to what depends on the profile (the combined schema, the objects)."""
+    """What the backend can hold as the profile the request is read under allows (that of its Content-Type): its
+    extensions and its data objects. Handlers pass this, not `backend_profile()`, to
+    what parses or checks the request (the combined schema, the objects)."""
     requests: RequestProfiles = current_app.config[REQUEST_PROFILES]
-    return requests.of(selected_profile())
+    return requests.of(profile_selection().request)
+
+
+def response_profile() -> BackendProfile:
+    """The same as the profile of the response allows: what a response shows (the extensions of the profile it is
+    under)."""
+    requests: RequestProfiles = current_app.config[REQUEST_PROFILES]
+    return requests.of(profile_selection().response)
 
 
 def discovery_settings():

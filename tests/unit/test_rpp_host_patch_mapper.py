@@ -6,6 +6,9 @@ from core.model.host.host_update import HostUpdate
 from core.model.host.host_update_changes import HostUpdateChanges
 from rpp.mapping.host import host_patch
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 NAME = "ns1.example.example"
 
 A = {"@type": "dnsRecord", "name": f"{NAME}.", "type": "a", "rdata": {"address": "192.0.2.1"}}

@@ -14,7 +14,8 @@ from rpp.mapping.domain import domain_patch, domains
 from rpp.mapping.host import host_patch, host_replacement, hosts
 from tests.helper.epp_app_context import epp_app_context  # noqa: F401, a fixture
 
-pytestmark = pytest.mark.usefixtures("epp_app_context")
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = [pytest.mark.usefixtures("epp_app_context"), pytest.mark.lazy_schemas]
 
 create_domain = partial(domains.rpp_to_model, profile=EPP_PROFILE)
 
@@ -74,7 +75,6 @@ NOT_IN_EPP = [
     (hosts.rpp_to_model, {**HOST, "dns": dns(record("ns", {"nsdname": "other.example."}))}),
     (hosts.rpp_to_model, {**HOST, "dns": dns(record("mx", {"exchange": "a.", "preference": "1"}))}),
     (hosts.rpp_to_model, {**HOST, "dns": dns(controls=SIG_LIFETIME)}),
-    (replace_host, {**HOST, "status": [{**STATUS, "due": "2030-01-01T00:00:00Z"}]}),
     (contacts.rpp_to_model, contact(status=[{"@type": "contactStatus", "label": "clientUpdateProhibited"}])),
     (contacts.rpp_to_model, contact(card(links={"url": {"uri": "https://example.example"}}))),
     (contacts.rpp_to_model, contact(card(emails={"email": EMAIL, "email-1": EMAIL}))),

@@ -9,6 +9,9 @@ from rpp.mapping.message import messages
 from rpp.schema.validator import validate_schema
 from tests.helper.captured_log import capture_log
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 DATE = "2026-11-05T16:49:34.000000Z"
 
 

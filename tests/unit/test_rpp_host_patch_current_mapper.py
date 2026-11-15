@@ -7,6 +7,9 @@ from core.model.host.host import Host
 from rpp.mapping.host import host_patch, hosts
 from rpp.mapping.shared.patch_not_applicable import PatchNotApplicable
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 NAME = "ns1.foo.example"
 
 RECORD_A = {"@type": "dnsRecord", "name": "@", "type": "a", "rdata": {"address": "198.51.100.1"}}

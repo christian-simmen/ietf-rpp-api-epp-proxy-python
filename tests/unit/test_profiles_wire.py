@@ -5,7 +5,8 @@ import pytest
 
 from core.session.session_pool import SessionPool
 from rpp.http.app import create_app
-from rpp.http.profile_resolver import ProfileResolver
+from rpp.http.header_profile_signalling import HeaderProfileSignalling
+from rpp.http.profile_selection import ProfileSelection
 from rpp.schema.profiles import PROFILES
 from tests.helper.epp_backends import epp_backends
 from tests.helper.fake_epp_client import FakeEppClient
@@ -81,10 +82,10 @@ def test_discovery_states_the_offered_profiles_and_their_extensions():
     rri = rri_client().get("/.well-known/rpp", headers=HEADERS).json()
 
     assert epp["profiles"] == [BASE, EPP]
-    assert [e["id"] for e in epp["extensions"]] == [EPP_EXTENSION]
+    assert [e["id"] for e in epp["extensions"]] == [EPP_EXTENSION, "urn:ietf:params:rpp:extension:profile-schemas"]
     assert epp["objects"] == ["domainName", "host", "contact"]
     assert rri["profiles"] == [BASE, RRI]
-    assert [e["id"] for e in rri["extensions"]] == ["de.denic.rpp.rri"]
+    assert [e["id"] for e in rri["extensions"]] == ["de.denic.rpp.rri", "urn:ietf:params:rpp:extension:profile-schemas"]
     assert rri["objects"] == ["domainName", "contact", "requestContact"]
 
 
@@ -145,7 +146,7 @@ class Selecting:
     """Stands for a signalling method of #163 or #164: the resolver is the one place a profile is chosen."""
 
     def __init__(self, monkeypatch, key):
-        monkeypatch.setattr(ProfileResolver, "resolve", lambda self, scope: PROFILES[key])
+        monkeypatch.setattr(HeaderProfileSignalling, "resolve", lambda self, scope: ProfileSelection.of(PROFILES[key]))
 
 
 def test_a_selected_profile_decides_the_paths_the_extensions_and_nothing_else(monkeypatch):

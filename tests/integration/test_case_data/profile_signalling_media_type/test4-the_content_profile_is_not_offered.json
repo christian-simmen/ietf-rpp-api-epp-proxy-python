@@ -1,0 +1,154 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test4-the_content_profile_is_not_offered",
+  "description": "A profile or version of the Content-Type that the server does not offer is 415 with RPP-Code 02004, a Problem Detail without profile parameters and Accept in Vary, on a request with content and on one without (core 14.3).",
+  "when": {
+    "env.profile_signalling": "media-type"
+  },
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/contacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"2.0\""
+        },
+        "body_json": {
+          "@type": "contact",
+          "id": "{handle:a:PB4}"
+        }
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/contacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:example:nope\"; profile-version=\"1.0\""
+        },
+        "body_json": {
+          "@type": "contact",
+          "id": "{handle:a:PB4}"
+        }
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b4-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:example:nope\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.profiles": {
+          "not": {
+            "contains": "epp"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b4-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:epp-compatibility\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.profiles": {
+          "not": {
+            "contains": "rri"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b4-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; profile=\"de.denic.rpp.profile.rri\"; profile-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 415,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

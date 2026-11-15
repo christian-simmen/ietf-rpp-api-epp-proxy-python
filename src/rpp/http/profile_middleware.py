@@ -3,30 +3,16 @@ from connexion import ProblemException
 from core.result.result_code import ResultCode
 from rpp.http.extension_paths import plural
 from rpp.http.headers import problem_headers
-from rpp.http.profile_header import HEADER, format_profile, vary_with_profile
-from rpp.http.profile_resolver import ProfileResolver
+from rpp.http.profile_schema_path import OPERATION as SCHEMA_OPERATION
 from rpp.http.request_profiles import RequestProfiles
 from rpp.schema.extensions import EXTENSIONS
-from rpp.schema.rpp_profile import RppProfile
 
-# The key of the request context that holds the selected `RppProfile`.
+# The keys of the request context that hold the `ProfileSelection` of the request and the signalling method that made it.
 SELECTED_PROFILE = "rpp_profile"
+SIGNALLING = "rpp_profile_signalling"
 
 # The first path segment of the data objects of the drafts, and the object it addresses.
 COLLECTIONS = {plural(obj): obj for obj in ("domainName", "contact", "host")}
-
-
-def with_profile_header(send, profile: RppProfile):
-    """`send` that adds the `RPP-Profile` header of the applied profile to the response (core §6.2)."""
-    async def send_with_profile(message):
-        if message["type"] == "http.response.start":
-            headers = [(name, value) for name, value in message.get("headers", []) if name.lower() != b"vary"]
-            vary = b", ".join(value for name, value in message.get("headers", []) if name.lower() == b"vary")
-            message = {**message, "headers": [
-                *headers, (HEADER.lower().encode(), format_profile(profile).encode()),
-                (b"vary", vary_with_profile(vary.decode("latin-1")).encode("latin-1"))]}
-        await send(message)
-    return send_with_profile
 
 
 class ProfileMiddleware:
@@ -41,13 +27,13 @@ class ProfileMiddleware:
     401 and gives no hint of the profiles.
     """
 
-    def __init__(self, app, resolver: ProfileResolver, request_profiles: RequestProfiles, extensions):
+    def __init__(self, app, signalling, request_profiles: RequestProfiles, extensions):
         self.app = app
         # The objects an extension defines are in the plural of their identifier (core §16.1). Only those of the
         # offered extensions have paths: any other is a 404, as without the extension.
         self.collections = {**COLLECTIONS, **{
             plural(obj): obj for extension in extensions for obj in EXTENSIONS[extension].objects}}
-        self.resolver = resolver
+        self.signalling = signalling
         self.request_profiles = request_profiles
 
     async def __call__(self, scope, receive, send):
@@ -55,18 +41,22 @@ class ProfileMiddleware:
             # Only a routed operation selects a profile and is refused: a path no operation serves stays the 404 of
             # the router, and a 401 never gets here.
             routed = scope.get("extensions", {}).get("connexion_routing", {}).get("operation_id")
-            if not routed:
+            if not routed or routed.endswith(SCHEMA_OPERATION):
+                # A path no operation serves is the router's 404. The schema of a profile is a document, outside the
+                # profile signalling of both methods: no selection, no refusal, no profile in the response.
                 await self.app(scope, receive, send)
                 return
-            profile = self.resolver.resolve(scope)
-            scope.setdefault("extensions", {}).setdefault("connexion_context", {})[SELECTED_PROFILE] = profile
-            send = with_profile_header(send, profile)
+            selection = self.signalling.resolve(scope)
+            context = scope.setdefault("extensions", {}).setdefault("connexion_context", {})
+            context[SELECTED_PROFILE] = selection
+            context[SIGNALLING] = self.signalling
+            send = self.signalling.announce(send, selection)
             segment = scope["path"].lstrip("/").split("/", 1)[0]
             obj = self.collections.get(segment)
-            if obj is not None and obj not in self.request_profiles.of(profile).objects:
+            if obj is not None and obj not in self.request_profiles.of(selection.request).objects:
                 raise ProblemException(
                     status=501, title=ResultCode.UNIMPLEMENTED_OBJECT_SERVICE.value[1],
-                    detail=f"The profile {profile.name} has no {obj} object on this server",
+                    detail=f"The profile {selection.request.name} has no {obj} object on this server",
                     headers=problem_headers(ResultCode.UNIMPLEMENTED_OBJECT_SERVICE),
                 )
         await self.app(scope, receive, send)

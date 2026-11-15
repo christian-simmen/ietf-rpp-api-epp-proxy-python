@@ -5,7 +5,7 @@
     "profile.profiles": {
       "contains": "rri"
     },
-    "env.profile_signalling": "header"
+    "env.profile_signalling": "media-type"
   },
   "steps": [
     {
@@ -14,10 +14,9 @@
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json",
-          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
         },
         "body_json": {
           "@type": "domainName",
@@ -36,7 +35,7 @@
         },
         "headers": {
           "RPP-Code": "02001",
-          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+          "RPP-Profile": null
         }
       }
     },
@@ -46,10 +45,9 @@
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json",
-          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
         },
         "body_json": {
           "@type": "requestContact",
@@ -65,7 +63,7 @@
         },
         "headers": {
           "RPP-Code": "02307",
-          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+          "RPP-Profile": null
         }
       }
     }

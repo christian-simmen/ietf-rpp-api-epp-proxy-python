@@ -9,6 +9,9 @@ from core.model.shared.common import AuthInfo
 from tests.helper.profiles import EPP_PROFILE
 from rpp.mapping.domain import domains
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 IDN_PROFILE = EPP_PROFILE.with_changes({"lgrs": ["latn-1.0"]})
 
 

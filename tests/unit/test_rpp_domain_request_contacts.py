@@ -11,6 +11,9 @@ from rpp.mapping.domain import domain_patch, domain_replacement, domains
 from rpp.mapping.shared.patch_not_applicable import PatchNotApplicable
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 NAME = "example.de"
 
 HOLDER = {"@type": "contact", "id": "DENIC-1000022-HOLDER"}

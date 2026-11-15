@@ -55,12 +55,17 @@ rpp_backend_profile:
   extends: rri                    # the generic RRI profile, src/settings/profiles/rri.yaml
   profiles: [base, rri]           # the RPP profiles offered (src/rpp/schema/schemas/profiles)
   default_profile: rri            # the one a request gets when it names none
-rpp_profile_signalling: header    # how a client names the profile: the RPP-Profile header field (the default)
+rpp_profile_signalling: header    # how a client names the profile: the RPP-Profile header field (the default), or media-type
 rpp_tlds:
   - de
 ```
-A client names the profile of a request with `RPP-Profile: profile=<name>;version=1.0` (core §14.2); without it the
-request gets `default_profile`. The response names the profile applied. `rpp_backend_profile.extends` names the generic profile of the protocol and defaults to `rpp_backend`. HTTP Basic is
+A client names the profile of a request with `RPP-Profile: profile=<name>;version=1.0` (core §14.2), or, with
+`rpp_profile_signalling: media-type`, with the parameters of the media type, `Accept: application/rpp+json;
+profile="<name>"; profile-version="1.0"` and the same in the `Content-Type` of every request, with content or without (core §13); without it the request is
+under `default_profile`, which the `Accept` must then list. The two methods are not mixed. With the header method a request that names none gets `default_profile`. The response names the profile applied, in
+`RPP-Profile` or in its `Content-Type`. Discovery lists, in `profileSchemas`, the URL of the effective JSON Schema of each
+offered profile (`GET /profiles/<name>/schema`, no authentication): the data definitions and those of the profile's
+extensions, the schema the proxy validates with ([docs/profile-schemas-extension.md](docs/profile-schemas-extension.md)). `rpp_backend_profile.extends` names the generic profile of the protocol and defaults to `rpp_backend`. HTTP Basic is
 passed through as the RRI LOGIN, as it is as the EPP login. DENIC lets in only addresses on the allowlist of the
 RegAcc.
 

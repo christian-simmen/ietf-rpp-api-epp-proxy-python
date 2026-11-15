@@ -4,6 +4,9 @@ from core.capabilities.not_supported_by_backend import NotSupportedByBackend
 from core.model.shared.availability import Availability
 from rpp.mapping.domain import domain_availability
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 
 def availability(available, reason):
     return Availability(name="foo.example", available=available, reason=reason)

@@ -10,6 +10,9 @@ from core.model.domain.zone_record import ZoneRecord
 from tests.helper.profiles import EPP_PROFILE
 from rpp.mapping.domain import domain_patch, domain_wanted, domains
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 OTHER = EPP_PROFILE.with_changes({"name": "Other", "domainName": {
     "registrant": {"max_count": 5}, "contacts": {"labels": ["generalRequest", "abuse"]},
     "dns": {"record_types": ["ns", "a", "aaaa", "mx", "dnskey"]}}})

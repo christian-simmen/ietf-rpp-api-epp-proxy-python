@@ -1,12 +1,10 @@
-import re
-from urllib.parse import urlsplit
-
 from core.model.shared.discovery import Discovery
 from rpp.dto.rpp_discovery import RPPDiscovery
 from rpp.dto.rpp_discovery_environment import RPPDiscoveryEnvironment
 from rpp.dto.rpp_discovery_version import RPPDiscoveryVersion
 from rpp.mapping.shared.extension import extension_to_rpp
-from rpp.schema.extensions import EXTENSIONS
+from rpp.schema.extensions import EXTENSIONS, SERVER_EXTENSIONS
+from rpp.schema.https_url import https_url, text
 from rpp.schema.validator import validate_schema
 
 
@@ -20,36 +18,19 @@ def model_to_rpp(discovery: Discovery) -> dict:
         objects=discovery.objects,
         datetime=discovery.datetime,
     ).to_rpp()
-    validate_schema("discovery.read", rpp)
+    extensions = ()
+    if discovery.profile_schemas is not None:
+        # a member of the extension `profile-schemas`, which the server has whatever profile a request has
+        rpp["profileSchemas"] = [
+            {"profile": reference.profile, "version": reference.version, "url": reference.url}
+            for reference in discovery.profile_schemas]
+        extensions = SERVER_EXTENSIONS
+    validate_schema("discovery.read", rpp, extensions)
     return rpp
 
 
-# The characters a URI may have (RFC 3986), without `?` and `#`, which the base URL may not have anyway.
-_URI_CHARACTERS = re.compile(r"[A-Za-z0-9\-._~:/\[\]@!$&'()*+,;=%]+")
-
-
-def _text(value) -> bool:
-    """A non-empty string with no control characters and no padding."""
-    return isinstance(value, str) and bool(value) and value == value.strip() and not any(ord(c) < 32 or ord(c) == 127 for c in value)
-
-
 def _tld(value) -> bool:
-    return _text(value) and not any(c.isspace() for c in value)
-
-
-def _https_url(value) -> bool:
-    """An absolute https URL with a host, usable as a prefix: no userinfo, query or fragment, and no malformed escape."""
-    if not _text(value) or not _URI_CHARACTERS.fullmatch(value) or any(c.isspace() or c == "\\" for c in value) or re.search(r"%(?![0-9A-Fa-f]{2})", value):
-        return False
-    try:
-        parts = urlsplit(value)
-        parts.port  # raises ValueError for a port that is not a number or out of range
-        return (
-            parts.scheme == "https" and bool(parts.hostname) and "@" not in parts.netloc
-            and "?" not in value and "#" not in value
-        )
-    except ValueError:
-        return False
+    return text(value) and not any(c.isspace() for c in value)
 
 
 def invalid_settings(settings) -> list[str]:
@@ -60,9 +41,9 @@ def invalid_settings(settings) -> list[str]:
     """
     tlds = getattr(settings, "rpp_tlds", None)
     checks = {
-        "rpp_base_url": _https_url(getattr(settings, "rpp_base_url", None)),
+        "rpp_base_url": https_url(getattr(settings, "rpp_base_url", None)),
         "rpp_tlds": isinstance(tlds, list) and bool(tlds) and all(_tld(tld) for tld in tlds),
-        "rpp_environment_name": _text(getattr(settings, "rpp_environment_name", None)),
-        "rpp_environment_status": _text(getattr(settings, "rpp_environment_status", None)),
+        "rpp_environment_name": text(getattr(settings, "rpp_environment_name", None)),
+        "rpp_environment_status": text(getattr(settings, "rpp_environment_status", None)),
     }
     return [key for key, valid in checks.items() if not valid]

@@ -5,7 +5,7 @@ from settings.epp_settings import EppSettings
 from settings.rri_settings import RriSettings
 
 BACKENDS = ("epp", "rri")
-SIGNALLING_METHODS = ("header",)  # "media-type" follows with #164
+SIGNALLING_METHODS = ("header", "media-type")
 
 
 @dataclass(frozen=True)
@@ -15,7 +15,7 @@ class Settings:
     `backend` is the protocol the proxy speaks to the registry (`rpp_backend`): `epp` or `rri`. `profile_layers`
     are the layers of its `BackendProfile`, the generic one of the protocol first, then the server's own
     (`rpp_backend_profile`); main merges them with `lgrs`. `profile_signalling` is how a client names the profile of a
-    request (`rpp_profile_signalling`, core §14): `header` (the default), or `media-type`, which is not implemented.
+    request (`rpp_profile_signalling`, core §14): `header` (the default, core §14.2), or `media-type` (§14.3).
     """
     epp: EppSettings
     discovery: DiscoverySettings

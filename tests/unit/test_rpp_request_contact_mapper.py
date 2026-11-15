@@ -8,6 +8,9 @@ from rpp.mapping.request_contact import (
     request_contact_availability, request_contact_patch, request_contact_replacement, request_contacts,
 )
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 ID = "DENIC-1000022-GR"
 
 TEMPLATE = "https://example.com/contact?domain={Alabel}"

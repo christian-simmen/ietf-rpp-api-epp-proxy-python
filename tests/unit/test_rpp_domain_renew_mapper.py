@@ -6,6 +6,9 @@ from core.model.domain.domain_renew import DomainRenew
 from core.model.domain.domain_renew_process import DomainRenewProcess
 from rpp.mapping.domain import domain_renew_process
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 REQUEST = {"@type": "renewProcess"}
 
 

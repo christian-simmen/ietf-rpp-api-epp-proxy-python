@@ -12,6 +12,9 @@ from jsonschema import ValidationError
 from rpp.schema.validator import validate_schema
 from tests.helper.profiles import RRI_PROFILE
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 ROOT = Path(__file__).parents[2]
 
 DOC = (ROOT / "docs" / "rri" / "rri-extension.md").read_text(encoding="utf-8")

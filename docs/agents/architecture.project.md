@@ -23,7 +23,8 @@ src/
 │   └── flows/               read_back.py, mutation_result.py, sponsor.py, {domain,contact,host,message,request_contact}/
 ├── rpp/                     receiving adapter: RPP over HTTP
 │   ├── http/                app (create_app), extension_paths, middleware/, validators/, security/, problem, headers,
-│   │                        context, operation, profile_resolver, profile_middleware, request_profiles
+│   │                        context, operation, profile_signalling, profile_middleware, request_profiles,
+│   │                        profile_selection, header_profile_signalling, media_type_profile_signalling, media_range
 │   ├── handlers/            {domain,contact,host,message,request_contact}/, shared/, discovery.py, profiles.py
 │   ├── mapping/             shared/, {domain,contact,host,message,discovery,profile,request_contact}/
 │   ├── dto/                 the RPP dataclasses
@@ -281,23 +282,75 @@ unknown key, offered twice, the default not offered, an extension listed twice, 
 backend, a base profile that is not offered or has a base itself, a profile that is its own base. A profile's objects need
 not be held.
 
-A request has a selected profile. `ProfileResolver.resolve(scope)` in `rpp/http/profile_resolver.py` is the one place
-that chooses it. The signalling is the `rpp_profile_signalling` of the config (`Settings.profile_signalling`, default
-`header`; `media-type`, core §14.3, is not implemented). With `header` it reads `RPP-Profile` (core §14.2), an RFC 9651
+A request has selected profiles, a `ProfileSelection` (`rpp/http/profile_selection.py`): the `request` profile the request is
+read under (its parsing, checking, routing and backend command), and the `response` profile (what the response shows and
+its media type). The signalling is the `rpp_profile_signalling` of the config
+(`Settings.profile_signalling`, default `header`), and `profile_signalling(method, profiles)` in
+`rpp/http/profile_signalling.py` gives the class of the method. Each has `resolve(scope)`, the one place that chooses
+the profiles, `announce(send, selection)`, which shows the applied profile in the response, and `problem_headers`, which
+does so for the Problem Details an outer error handler renders (`handle_rpp_error`). Only a routed operation selects a
+profile: an unrouted path is the router's 404, and a 401 comes before the profile.
+
+**`header`** (`HeaderProfileSignalling`, core §14.2) reads `RPP-Profile`, an RFC 9651
 Dictionary (a repeated header's lines combined with a comma, the last repeated key winning) parsed by `http-sfv` and checked in `rpp/http/profile_header.py`: the `profile` member is a Token, its
 `version` parameter a Decimal, compared as one (1.10 is 1.1); other members and parameters are ignored. No header
-selects the default profile. A value it cannot read, a missing member or parameter, a profile or version the server does
+selects the default profile, for the request and the response alike. A value it cannot read, a missing member or parameter, a profile or version the server does
 not offer, or profile parameters on an `application/rpp+*` media range of `Accept` or `Content-Type` (both methods in use, core §14) are a 400 with `02005`,
-`02003`, `02004` and `02001` (core §12.4 asks for an RPP client error code). Only a routed operation selects a profile:
-an unrouted path is the router's 404, and a 401 comes before the profile. `ProfileMiddleware` (after the authentication)
-stores it in the request context (`selected_profile()`), adds `RPP-Profile` with the applied profile and version to
+`02003`, `02004` and `02001` (core §12.4 asks for an RPP client error code). It adds `RPP-Profile` with the applied profile and version to
 the response, with `RPP-Profile` in `Vary` (`handle_rpp_error` does it for the Problem Details an outer handler renders, so the header is on every
-response after the selection, a handler's 500 Problem Detail too, and on none before it or on a framework-level 500), and refuses a routed operation on a data object that the profile does not have or the backend does not hold
-with 501 `02307` before validation and any object command (the session login of authentication comes first; core §16.1.6, "404 or 501" for an endpoint a server does not
-implement, and the result code table). `request_profile()` is the backend profile as the request sees it
-(`RequestProfiles`): `extensions` those of the selected profile, so the combined schema of
+response after the selection, a handler's 500 Problem Detail too, and on none before it or on a framework-level 500).
+
+**`media-type`** (`MediaTypeProfileSignalling`, core §14.3; `rpp/http/media_range.py` parses the media ranges) takes the
+request profile from the parameters `profile` and `profile-version` of the `Content-Type` of every request, with
+content or without (core §13 asks for one on every request), and the response profile from the `Accept` by weight. The
+request profile alone governs routing, validation, the mappers and the backend command; the `Accept` governs only the
+response. A value is a token or a quoted string (a profile URN needs quotes), names are not
+case sensitive, versions compare as decimals (`1*DIGIT "." 1*DIGIT`, so `1` is a syntax error). A range of
+`application/rpp+json` with the parameters stands for that profile, one without them for the default profile, `application/*`
+and `*/*` for every offered profile. The most specific range gives a profile its weight, a weight of 0 excludes it, the
+highest weight is answered, and on a tie the request profile if it is among the tied ones, else the first range (a wildcard
+means the default profile). No `Accept` is the default. A `Content-Type` without parameters, or none, is the default
+profile. Refusals, each with `Vary: Accept`: 415 `02004` for a
+profile or version of the `Content-Type` that is not offered, 406 `02004` when no profile of the `Accept` is offered, 400
+`02001` when the request profile is not listed in the `Accept` (weight above 0) and when the `RPP-Profile` header is sent
+(both methods in use), 400 `02003` for a `profile` without its `profile-version` or the reverse, 400 `02005` for a
+value that does not parse. The order is unreadable, then 415, 406, 400. A successful response with an RPP
+media type has `application/rpp+json; profile="<name>"; profile-version="<version>"` of the response profile in its
+`Content-Type`, `Vary` lists `Accept` on every response of a routed operation, a Problem Detail has no parameters, and
+there is no `RPP-Profile` response header (core §14: the methods are not both used in a response; see
+[spec-issues.md](../../.spec/spec-issues.md#profile-signalling-with-media-type-parameters)).
+
+**Effective schemas.** `create_app` builds `ProfileSchemas` (`rpp/schema/profile_schemas.py`) once per app, so once per
+uvicorn worker, at startup (about 5 to 10 ms for two profiles): for each offered profile `build_effective` (for its extension tuple, the server's own, and
+both together, which is the document's) of
+`rpp/schema/validator.py` fills the validator of every definition for the profile's extension tuple (json §7.2: the base
+definition and the extension's with `allOf`), and a JSON Schema 2020-12 document is made with `$id` the public URL, `$defs`
+the bundle and the profile's extension definitions, and each extended definition as the `allOf` of the base definition and
+the extension's, which is what validation composes (the bundle references an extended definition from no other, so composing
+it in place changes nothing else). A request only looks a validator up (`validate_schema`); one the app did not build is a `SchemaNotBuilt`
+error. Only the tests, which map without an app, set `validator.LAZY_BUILD` (tests/conftest.py). `GET /profiles/{name}/schema`
+(`profiles_schemaRead`; the path is added by `rpp/http/profile_schema_path.py`, copied from `/profiles/{name}`, as
+extension paths are, with no security) answers the document as `application/schema+json`, a name not offered is 404
+`02303`. It is a document fetch and not an RPP operation: `ProfileMiddleware` exempts it from profile signalling in both
+methods (no selection, no refusal, no `RPP-Profile`), `RPP-Cltrid` and `Accept` are optional on it, and an `Accept` that does
+not allow `application/schema+json`, `application/json`, `application/*` or `*/*` is a 406 `02004`. Discovery lists
+`{profile, version, url}` per offered profile in `profileSchemas`, a member of the server-wide extension
+`urn:ietf:params:rpp:extension:profile-schemas` (`.spec/profile-schemas.schema.json`,
+[profile-schemas-extension.md](../profile-schemas-extension.md); `SERVER_EXTENSIONS` in `rpp/schema/extensions.py`, listed
+in `extensions` after those of the profiles, in no profile). The URL is `rpp_base_url` plus the path with the name
+URL-encoded as one segment; the document's `$id` is that URL only where discovery would state the base URL
+(`rpp/schema/https_url.py`: https, no userinfo, query or fragment), else the document has none and discovery is the 500 it
+already is. The injection does not put the keyword on a node an `allOf`, `anyOf`, `oneOf`, `then`, `else` or
+`dependentSchemas` reaches: the holder's covers it (`effective_schema.py`).
+
+`ProfileMiddleware` (after the authentication) stores the selection in the request context (`profile_selection()`) and
+refuses a routed operation on a data object that the request profile does not have or the
+backend does not hold with 501 `02307` before validation and any object command (the session login of authentication comes first; core §16.1.6, "404 or 501" for an endpoint a server does not
+implement, and the result code table). `request_profile()` is the backend profile as the request is read under
+(`RequestProfiles`): `extensions` those of the request profile, so the combined schema of
 [RPP extensions](#rpp-extensions) holds only them (guidelines §8.6), and `objects` those of the profile the backend
-holds. Handlers pass it to the mappers that read `extensions` or `objects`; discovery and refusals use `backend_profile()`.
+holds. Handlers pass it to the mappers that read `extensions` or `objects`; `response_profile()` is the same for what a
+response shows (the extensions a domain is rendered with, so an object the response profile lacks members of is shown without them); discovery and refusals use `backend_profile()`.
 The extension paths exist for the extensions of every offered profile, so those of another are a 404.
 
 ## RPP extensions

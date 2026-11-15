@@ -5,7 +5,7 @@ from core.flows.domain.domain_flows import (
 )
 from core.result.error_response import ErrorResponse
 from rpp.handlers.shared.requested_elements import requested_elements
-from rpp.http.context import get_backend, request_profile
+from rpp.http.context import get_backend, request_profile, response_profile
 from rpp.http.headers import client_transaction_id, generate_rpp_response_headers
 from rpp.http.operation import map_request, require_empty_body, rpp_operation
 from rpp.http.problem import raise_registry_error
@@ -25,7 +25,7 @@ def _requested():
 
 def _domain_output(domain, requested):
     """The domain as a response shows it: with the onDemand data elements the request includes."""
-    return include_elements.visible(OBJECT, domains.model_to_rpp(domain, request_profile().extensions), requested)
+    return include_elements.visible(OBJECT, domains.model_to_rpp(domain, response_profile().extensions), requested)
 
 
 def _mutation_answer(result, requested, status=200, extra_headers=None):

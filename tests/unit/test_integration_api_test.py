@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from tests.helper.integration_api_test import (endpoint_test, field_value, replace_pad_placeholders,
+from tests.helper.integration_api_test import (assert_response, endpoint_test, field_value, replace_pad_placeholders,
                                                replace_upper_placeholders, substitute_captures)
 from tests.helper.recursive_compare_existing import recusive_compare_existing
 
@@ -184,3 +184,31 @@ def test_without_delay_seconds_nothing_waits():
     endpoint_test(FakeClient(FakeResponse(201, {"name": "a"}, "01000")),
                   {"test_id": "t", "steps": [{"request": REQUEST, "response": CREATED}]}, sleep=waits.append)
     assert waits == []
+
+
+PROFILED = 'application/rpp+json; profile="urn:x"; profile-version="1.0"'
+
+
+def typed(content_type):
+    reply = FakeResponse(201, {"name": "a"}, "01000")
+    reply.headers["Content-Type"] = content_type
+    return reply
+
+
+def test_with_the_media_type_signalling_an_expected_media_type_without_parameters_matches_one_with_the_parameters():
+    assert_response({**CREATED, "content_type": "application/rpp+json"}, typed(PROFILED), "t", "media-type")
+
+
+def test_with_the_header_signalling_the_whole_media_type_is_compared():
+    with pytest.raises(AssertionError, match="Content-Type mismatch"):
+        assert_response({**CREATED, "content_type": "application/rpp+json"}, typed(PROFILED), "t")
+
+
+@pytest.mark.parametrize("actual, expected", [
+    ("application/problem+json", "application/rpp+json"),
+    (PROFILED, 'application/rpp+json; profile="urn:y"; profile-version="1.0"'),   # parameters given are compared
+    ("application/rpp+json", PROFILED),
+])
+def test_another_media_type_or_other_parameters_are_a_mismatch(actual, expected):
+    with pytest.raises(AssertionError, match="Content-Type mismatch"):
+        assert_response({**CREATED, "content_type": expected}, typed(actual), "t", "media-type")

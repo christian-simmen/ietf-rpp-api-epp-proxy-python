@@ -1,5 +1,9 @@
+import pytest
 from core.model.shared.availability import Availability
 from rpp.mapping.contact import contact_availability
+
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
 
 
 def availability(available, reason=None):

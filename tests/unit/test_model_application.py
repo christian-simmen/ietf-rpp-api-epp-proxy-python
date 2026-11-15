@@ -17,6 +17,9 @@ from rpp.mapping.contact import contact_patch
 from rpp.mapping.domain import domain_patch
 from rpp.mapping.host import host_patch
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 DOMAIN = "foo.example"
 
 HOST = "ns1.foo.example"

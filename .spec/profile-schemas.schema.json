@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/profile-schemas.schema.json",
+  "title": "RPP Profile Schemas extension",
+  "description": "Adds to the Discovery Data Object the URL of the effective JSON Schema of each profile the server offers (json §7.2): the bundle and the definitions of the profile's extensions, with each extended definition composed by allOf. It is server-wide, not part of any profile. See docs/profile-schemas-extension.md.",
+  "rpp:extension": {
+    "name": "RPP Profile Schemas",
+    "id": "urn:ietf:params:rpp:extension:profile-schemas",
+    "version": "1.0"
+  },
+  "rpp:extends": {
+    "#/$defs/discovery.read": "#/$defs/ext.profileSchemas.discovery.read"
+  },
+  "$defs": {
+    "ext.profileSchemas.discovery.read": {
+      "type": "object",
+      "properties": {
+        "profileSchemas": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ext.profileSchemas.profileSchema" },
+          "minItems": 1,
+          "readOnly": true
+        }
+      },
+      "required": ["profileSchemas"]
+    },
+    "ext.profileSchemas.profileSchema": {
+      "type": "object",
+      "properties": {
+        "profile": { "type": "string" },
+        "version": { "type": "string" },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "required": ["profile", "version", "url"]
+    }
+  }
+}

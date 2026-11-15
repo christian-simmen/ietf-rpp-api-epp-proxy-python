@@ -16,12 +16,13 @@ def _check(operation: RPPPatchOperation):
         raise ValueError(f"Path '{operation.path}' cannot be changed")
 
 
-def rpp_to_model_with_current(contact_id: str, rpp: list, current: RequestContact) -> RequestContact:
+def rpp_to_model_with_current(contact_id: str, rpp: list, current: RequestContact,
+                              extensions: tuple[str, ...] = ()) -> RequestContact:
     """Applies the patch (json §5.2.2) to the current request contact, read for it, and returns the request
     contact it asks for. Only the template can change, and it cannot be removed."""
     operations = [parse_rpp(RPPPatchOperation, operation) for operation in rpp]
     for operation in operations:
         _check(operation)
-    patched = json_patch.apply(request_contacts.model_to_rpp(current), operations, array_paths=())
-    validate_schema("requestContact.read", patched)
+    patched = json_patch.apply(request_contacts.model_to_rpp(current, extensions), operations, array_paths=())
+    validate_schema("requestContact.read", patched, extensions)
     return RequestContact(id=contact_id, uriTemplate=patched["uriTemplate"])

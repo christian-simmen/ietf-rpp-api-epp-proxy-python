@@ -10,6 +10,9 @@ from rpp.schema.extensions import EXTENSIONS
 from rpp.schema.validator import validate_schema
 from tests.helper.profiles import EPP_PROFILE
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 TRANSFER = {"@type": "domainTransferProcess"}
 
 DATA = {

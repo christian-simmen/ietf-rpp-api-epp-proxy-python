@@ -8,6 +8,9 @@ from core.model.shared.contact_transfer_process import ContactTransferProcess
 from core.model.shared.transfer_operation import TransferOperation
 from rpp.mapping.contact import contact_transfer_approve, contact_transfer_process, contact_transfer_reject
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 PROCESS = {"@type": "transferProcess"}
 
 

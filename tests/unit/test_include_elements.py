@@ -8,6 +8,9 @@ from rpp.mapping.domain import domain_replacement
 from rpp.mapping.shared import include_elements
 from tests.helper.contact_fixtures import put_body
 
+# the tests map without an app, so a validator is built on first use (tests/conftest.py)
+pytestmark = pytest.mark.lazy_schemas
+
 PASSWORD = {"@type": "authInfo", "method": "authinfo", "authdata": "NewSecret1!x"}
 
 DOMAIN_BODY = {"@type": "domainName", "nameservers": [{"@type": "host", "hostName": "ns1.foo.example"}]}

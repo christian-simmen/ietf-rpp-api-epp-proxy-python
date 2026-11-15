@@ -14,7 +14,6 @@ from rpp.schema.validator import validate_schema
 
 def add_rpp_status(status: RPPStatus, target: Host | HostUpdateChanges):
     """Adds a status and its reason to what holds them."""
-    reject_set(due=status.due)
     target.status.append(status.label)
     if status.reason:
         target.status_reasons[status.label] = status.reason
