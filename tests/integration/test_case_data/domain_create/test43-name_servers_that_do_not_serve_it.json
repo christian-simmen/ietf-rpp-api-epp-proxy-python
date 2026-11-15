@@ -3,7 +3,8 @@
   "when": {
     "env.domainName.processes.create.failed_dns_status": {
       "not": null
-    }
+    },
+    "env.pdc.pdc_always_true": false
   },
   "description": "A create whose name servers do not serve the domain succeeds where the registry checks them after the create, and the domain reads with the status of a failed check (RRI `failed`, with a `due`). Only for a registry that checks; every other case gives DNS data that passes.",
   "steps": [

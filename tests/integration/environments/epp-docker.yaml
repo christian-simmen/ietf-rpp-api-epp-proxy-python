@@ -87,6 +87,9 @@ facts:
     phone:
       subscriber:
         min_length: 1                  # digits after the country code
+  pdc:
+    pdc_always_true: false             # Fakenast won't fail in local environment
   # Defects of this server, which the cases it breaks do not run on.
   bugs:
     over_max_length_cut: true          # a value longer than its column is stored cut, not refused (pawel-kow/epp#21)
+    queue_del_no_msgcnt: false

@@ -90,6 +90,9 @@ facts:
     phone:
       subscriber:
         min_length: 4                  # digits after the country code
+  pdc:
+    pdc_always_true: false             # Fakenast won't fail in local environment
   # Defects of this server, which the cases it breaks do not run on.
   bugs:
     over_max_length_cut: false
+    queue_del_no_msgcnt: true
