@@ -43,6 +43,8 @@ requirements are agreed.
   out of scope, the acceptance criteria as a checklist, and open questions. Show
   the title and body in the summary: confirming the summary authorises creating
   the issue. Report the URL. Later design, plans, commits and PRs reference it.
+- When the feature is a protocol concept, the issue also carries its specification text, written per
+  [specification.md](specification.md).
 - Design and implementation start only after confirmation, following
   [process.md](process.md) and [testing.md](testing.md). The acceptance criteria
   are the basis for the failing tests.
