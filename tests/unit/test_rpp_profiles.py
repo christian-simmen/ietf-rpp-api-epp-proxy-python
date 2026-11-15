@@ -9,7 +9,7 @@ from rpp.schema import profiles as definitions
 from rpp.schema.rpp_profiles import RppProfiles
 from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 
-BASE = "io.github.pawel-kow.rpp.profile.base"
+BASE = "urn:ietf:params:rpp:profile:base"
 RRI_EXTENSION = "de.denic.rpp.rri"
 
 

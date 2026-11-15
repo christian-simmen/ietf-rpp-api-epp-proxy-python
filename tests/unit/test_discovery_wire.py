@@ -70,7 +70,7 @@ def test_discovery_states_what_the_proxy_is_configured_and_built_for(client):
     assert body["environment"] == {"@type": "discoveryEnvironment", "name": "rpp.example", "status": "test"}
     assert body["tlds"] == ["example", "test"]
     assert body["objects"] == ["domainName", "host", "contact"]
-    assert body["profiles"] == ["io.github.pawel-kow.rpp.profile.base", "urn:ietf:params:rpp:profile:epp-compatibility"]
+    assert body["profiles"] == ["urn:ietf:params:rpp:profile:base", "urn:ietf:params:rpp:profile:epp-compatibility"]
 
 
 def test_discovery_advertises_nothing_the_proxy_does_not_do(client):
@@ -228,5 +228,5 @@ def test_the_objects_are_the_backends_and_the_profiles_those_it_offers():
     body = http.get("/.well-known/rpp", headers=HEADERS).json()
 
     assert body["objects"] == ["domainName", "contact"]
-    assert body["profiles"] == ["io.github.pawel-kow.rpp.profile.base"]
+    assert body["profiles"] == ["urn:ietf:params:rpp:profile:base"]
     assert "extensions" not in body

@@ -4,7 +4,7 @@ name: urn:ietf:params:rpp:profile:epp-compatibility
 description: EPP compatibility profile
 version: "1.0"
 rppVersion: "1.0"
-baseProfile: io.github.pawel-kow.rpp.profile.base
+baseProfile: urn:ietf:params:rpp:profile:base
 objects:
   - domainName
   - contact

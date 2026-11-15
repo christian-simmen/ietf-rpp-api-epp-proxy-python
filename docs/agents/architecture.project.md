@@ -265,7 +265,7 @@ out of the request and converts them with `domains.rpp_to_model`, as a create's,
 
 An RPP profile (json §6.11, core §12.4) is a named, versioned set of data objects and extensions, defined once in
 `src/rpp/schema/schemas/profiles/<key>.yaml` (`RppProfile`, loaded by `rpp/schema/profiles.py`): `base`
-(`io.github.pawel-kow.rpp.profile.base`: domainName, contact, host), `epp` (`urn:ietf:params:rpp:profile:epp-compatibility`,
+(`urn:ietf:params:rpp:profile:base`: domainName, contact, host), `epp` (`urn:ietf:params:rpp:profile:epp-compatibility`,
 base `base`, and the constraint-only extension `urn:ietf:params:rpp:extension:epp-compatibility`, which adds no schema
 member: the EPP backend enforces the constraints under every profile) and `rri` (`de.denic.rpp.profile.rri`: domainName,
 contact, requestContact, no host; extension `de.denic.rpp.rri`). Every file is complete: `baseProfile` is not an

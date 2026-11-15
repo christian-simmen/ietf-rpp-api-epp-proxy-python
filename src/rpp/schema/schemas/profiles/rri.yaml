@@ -4,7 +4,7 @@ name: de.denic.rpp.profile.rri
 description: Profile of DENIC RRI behind RPP
 version: "1.0"
 rppVersion: "1.0"
-baseProfile: io.github.pawel-kow.rpp.profile.base
+baseProfile: urn:ietf:params:rpp:profile:base
 objects:
   - domainName
   - contact

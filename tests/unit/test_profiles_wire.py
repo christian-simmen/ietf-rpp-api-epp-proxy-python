@@ -13,7 +13,7 @@ from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
 from tests.helper.fake_rri_client import FakeRriClient, rri_backends
 from tests.unit.test_rri_wire import DISCOVERY, HEADERS, MEDIA_TYPE
 
-BASE = "io.github.pawel-kow.rpp.profile.base"
+BASE = "urn:ietf:params:rpp:profile:base"
 EPP = "urn:ietf:params:rpp:profile:epp-compatibility"
 RRI = "de.denic.rpp.profile.rri"
 EPP_EXTENSION = "urn:ietf:params:rpp:extension:epp-compatibility"
