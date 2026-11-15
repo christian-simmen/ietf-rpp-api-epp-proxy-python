@@ -184,3 +184,26 @@ def test_without_delay_seconds_nothing_waits():
     endpoint_test(FakeClient(FakeResponse(201, {"name": "a"}, "01000")),
                   {"test_id": "t", "steps": [{"request": REQUEST, "response": CREATED}]}, sleep=waits.append)
     assert waits == []
+
+
+PROFILED = 'application/rpp+json; profile="urn:x"; profile-version="1.0"'
+
+
+def typed(content_type):
+    reply = FakeResponse(201, {"name": "a"}, "01000")
+    reply.headers["Content-Type"] = content_type
+    return reply
+
+
+def test_an_expected_media_type_without_parameters_matches_one_with_the_profile_parameters():
+    run(FakeClient(typed(PROFILED)), {**CREATED, "content_type": "application/rpp+json"})
+
+
+@pytest.mark.parametrize("actual, expected", [
+    ("application/problem+json", "application/rpp+json"),
+    (PROFILED, 'application/rpp+json; profile="urn:y"; profile-version="1.0"'),   # parameters given are compared
+    ("application/rpp+json", PROFILED),
+])
+def test_another_media_type_or_other_parameters_are_a_mismatch(actual, expected):
+    with pytest.raises(AssertionError, match="Content-Type mismatch"):
+        run(FakeClient(typed(actual)), {**CREATED, "content_type": expected})

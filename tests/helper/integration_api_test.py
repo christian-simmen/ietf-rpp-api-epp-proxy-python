@@ -61,7 +61,12 @@ def assert_response(expected, response, test_name):
 
     if "content_type" in expected:
         # Check the Content-Type header
-        assert response.headers["Content-Type"].lower() == expected["content_type"].lower(), f"Content-Type mismatch for test case: {test_name}"
+        # An expected type without parameters is the media type of the response, whatever its parameters: the media
+        # type signalling of core §14.3 puts the profile in them. One with parameters is the whole value.
+        actual = response.headers["Content-Type"].lower()
+        if ";" not in expected["content_type"]:
+            actual = actual.partition(";")[0].strip()
+        assert actual == expected["content_type"].lower(), f"Content-Type mismatch for test case: {test_name}"
 
     # 2. Check the response body (if one is expected)
     if "body" in expected:

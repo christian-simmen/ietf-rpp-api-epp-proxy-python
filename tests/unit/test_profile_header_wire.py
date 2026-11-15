@@ -214,7 +214,8 @@ def test_a_handler_failure_that_is_a_problem_detail_names_the_profile():
 def test_a_response_with_a_vary_header_gets_one_vary_header_that_lists_the_profile_too():
     import asyncio
 
-    from rpp.http.profile_middleware import with_profile_header
+    from rpp.http.header_profile_signalling import HeaderProfileSignalling
+    from rpp.http.profile_selection import ProfileSelection
 
     sent = []
 
@@ -222,8 +223,15 @@ def test_a_response_with_a_vary_header_gets_one_vary_header_that_lists_the_profi
         sent.append(message)
 
     start = {"type": "http.response.start", "status": 200, "headers": [(b"vary", b"Accept"), (b"x", b"y")]}
-    asyncio.run(with_profile_header(fake_send, PROFILES["base"])(start))
+    signalling = HeaderProfileSignalling(None)
+    asyncio.run(signalling.announce(fake_send, ProfileSelection.of(PROFILES["base"]))(start))
 
     headers = sent[0]["headers"]
     assert [value for name, value in headers if name == b"vary"] == [b"Accept, RPP-Profile"]
     assert (b"x", b"y") in headers
+
+
+def test_the_header_method_puts_no_parameters_in_the_content_type():
+    response = epp_client().get(DISCOVERY, headers=named(BASE))
+
+    assert response.headers["Content-Type"] == MEDIA_TYPE

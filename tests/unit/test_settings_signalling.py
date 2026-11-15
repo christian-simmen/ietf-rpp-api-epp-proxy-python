@@ -17,12 +17,15 @@ def test_the_header_can_be_named(tmp_path):
     assert load_settings(write(tmp_path, "rpp_profile_signalling: header\n")).profile_signalling == "header"
 
 
-@pytest.mark.parametrize("value", ["media-type", "cookie"])
-def test_a_method_that_is_not_implemented_or_unknown_stops_the_server(tmp_path, value):
+def test_the_media_type_can_be_named(tmp_path):
+    assert load_settings(write(tmp_path, "rpp_profile_signalling: media-type\n")).profile_signalling == "media-type"
+
+
+def test_an_unknown_method_stops_the_server(tmp_path):
     with pytest.raises(ValueError, match="rpp_profile_signalling"):
-        load_settings(write(tmp_path, f"rpp_profile_signalling: {value}\n"))
+        load_settings(write(tmp_path, "rpp_profile_signalling: cookie\n"))
 
 
-@pytest.mark.parametrize("config", ["config.yaml", "config.rri-mtest.yaml"])
-def test_the_configs_of_the_test_environments_use_the_header(config):
-    assert load_settings(config).profile_signalling == "header"
+@pytest.mark.parametrize("config, method", [("config.yaml", "header"), ("config.rri-mtest.yaml", "media-type")])
+def test_the_configs_of_the_test_environments_use_both_methods(config, method):
+    assert load_settings(config).profile_signalling == method

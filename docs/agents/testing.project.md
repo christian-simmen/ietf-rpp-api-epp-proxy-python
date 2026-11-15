@@ -122,9 +122,11 @@ descriptor's `profile` and the `rpp_profile_signalling` of its config (`with_rpp
 
 A header the case writes literally is sent as written, so a case can send what the runner would not (a value of another
 media type, a profile the server does not offer). The signalling method is the environment fact `env.profile_signalling`
-(`header` or `media-type`, read from the config, not stated twice). The cases of `profile_signalling_header/` hold literal headers and are active for that method (a case-level `when` on that
-fact); a step that differs per server selects by the facts, for example `profile.profiles` contains `rri`, never by the
-backend's name.
+(`header` or `media-type`, read from the config, not stated twice). The cases of `profile_signalling_header/` and `profile_signalling_media_type/` hold literal headers and are each active for one
+method (a case-level `when` on that fact), so a case that needs a backend as well as a method runs only where an
+environment has both (the rri-only refusals are in `profile_signalling_media_type/`, as no RRI environment uses the header); a step that differs per server selects by the facts, for example `profile.profiles` contains `rri`, never by the
+backend's name. An expected `content_type` without parameters is the media type of the response whatever its
+parameters; one with parameters is the whole value.
 
 The registrars name the variables that hold their credentials, the prefix of the handles they create, and on RRI
 their General Request and Abuse contacts. The runner reads them from the process environment or from `.env` in the

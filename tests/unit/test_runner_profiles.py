@@ -11,6 +11,7 @@ ENV = load("epp-docker", with_credentials=False)
 MEDIA = replace(ENV, profile_signalling="media-type")
 EPP = "urn:ietf:params:rpp:profile:epp-compatibility"
 RPP = "application/rpp+json"
+PROFILED_RRI = 'application/rpp+json; profile="de.denic.rpp.profile.rri"; profile-version="1.0"'
 PROFILED = f'{RPP}; profile="{EPP}"; profile-version="1.0"'
 ALL = {"RPP-Profile": "{rpp:profile}", "Accept": "{rpp:accept}", "Content-Type": "{rpp:content-type}"}
 
@@ -55,7 +56,15 @@ def test_an_unknown_placeholder_or_one_inside_a_value_is_an_error(value):
 
 
 def test_the_signalling_of_the_config_is_a_fact_of_the_environment():
+    # each environment reads it from its own config, which a fact stated in the descriptor could not follow
     assert ENV.facts["profile_signalling"] == "header"
+    assert load("rri-mtest", with_credentials=False).facts["profile_signalling"] == "media-type"
+
+
+def test_the_placeholders_of_an_environment_follow_the_signalling_of_its_config():
+    mtest = load("rri-mtest", with_credentials=False)
+
+    assert headers_of(ALL, mtest) == {"Accept": PROFILED_RRI, "Content-Type": PROFILED_RRI}
 
 
 @pytest.mark.parametrize("where", [{"url": "/x/{rpp:accept}"}, {"body_json": {"a": ["{rpp:profile}"]}},
