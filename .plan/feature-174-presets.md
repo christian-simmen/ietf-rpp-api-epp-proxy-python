@@ -7,7 +7,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 - [x] T0 Agent docs for specification writing (`docs/agents/specification.md`, `specification.project.md`), imported
       from the data-objects `Agents.md` (`2438b83`), linked from `Agents.md`, `requirements.md` and
       `architecture.project.md`
-- [~] T1 Proposal for draft-ietf-rpp-data-objects: concepts, Preset and Profile Data Objects, Discovery, IANA, the EPP
+- [~] T1 (draft written, in review) Proposal for draft-ietf-rpp-data-objects: concepts, Preset and Profile Data Objects, Discovery, IANA, the EPP
       Compatibility Profile as a profile (`.spec/proposals/174-presets/data-objects.md`)
 - [ ] T2 Proposal for draft-ietf-rpp-core: `RPP-Preset`, `preset`/`preset-version`, versioning, 02308
 - [ ] T3 Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
@@ -53,3 +53,4 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` were changed on `main` before the branch. They are the
   maintainer's and are left unstaged.
+- Review points R1-R8 of `.spec/proposals/174-presets/data-objects.md` await the maintainer.
