@@ -23,7 +23,7 @@ from tests.helper.integration_api_test import endpoint_test, replace_pad_placeho
 from tests.helper.pacer import Pacer
 from tests.helper.test_environment import (
     REPOSITORY, Credentials, EnvironmentError, TestEnvironment, environment_names, load, replace_fact, replace_values,
-    selected_names,
+    selected_names, with_profiles,
 )
 
 CASE_DATA = Path(__file__).parent / "test_case_data"
@@ -221,6 +221,7 @@ def run_case(case, run: EnvironmentRun):
     # The selectors are resolved first, then the placeholders, then the captures.
     # {test_start} is the start of this case, so the time windows in the data do not depend on suite length.
     with run.app.test_client() as client:
-        endpoint_test(client, process_placeholders(select(case, run.facts), run.environment,
+        selected = with_profiles(select(case, run.facts), run.environment)
+        endpoint_test(client, process_placeholders(selected, run.environment,
                                                    started=datetime.datetime.now(datetime.UTC)),
                       credentials=run.credentials, pacer=run.pacer)

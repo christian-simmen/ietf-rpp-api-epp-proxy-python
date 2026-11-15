@@ -536,3 +536,11 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
   a data object outside the selected profile, or that the backend does not hold, is 501 `02307` (core §16.1.6 allows
   404 or 501 for an endpoint a server does not implement). The Profile Data Object is the same on every server, whatever
   the backend holds.
+
+## Profile signalling with the RPP-Profile header
+
+- Core §14.2 gives the version as a Structured Field Decimal (RFC 9651), which has no trailing-zero identity: `1.10` and `1.1` parse to the same number, so a profile cannot have both. The ABNF (`1*DIGIT "." 1*DIGIT`) allows more than three fraction digits, which an SF Decimal does not (it has at most three). The draft should say how versions compare, or give the version as a String.
+- §14.2 names no status or RPP result code for a profile or version the server does not support ("an HTTP error response"); §12.4 asks for "an RPP Client error code". It also says nothing about a malformed value, a Dictionary without the `profile` member or its `version` parameter, or members and parameters it does not define.
+- §14.2 does not say what a request without the header gets. §14.3 says the default profile of the Discovery document; §14.2 is silent.
+- §14 says the two methods "MUST NOT be used simultaneously", without saying what a server that supports one does with the parameters of the other.
+- **Proxy:** `rpp_profile_signalling: header` (the default). A request without the header gets the default profile. Every refusal is a 400 with a Problem Detail: `02005` for a value that is not an SF Dictionary, a `profile` that is not a Token or a `version` that is not a Decimal (`version=1` is an Integer); `02003` for a missing `profile` member or `version`; `02004` for a profile or version the server does not offer (the version compared as a decimal); `02001` for `profile` or `profile-version` parameters in `Accept` or `Content-Type`. Other members and parameters are ignored. Only a routed operation selects a profile, so an unrouted path is a 404 and a 401 is before the profile; `/.well-known/rpp` and `/profiles/*` are refused like any other. `RPP-Profile` in the response names the applied profile on every response after the selection, and is absent on the refusal of the profile itself, on a 401 and on an unrouted path.

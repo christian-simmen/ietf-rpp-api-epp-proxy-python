@@ -2,20 +2,20 @@
 
 Branch `feature/163-profile-header`, stacked on `feature/162-profiles` (PR #165, merges first). The PR targets `main`
 and says so. #164 (media type parameters) stacks on this branch.
-Status: plan, waiting for the orchestrator's approval.
+Status: approved, implemented, checks running.
 
 ## Tasks
 
-- [~] T1 Plan approved
-- [ ] T2 `rpp/http/profile_header.py`: parse and format the SF Dictionary of core §14.2 (see Decisions D3)
-- [ ] T3 `ProfileResolver.resolve(scope)` reads the header; `rpp_profile_signalling` in `Settings`, `compose`, `create_app`
-- [ ] T4 `ProfileMiddleware`: profile parameters in Accept/Content-Type are a 400; the `RPP-Profile` response header
-- [ ] T5 Unit tests (parser, resolver, wire: every response kind)
-- [ ] T6 Integration runner: `profile:` of the environment and of a case or step, sent in the configured method
-- [ ] T7 Environment yamls (`profile: epp`, `profile: rri`), configs (`rpp_profile_signalling: header`)
-- [ ] T8 Mixed cases 1 to 3 of the issue
-- [ ] T9 Docs (architecture.project.md, testing.project.md, README config) and `.spec/spec-issues.md`
-- [ ] T10 Checks, draft PR
+- [x] T1 Plan approved
+- [x] T2 `rpp/http/profile_header.py`: parse and format the SF Dictionary of core §14.2 (see Decisions D3)
+- [x] T3 `ProfileResolver.resolve(scope)` reads the header; `rpp_profile_signalling` in `Settings`, `compose`, `create_app`
+- [x] T4 `ProfileMiddleware`: profile parameters in Accept/Content-Type are a 400; the `RPP-Profile` response header
+- [x] T5 Unit tests (parser, resolver, wire: every response kind)
+- [x] T6 Integration runner: `profile:` of the environment and of a case or step, sent in the configured method
+- [x] T7 Environment yamls (`profile: epp`, `profile: rri`), configs (`rpp_profile_signalling: header`)
+- [x] T8 Mixed cases 1 to 3 of the issue
+- [x] T9 Docs (architecture.project.md, testing.project.md, README config) and `.spec/spec-issues.md`
+- [~] T10 Checks, draft PR
 
 ## Findings (evidence)
 
@@ -44,10 +44,26 @@ Status: plan, waiting for the orchestrator's approval.
   absent when the profile itself was refused.
 - D6 Integration tests as in the issue; select by profile facts, never by backend name; mind the MTEST limits.
 
-## Proposals (waiting for an answer)
+## Decisions (answers of the orchestrator to the plan)
 
-See the report of the plan checkpoint.
+- D7 SF parsing is `http-sfv` 0.9.9, pinned in requirements.txt. Verified in its source: it has the RFC 9651 Date and
+  Display String types, so it implements RFC 9651. After parsing: `profile` is a Token, `version` a Decimal; an Integer
+  (`version=1`) is 400 `02005`.
+- D8 Default `header` when `rpp_profile_signalling` is absent.
+- D9 Codes, all 400: `02005` (malformed, wrong type, header twice), `02003` (no profile member or version), `02004`
+  (profile or version unknown or not offered), `02001` (profile parameters in Accept/Content-Type). Extra members and
+  parameters are ignored; recorded as a gap. Decimal comparison (1.10 is 1.1), recorded.
+- D10 Only routed operations select a profile. `RPP-Profile` on every response after selection (also discovery,
+  `/profiles/*`, Problem Details), absent on a 401, an unrouted path and the profile's own refusal. Discovery is not
+  lenient.
+- D11 Mixed case 2 on `profile.profiles contains rri`; cases 1 and 3 are `smoke`, case 2 is not.
+- D12 The base profile is named `urn:ietf:params:rpp:profile:base` (maintainer, via the orchestrator). Done on
+  `feature/162-profiles` (PR #165), checks run there, and this branch rebased onto it.
+
+## Results
+
+(see the PR)
 
 ## Open questions
 
-(see above)
+None.

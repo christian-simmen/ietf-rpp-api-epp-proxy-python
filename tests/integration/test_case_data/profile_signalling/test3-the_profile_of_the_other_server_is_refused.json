@@ -1,0 +1,69 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-the_profile_of_the_other_server_is_refused",
+  "description": "A profile the server does not offer is refused even for a request its content fits: a plain domain read under the epp profile where the server has none, and under the rri profile.",
+  "steps": [
+    {
+      "when": {
+        "profile.profiles": {
+          "not": {
+            "contains": "epp"
+          }
+        }
+      },
+      "profile": "epp",
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_name}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.profiles": {
+          "not": {
+            "contains": "rri"
+          }
+        }
+      },
+      "profile": "rri",
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_name}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Profile": null
+        }
+      }
+    }
+  ]
+}

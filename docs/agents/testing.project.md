@@ -109,6 +109,12 @@ by [pacer.py](../../tests/helper/pacer.py)), the registrars, a user the backend 
 `BackendProfile`, the TLD, the environment name and the LGRs are read from that config, as the app reads them, and not
 repeated. A run with more workers than an environment it tests allows does not start.
 
+The descriptor's `profile` is the key of the RPP profile (`epp`, `rri`, `base`) that the runner names in every request,
+in the signalling method of the environment's config (`rpp_profile_signalling`: `RPP-Profile`). A case or a step may
+name another with `"profile": "base"` (a step's wins; a header the step sets itself wins over both). The key may be one
+the server does not offer, which `profile_signalling/` uses. A case that needs a profile selects by the facts, for
+example `profile.profiles` contains `rri`, never by the backend's name.
+
 The registrars name the variables that hold their credentials, the prefix of the handles they create, and on RRI
 their General Request and Abuse contacts. The runner reads them from the process environment or from `.env` in the
 repository root (python-dotenv; the proxy never reads it). [.env.example](../../.env.example) names them all. A
