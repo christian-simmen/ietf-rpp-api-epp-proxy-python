@@ -5,6 +5,10 @@ rpp_rri_host: rri.test.denic.de
 rpp_rri_port: 51131
 rpp_rri_use_tls: true
 rpp_rri_tls_insecure_skip_verify: false
+# How a client names the profile of a request (core §14): `header` is the RPP-Profile header field. Without the key it
+# is `header`. A request that names none gets default_profile below. (`media-type` is not implemented yet.)
+rpp_profile_signalling: header
+
 # The profile of this server (see config.yaml): DENIC's, src/settings/profiles/rri.yaml.
 rpp_backend_profile:
   extends: rri

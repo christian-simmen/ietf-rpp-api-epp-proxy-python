@@ -44,6 +44,10 @@ rpp_epp_ns_map:
   rgp: "urn:ietf:params:xml:ns:rgp-1.0"
   idn: "urn:ietf:params:xml:ns:idn-1.0"
 
+# How a client names the profile of a request (core §14): `header` is the RPP-Profile header field. Without the key it
+# is `header`. A request that names none gets default_profile below. (`media-type` is not implemented yet.)
+rpp_profile_signalling: header
+
 # The profile of this server: what it holds, which the proxy checks before any command. It extends the generic profile
 # of its protocol (src/settings/profiles/epp.yaml, or rri.yaml) and states only what this server differs in: a map
 # merges, a list or a value replaces. Another EPP server starts from `extends: epp` alone.

@@ -16,7 +16,7 @@ from rpp.http.context import BACKEND_PROFILE, DISCOVERY_SETTINGS, REQUEST_PROFIL
 from rpp.http.middleware.body_buffering_middleware import BodyBufferingMiddleware
 from rpp.http.problem import handle_rpp_error
 from rpp.http.profile_middleware import ProfileMiddleware
-from rpp.http.profile_resolver import ProfileResolver
+from rpp.http.profile_resolver import HEADER_SIGNALLING, ProfileResolver
 from rpp.http.request_profiles import RequestProfiles
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
@@ -38,7 +38,7 @@ def parsed_spec() -> dict:
         return yaml.load(spec, Loader=yaml.CSafeLoader)
 
 
-def create_app(sessions, profile: BackendProfile, discovery_settings=None):
+def create_app(sessions, profile: BackendProfile, discovery_settings=None, profile_signalling=HEADER_SIGNALLING):
     """
     Builds the application.
 
@@ -48,6 +48,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
         profile: What the backend can hold, which the mappers check, refusals name and discovery states.
         discovery_settings: Has rpp_base_url, rpp_tlds, rpp_environment_name and
             rpp_environment_status, which the discovery document states.
+        profile_signalling: How a client names the profile of a request (`rpp_profile_signalling`): `header`.
     """
     check_known(profile.extensions)
     profiles = RppProfiles.build(profile.profiles, profile.default_profile, profile.extensions)
@@ -58,7 +59,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None):
     )
     app.add_middleware(BodyBufferingMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION)
     app.add_middleware(ProfileMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION,
-                       resolver=ProfileResolver(profiles), request_profiles=request_profiles,
+                       resolver=ProfileResolver(profiles, profile_signalling), request_profiles=request_profiles,
                        extensions=profiles.extensions())
     app.add_middleware(
         CORSMiddleware,

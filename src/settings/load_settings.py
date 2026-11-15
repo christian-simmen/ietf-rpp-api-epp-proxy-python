@@ -43,4 +43,5 @@ def load_settings(config_path: str | None = None) -> Settings:
     return Settings(
         epp=_section(EppSettings, data), discovery=_section(DiscoverySettings, data), rri=_section(RriSettings, data),
         backend=backend, profile_layers=_profile_layers(data, backend) if backend in BACKENDS else (),
+        profile_signalling=data.get("rpp_profile_signalling", "header"),
     )

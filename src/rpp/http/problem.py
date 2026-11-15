@@ -5,6 +5,8 @@ from connexion.problem import problem
 from core.result.error_response import ErrorResponse
 from core.result.result_code import ResultCode
 from rpp.http.headers import problem_headers
+from rpp.http.profile_header import HEADER, format_profile
+from rpp.http.profile_middleware import SELECTED_PROFILE
 
 RPP_ERROR_TYPE = "urn:ietf:params:rpp:error"
 
@@ -60,6 +62,9 @@ def _default_result(status: int) -> ResultCode:
 def handle_rpp_error(request: ConnexionRequest, exc: ProblemException) -> ConnexionResponse:
     """Renders every error as a core §9 Problem Detail with the RPP response headers."""
     headers = {**problem_headers(_default_result(exc.status)), **(exc.headers or {})}
+    selected = request.context.get(SELECTED_PROFILE)
+    if selected is not None:
+        headers[HEADER] = format_profile(selected)
     if "RPP-Cltrid" in request.headers:
         headers["RPP-Cltrid"] = request.headers["RPP-Cltrid"]
     return problem(
