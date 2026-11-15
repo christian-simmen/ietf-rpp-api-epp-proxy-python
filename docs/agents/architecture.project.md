@@ -13,7 +13,7 @@ registry object (#120). The rules below are checked by `import-linter`.
 src/
 ├── main.py                  composition root, the only module that knows all others
 ├── settings/                loads config.yaml once into typed sections, which main.py passes on
-│   └── profiles/            epp.yaml, rri.yaml: the generic backend profile of each protocol
+│   └── profiles/            epp.yaml, rri.yaml: the generic backend profile of each protocol (not the RPP profiles)
 ├── core/                    pure Python: no I/O, no framework, no protocol
 │   ├── model/{shared,domain,contact,host,message,request_contact}/
 │   ├── result/              ResultCode, UnknownResultCode, OperationResponse, ErrorResponse
@@ -23,11 +23,12 @@ src/
 │   └── flows/               read_back.py, mutation_result.py, sponsor.py, {domain,contact,host,message,request_contact}/
 ├── rpp/                     receiving adapter: RPP over HTTP
 │   ├── http/                app (create_app), extension_paths, middleware/, validators/, security/, problem, headers,
-│   │                        context, operation
-│   ├── handlers/            {domain,contact,host,message,request_contact}/, shared/, discovery.py
-│   ├── mapping/             shared/, {domain,contact,host,message,discovery,request_contact}/
+│   │                        context, operation, profile_resolver, profile_middleware, request_profiles
+│   ├── handlers/            {domain,contact,host,message,request_contact}/, shared/, discovery.py, profiles.py
+│   ├── mapping/             shared/, {domain,contact,host,message,discovery,profile,request_contact}/
 │   ├── dto/                 the RPP dataclasses
-│   ├── schema/              validator, data_objects, extensions, schemas/ (generated; extensions/ copied)
+│   ├── schema/              validator, data_objects, extensions, profiles, rpp_profiles, schemas/ (generated;
+│   │                        extensions/ copied; profiles/ written by hand)
 │   └── openapi.yaml         (generated)
 └── registry_adapter/
     ├── epp/
@@ -261,6 +262,36 @@ the state of the transfer, so they need no follow-up Info. `epp_domains_Transfer
 offers an extension that adds members to `domainTransferProcess.create` (`de.denic.rpp.rri`), `domain_transfer_process` takes them
 out of the request and converts them with `domains.rpp_to_model`, as a create's, into `DomainTransfer.domain`.
 
+## RPP profiles
+
+An RPP profile (json §6.11, core §12.4) is a named, versioned set of data objects and extensions, defined once in
+`src/rpp/schema/schemas/profiles/<key>.yaml` (`RppProfile`, loaded by `rpp/schema/profiles.py`): `base`
+(`urn:ietf:params:rpp:profile:base`: domainName, contact, host), `epp` (`urn:ietf:params:rpp:profile:epp-compatibility`,
+base `base`, and the constraint-only extension `urn:ietf:params:rpp:extension:epp-compatibility`, which adds no schema
+member: the EPP backend enforces the constraints under every profile) and `rri` (`de.denic.rpp.profile.rri`: domainName,
+contact, requestContact, no host; extension `de.denic.rpp.rri`). Every file is complete: `baseProfile` is not an
+inheritance, and is only checked. The definition is the same on every server, and `GET /profiles/{name}`
+(`handlers/profiles.py`, `mapping/profile/profile.py`) publishes it as it is, so base lists `host` on an RRI server too.
+An unknown or not offered name is a 404 `02303`.
+
+A server offers some of them: the `profiles` (keys) and `default_profile` leaves of the `BackendProfile`, from
+`epp.yaml` or `rri.yaml` and what `rpp_backend_profile` of the config states. Its `objects` and `extensions` are what the
+backend holds. `create_app` builds `RppProfiles` (`rpp/schema/rpp_profiles.py`) from them and stops on a wrong choice:
+unknown key, offered twice, the default not offered, an extension listed twice, not implemented or not held by the
+backend, a base profile that is not offered or has a base itself, a profile that is its own base. A profile's objects need
+not be held.
+
+A request has a selected profile. `ProfileResolver.resolve(scope)` in `rpp/http/profile_resolver.py` is the one place
+that chooses it, and today returns the default; the signalling methods of core §14 (`RPP-Profile`, media type
+parameters) read the request there. `ProfileMiddleware` (after the authentication) stores it in the request context
+(`selected_profile()`), and refuses a routed operation on a data object that the profile does not have or the backend does not hold
+with 501 `02307` before validation and any object command (the session login of authentication comes first; core §16.1.6, "404 or 501" for an endpoint a server does not
+implement, and the result code table). `request_profile()` is the backend profile as the request sees it
+(`RequestProfiles`): `extensions` those of the selected profile, so the combined schema of
+[RPP extensions](#rpp-extensions) holds only them (guidelines §8.6), and `objects` those of the profile the backend
+holds. Handlers pass it to the mappers that read `extensions` or `objects`; discovery and refusals use `backend_profile()`.
+The extension paths exist for the extensions of every offered profile, so those of another are a 404.
+
 ## RPP extensions
 
 An RPP extension (json §7) is a schema file in `.spec/`, copied by [copy_models.sh](../../copy_models.sh) to
@@ -270,8 +301,8 @@ section structure of the RPP drafts; `tests/unit/test_rri_extension_doc.py` vali
 `<!-- example valid|invalid <definition> -->` and checks that each `<!-- definition <name> -->` it shows is the
 schema's). `rpp/schema/extensions.py` loads them (`RppExtension`): the
 Extension Object discovery states, the definitions each adds to a base definition, and the data objects it defines
-(`objects` of `rpp:extension`). A deployment offers those its backend profile lists in `extensions`; `create_app`
-refuses one the proxy does not know. `validate_schema(name, data, extensions=profile.extensions)` composes the
+(`objects` of `rpp:extension`). A deployment offers those of its offered profiles; `create_app`
+refuses one the proxy does not know or the backend does not hold. `validate_schema(name, data, extensions=profile.extensions)` composes the
 effective schema (json §7.2) with `allOf`, and `added_members` names the members an extension adds, so a mapper names
 no extension. Without the extension those members are undeclared, a 400 as before. An extension's own objects are
 validated by the names a base object's definitions would have (`requestContact.create` for
@@ -440,10 +471,10 @@ RegAccId setting: it is taken from the login.
 
 `rpp_base_url`, `rpp_tlds`, `rpp_environment_name` and `rpp_environment_status` are what the
 discovery document (`GET /.well-known/rpp`, no authentication, no EPP) states. `rpp/handlers/discovery.py`
-adds the RPP version, a constant, and the supported objects and profiles of the `BackendProfile`. Without all four, it
+adds the RPP version, a constant, the data objects the `BackendProfile` holds, and the offered profiles and extensions. Without all four, it
 answers 500 (`02400`) and logs the keys, never the values. A setting is also missing when it has the wrong shape:
-`rpp_base_url` must be an absolute `https` URL, `rpp_tlds` a non-empty list of non-empty strings. For EPP, `profiles`
-is `epp-compatibility`, though `GET /profiles/{name}` is 501. The base URL is never taken from the request. The proxy
+`rpp_base_url` must be an absolute `https` URL, `rpp_tlds` a non-empty list of non-empty strings. `profiles` are the
+RPP profiles the server offers, `extensions` those of their extensions, see [RPP profiles](#rpp-profiles). The base URL is never taken from the request. The proxy
 does not check the `version` parameter of the media type, so core §12's 406 is not enforced (#41). See
 [spec-issues.md](../../.spec/spec-issues.md#discovery).
 

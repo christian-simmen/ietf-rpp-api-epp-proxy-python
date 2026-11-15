@@ -1,0 +1,13 @@
+# The profile of DENIC's RRI (docs/rri/rri-extension.md): no host, which RRI does not have as an object, and request
+# contacts, which the extension adds.
+name: de.denic.rpp.profile.rri
+description: Profile of DENIC RRI behind RPP
+version: "1.0"
+rppVersion: "1.0"
+baseProfile: urn:ietf:params:rpp:profile:base
+objects:
+  - domainName
+  - contact
+  - requestContact
+extensions:
+  - de.denic.rpp.rri

@@ -29,3 +29,4 @@ from rpp.handlers.request_contact.request_contact_handlers import (
 )
 from rpp.handlers.message.message_handlers import messages_query, messages_read, messages_delete, messages_create
 from rpp.handlers.discovery import discovery_read
+from rpp.handlers.profiles import profiles_read

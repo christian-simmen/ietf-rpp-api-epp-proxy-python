@@ -19,7 +19,7 @@ INCLUDE_ELEMENTS = "#/components/parameters/gen.IncludeElements"
 SCHEMA_REF = re.compile(r"^#/components/schemas/gen\.(\w+)(\.\w+)$")
 
 
-def _plural(identifier: str) -> str:
+def plural(identifier: str) -> str:
     """Core §16.1.1, for the identifiers here."""
     return f"{identifier}s"
 
@@ -36,7 +36,7 @@ def _renamed(node, template: str, identifier: str, schemas: dict):
         if key == "description" and isinstance(value, str) and "operationId" in node:
             continue
         if key == "operationId":
-            value = value.replace(_plural(template), _plural(identifier), 1)
+            value = value.replace(plural(template), plural(identifier), 1)
         elif key == "$ref" and isinstance(value, str):
             match = SCHEMA_REF.fullmatch(value)
             if match and match.group(1) in (template, f"{template}Availability"):
@@ -54,7 +54,7 @@ def add_extension_paths(spec: dict, extensions) -> dict:
         for identifier in EXTENSIONS[extension].objects:
             template = TEMPLATES[identifier]
             for suffix in SUFFIXES:
-                path = copy.deepcopy(spec["paths"][f"/{_plural(template)}{suffix}"])
-                spec["paths"][f"/{_plural(identifier)}{suffix}"] = _renamed(path, template, identifier, schemas)
+                path = copy.deepcopy(spec["paths"][f"/{plural(template)}{suffix}"])
+                spec["paths"][f"/{plural(identifier)}{suffix}"] = _renamed(path, template, identifier, schemas)
     spec["components"]["schemas"].update(schemas)
     return spec

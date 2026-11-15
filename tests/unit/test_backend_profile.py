@@ -125,8 +125,8 @@ def test_a_profile_reads_as_a_tree():
         "request", "query", "cancel", "approve", "reject")
 
 
-def test_only_rri_offers_an_extension_and_transfers_with_it():
-    assert EPP_PROFILE.extensions == ()
+def test_each_backend_holds_its_extension_and_rri_transfers_with_its_own():
+    assert EPP_PROFILE.extensions == ("urn:ietf:params:rpp:extension:epp-compatibility",)
     assert RRI_PROFILE.extensions == ("de.denic.rpp.rri",)
     assert RRI_PROFILE.domainName.processes.transfer.operations == ("request",)
 

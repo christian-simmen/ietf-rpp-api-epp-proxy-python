@@ -53,6 +53,8 @@ rpp_rri_port: 51131
 rpp_rri_use_tls: true
 rpp_backend_profile:
   extends: rri                    # the generic RRI profile, src/settings/profiles/rri.yaml
+  profiles: [base, rri]           # the RPP profiles offered (src/rpp/schema/schemas/profiles)
+  default_profile: rri            # the one a request gets when it names none
 rpp_tlds:
   - de
 ```

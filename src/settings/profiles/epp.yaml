@@ -10,10 +10,13 @@ objects:                               # data-objects §2.8: the objects of EPP
   - domainName
   - host
   - contact
-profiles:                              # core §12.4, json §8.7.1
-  - urn:ietf:params:rpp:profile:epp-compatibility
+profiles:                              # the RPP profiles offered (src/rpp/schema/schemas/profiles), core §12.4
+  - base
+  - epp
+default_profile: epp                   # applied when a request names none
 lgrs: []                               # from rpp_idn_lgr_tables of the config, not set here
-extensions: []                         # the proxy offers no RPP extension for EPP
+extensions:                            # held by the backend: the profiles offer them
+  - urn:ietf:params:rpp:extension:epp-compatibility   # constraints only, no schema member
 
 domainName:
   registrant:

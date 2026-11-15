@@ -11,8 +11,10 @@ object: `min_count` and `max_count` how many a field holds, `<what>_supported` w
 LEAVES: dict[str, type] = {
     "name": str,                                         # names the backend in a refusal (`… cannot be expressed in`)
     "objects": tuple,                                    # the data objects discovery states; hosts are objects if there
-    "profiles": tuple,                                   # the RPP profiles discovery states
-    "extensions": tuple,                                 # the RPP extensions (ids) offered, which discovery states
+    "profiles": tuple,                                   # the keys of the RPP profiles this server offers (rpp/schema)
+    "default_profile": str,                              # the key of the one it applies when a request names none
+    "extensions": tuple,                                 # the RPP extensions (ids) the backend can hold: the ceiling of
+                                                         # the extensions of the offered profiles
     "lgrs": tuple,                                       # the LGRs offered for IDNs, from the config, none without IDN
     "domainName.registrant.min_count": int,              # left to the registry to refuse; the test selectors read it
     "domainName.registrant.max_count": int,              # further registrants are contacts labelled `registrant`

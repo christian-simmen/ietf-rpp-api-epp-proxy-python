@@ -5,7 +5,7 @@ from core.flows.domain.domain_flows import (
 )
 from core.result.error_response import ErrorResponse
 from rpp.handlers.shared.requested_elements import requested_elements
-from rpp.http.context import backend_profile, get_backend
+from rpp.http.context import get_backend, request_profile
 from rpp.http.headers import client_transaction_id, generate_rpp_response_headers
 from rpp.http.operation import map_request, require_empty_body, rpp_operation
 from rpp.http.problem import raise_registry_error
@@ -20,12 +20,12 @@ OBJECT = "domainName"
 
 def _requested():
     """The data elements the request asks to include, which the backend must be able to show."""
-    return map_request(domains.check_requested, requested_elements(OBJECT), profile=backend_profile())
+    return map_request(domains.check_requested, requested_elements(OBJECT), profile=request_profile())
 
 
 def _domain_output(domain, requested):
     """The domain as a response shows it: with the onDemand data elements the request includes."""
-    return include_elements.visible(OBJECT, domains.model_to_rpp(domain, backend_profile().extensions), requested)
+    return include_elements.visible(OBJECT, domains.model_to_rpp(domain, request_profile().extensions), requested)
 
 
 def _mutation_answer(result, requested, status=200, extra_headers=None):
@@ -61,7 +61,7 @@ def domainNames_availability(name, uName=None, lgr=None):
 @rpp_operation
 def domainNames_create(body):
     requested = _requested()
-    domain = map_request(domains.rpp_to_model, body, profile=backend_profile())
+    domain = map_request(domains.rpp_to_model, body, profile=request_profile())
     result = create_domain(get_backend(), domain, client_transaction_id())
     location = {"Location": f"{str(request.url).rstrip('/')}/{domain.name}"}
     try:
@@ -91,13 +91,13 @@ def domainNames_read(name):
 @rpp_operation
 def domainNames_updatePartial(name, body):
     requested = _requested()
-    update = map_request(domain_patch.rpp_to_model, name, body, profile=backend_profile())
+    update = map_request(domain_patch.rpp_to_model, name, body, profile=request_profile())
 
     def wanted_from_current(current):
         return map_request(
             domain_patch.rpp_to_model_with_current, name, body,
-            domains.model_to_rpp(current, backend_profile().extensions),
-            profile=backend_profile(),
+            domains.model_to_rpp(current, request_profile().extensions),
+            profile=request_profile(),
         )
 
     result = patch_domain(get_backend(), name, update, wanted_from_current, client_transaction_id())
@@ -107,7 +107,7 @@ def domainNames_updatePartial(name, body):
 @rpp_operation
 def domainNames_update(name, body):
     requested = _requested()
-    wanted = map_request(domain_replacement.rpp_to_model, name, body, requested, profile=backend_profile())
+    wanted = map_request(domain_replacement.rpp_to_model, name, body, requested, profile=request_profile())
     return _mutation_answer(replace_domain(get_backend(), wanted, client_transaction_id()), requested)
 
 
@@ -136,12 +136,12 @@ def domainNameRestoreProcesses_create(name, body):
 
 @rpp_operation
 def domainNameRestoreProcesses_update(name, body):
-    return _restore(map_request(domain_restore_report.rpp_to_model, name, body, profile=backend_profile()))
+    return _restore(map_request(domain_restore_report.rpp_to_model, name, body, profile=request_profile()))
 
 
 @rpp_operation
 def domainNameRestoreProcesses_updatePartial(name, body):
-    return _restore(map_request(domain_restore_patch.rpp_to_model, name, body, profile=backend_profile()))
+    return _restore(map_request(domain_restore_patch.rpp_to_model, name, body, profile=request_profile()))
 
 
 @rpp_operation

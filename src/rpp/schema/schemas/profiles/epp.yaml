@@ -1,0 +1,13 @@
+# The EPP Compatibility Profile (data-objects §2.8, core §12.4). Its extension lists the constraints and adds no schema
+# member: the EPP backend enforces them under every profile.
+name: urn:ietf:params:rpp:profile:epp-compatibility
+description: EPP compatibility profile
+version: "1.0"
+rppVersion: "1.0"
+baseProfile: urn:ietf:params:rpp:profile:base
+objects:
+  - domainName
+  - contact
+  - host
+extensions:
+  - urn:ietf:params:rpp:extension:epp-compatibility
