@@ -171,8 +171,8 @@ inherited merging. Recommend yes (simple, matches D1).
 
 On the commit of the draft PR (`PYTHONPATH=src` from the repository root):
 - `lint-imports`: 15 kept, 0 broken.
-- `pytest -n 4 tests/unit`: 2210 passed.
-- `pytest -n 4 -m smoke tests/integration` (epp-docker and rri-mtest, credentials from `.env`): 60 passed, 12 skipped.
+- `pytest -n 4 tests/unit`: 2212 passed (after review round 1).
+- `pytest -n 4 -m smoke tests/integration` (epp-docker and rri-mtest, credentials from `.env`): 60 passed, 12 skipped (rerun after review round 1: same).
   The first run failed `draft_discovery/test1-read` on both environments (expected `profiles`); fixed, rerun green.
 - Full `pytest -n 4` not run (maintainer's call).
 
@@ -180,3 +180,12 @@ On the commit of the draft PR (`PYTHONPATH=src` from the repository root):
 
 - Cases that asserted 02101 for RRI `/hosts`: `tests/unit/test_rri_wire.py` only (now 02307, own test). No integration case did.
 - Wire change W5 (discovery) is deliberate: `tests/unit/test_discovery_wire.py` and `draft_discovery/test1-read.json`.
+
+## Review round 1
+
+- R1 Only routed operations are refused (`connexion_routing.operation_id` present); an unrouted path stays 404. The
+  collection still comes from the first path segment, not the operation id prefix, because process operations
+  (`domainNameRenewProcesses_*`) have a prefix that is no collection; `plural` is public in `extension_paths.py` and
+  used for every collection. Test added; a mutation (dropping the routed condition) makes it fail.
+- R2 `docs/rri/refactoring.md` 02101 -> 02307 and the `profiles` row. R3 unique profile names checked, test added.
+  R5 wording changed. R6 no change.
