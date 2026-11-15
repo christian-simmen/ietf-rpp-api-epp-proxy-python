@@ -242,3 +242,16 @@ spec-issues entry; (10) no change.
   and a well-formed one that both admit. A base URL that cannot be read at app build gives a document without `$id`.
 - Discovery's own `extensions` list now has the server-wide extension, so the discovery tests and
   `draft_discovery/test1-read` changed; new smoke case `draft_discovery/test2-profile_schemas`.
+
+## Undeclared members (json §4.9.1, guidelines §8.6)
+
+- `effective_schema.py` builds the combined `$defs` per extension tuple with `unevaluatedProperties: false` injected at every
+  `type: object` node (not under `if`/`not`; `additionalProperties`/`unevaluatedProperties` nodes stay; on the `allOf`
+  holder of an extended definition, not in its branches). Validation and publication use that one dict.
+- Decision (maintainer): a `due` on a contact or host status is an undeclared member (json §6.2.3 declares `due` on the
+  domain status only): 400 `02001` "Undeclared property", no longer 501 `02102`. Three tests changed with that reason; the
+  mapper's three `reject_set(due=...)` refusals (contact patch, contact replacement, host status) became unreachable and
+  are removed (a mutation that made them fail the tests found no path to them). The dataclass check `parse_rpp` stays as
+  defence in depth.
+- Results on 186d706: lint 15 kept; unit 2431 passed; smoke both environments 73 passed, 23 skipped; full epp-docker
+  `pytest -n 8 tests/integration` 463 passed, 633 skipped (no other wire difference).
