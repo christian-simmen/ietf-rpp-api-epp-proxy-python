@@ -44,18 +44,30 @@ def build_effective(extensions: tuple[str, ...]) -> None:
             _effective[(name, extensions)] = _compose(name, extensions)    # None: the profile has no such definition
 
 
+# Whether a tuple of extensions that `build_effective` did not build may be built on first use. The app never does that: a
+# schema is built when the app is built and a request only looks it up. Only the tests, which map without an app, say
+# so (tests/conftest.py).
+LAZY_BUILD = False
+
+
+class SchemaNotBuilt(LookupError):
+    """A request asked for a validator that no profile of the app has: a defect, not a refusal of the request."""
+
+
 def effective_validator(schema_name: str, extensions: tuple[str, ...]):
-    """The validator of a definition for the extensions of a profile. One the profile does not have (an extension's own
-    object under a profile without the extension: only a test that maps without an app reaches it) is the combined
-    schema of every extension's. A tuple the app did not build is built on first use."""
+    """The validator of a definition for the extensions of a profile, as the app built it. Where `LAZY_BUILD` is set (the
+    tests), a tuple not built is built on first use, and a definition the profile does not have (an extension's own object
+    under a profile without the extension) is the combined schema of every extension's."""
     extensions = tuple(extensions)
     key = (schema_name, extensions)
-    if key not in _effective:
+    if key not in _effective and LAZY_BUILD:
         build_effective(extensions)
-    if _effective[key] is None:
+    if _effective.get(key) is None and LAZY_BUILD:
         everything = tuple(EXTENSIONS)
         build_effective(everything)
         key = (schema_name, everything)
+    if _effective.get(key) is None:
+        raise SchemaNotBuilt(f"No schema {schema_name} was built for the extensions {', '.join(extensions) or '(none)'}")
     return _effective[key]
 
 

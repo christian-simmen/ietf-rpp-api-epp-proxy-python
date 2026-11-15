@@ -320,21 +320,27 @@ there is no `RPP-Profile` response header (core §14: the methods are not both u
 [spec-issues.md](../../.spec/spec-issues.md#profile-signalling-with-media-type-parameters)).
 
 **Effective schemas.** `create_app` builds `ProfileSchemas` (`rpp/schema/profile_schemas.py`) once per app, so once per
-uvicorn worker, at startup (about 5 to 10 ms for two profiles): for each offered profile `build_effective` of
+uvicorn worker, at startup (about 5 to 10 ms for two profiles): for each offered profile `build_effective` (for its extension tuple, the server's own, and
+both together, which is the document's) of
 `rpp/schema/validator.py` fills the validator of every definition for the profile's extension tuple (json §7.2: the base
 definition and the extension's with `allOf`), and a JSON Schema 2020-12 document is made with `$id` the public URL, `$defs`
 the bundle and the profile's extension definitions, and each extended definition as the `allOf` of the base definition and
 the extension's, which is what validation composes (the bundle references an extended definition from no other, so composing
-it in place changes nothing else). A request only looks a validator up (`validate_schema`); a tuple the app did not build,
-only reached by a test that maps without an app, is built on first use. `GET /profiles/{name}/schema`
+it in place changes nothing else). A request only looks a validator up (`validate_schema`); one the app did not build is a `SchemaNotBuilt`
+error. Only the tests, which map without an app, set `validator.LAZY_BUILD` (tests/conftest.py). `GET /profiles/{name}/schema`
 (`profiles_schemaRead`; the path is added by `rpp/http/profile_schema_path.py`, copied from `/profiles/{name}`, as
 extension paths are, with no security) answers the document as `application/schema+json`, a name not offered is 404
-`02303`. It is a routed operation, so the profile headers and `Vary` are those of discovery. Discovery lists
+`02303`. It is a document fetch and not an RPP operation: `ProfileMiddleware` exempts it from profile signalling in both
+methods (no selection, no refusal, no `RPP-Profile`), `RPP-Cltrid` and `Accept` are optional on it, and an `Accept` that does
+not allow `application/schema+json`, `application/json`, `application/*` or `*/*` is a 406 `02004`. Discovery lists
 `{profile, version, url}` per offered profile in `profileSchemas`, a member of the server-wide extension
 `urn:ietf:params:rpp:extension:profile-schemas` (`.spec/profile-schemas.schema.json`,
 [profile-schemas-extension.md](../profile-schemas-extension.md); `SERVER_EXTENSIONS` in `rpp/schema/extensions.py`, listed
 in `extensions` after those of the profiles, in no profile). The URL is `rpp_base_url` plus the path with the name
-URL-encoded as one segment; without a readable base URL a document has no `$id` and discovery is the 500 it already is.
+URL-encoded as one segment; the document's `$id` is that URL only where discovery would state the base URL
+(`rpp/schema/https_url.py`: https, no userinfo, query or fragment), else the document has none and discovery is the 500 it
+already is. The injection does not put the keyword on a node an `allOf`, `anyOf`, `oneOf`, `then`, `else` or
+`dependentSchemas` reaches: the holder's covers it (`effective_schema.py`).
 
 `ProfileMiddleware` (after the authentication) stores the selection in the request context (`profile_selection()`) and
 refuses a routed operation on a data object that the request profile does not have or the

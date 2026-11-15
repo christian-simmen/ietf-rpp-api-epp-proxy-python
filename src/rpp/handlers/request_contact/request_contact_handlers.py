@@ -8,7 +8,7 @@ from core.flows.request_contact.request_contact_flows import (
 )
 from core.result.error_response import ErrorResponse
 from rpp.handlers.shared.requested_elements import INCLUDE_ELEMENTS
-from rpp.http.context import get_backend
+from rpp.http.context import get_backend, request_profile, response_profile
 from rpp.http.headers import client_transaction_id, generate_rpp_response_headers
 from rpp.http.operation import map_request, require_empty_body, rpp_operation
 from rpp.http.problem import raise_registry_error
@@ -28,13 +28,13 @@ def _mutation_answer(result, status=200, extra_headers=None):
     headers = {**generate_rpp_response_headers(result.mutation), **(extra_headers or {})}
     if result.stored is None:
         return None, 202, headers
-    return request_contacts.model_to_rpp(result.stored), status, headers
+    return request_contacts.model_to_rpp(result.stored, response_profile().extensions), status, headers
 
 
 @rpp_operation
 def requestContacts_create(body):
     _no_elements_requested()
-    contact = map_request(request_contacts.rpp_to_model, body)
+    contact = map_request(request_contacts.rpp_to_model, body, request_profile().extensions)
     result = create_request_contact(get_backend(), contact, client_transaction_id())
     return _mutation_answer(result, 201, {"Location": f"{str(request.url).rstrip('/')}/{contact.id}"})
 
@@ -45,13 +45,14 @@ def requestContacts_read(id):
     response = get_backend().request_contacts.info(id, client_transaction_id=client_transaction_id())
     if isinstance(response, ErrorResponse):
         raise_registry_error(response)
-    return request_contacts.model_to_rpp(response.payload), 200, generate_rpp_response_headers(response)
+    return (request_contacts.model_to_rpp(response.payload, response_profile().extensions), 200,
+            generate_rpp_response_headers(response))
 
 
 @rpp_operation
 def requestContacts_update(id, body):
     _no_elements_requested()
-    wanted = map_request(request_contact_replacement.rpp_to_model, id, body)
+    wanted = map_request(request_contact_replacement.rpp_to_model, id, body, request_profile().extensions)
     return _mutation_answer(replace_request_contact(get_backend(), wanted, client_transaction_id()))
 
 
@@ -60,7 +61,8 @@ def requestContacts_updatePartial(id, body):
     _no_elements_requested()
 
     def wanted_from_current(current):
-        return map_request(request_contact_patch.rpp_to_model_with_current, id, body, current)
+        return map_request(request_contact_patch.rpp_to_model_with_current, id, body, current,
+                           request_profile().extensions)
 
     return _mutation_answer(patch_request_contact(get_backend(), id, wanted_from_current, client_transaction_id()))
 
@@ -92,5 +94,5 @@ def requestContacts_availabilityHead(id):
 @rpp_operation
 def requestContacts_availability(id):
     response = _availability(id)
-    return (request_contact_availability.model_to_rpp(response.payload), 200 if response.payload.available else 404,
+    return (request_contact_availability.model_to_rpp(response.payload, response_profile().extensions), 200 if response.payload.available else 404,
             generate_rpp_response_headers(response))

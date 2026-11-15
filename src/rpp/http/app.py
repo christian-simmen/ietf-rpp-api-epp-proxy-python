@@ -23,9 +23,9 @@ from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidat
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
 from rpp.http.extension_paths import add_extension_paths
 from rpp.http.profile_schema_path import add_profile_schema_path
-from rpp.schema.extensions import SERVER_EXTENSIONS, check_known
+from rpp.schema.extensions import check_known
+from rpp.schema.https_url import https_url
 from rpp.schema.profile_schemas import ProfileSchemas
-from rpp.schema.validator import build_effective
 from rpp.schema.rpp_profiles import RppProfiles
 
 OPENAPI_SPEC = Path(__file__).parent.parent / "openapi.yaml"
@@ -42,13 +42,14 @@ def parsed_spec() -> dict:
 
 
 def public_base_url(discovery_settings) -> str | None:
-    """The base URL the discovery document states, None where there is none to state (unset, not an https URL, or
-    settings that cannot be read: discovery answers that at request time, with its own checks)."""
+    """The base URL the discovery document states, None where there is none to state (unset, not an acceptable https URL:
+    no userinfo, query or fragment, or settings that cannot be read: discovery answers that at request time). An unauthenticated
+    endpoint publishes it in a `$id`, so it must be one discovery would state."""
     try:
         url = getattr(discovery_settings, "rpp_base_url", None)
     except Exception:  # noqa: BLE001 - settings are read by the request that needs them
         return None
-    return url if isinstance(url, str) and url.startswith("https://") else None
+    return url if https_url(url) else None
 
 
 def create_app(sessions, profile: BackendProfile, discovery_settings=None, signalling=HEADER_SIGNALLING):
@@ -69,7 +70,6 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
     # The effective schemas are built here, once, and only read by a request. A base URL that discovery would refuse is
     # no public URL: the documents then have no `$id`.
     profile_schemas = ProfileSchemas(profiles, public_base_url(discovery_settings))
-    build_effective(SERVER_EXTENSIONS)
     app = FlaskApp(
         __name__,
         security_map={"basic": lambda: SessionSecurityHandler(sessions)},

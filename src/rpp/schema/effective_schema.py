@@ -15,11 +15,17 @@ with open(SCHEMA_FILE) as f:
 
 UNEVALUATED = "unevaluatedProperties"
 
-# Schema keywords whose value is a schema, a list of schemas, or a map of schemas that the injection goes into.
-_SCHEMA = ("items", "contains", "then", "else", "additionalProperties", "unevaluatedProperties")
-_SCHEMAS = ("allOf", "anyOf", "oneOf", "prefixItems")
-_SCHEMA_MAPS = ("properties", "patternProperties", "dependentSchemas", "$defs")
-# `if` and `not` are conditions, not what an instance must be: an injection there would change what they match.
+# Schema keywords whose value is a schema, a list of schemas, or a map of schemas that the injection goes into. A node
+# reached through `_IN_PLACE` is evaluated together with the node that holds the keyword, so the holder's
+# `unevaluatedProperties` covers its members and the node itself gets none; its own `properties` and `items` are other
+# nodes and are entered. `if` and `not` are conditions, not what an instance must be: an injection there would change
+# what they match, so they are not entered.
+_SCHEMA = ("items", "contains", "additionalProperties", "unevaluatedProperties")
+_SCHEMAS = ("prefixItems",)
+_SCHEMA_MAPS = ("properties", "patternProperties", "$defs")
+_IN_PLACE = ("then", "else")
+_IN_PLACE_LISTS = ("allOf", "anyOf", "oneOf")
+_IN_PLACE_MAPS = ("dependentSchemas",)
 
 
 def bundle_definitions() -> dict:
@@ -30,7 +36,8 @@ def bundle_definitions() -> dict:
 def _inject(node, root: bool = True) -> None:
     """Puts the keyword at every object-schema node of `node` (`type` is `object`) that says nothing about members it does
     not declare: `unevaluatedProperties` or `additionalProperties` (free keys) already there stay as they are. `root` is
-    False for the node of a definition that is composed with `allOf`: the keyword goes on the composition."""
+    False for a node the holder of an applicator covers: the node of a definition that is composed with `allOf`, and a
+    branch of `allOf`, `anyOf`, `oneOf`, `then`, `else` or `dependentSchemas`."""
     if isinstance(node, list):
         for item in node:
             _inject(item)
@@ -50,6 +57,17 @@ def _inject(node, root: bool = True) -> None:
         if isinstance(node.get(keyword), dict):
             for value in node[keyword].values():
                 _inject(value)
+    for keyword in _IN_PLACE:
+        if isinstance(node.get(keyword), dict):
+            _inject(node[keyword], root=False)
+    for keyword in _IN_PLACE_LISTS:
+        if isinstance(node.get(keyword), list):
+            for item in node[keyword]:
+                _inject(item, root=False)
+    for keyword in _IN_PLACE_MAPS:
+        if isinstance(node.get(keyword), dict):
+            for value in node[keyword].values():
+                _inject(value, root=False)
 
 
 _effective: dict[tuple[str, ...], dict] = {}

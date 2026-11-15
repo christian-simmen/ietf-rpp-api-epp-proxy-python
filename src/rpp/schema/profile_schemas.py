@@ -1,6 +1,7 @@
 from urllib.parse import quote
 
 from rpp.schema.effective_schema import effective_definitions
+from rpp.schema.extensions import SERVER_EXTENSIONS
 from rpp.schema.rpp_profile import RppProfile
 from rpp.schema.rpp_profiles import RppProfiles
 from rpp.schema.validator import build_effective
@@ -31,8 +32,10 @@ class ProfileSchemas:
 
     def __init__(self, profiles: RppProfiles, base_url: str | None):
         self._documents = {}
+        build_effective(SERVER_EXTENSIONS)      # what the discovery document is validated with
         for profile in profiles.offered:
-            build_effective(profile.extensions)
+            build_effective(profile.extensions)     # what a request of the profile is validated with
+            build_effective((*profile.extensions, *SERVER_EXTENSIONS))     # what the document publishes
             self._documents[profile.key] = self._document(profile, base_url)
 
     @staticmethod
@@ -41,7 +44,8 @@ class ProfileSchemas:
         if base_url:
             document["$id"] = schema_url(base_url, profile.name)
         document["title"] = f"Effective schema of the RPP profile {profile.name} version {profile.version}"
-        document["$defs"] = effective_definitions(profile.extensions)
+        # the profile's own extensions and the server's: the schema also accepts the server's discovery document
+        document["$defs"] = effective_definitions((*profile.extensions, *SERVER_EXTENSIONS))
         return document
 
     def of(self, profile: RppProfile) -> dict:

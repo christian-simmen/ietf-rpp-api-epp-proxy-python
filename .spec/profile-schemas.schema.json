@@ -18,6 +18,7 @@
         "profileSchemas": {
           "type": "array",
           "items": { "$ref": "#/$defs/ext.profileSchemas.profileSchema" },
+          "minItems": 1,
           "readOnly": true
         }
       },

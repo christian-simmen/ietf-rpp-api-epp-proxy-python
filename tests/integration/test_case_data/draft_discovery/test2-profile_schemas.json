@@ -3,7 +3,7 @@
     "smoke"
   ],
   "test_id": "test2-profile_schemas",
-  "description": "Discovery lists the URL of the effective schema of each offered profile (extension profile-schemas): each is fetched, without authentication, as application/schema+json.",
+  "description": "Discovery lists the URL of the effective schema of each offered profile (extension profile-schemas): each is fetched, without authentication and without a profile header, as application/schema+json.",
   "steps": [
     {
       "request": {
@@ -70,9 +70,7 @@
         "method": "GET",
         "url": "{capture:schemaA}",
         "headers": {
-          "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
-          "Content-Type": "{rpp:content-type}",
+          "Accept": "application/schema+json",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -80,7 +78,8 @@
         "status": 200,
         "content_type": "application/schema+json",
         "headers": {
-          "RPP-Code": "01000"
+          "RPP-Code": "01000",
+          "RPP-Profile": null
         },
         "body": {
           "$schema": "https://json-schema.org/draft/2020-12/schema"
@@ -92,9 +91,7 @@
         "method": "GET",
         "url": "{capture:schemaB}",
         "headers": {
-          "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
-          "Content-Type": "{rpp:content-type}",
+          "Accept": "application/schema+json",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -102,7 +99,8 @@
         "status": 200,
         "content_type": "application/schema+json",
         "headers": {
-          "RPP-Code": "01000"
+          "RPP-Code": "01000",
+          "RPP-Profile": null
         },
         "body": {
           "$schema": "https://json-schema.org/draft/2020-12/schema"

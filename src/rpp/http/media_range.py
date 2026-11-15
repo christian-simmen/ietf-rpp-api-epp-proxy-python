@@ -83,6 +83,16 @@ def _unclosed(value: str) -> bool:
     return quoted
 
 
+def _lenient_quality(parts: list[str]) -> Decimal:
+    """The weight of a range that is not read in full: the first `q` parameter if it is a weight, else 1. A range of another
+    media type matters only to a caller that names it, and that caller wants its weight."""
+    for part in parts:
+        name, separator, value = part.partition("=")
+        if separator and name.strip().lower() == "q":
+            return Decimal(value.strip()) if _QUALITY.match(value.strip()) else Decimal(1)
+    return Decimal(1)
+
+
 def _syntax(message: str) -> MediaRangeError:
     return MediaRangeError(ResultCode.PARAMETER_VALUE_SYNTAX_ERROR, message)
 
@@ -110,7 +120,7 @@ def _parse(text: str, weighted: bool) -> MediaRange:
         # refused (it would swallow the ranges after it), and a parameter the grammar may not like is not.
         if _unclosed(text):
             raise _syntax("A quoted string of a media range is not closed")
-        return MediaRange(kind=kind)
+        return MediaRange(kind=kind, quality=_lenient_quality(parts) if weighted else Decimal(1))
     for part in parts:
         if not part.strip():
             continue

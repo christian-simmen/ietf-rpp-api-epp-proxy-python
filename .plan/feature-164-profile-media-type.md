@@ -255,3 +255,16 @@ spec-issues entry; (10) no change.
   defence in depth.
 - Results on 186d706: lint 15 kept; unit 2431 passed; smoke both environments 73 passed, 23 skipped; full epp-docker
   `pytest -n 8 tests/integration` 463 passed, 633 skipped (no other wire difference).
+
+## Review round 2 of #171
+
+Decisions: (1) `https_url` and `text` moved to `rpp/schema/https_url.py` (discovery and `public_base_url` use it; a userinfo or
+query URL gives no `$id`, discovery 500); (2) the published document and its validators are built for
+`(*profile.extensions, *SERVER_EXTENSIONS)`, and the server tuple is built by `ProfileSchemas`, not `app.py`; the live
+discovery response validates against each published `discovery.read`; (3) array items pinned by tests (removing `items` from
+`_SCHEMA` fails the `contacts[]` one); (4) the request-contact mappers take the request or response profile's extensions, an
+unbuilt validator is `SchemaNotBuilt` unless a test sets `validator.LAZY_BUILD`, and the build-once test strictly runs requests
+on requestContact; (5) `profiles_schemaRead` is outside profile signalling in both methods, `Accept` must allow
+`application/schema+json`, `application/json`, `application/*` or `*/*` (406 `02004`), `RPP-Cltrid` optional, relaxation of core
+§6.1 recorded; (6) `minItems: 1` on `profileSchemas`; (7) `_inject` leaves nodes reached through applicators alone but enters
+their `properties` and `items`.

@@ -3,6 +3,7 @@ from connexion import ProblemException
 from core.result.result_code import ResultCode
 from rpp.http.extension_paths import plural
 from rpp.http.headers import problem_headers
+from rpp.http.profile_schema_path import OPERATION as SCHEMA_OPERATION
 from rpp.http.request_profiles import RequestProfiles
 from rpp.schema.extensions import EXTENSIONS
 
@@ -40,7 +41,9 @@ class ProfileMiddleware:
             # Only a routed operation selects a profile and is refused: a path no operation serves stays the 404 of
             # the router, and a 401 never gets here.
             routed = scope.get("extensions", {}).get("connexion_routing", {}).get("operation_id")
-            if not routed:
+            if not routed or routed.endswith(SCHEMA_OPERATION):
+                # A path no operation serves is the router's 404. The schema of a profile is a document, outside the
+                # profile signalling of both methods: no selection, no refusal, no profile in the response.
                 await self.app(scope, receive, send)
                 return
             selection = self.signalling.resolve(scope)

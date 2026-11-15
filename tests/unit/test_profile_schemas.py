@@ -21,6 +21,7 @@ from tests.unit.test_profiles_wire import BASE, EPP, RRI, epp_client, rri_client
 from tests.unit.test_rri_wire import DISCOVERY, HEADERS
 
 PUBLIC = {"Accept": "application/rpp+json", "RPP-Cltrid": "cl-1"}   # no Authorization: like discovery
+SCHEMA = {"Accept": "application/schema+json"}                          # a schema fetch: no RPP-Cltrid, no profile
 BASE_URL = DISCOVERY.rpp_base_url
 
 
@@ -29,7 +30,7 @@ def url_of(name):
 
 
 def schema_of(client, name):
-    response = client.get(f"/profiles/{quote(name, safe='')}/schema", headers=PUBLIC)
+    response = client.get(f"/profiles/{quote(name, safe='')}/schema", headers=SCHEMA)
     assert response.status_code == 200, response.text
     return response
 
@@ -59,17 +60,66 @@ def test_each_listed_schema_is_fetched_without_authentication_and_is_a_valid_202
 
 @pytest.mark.parametrize("name", ["nope", RRI])
 def test_a_name_the_server_does_not_offer_is_a_404(name):
-    response = epp_client().get(f"/profiles/{quote(name, safe='')}/schema", headers=PUBLIC)
+    response = epp_client().get(f"/profiles/{quote(name, safe='')}/schema", headers=SCHEMA)
 
     assert response.status_code == 404 and response.headers["RPP-Code"] == "02303"
     assert response.headers["Content-Type"] == "application/problem+json"
 
 
-def test_the_schema_path_has_the_profile_headers_and_vary_of_discovery():
-    response = epp_client().get(f"/profiles/{BASE}/schema", headers=PUBLIC)
+def media_client():
+    sessions = SessionPool(epp_backends(lambda username, password: FakeEppClient(username, password)))
+    return create_app(sessions, EPP_PROFILE, discovery_settings=DISCOVERY, signalling="media-type").test_client()
 
-    assert response.headers["RPP-Profile"] == f"profile={EPP};version=1.0"       # the default: no header was sent
-    assert response.headers["Vary"] == "RPP-Profile"
+
+@pytest.mark.parametrize("client_of", [epp_client, media_client], ids=["header", "media-type"])
+class TestTheSchemaIsADocumentOutsideProfileSignalling:
+    def fetch(self, client_of, headers):
+        return client_of().get(f"/profiles/{BASE}/schema", headers=headers)
+
+    @pytest.mark.parametrize("accept", ["application/schema+json", "application/json", "application/*", "*/*",
+                                        "text/html, application/json;q=0.5", 'application/schema+json; profile="x"'])
+    def test_an_accept_that_allows_the_document_is_answered(self, client_of, accept):
+        response = self.fetch(client_of, {"Accept": accept})
+
+        assert response.status_code == 200 and response.headers["Content-Type"] == "application/schema+json"
+        assert response.headers["Vary"] == "Accept"
+
+    def test_no_accept_is_any(self, client_of):
+        response = client_of().get(f"/profiles/{BASE}/schema", headers={"Accept": ""})
+
+        assert response.status_code == 200
+
+    @pytest.mark.parametrize("accept", ["text/html", "application/rpp+json", "application/xml, application/schema+json;q=0",
+                                        "application/schema+json;q=0, */*"])
+    def test_an_accept_that_does_not_allow_it_is_a_406_problem_detail(self, client_of, accept):
+        response = self.fetch(client_of, {"Accept": accept})
+
+        assert response.status_code == 406 and response.headers["RPP-Code"] == "02004"
+        assert response.headers["Content-Type"] == "application/problem+json"
+        assert "RPP-Profile" not in response.headers
+
+    def test_rpp_cltrid_is_optional_and_echoed_when_sent(self, client_of):
+        assert "RPP-Cltrid" not in self.fetch(client_of, SCHEMA).headers
+        assert self.fetch(client_of, {**SCHEMA, "RPP-Cltrid": "cl-9"}).headers["RPP-Cltrid"] == "cl-9"
+
+    @pytest.mark.parametrize("headers", [
+        {"RPP-Profile": "garbage"},                                          # no refusal, and nothing selected
+        {"RPP-Profile": f"profile={RRI};version=9.9"},
+        {"Content-Type": 'application/rpp+json; profile="nope"; profile-version="9.9"'},
+        {"Accept": 'application/schema+json; profile="nope"; profile-version="9.9"'},
+    ])
+    def test_profile_headers_and_parameters_are_ignored(self, client_of, headers):
+        response = self.fetch(client_of, {**SCHEMA, **headers})
+
+        assert response.status_code == 200
+        assert "RPP-Profile" not in response.headers
+        assert response.headers["Content-Type"] == "application/schema+json"      # no profile parameters
+        assert response.json()["$id"] == url_of(BASE)
+
+    def test_a_name_not_offered_is_a_404_with_no_profile_either(self, client_of):
+        response = client_of().get("/profiles/nope/schema", headers=SCHEMA)
+
+        assert response.status_code == 404 and "RPP-Profile" not in response.headers
 
 
 def test_a_profile_has_the_definitions_of_its_extensions_and_no_others():
@@ -107,6 +157,11 @@ SAMPLES = [
     ("requestContact.create", {"@type": "requestContact", "id": "X-1", "uriTemplate": "https://e.example/{Alabel}", "bogus": 1}),
     ("contact.create", {"@type": "contact", "id": "X-1", "contactInfo": {"@type": "Card", "version": "2.0", "bogus": 1}}),
     ("domainTransferProcess.create", {"@type": "domainTransferProcess", "bogus": 1}),
+    # an undeclared member in an item of an array
+    ("domainName.create", {"@type": "domainName", "name": "foo.de",
+                           "nameservers": [{"@type": "host", "hostName": "ns1.example", "bogus": 1}]}),
+    ("domainName.create", {"@type": "domainName", "name": "foo.de",
+                           "contacts": [{"label": "admin", "object": {"@type": "contact", "id": "X-1"}, "bogus": 1}]}),
 ]
 
 
@@ -174,7 +229,19 @@ def test_the_validators_are_built_on_the_published_definitions():
         profile = PROFILES[key]
         published = schema_of(rri_client(), profile.name).json()["$defs"]
 
-        assert validator.effective_definitions(profile.extensions) == published
+        assert effective_schema.effective_definitions((*profile.extensions, *SERVER_EXTENSIONS)) == published
+        assert (("domainName.create", (*profile.extensions, *SERVER_EXTENSIONS)) in validator._effective)
+
+
+@pytest.mark.parametrize("client_of, names", [(epp_client, [BASE, EPP]), (rri_client, [BASE, RRI])])
+def test_the_published_schema_accepts_the_discovery_document_of_the_server(client_of, names):
+    client = client_of()
+    discovery = client.get("/.well-known/rpp", headers=PUBLIC).json()
+    for name in names:
+        defs = schema_of(client, name).json()["$defs"]
+        schema = Draft202012Validator({"$ref": "#/$defs/discovery.read", "$defs": defs})
+
+        assert list(schema.iter_errors(discovery)) == [], name
 
 
 def test_an_undeclared_member_is_the_error_a_mapper_turns_into_a_400():
@@ -195,7 +262,8 @@ def count_composed(monkeypatch):
 
 
 def test_the_schemas_are_built_once_per_profile_with_the_app_and_never_per_request(monkeypatch):
-    monkeypatch.setattr(validator, "_effective", {})        # nothing built before: the app builds all it needs
+    monkeypatch.setattr(validator, "LAZY_BUILD", False)     # the app builds all it needs, a request builds nothing
+    monkeypatch.setattr(validator, "_effective", {})
     monkeypatch.setattr(effective_schema, "_effective", {})
     composed = count_composed(monkeypatch)
     documents = []
@@ -208,7 +276,7 @@ def test_the_schemas_are_built_once_per_profile_with_the_app_and_never_per_reque
 
     # one document per offered profile, and the validators of every definition for each distinct extension tuple
     assert documents == ["base", "rri"]
-    assert len(composed) == len(validator._names()) * 3            # (), the rri extension, the server's own
+    assert len(composed) == len(validator._names()) * 4            # (), rri, the server's own, rri and the server's
     built = len(composed)
 
     for _ in range(3):
@@ -218,6 +286,15 @@ def test_the_schemas_are_built_once_per_profile_with_the_app_and_never_per_reque
         client.post("/domainNames", json={"@type": "domainName", "name": "foo.de"},
                     headers={**HEADERS, "Content-Type": "application/rpp+json"})
         client.get("/domainNames/foo.de", headers=HEADERS)
+        for response in (
+                client.post("/requestContacts", json={"@type": "requestContact", "id": "DENIC-1000022-GR",
+                                                      "uriTemplate": "https://e.example/{Alabel}"},
+                            headers={**HEADERS, "Content-Type": "application/rpp+json"}),
+                client.put("/requestContacts/DENIC-1000022-GR", json={"@type": "requestContact",
+                                                                     "uriTemplate": "https://e.example/{Alabel}"},
+                           headers={**HEADERS, "Content-Type": "application/rpp+json"}),
+                client.get("/requestContacts/DENIC-1000022-GR/availability", headers=HEADERS)):
+            assert "No schema" not in response.text         # nothing was built, or looked up unbuilt, for the request
 
     assert len(composed) == built and documents == ["base", "rri"]
 
@@ -237,3 +314,45 @@ def test_without_a_configured_base_url_a_document_has_no_id():
     document = client.get(f"/profiles/{BASE}/schema", headers=PUBLIC).json()
 
     assert "$id" not in document
+
+
+@pytest.mark.parametrize("body", [
+    {"@type": "domainName", "name": "foo.de", "nameservers": [{"@type": "host", "hostName": "ns1.example", "bogus": 1}]},
+    {"@type": "domainName", "name": "foo.de", "contacts": [{"label": "admin", "object": {"@type": "contact", "id": "X-1"}, "bogus": 1}]},
+])
+@pytest.mark.parametrize("key", ["base", "epp", "rri"])
+def test_an_undeclared_member_in_an_array_item_is_refused_under_every_profile(key, body):
+    profile = PROFILES[key]
+    client = rri_client() if key == "rri" else epp_client()
+    document = schema_of(client, profile.name).json()
+
+    assert published_validity(document, "domainName.create", body) is False
+    with pytest.raises(ValueError, match="Undeclared property: 'bogus'"):
+        validator.validate_schema("domainName.create", body, profile.extensions)
+
+
+def test_an_unbuilt_schema_is_an_error_where_the_app_is_not_lazy(monkeypatch):
+    monkeypatch.setattr(validator, "LAZY_BUILD", False)
+
+    with pytest.raises(validator.SchemaNotBuilt):
+        validator.effective_validator("domainName.create", ("no.such.extension",))
+    # what no profile of the app has: an extension's own object under a tuple without the extension
+    with pytest.raises(validator.SchemaNotBuilt):
+        validator.effective_validator("requestContact.create", ())
+
+
+def https_settings(url):
+    from types import SimpleNamespace
+    return SimpleNamespace(rpp_base_url=url, rpp_tlds=["de"], rpp_environment_name="test", rpp_environment_status="test")
+
+
+@pytest.mark.parametrize("url", ["https://user:secret@rpp.example", "https://rpp.example/?token=1", "https://rpp.example/#x",
+                                 "http://rpp.example", "https://", "https://rpp.example/a b", "rpp.example"])
+def test_a_base_url_discovery_would_refuse_is_published_in_no_id(url):
+    sessions = SessionPool(epp_backends(lambda username, password: FakeEppClient(username, password)))
+    client = create_app(sessions, EPP_PROFILE, discovery_settings=https_settings(url)).test_client()
+    document = client.get(f"/profiles/{BASE}/schema", headers=SCHEMA)
+
+    assert document.status_code == 200 and "$id" not in document.json()
+    assert "secret" not in document.text and "token" not in document.text
+    assert client.get("/.well-known/rpp", headers=PUBLIC).status_code == 500

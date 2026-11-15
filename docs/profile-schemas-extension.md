@@ -140,7 +140,7 @@ Request message: None
 
 Response message: the Effective Schema of the profile, a JSON Schema document [@!JSON-SCHEMA] with the media type `application/schema+json`.
 
-The operation needs no authentication and no registry command, as the Discovery operation. The profile headers of the request apply as for the Discovery operation.
+The operation needs no authentication and no registry command, as the Discovery operation. It reads a document and is not an RPP operation: the profile of the request is not selected, so `RPP-Profile` and the media type parameters of the request are ignored and the response names no profile, and `RPP-Cltrid` is optional, so that a generic JSON Schema client that resolves the `$id` of the schema can fetch it. A client sends `Accept` with `application/schema+json`, `application/json`, `application/*` or `*/*`, or none; any other `Accept` is a 406 with the result code `02004`. The response has `Vary: Accept`.
 
 | Case                                    | HTTP status | RPP result code |
 | --------------------------------------- | ----------- | --------------- |
@@ -190,6 +190,7 @@ The schema document states the Name, Identifier, and Version of (#overview) in t
         "profileSchemas": {
           "type": "array",
           "items": { "$ref": "#/$defs/ext.profileSchemas.profileSchema" },
+          "minItems": 1,
           "readOnly": true
         }
       },
@@ -307,6 +308,21 @@ Example Discovery document with a Profile Schema without a URL:
 }
 ```
 
+Example Discovery document with an empty `profileSchemas`:
+
+<!-- example invalid discovery.read -->
+```json
+{
+  "@type": "discovery",
+  "versions": [{ "@type": "discoveryVersion", "version": "1.0", "baseUrl": "https://rpp.example" }],
+  "environment": { "@type": "discoveryEnvironment", "name": "rpp.example", "status": "production" },
+  "tlds": ["de"],
+  "objects": ["domainName"],
+  "datetime": "2026-11-15T12:00:00Z",
+  "profileSchemas": []
+}
+```
+
 A request for the schema of a profile that the server does not offer is answered with 404 and `RPP-Code: 02303`. A member that the Effective Schema of a profile does not declare, such as `generalRequest` in a Domain Name create request under the base profile, is invalid under that schema, and valid under the schema of the profile of the DENIC RRI extension.
 
 # IANA Considerations {#iana}
@@ -359,5 +375,5 @@ This appendix states the decisions of the implementation where the base specific
 * The schema is built once per worker when the application starts, from the same `$defs` that the validators of the profile use, so what is published is what is enforced. The bundle of the base specifications references no definition that an extension extends from another definition, so composing in place changes no other definition.
 * The injection of `"unevaluatedProperties": false` follows [@!I-D.ietf-rpp-json, section 4.9.1]: object-schema nodes have it, nodes with `additionalProperties` or `unevaluatedProperties` do not get it, and the conditions `if` and `not` are not entered.
 * A member no schema of the profile declares is refused with 400 `02001` and the detail "Undeclared property", also one that only another profile declares (an rri member under the base profile) and one nested in an object of an extension. The status of a contact or a host has no `due` member [@!I-D.ietf-rpp-json, section 6.2.3], so it is refused the same way.
-* The media type of the response is `application/schema+json`, whatever the `Accept` of the request lists, as [@!I-D.ietf-rpp-core, section 13] asks for a listed media type and the schema is not an RPP media type. The profile headers and `Vary` are those of the Discovery operation.
-* Without a configured https base URL a document has no `$id`, and the Discovery document is the 500 it is without that URL.
+* The schema is not an RPP media type and the operation is not part of profile signalling: [@!I-D.ietf-rpp-core, section 13] and 14 are not applied to it. The `Accept` must allow `application/schema+json` (406 otherwise), the request profile is not selected and no `RPP-Profile` is sent, in either signalling method. [@!I-D.ietf-rpp-core, section 6.1] asks for `RPP-Cltrid` on every request; the proxy relaxes that for this operation only, which is echoed when sent.
+* Without a base URL that discovery would state (https, no userinfo, query or fragment) a document has no `$id`, and the Discovery document is the 500 it is without that URL.
