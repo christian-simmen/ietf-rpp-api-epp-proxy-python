@@ -7,10 +7,11 @@
         "url": "/domainNames",
         "body_raw": "\n{\n    \"name: \"FREE.EXAMPLE\",\n    \"authInfo\": {\n        \"pw\": \"Abc2345678\"\n    }\n}\n            ",
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "test8-{random_name}-clTRID",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json"
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}"
         }
       },
       "response": {

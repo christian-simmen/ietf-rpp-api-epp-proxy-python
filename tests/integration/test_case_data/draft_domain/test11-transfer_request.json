@@ -61,9 +61,10 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -133,9 +134,10 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -153,9 +155,10 @@
         "url": "/domainNames/ex11-{random_name}.{tld}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Authorization": "authinfo value=QWJjMjM0NTY3OA=="
         },
         "body_json": {

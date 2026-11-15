@@ -6,10 +6,11 @@
         "method": "DELETE",
         "url": "/domainNames/test6-{random_name}.{tld}",
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "test6-{random_name}-clTRID",
           "Authorization": "{auth:unknown_user}",
-          "Accept": "application/rpp+json"
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}"
         }
       },
       "response": {

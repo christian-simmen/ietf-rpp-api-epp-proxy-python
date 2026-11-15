@@ -10,9 +10,10 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "contact",
@@ -108,9 +109,10 @@
         "url": "/contacts/{handle:a:32A}",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": [
           {

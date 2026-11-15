@@ -16,6 +16,8 @@ import yaml
 
 from core.capabilities.backend_profile import BackendProfile
 from settings.load_settings import load_settings
+from rpp.http import profile_header
+from rpp.schema.profiles import PROFILES
 from tests.helper.one_of import OneOf
 from tests.helper.selectors import env_fact
 
@@ -52,6 +54,8 @@ class TestEnvironment:
     facts: dict
     profile: BackendProfile
     unknown_user: tuple[str, str] | None = field(default=None, repr=False)
+    rpp_profile: str = "base"          # the key of the RPP profile every request names, unless a case or step says
+    profile_signalling: str = "header"  # how it is named: the `rpp_profile_signalling` of the config
 
 
 def environment_names() -> list[str]:
@@ -126,14 +130,20 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
         raise EnvironmentError(f"Test environment {name!r} needs {', '.join(missing)} in .env or the environment")
     unknown = data.get("unknown_user")
     settings = load_settings(str(REPOSITORY / data["config"]))
+    rpp_profile = data.get("profile")
+    if rpp_profile not in PROFILES:
+        raise EnvironmentError(
+            f"Test environment {name!r}: `profile` is one of {', '.join(PROFILES)}, not {rpp_profile!r}")
     # What the config states, which the cases read as facts too: `{tld}` and `{env:environment_name}`.
     facts = {**(data.get("facts") or {}), "tld": (settings.discovery.rpp_tlds or [""])[0],
-             "environment_name": settings.discovery.rpp_environment_name}
+             "environment_name": settings.discovery.rpp_environment_name,
+             "profile_signalling": settings.profile_signalling}
     return TestEnvironment(
         name=name, config=data["config"], max_workers=int(data.get("max_workers", 8)),
         rpp_requests_per_minute=data.get("rpp_requests_per_minute"), registrars=registrars, facts=facts,
         profile=BackendProfile.from_layers(*settings.profile_layers, {"lgrs": list(settings.lgrs)}),
-        unknown_user=(unknown["user"], unknown["password"]) if unknown else None)
+        unknown_user=(unknown["user"], unknown["password"]) if unknown else None,
+        rpp_profile=rpp_profile, profile_signalling=settings.profile_signalling)
 
 
 VALUE_PLACEHOLDER = re.compile(r"\{(handle|regacc):([a-z])(?::([^{}]*))?\}")
@@ -178,6 +188,48 @@ def replace_fact(value: str, env: TestEnvironment):
         return value
     fact = _fact(match, env)
     return OneOf(fact) if isinstance(fact, list) else value
+
+
+RPP_MEDIA_TYPE = "application/rpp+json"
+RPP_PLACEHOLDER = re.compile(r"\{rpp:[^{}]*\}")
+OMIT = object()  # what a placeholder gives when the header it stands for is not sent
+
+
+def rpp_headers(env: TestEnvironment) -> dict:
+    """What the placeholders of the profile headers stand for in `env`, by the signalling method of its config
+    (`rpp_profile_signalling`), for the profile of its descriptor (`profile`). `OMIT`: the header is not sent.
+
+    - `header`: `{rpp:profile}` is the value of `RPP-Profile`, `{rpp:accept}` and `{rpp:content-type}` the plain media type.
+    - `media-type`: `{rpp:profile}` is omitted, the others are the media type with the profile parameters.
+    """
+    profile = PROFILES[env.rpp_profile]
+    if env.profile_signalling == "header":
+        return {"{rpp:profile}": profile_header.format_profile(profile), "{rpp:accept}": RPP_MEDIA_TYPE,
+                "{rpp:content-type}": RPP_MEDIA_TYPE}
+    if env.profile_signalling == "media-type":
+        typed = f'{RPP_MEDIA_TYPE}; profile="{profile.name}"; profile-version="{profile.version}"'
+        return {"{rpp:profile}": OMIT, "{rpp:accept}": typed, "{rpp:content-type}": typed}
+    raise EnvironmentError(f"{env.name}: the signalling {env.profile_signalling!r} is not implemented in the runner")
+
+
+def with_rpp_headers(case: dict, env: TestEnvironment) -> dict:
+    """The case with the placeholders of the profile headers resolved in the headers of every request. A placeholder
+    stands for a whole header value; one that resolves to `OMIT` takes the header out of the request. Nothing is added:
+    a request sends the profile headers its case states."""
+    known = rpp_headers(env)
+    steps = []
+    for step in case["steps"]:
+        request = step["request"]
+        headers = {}
+        for name, value in request.get("headers", {}).items():
+            if isinstance(value, str) and RPP_PLACEHOLDER.search(value):
+                if value not in known:
+                    raise EnvironmentError(f"{value}: not one of {', '.join(known)}, which are a whole header value")
+                value = known[value]
+            if value is not OMIT:
+                headers[name] = value
+        steps.append({**step, "request": {**request, "headers": headers}})
+    return {**case, "steps": steps}
 
 
 AUTH_PLACEHOLDER = re.compile(r"\{auth:([a-z_]+)\}")

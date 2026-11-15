@@ -58,9 +58,10 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -77,9 +78,10 @@
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "domainName",
@@ -153,9 +155,10 @@
         "url": "/domainNames/put22-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "domainName",
@@ -236,9 +239,10 @@
         "url": "/domainNames/put22-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": [
           {
@@ -272,9 +276,10 @@
         "url": "/domainNames/put22-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "domainName",
@@ -348,9 +353,10 @@
         "url": "/domainNames/put22-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": [
           {

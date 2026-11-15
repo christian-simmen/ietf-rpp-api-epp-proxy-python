@@ -8,9 +8,10 @@
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "host",
@@ -43,7 +44,9 @@
         "url": "/hosts/{pad:63:h3-{random_name}}.{pad:63:a}.{pad:63:b}.{pad:57:c}.net",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

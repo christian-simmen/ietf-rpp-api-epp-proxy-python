@@ -9,8 +9,9 @@
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
         "body_json": {
@@ -36,8 +37,9 @@
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
         "body_json": {
@@ -63,8 +65,9 @@
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
         "body_json": {
@@ -90,8 +93,9 @@
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
         "body_json": {
@@ -117,9 +121,10 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "contact",
@@ -183,9 +188,10 @@
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "domainName",
@@ -239,9 +245,10 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "contact",
@@ -305,9 +312,10 @@
         "url": "/domainNames/x1-{random_name}.{tld}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Authorization": "authinfo value=QWJjMjM0NTY3OA=="
         },
         "body_json": {
@@ -369,7 +377,9 @@
         "url": "/domainNames/x1-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -393,7 +403,9 @@
         "url": "/domainNames/x1-{random_name}.{tld}/processes/transferProcesses/latest",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -414,7 +426,9 @@
         "url": "/domainNames/x1-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

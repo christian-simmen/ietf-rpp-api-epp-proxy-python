@@ -1,0 +1,73 @@
+{
+  "test_id": "test2-base_refuses_the_rri_specifics",
+  "description": "Under the base profile a server that holds the rri profile refuses what only the rri extension adds: a domain member of the extension is undeclared, and the request contact object is not in the profile.",
+  "when": {
+    "profile.profiles": {
+      "contains": "rri"
+    },
+    "env.profile_signalling": "header"
+  },
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/domainNames",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+        },
+        "body_json": {
+          "@type": "domainName",
+          "name": "b2-{random_id_10}.{tld}",
+          "generalRequest": {
+            "@type": "requestContact",
+            "id": "{handle:a:RG2}"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ2}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 501,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02307",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+        }
+      }
+    }
+  ]
+}

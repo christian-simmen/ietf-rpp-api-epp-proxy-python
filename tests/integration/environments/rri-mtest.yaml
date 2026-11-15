@@ -1,6 +1,7 @@
 # DENIC's RRI test environment, MTEST (docs/rri/refactoring.md §5.4). The machine must be on the IPv4 allowlist of
 # both RegAccs.
 config: config.rri-mtest.yaml          # RPP_CONFIG_FILE of the app under test: its profile, TLD, LGRs, environment name
+profile: rri                           # the RPP profile the `{rpp:*}` placeholders stand for (a key of src/rpp/schema/schemas/profiles)
 max_workers: 4                         # MTEST allows 4 sessions per RegAcc
 rpp_requests_per_minute: 25            # under the ACL of 100 RRI requests a minute: one RPP request is up to 4
 regacc: login_prefix                   # the sponsor id is the RegAccId the login starts with

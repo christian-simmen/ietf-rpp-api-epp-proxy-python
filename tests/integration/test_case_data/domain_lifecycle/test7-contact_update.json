@@ -8,8 +8,9 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
         "body_json": {
@@ -134,8 +135,9 @@
         "url": "/contacts/{handle:a:L7}",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
         "body_json": [
@@ -168,7 +170,9 @@
         "url": "/contacts/{handle:a:L7}",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -199,7 +203,9 @@
         "url": "/contacts/{handle:a:L7}/availability",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

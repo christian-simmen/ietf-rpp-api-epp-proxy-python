@@ -7,7 +7,9 @@
         "url": "/contacts/{handle:a:-a5}/availability",
         "headers": {
           "Authorization": "{auth:unknown_user}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

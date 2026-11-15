@@ -7,8 +7,9 @@
         "url": "/domainNames/up-test7-{random_name}.{tld}",
         "headers": {
           "RPP-Cltrid": "up-test7-{random_name}-clTRID",
-          "Accept": "application/rpp+json",
-          "Content-Type": "application/rpp+json"
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": [
           {

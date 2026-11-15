@@ -23,7 +23,7 @@ from tests.helper.integration_api_test import endpoint_test, replace_pad_placeho
 from tests.helper.pacer import Pacer
 from tests.helper.test_environment import (
     REPOSITORY, Credentials, EnvironmentError, TestEnvironment, environment_names, load, replace_fact, replace_values,
-    selected_names,
+    selected_names, with_rpp_headers,
 )
 
 CASE_DATA = Path(__file__).parent / "test_case_data"
@@ -195,7 +195,11 @@ def process_placeholders(json_data, environment: TestEnvironment, obj=None, star
             .replace("{test_start}", started.isoformat())# type: ignore
         replaced = replace_values(replaced, environment, random_id_10)
         replaced = replace_upper_placeholders(replace_pad_placeholders(replace_idn_placeholders(replaced, random_id_10)))
-        return replaced.replace("{unique_cltrid}", str(uuid.uuid4())) # RPP-Cltrid is unique per request
+        replaced = replaced.replace("{unique_cltrid}", str(uuid.uuid4()))  # RPP-Cltrid is unique per request
+        if "{rpp:" in replaced:
+            # `with_rpp_headers` resolved the placeholders of the request headers, the only place they may stand
+            raise EnvironmentError(f"{replaced!r}: a {{rpp:...}} placeholder is only a whole value of a request header")
+        return replaced
     else:
         return json_data
 
@@ -221,6 +225,7 @@ def run_case(case, run: EnvironmentRun):
     # The selectors are resolved first, then the placeholders, then the captures.
     # {test_start} is the start of this case, so the time windows in the data do not depend on suite length.
     with run.app.test_client() as client:
-        endpoint_test(client, process_placeholders(select(case, run.facts), run.environment,
+        selected = with_rpp_headers(select(case, run.facts), run.environment)
+        endpoint_test(client, process_placeholders(selected, run.environment,
                                                    started=datetime.datetime.now(datetime.UTC)),
                       credentials=run.credentials, pacer=run.pacer)

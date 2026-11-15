@@ -7,9 +7,10 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "contact",
@@ -88,9 +89,10 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "contact",
@@ -169,9 +171,10 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "contact",
@@ -345,9 +348,10 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

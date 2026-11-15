@@ -15,9 +15,10 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -35,9 +36,10 @@
         "url": "/domainNames/t12-{random_name}.{tld}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Authorization": "authinfo value=UGFzc3dvcmQxIUA="
         },
         "body_json": {
@@ -66,9 +68,10 @@
         "url": "/domainNames/t12-{random_name}.{tld}/processes/transferProcesses/latest/transferApprove",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "domainTransferProcess",
@@ -92,9 +95,10 @@
         "url": "/domainNames/t12-{random_name}.{tld}/processes/transferProcesses/latest/transferApprove",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "nonsense"
@@ -117,9 +121,10 @@
         "url": "/domainNames/t12-{random_name}.{tld}/processes/transferProcesses/latest/transferApprove",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "x": 1
@@ -142,7 +147,9 @@
         "url": "/domainNames/t12-{random_name}.{tld}/processes/transferProcesses/latest",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
