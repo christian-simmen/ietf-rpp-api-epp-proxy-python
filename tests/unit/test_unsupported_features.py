@@ -74,7 +74,6 @@ NOT_IN_EPP = [
     (hosts.rpp_to_model, {**HOST, "dns": dns(record("ns", {"nsdname": "other.example."}))}),
     (hosts.rpp_to_model, {**HOST, "dns": dns(record("mx", {"exchange": "a.", "preference": "1"}))}),
     (hosts.rpp_to_model, {**HOST, "dns": dns(controls=SIG_LIFETIME)}),
-    (replace_host, {**HOST, "status": [{**STATUS, "due": "2030-01-01T00:00:00Z"}]}),
     (contacts.rpp_to_model, contact(status=[{"@type": "contactStatus", "label": "clientUpdateProhibited"}])),
     (contacts.rpp_to_model, contact(card(links={"url": {"uri": "https://example.example"}}))),
     (contacts.rpp_to_model, contact(card(emails={"email": EMAIL, "email-1": EMAIL}))),

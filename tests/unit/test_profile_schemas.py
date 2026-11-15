@@ -8,6 +8,7 @@ from jsonschema import Draft202012Validator
 
 from core.session.session_pool import SessionPool
 from rpp.http.app import create_app
+from rpp.schema import effective_schema
 from rpp.schema import profile_schemas as profile_schemas_module
 from rpp.schema import validator
 from rpp.schema.extensions import SERVER_EXTENSIONS
@@ -96,6 +97,16 @@ SAMPLES = [
     ("requestContact.create", {"@type": "requestContact", "id": "X-1"}),
     ("requestContact.create", {"@type": "requestContact", "id": "X-1", "uriTemplate": "https://e.example/{Alabel}"}),
     ("discovery.read", {"@type": "discovery"}),
+    # undeclared members (json §4.9.1): at the top level, nested in a referenced object, in an object of the extension, and
+    # in an object the extension defines
+    ("domainName.create", {"@type": "domainName", "name": "foo.de", "bogus": 1}),
+    ("domainName.create", {"@type": "domainName", "name": "foo.de", "registrant": {"@type": "contact", "id": "X-1", "bogus": 1}}),
+    ("domainName.create", {"@type": "domainName", "name": "foo.de",
+                           "generalRequest": {"@type": "requestContact", "id": "X-1", "bogus": 1}}),
+    ("domainName.create", {"@type": "domainName", "name": "foo.de", "dns": {"@type": "dnsData", "bogus": 1}}),
+    ("requestContact.create", {"@type": "requestContact", "id": "X-1", "uriTemplate": "https://e.example/{Alabel}", "bogus": 1}),
+    ("contact.create", {"@type": "contact", "id": "X-1", "contactInfo": {"@type": "Card", "version": "2.0", "bogus": 1}}),
+    ("domainTransferProcess.create", {"@type": "domainTransferProcess", "bogus": 1}),
 ]
 
 
@@ -115,7 +126,7 @@ def enforced_validity(name, body, extensions):
     try:
         validator.validate_schema(name, body, extensions)
         return True
-    except jsonschema.ValidationError:
+    except (jsonschema.ValidationError, ValueError):     # an undeclared member is a ValueError (json §4.9.1)
         return False
 
 
@@ -135,15 +146,40 @@ def test_the_published_schema_accepts_and_refuses_what_the_proxy_does(key, name,
     assert published == enforced_validity(name, body, profile.extensions), (key, name, body)
 
 
-def test_an_rri_member_is_checked_where_the_profile_has_the_extension_and_left_alone_without_it():
-    body = {"@type": "domainName", "name": "foo.de", "generalRequest": {"@type": "requestContact"}}
+def test_an_rri_member_is_refused_where_the_profile_lacks_the_extension_and_accepted_where_it_has_it():
+    body = {"@type": "domainName", "name": "foo.de", "generalRequest": {"@type": "requestContact", "id": "X-1"}}
     base = schema_of(rri_client(), BASE).json()
     rri = schema_of(rri_client(), RRI).json()
 
-    assert published_validity(base, "domainName.create", body) is True       # an undeclared member is no concern of base
-    assert published_validity(rri, "domainName.create", body) is False       # the member of the extension lacks its id
-    good = {**body, "generalRequest": {"@type": "requestContact", "id": "X-1"}}
-    assert published_validity(rri, "domainName.create", good) is True
+    assert published_validity(base, "domainName.create", body) is False      # undeclared under base (json §4.9.1)
+    assert published_validity(rri, "domainName.create", body) is True
+    malformed = {**body, "generalRequest": {"@type": "requestContact"}}
+    assert published_validity(base, "domainName.create", malformed) is False
+    assert published_validity(rri, "domainName.create", malformed) is False  # the member lacks its id
+
+
+def test_a_member_nobody_declares_is_refused_under_every_profile_even_inside_the_extension():
+    for name in (BASE, RRI):
+        document = schema_of(rri_client(), name).json()
+        for body in ({"@type": "domainName", "name": "foo.de", "bogus": 1},
+                     {"@type": "domainName", "name": "foo.de", "registrant": {"@type": "contact", "id": "X-1", "bogus": 1}}):
+            assert published_validity(document, "domainName.create", body) is False
+    rri = schema_of(rri_client(), RRI).json()
+    inside = {"@type": "domainName", "name": "foo.de", "generalRequest": {"@type": "requestContact", "id": "X-1", "bogus": 1}}
+    assert published_validity(rri, "domainName.create", inside) is False
+
+
+def test_the_validators_are_built_on_the_published_definitions():
+    for key in ("base", "rri"):
+        profile = PROFILES[key]
+        published = schema_of(rri_client(), profile.name).json()["$defs"]
+
+        assert validator.effective_definitions(profile.extensions) == published
+
+
+def test_an_undeclared_member_is_the_error_a_mapper_turns_into_a_400():
+    with pytest.raises(ValueError, match="Undeclared property: 'bogus'"):
+        validator.validate_schema("domainName.create", {"@type": "domainName", "name": "foo.de", "bogus": 1})
 
 
 def count_composed(monkeypatch):
@@ -160,6 +196,7 @@ def count_composed(monkeypatch):
 
 def test_the_schemas_are_built_once_per_profile_with_the_app_and_never_per_request(monkeypatch):
     monkeypatch.setattr(validator, "_effective", {})        # nothing built before: the app builds all it needs
+    monkeypatch.setattr(effective_schema, "_effective", {})
     composed = count_composed(monkeypatch)
     documents = []
     original = profile_schemas_module.ProfileSchemas._document
@@ -171,7 +208,7 @@ def test_the_schemas_are_built_once_per_profile_with_the_app_and_never_per_reque
 
     # one document per offered profile, and the validators of every definition for each distinct extension tuple
     assert documents == ["base", "rri"]
-    assert len(composed) == len(validator.validators) * 3          # (), the rri extension, the server's own
+    assert len(composed) == len(validator._names()) * 3            # (), the rri extension, the server's own
     built = len(composed)
 
     for _ in range(3):

@@ -9,7 +9,7 @@ from rpp.schema.extensions import EXTENSIONS, own_definitions
 # The effective validators of json §7.2, by definition and the extensions it is composed with, on the combined schema
 # of `effective_schema.py`. `build_effective` fills them for every definition of one extension tuple, once, when the app
 # is built; a request only looks one up.
-_effective: dict[tuple[str, tuple[str, ...]], Draft202012Validator] = {}
+_effective: dict[tuple[str, tuple[str, ...]], Draft202012Validator | None] = {}
 
 _UNEXPECTED = re.compile(r"\((.*) (?:was|were) unexpected\)")
 
@@ -41,9 +41,7 @@ def build_effective(extensions: tuple[str, ...]) -> None:
     extensions = tuple(extensions)
     for name in _names():
         if (name, extensions) not in _effective:
-            built = _compose(name, extensions)
-            if built is not None:
-                _effective[(name, extensions)] = built
+            _effective[(name, extensions)] = _compose(name, extensions)    # None: the profile has no such definition
 
 
 def effective_validator(schema_name: str, extensions: tuple[str, ...]):
@@ -54,7 +52,7 @@ def effective_validator(schema_name: str, extensions: tuple[str, ...]):
     key = (schema_name, extensions)
     if key not in _effective:
         build_effective(extensions)
-    if key not in _effective:
+    if _effective[key] is None:
         everything = tuple(EXTENSIONS)
         build_effective(everything)
         key = (schema_name, everything)

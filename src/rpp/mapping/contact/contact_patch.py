@@ -10,7 +10,7 @@ from rpp.dto.rpp_patch_operation import RPPPatchOperation
 from rpp.dto.rpp_status import RPPStatus
 from rpp.mapping.contact import contact_replacement, contacts
 from rpp.mapping.shared import auth_info, include_elements, json_patch, patch_statuses
-from rpp.mapping.shared.common import parse_rpp, reject_operation, reject_set
+from rpp.mapping.shared.common import parse_rpp, reject_operation
 from rpp.mapping.shared.needs_current_state import NeedsCurrentState
 from rpp.schema.validator import validate_schema
 
@@ -103,7 +103,6 @@ class _PatchedUpdate:
         if operation.op == "add" and operation.match is None:
             validate_schema("contactStatus.create", operation.value)
             status = parse_rpp(RPPStatus, operation.value)
-            reject_set(due=status.due)
             self._require_one_operation_on(status.label)
             self.add.status.append(status.label)
             if status.reason:

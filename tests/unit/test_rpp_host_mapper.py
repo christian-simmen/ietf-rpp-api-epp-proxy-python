@@ -59,8 +59,10 @@ def test_status_on_create_comes_before_the_missing_ns_record():
         ]})
 
 
-def test_a_status_epp_cannot_hold_comes_before_the_missing_ns_record_on_a_replacement():
-    with pytest.raises(UnsupportedFeature):
+def test_a_due_date_on_a_host_status_is_an_undeclared_property_before_the_missing_ns_record_on_a_replacement():
+    # json §6.2.3: hostStatus.create has `@type`, `label` and `reason` only: `due` is undeclared (json §4.9.1), whatever
+    # else the replacement lacks
+    with pytest.raises(ValueError, match="Undeclared property: 'due'"):
         replace_host({"@type": "host", "hostName": NAME, "status": [
             {"@type": "hostStatus", "label": "clientUpdateProhibited", "due": "2030-01-01T00:00:00Z"},
         ]})

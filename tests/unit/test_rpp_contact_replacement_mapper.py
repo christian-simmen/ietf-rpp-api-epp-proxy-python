@@ -203,10 +203,13 @@ def test_a_server_status_is_a_400():
     assert rejected(put_body(status=[{"@type": "contactStatus", "label": "serverUpdateProhibited"}])) == 400
 
 
-def test_a_due_date_is_a_501():
+def test_a_due_date_on_a_contact_status_is_an_undeclared_property():
+    # json §6.2.3: only the domain status has `due`; contactStatus.create has `@type`, `label` and `reason`, so under
+    # json §4.9.1 the member is undeclared: 400 (02001), no longer the 501 of EPP not holding it, which a permissive schema
+    # let through to the mapper
     status = {"@type": "contactStatus", "label": "clientUpdateProhibited", "due": "2030-01-01T00:00:00Z"}
 
-    assert rejected(put_body(status=[status])) == 501
+    assert rejected(put_body(status=[status])) == 400
 
 
 def test_disclose_is_a_501():

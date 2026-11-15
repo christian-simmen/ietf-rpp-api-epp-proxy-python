@@ -4,7 +4,7 @@ from core.model.shared.common import AuthInfo
 from rpp.dto.rpp_contact import RPPContact
 from rpp.mapping.contact import contacts
 from rpp.mapping.shared import auth_info, include_elements
-from rpp.mapping.shared.common import parse_rpp, reject_set
+from rpp.mapping.shared.common import parse_rpp
 from rpp.schema.validator import validate_schema
 
 TYPE = "@type"
@@ -17,11 +17,9 @@ OBJECT = "contact"
 def replacement_from_rpp(
     contact_rpp: RPPContact, password: AuthInfo | None, unchanged: frozenset[str],
 ) -> ContactReplacement:
-    """The contact a full update or a patched read asks for. A `due` date has no place in EPP. The caller converts
+    """The contact a full update or a patched read asks for. The caller converts
     `authInfo`, which a read need not show, and names the members the request leaves `unchanged`."""
     contact: Contact = contacts.contact_from_rpp(contact_rpp)
-    for status in contact_rpp.status or []:
-        reject_set(due=status.due)
     return ContactReplacement(
         id=contact_rpp.id,
         type=contact.type,
