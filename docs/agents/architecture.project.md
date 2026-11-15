@@ -356,11 +356,8 @@ The extension paths exist for the extensions of every offered profile, so those 
 ## RPP extensions
 
 An RPP extension (json §7) is a schema file in `.spec/`, copied by [copy_models.sh](../../copy_models.sh) to
-`src/rpp/schema/schemas/extensions/`, and specified in the structure of the extension guidelines (§9) under
-`docs/` (`de.denic.rpp.rri`: [rri-extension.md](../rri/rri-extension.md), in I-D markdown for mmark, with the
-section structure of the RPP drafts; `tests/unit/test_rri_extension_doc.py` validates its examples marked
-`<!-- example valid|invalid <definition> -->` and checks that each `<!-- definition <name> -->` it shows is the
-schema's). `rpp/schema/extensions.py` loads them (`RppExtension`): the
+`src/rpp/schema/schemas/extensions/`, and specified under `docs/` as
+[specification.project.md](specification.project.md#kinds-of-specification) describes. `rpp/schema/extensions.py` loads them (`RppExtension`): the
 Extension Object discovery states, the definitions each adds to a base definition, and the data objects it defines
 (`objects` of `rpp:extension`). A deployment offers those of its offered profiles; `create_app`
 refuses one the proxy does not know or the backend does not hold. `validate_schema(name, data, extensions=profile.extensions)` composes the
