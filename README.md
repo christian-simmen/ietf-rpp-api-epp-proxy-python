@@ -65,7 +65,7 @@ profile="<name>"; profile-version="1.0"` and the same in the `Content-Type` of e
 under `default_profile`, which the `Accept` must then list. The two methods are not mixed. With the header method a request that names none gets `default_profile`. The response names the profile applied, in
 `RPP-Profile` or in its `Content-Type`. Discovery lists, in `profileSchemas`, the URL of the effective JSON Schema of each
 offered profile (`GET /profiles/<name>/schema`, no authentication): the data definitions and those of the profile's
-extensions, the schema the proxy validates with. `rpp_backend_profile.extends` names the generic profile of the protocol and defaults to `rpp_backend`. HTTP Basic is
+extensions, the schema the proxy validates with ([docs/profile-schemas-extension.md](docs/profile-schemas-extension.md)). `rpp_backend_profile.extends` names the generic profile of the protocol and defaults to `rpp_backend`. HTTP Basic is
 passed through as the RRI LOGIN, as it is as the EPP login. DENIC lets in only addresses on the allowlist of the
 RegAcc.
 
