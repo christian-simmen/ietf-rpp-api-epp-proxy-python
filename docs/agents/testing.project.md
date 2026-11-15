@@ -109,11 +109,23 @@ by [pacer.py](../../tests/helper/pacer.py)), the registrars, a user the backend 
 `BackendProfile`, the TLD, the environment name and the LGRs are read from that config, as the app reads them, and not
 repeated. A run with more workers than an environment it tests allows does not start.
 
-The descriptor's `profile` is the key of the RPP profile (`epp`, `rri`, `base`) that the runner names in every request,
-in the signalling method of the environment's config (`rpp_profile_signalling`: `RPP-Profile`). A case or a step may
-name another with `"profile": "base"` (a step's wins; a header the step sets itself wins over both). The key may be one
-the server does not offer, which `profile_signalling/` uses. A case that needs a profile selects by the facts, for
-example `profile.profiles` contains `rri`, never by the backend's name.
+The descriptor's `profile` is the key of the RPP profile (`epp`, `rri`, `base`) that the placeholders of the profile
+headers stand for. The runner adds and rewrites nothing: every request of every case states its profile headers in the
+case, `"RPP-Profile": "{rpp:profile}"`, `"Accept": "{rpp:accept}"` and `"Content-Type": "{rpp:content-type}"` (on
+every request, one without a body too, core §13), and the runner resolves each as a whole header value from the
+descriptor's `profile` and the `rpp_profile_signalling` of its config (`with_rpp_headers`):
+
+| Placeholder | `header` | `media-type` |
+|---|---|---|
+| `{rpp:profile}` | `profile=<name>;version=1.0` | omitted: the header is not sent |
+| `{rpp:accept}`, `{rpp:content-type}` | `application/rpp+json` | `application/rpp+json; profile="<name>"; profile-version="1.0"` |
+
+A header the case writes literally is sent as written, so a case can send what the runner would not (a value of another
+media type, a profile the server does not offer). The signalling method is the environment fact `env.profile_signalling`
+(`header` or `media-type`, read from the config, not stated twice). The cases of `profile_signalling_header/` and
+`profile_signalling_media_type/` hold literal headers and are each active for one method (a case-level `when` on that
+fact); a step that differs per server selects by the facts, for example `profile.profiles` contains `rri`, never by the
+backend's name.
 
 The registrars name the variables that hold their credentials, the prefix of the handles they create, and on RRI
 their General Request and Abuse contacts. The runner reads them from the process environment or from `.env` in the
@@ -129,6 +141,7 @@ into the `Authorization` header when it sends the request, never into the case, 
 | `{regacc:a}` | the sponsor id of `a`: its login on EPP, the RegAccId of its login on RRI |
 | `{tld}` | the TLD the environment registers under, the first of `rpp_tlds` of its config |
 | `{env:environment_name}` | `rpp_environment_name` of its config |
+| `{env:profile_signalling}` | `rpp_profile_signalling` of its config |
 | `{env:<path>}` | a fact of the environment. A list fact is a whole value only, and the response may hold any of its entries: `"label": "{env:domainName.processes.create.success_status}"` |
 | `{lower:TEXT}` | TEXT in lower case, after the placeholders in it, for an id sent in another case than stored |
 

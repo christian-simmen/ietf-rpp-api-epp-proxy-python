@@ -4,9 +4,9 @@
   "when": {
     "profile.profiles": {
       "contains": "rri"
-    }
+    },
+    "env.profile_signalling": "header"
   },
-  "profile": "base",
   "steps": [
     {
       "request": {
@@ -16,7 +16,8 @@
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "application/rpp+json",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
         },
         "body_json": {
           "@type": "domainName",
@@ -47,7 +48,8 @@
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "application/rpp+json",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
         },
         "body_json": {
           "@type": "requestContact",

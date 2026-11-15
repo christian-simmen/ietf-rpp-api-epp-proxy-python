@@ -4,6 +4,9 @@
   ],
   "test_id": "test3-the_profile_of_the_other_server_is_refused",
   "description": "A profile the server does not offer is refused even for a request its content fits: a plain domain read under the epp profile where the server has none, and under the rri profile.",
+  "when": {
+    "env.profile_signalling": "header"
+  },
   "steps": [
     {
       "when": {
@@ -13,14 +16,15 @@
           }
         }
       },
-      "profile": "epp",
       "request": {
         "method": "GET",
         "url": "/domainNames/b3-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:epp-compatibility;version=1.0",
+          "Content-Type": "application/rpp+json"
         }
       },
       "response": {
@@ -43,14 +47,15 @@
           }
         }
       },
-      "profile": "rri",
       "request": {
         "method": "GET",
         "url": "/domainNames/b3-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Profile": "profile=de.denic.rpp.profile.rri;version=1.0",
+          "Content-Type": "application/rpp+json"
         }
       },
       "response": {

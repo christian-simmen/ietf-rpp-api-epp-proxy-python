@@ -55,9 +55,10 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -127,10 +128,11 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json"
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}"
         }
       },
       "response": {
@@ -200,10 +202,11 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "test7-{random_name}-clTRID",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json"
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}"
         }
       },
       "response": {

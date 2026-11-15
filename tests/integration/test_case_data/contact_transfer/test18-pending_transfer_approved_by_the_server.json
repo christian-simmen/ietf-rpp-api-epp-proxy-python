@@ -11,9 +11,10 @@
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json"
+          "Content-Type": "{rpp:content-type}"
         },
         "body_json": {
           "@type": "contact",
@@ -64,9 +65,10 @@
         "url": "/contacts/{handle:a:C18}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Authorization": "authinfo value=UGFzc3dvcmQxIUA="
         },
         "body_json": {
@@ -96,7 +98,9 @@
         "url": "/contacts/{handle:a:C18}",
         "headers": {
           "Authorization": "{auth:b}",
-          "Accept": "application/rpp+json",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

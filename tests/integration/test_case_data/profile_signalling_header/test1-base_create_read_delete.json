@@ -4,7 +4,9 @@
   ],
   "test_id": "test1-base_create_read_delete",
   "description": "Under the base profile, with no element of the epp or rri profile, a contact and a domain are created, the domain is read and deleted on every server.",
-  "profile": "base",
+  "when": {
+    "env.profile_signalling": "header"
+  },
   "steps": [
     {
       "request": {
@@ -14,7 +16,8 @@
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
           "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
         },
         "body_json": {
           "select": [
@@ -141,7 +144,8 @@
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
           "Content-Type": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
         },
         "body_json": {
           "select": [
@@ -223,7 +227,9 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0",
+          "Content-Type": "application/rpp+json"
         }
       },
       "response": {
@@ -247,7 +253,9 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0",
+          "Content-Type": "application/rpp+json"
         }
       },
       "response": {
@@ -264,7 +272,9 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "application/rpp+json",
-          "RPP-Cltrid": "{unique_cltrid}"
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0",
+          "Content-Type": "application/rpp+json"
         }
       },
       "response": {

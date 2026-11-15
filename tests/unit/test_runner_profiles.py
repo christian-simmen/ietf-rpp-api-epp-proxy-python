@@ -1,41 +1,56 @@
-"""How the integration runner names the profile of each step."""
+"""How the integration runner resolves the placeholders of the profile headers: it adds nothing of its own."""
+from dataclasses import replace
+
 import pytest
 
-from tests.helper.test_environment import EnvironmentError, load, with_profiles
+from tests.helper.test_environment import EnvironmentError, load, with_rpp_headers
 
 ENV = load("epp-docker", with_credentials=False)
-EPP = "profile=urn:ietf:params:rpp:profile:epp-compatibility;version=1.0"
-BASE = "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+MEDIA = replace(ENV, profile_signalling="media-type")
+EPP = "urn:ietf:params:rpp:profile:epp-compatibility"
+RPP = "application/rpp+json"
+PROFILED = f'{RPP}; profile="{EPP}"; profile-version="1.0"'
+ALL = {"RPP-Profile": "{rpp:profile}", "Accept": "{rpp:accept}", "Content-Type": "{rpp:content-type}"}
 
 
-def headers_of(case, step=0):
-    return with_profiles(case, ENV)["steps"][step]["request"]["headers"]
+def headers_of(headers, env=ENV):
+    case = {"steps": [{"request": {"method": "GET", "url": "/x", "headers": headers}}]}
+    return with_rpp_headers(case, env)["steps"][0]["request"]["headers"]
 
 
-def step(**extra):
-    return {"request": {"method": "GET", "url": "/x", "headers": {"Accept": "a"}}, **extra}
+def test_the_header_method_resolves_the_profile_header_and_the_plain_media_type():
+    assert headers_of(ALL) == {"RPP-Profile": f"profile={EPP};version=1.0", "Accept": RPP, "Content-Type": RPP}
 
 
-def test_a_step_names_the_profile_of_the_environment():
-    assert headers_of({"steps": [step()]})["RPP-Profile"] == EPP
+def test_the_media_type_method_omits_the_header_and_puts_the_profile_in_the_media_type():
+    assert headers_of(ALL, MEDIA) == {"Accept": PROFILED, "Content-Type": PROFILED}
 
 
-def test_the_case_and_then_the_step_name_another():
-    case = {"profile": "base", "steps": [step(), step(profile="epp")]}
-
-    assert headers_of(case)["RPP-Profile"] == BASE
-    assert headers_of(case, 1)["RPP-Profile"] == EPP
-    assert "profile" not in with_profiles(case, ENV)["steps"][1]
+@pytest.mark.parametrize("env", [ENV, MEDIA])
+def test_nothing_is_added_to_a_request_that_does_not_state_it(env):
+    assert headers_of({"Authorization": "x"}, env) == {"Authorization": "x"}
+    assert headers_of({}, env) == {}
 
 
-@pytest.mark.parametrize("name", ["RPP-Profile", "rpp-profile"])
-def test_a_header_the_step_sets_itself_is_the_only_one(name):
-    case = {"steps": [{"request": {"method": "GET", "url": "/x", "headers": {name: "garbage"}}}]}
+@pytest.mark.parametrize("env", [ENV, MEDIA])
+def test_a_literal_value_is_sent_as_it_is(env):
+    own = {"RPP-Profile": "garbage", "Accept": "text/html", "Content-Type": "application/epp+xml"}
 
-    headers = headers_of(case)
-    assert headers == {name: "garbage"}
+    assert headers_of(own, env) == own
 
 
-def test_an_unknown_profile_key_is_an_error():
+def test_the_environment_decides_the_profile():
+    base = replace(ENV, rpp_profile="base")
+
+    assert headers_of({"RPP-Profile": "{rpp:profile}"}, base) == {
+        "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"}
+
+
+@pytest.mark.parametrize("value", ["{rpp:nope}", "x {rpp:accept}"])
+def test_an_unknown_placeholder_or_one_inside_a_value_is_an_error(value):
     with pytest.raises(EnvironmentError):
-        with_profiles({"steps": [step(profile="nope")]}, ENV)
+        headers_of({"Accept": value})
+
+
+def test_the_signalling_of_the_config_is_a_fact_of_the_environment():
+    assert ENV.facts["profile_signalling"] == "header"

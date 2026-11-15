@@ -12,10 +12,11 @@
           }
         },
         "headers": {
-          "Content-Type": "application/rpp+json",
+          "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "test5-{random_name}-clTRID",
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json"
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}"
         }
       },
       "response": {
