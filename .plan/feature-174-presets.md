@@ -17,7 +17,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 - [x] T4a Proposal for a new draft, the RPP EPP Compatibility Profile, with the EPP
       elements copied from data-objects, core and json (`.spec/proposals/174-presets/draft-kowalik-rpp-epp-compatibility.md`, renamed
       and edited by the maintainer)
-- [ ] T5 Link the approved proposals from #174
+- [x] T5 Link the approved proposals from #174 (comment on #174)
 - [ ] T6 Implementation plan for the proxy (tasks added here once T1-T4 are approved)
 
 ## Findings (evidence)
