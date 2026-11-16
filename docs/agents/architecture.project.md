@@ -450,6 +450,16 @@ has no `register`, has a definition named as a base definition or as another ext
 configured backend, stops the app. The schema and the data model being process-global is a limit, noted for #178, where
 presets need validators per preset.
 
+A full and a partial update are native in the gateways of the planets extension (`replace(replacement)` and
+`patch(id, changes)`, one unit of work each: lookup, sponsor and state checks, write, and the invariants of the result,
+`02004` when broken), so there is no read-modify-write across requests. `rpp/mapping` translates a JSON Patch (json
+§5.2) into `PlanetChanges` or `SatelliteChanges` (members to set, `cleared`), after checking each value against the update
+schema: no JSON Patch, JSON pointer, `@type` or JSON dict reaches `core` or a backend. Another extension adds members to a
+planet or a satellite without editing these classes: `extensions` of the replacement, the change set and the read model
+maps its extension id to a typed object of its own `core`, and its SQLite part gives a `MemberHook` (`HOOKS` of its module,
+`{object: hook}`) that the planets gateways call in the same unit of work. The rpp side of such members (mapping their JSON)
+is not built yet.
+
 The SQLite backend (`rpp_backend: sqlite`, [config.demo.yaml](../../config.demo.yaml)) is made as a test bed: the clients
 are `rpp_sqlite_clients` (user to a `scrypt$...` hash, made by `python -m registry_adapter.sqlite.hash_password`, compared
 in constant time; the user is the sponsoring client), the database is `rpp_sqlite_url` (a file, or `sqlite://` in

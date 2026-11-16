@@ -59,10 +59,8 @@ def planets_update(id, body):
 def planets_updatePartial(id, body):
     requested = requested_elements(OBJECT)
 
-    def wanted_from_current(current):
-        return map_request(planet_patch.rpp_to_model_with_current, id, body, current, _extensions())
-
-    return _mutation_answer(patch_planet(gateways(), id, wanted_from_current, client_transaction_id()), requested)
+    changes = map_request(planet_patch.rpp_to_model, body, _extensions())
+    return _mutation_answer(patch_planet(gateways(), id, changes, client_transaction_id()), requested)
 
 
 @rpp_operation

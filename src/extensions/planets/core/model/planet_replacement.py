@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Mapping, Optional
 
 from core.model.shared.common import AuthInfo
 
@@ -13,3 +13,4 @@ class PlanetReplacement:
     radius: Optional[float] = None
     mass: Optional[float] = None
     authInfo: Optional[AuthInfo] = None
+    extensions: Mapping[str, object] = field(default_factory=dict)  # a member of an extension not given is removed

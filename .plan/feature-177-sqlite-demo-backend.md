@@ -122,6 +122,10 @@ src/registry_adapter/sqlite/       the SQLite backend
 - Cases of the drafts' objects: 20 groups got a `_group.json` (`profile.objects` contains `contact`), so that they are
   skipped on `sqlite-demo`. Groups that had one select by leaves that are false on the SQLite profile.
 - `sqlite-demo` has registrars `c` and `d` for the message cases (no other case adds to their queues).
+- D24 and D25 done: native `replace` and `patch` in the ports and gateways (`Refusal` rolls the unit back), the change
+  sets and the `extensions` mappings in core, `MemberHook` and `HOOKS` in the SQLite part, the patch translated in
+  `rpp/mapping`. Unit tests with a dummy extension: `tests/unit/test_planets_gateways.py`,
+  `tests/unit/test_planets_patch_mapping.py`.
 - MTEST run: pending for the maintainer (no machine on the allowlist).
 
 ## Findings (evidence)
@@ -201,6 +205,18 @@ src/registry_adapter/sqlite/       the SQLite backend
   result are the gateway's, with the same errors (404, authorisation error, 400). The emulation of the commit `416cf6c`
   (`info`, `wanted_from_current`, `replace(current=)`) is to be replaced. Port signatures proposed to the maintainer
   before implementing (the carrying of the JSON Patch and the place of validation are open).
+
+- D25 (maintainer, 2026-11-16) D24 as proposed, with: (1) the change is translated in `rpp/mapping` into a core change
+  set. "Backend must not see json ever": no JSON Patch, JSON pointer, `@type` or JSON dict reaches core or the SQLite
+  gateway, for PUT too (the mapper builds `PlanetReplacement` and `SatelliteReplacement`). (2) The change set is
+  extensible: `PlanetChanges` and `SatelliteChanges` have typed own members and `cleared`, and `extensions`, a mapping by
+  extension id to a typed core object that the extension defines in its own `core/`. The replacement and the read model
+  (`Planet`, `Satellite`) carry such `extensions` too. The SQLite part of the extending extension applies each in the
+  same transaction through a hook (`HOOKS` of its module, `MemberHook`). In #177 the mechanism exists with a unit test
+  with a dummy extension; the #179 extensions and the rpp side of such members are not built. (3) The mapper checks each
+  operation value against the update schema (400), the gateway re-checks the core invariants in the transaction
+  (02004, 400). (4) Ports without `current`, `ReplaceOutcome` and `replaced()` removed, flows call the gateway and read
+  back, atomic gateway tests.
 
 ## Stash decision (S1)
 

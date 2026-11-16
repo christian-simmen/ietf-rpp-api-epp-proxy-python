@@ -1,31 +1,38 @@
-from extensions.planets.core.model.satellite import Satellite
-from extensions.planets.core.model.satellite_replacement import SatelliteReplacement
-from extensions.planets.rpp.mapping import satellite_replacement, satellites
+from extensions.planets.core.model.satellite_changes import SatelliteChanges
 from rpp.dto.rpp_patch_operation import RPPPatchOperation
-from rpp.mapping.shared import json_patch
 from rpp.mapping.shared.common import parse_rpp
+from rpp.schema.validator import validate_schema
 
 TYPE = "@type"
 
 CHANGEABLE = ("orbitalPeriod",)
 
-PATHS = tuple(f"/{member}" for member in CHANGEABLE)
 
-
-def _check(operation: RPPPatchOperation):
+def _member(operation: RPPPatchOperation) -> str:
     if operation.op not in ("add", "remove", "replace"):
         raise ValueError(f"Operation '{operation.op}' is not allowed")
-    if operation.path not in PATHS:
+    if operation.match is not None:
+        raise ValueError("'match' selects an element of an array, and no member of a satellite is one")
+    member = operation.path[1:] if operation.path.startswith("/") else operation.path
+    if member not in CHANGEABLE:
         raise ValueError(f"Path '{operation.path}' cannot be changed")
+    return member
 
 
-def rpp_to_model_with_current(satellite_id: str, rpp: list, current: Satellite,
-                              extensions: tuple[str, ...] = ()) -> SatelliteReplacement:
-    """Applies the patch (json §5.2.2) to the representation of the current satellite, and returns the full update it
-    asks for. Only the orbital period can change."""
-    operations = [parse_rpp(RPPPatchOperation, operation) for operation in rpp]
-    for operation in operations:
-        _check(operation)
-    patched = json_patch.apply(satellites.model_to_rpp(current, extensions), operations, array_paths=())
-    update = {TYPE: "satellite", **{member: patched[member] for member in CHANGEABLE if member in patched}}
-    return satellite_replacement.rpp_to_model(satellite_id, update, extensions)
+def rpp_to_model(rpp: list, extensions: tuple[str, ...] = ()) -> SatelliteChanges:
+    """Translates a partial update (json §5.2) into the changes it asks for, as `planet_patch` does. Only the orbital
+    period can change."""
+    period = None
+    cleared: set[str] = set()
+    for operation in (parse_rpp(RPPPatchOperation, item) for item in rpp):
+        member = _member(operation)
+        if operation.op == "remove":
+            period = None
+            cleared.add(member)
+            continue
+        if operation.value is None:
+            raise ValueError(f"'{operation.op}' needs a 'value'")
+        validate_schema("satellite.update", {TYPE: "satellite", member: operation.value}, extensions)
+        period = operation.value
+        cleared.discard(member)
+    return SatelliteChanges(orbitalPeriod=period, cleared=frozenset(cleared))

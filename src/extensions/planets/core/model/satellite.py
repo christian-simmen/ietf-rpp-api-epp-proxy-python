@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Mapping, Optional
 
 from core.model.shared.common import ProvisioningObject
 
@@ -10,3 +10,4 @@ class Satellite(ProvisioningObject):
     id: str
     planet: str
     orbitalPeriod: Optional[float] = None
+    extensions: Mapping[str, object] = field(default_factory=dict)

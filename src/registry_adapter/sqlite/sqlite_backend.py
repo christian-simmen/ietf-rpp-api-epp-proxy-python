@@ -20,13 +20,17 @@ class SqliteBackend:
         self._username = username
         # Whether the login was right is known at `connect`, which checks it; the password is not kept.
         self._connected = clients.verify(username, password)
-        context = SqliteContext(database=database, sponsor_id=username, messages=MessageStore())
+        hooks: dict[str, dict] = {}
+        for part in extension_parts:
+            for target, hook in part.hooks.items():
+                hooks.setdefault(target, {})[part.extension_id] = hook
+        context = SqliteContext(database=database, sponsor_id=username, messages=MessageStore(), hooks=hooks)
         self.domains = UnsupportedGateway("domain name")
         self.contacts = UnsupportedGateway("contact")
         self.hosts = UnsupportedGateway("host")
         self.request_contacts = UnsupportedGateway("request contact")
         self.messages = SqliteMessageGateway(context)
-        self._extensions = {part.extension_id: part.gateways(context) for part in extension_parts}
+        self._extensions = {part.extension_id: part.gateways(context) for part in extension_parts if part.gateways is not None}
 
     @property
     def sponsor_id(self) -> str:

@@ -6,16 +6,18 @@ from core.model.message.transfer_event import TransferEvent
 from core.model.shared.availability import Availability
 from core.model.shared.contact_transfer_process import ContactTransferProcess
 from core.model.shared.transfer_operation import TransferOperation
-from core.ports.replace_outcome import ReplaceOutcome
 from core.result.result_code import ResultCode
 from extensions.planets.core.model.planet import Planet
+from extensions.planets.core.model.planet_changes import PlanetChanges
 from extensions.planets.core.model.planet_replacement import PlanetReplacement
+from extensions.planets.core.model.planet_rules import planet_violations
 from extensions.planets.core.model.planet_transfer import PlanetTransfer
 from registry_adapter.sqlite.clock import now
 from registry_adapter.sqlite.extensions.planets.gateways.planet_rows import PENDING, is_pending, to_planet, transfer_of
 from registry_adapter.sqlite.extensions.planets.models.planet_row import PlanetRow
 from registry_adapter.sqlite.extensions.planets.models.planet_transfer_row import PlanetTransferRow
 from registry_adapter.sqlite.extensions.planets.models.satellite_row import SatelliteRow
+from registry_adapter.sqlite.gateways.refusal import Refusal
 from registry_adapter.sqlite.gateways.sqlite_gateway import SqliteGateway
 
 OBJECT_TYPE = "planet"
@@ -41,13 +43,37 @@ class SqlitePlanetGateway(SqliteGateway):
     by a transfer; only the sponsor changes or deletes it, and the transfer is EPP's (RFC 5731 section 3.2.4): a pull
     that waits until the sponsor answers it, with no approval after a period."""
 
-    def _missing(self, planet_id: str, client_transaction_id):
-        return self._refused(ResultCode.OBJECT_DOES_NOT_EXIST, f"The planet {planet_id} does not exist",
-                             client_transaction_id)
+    @property
+    def _hooks(self):
+        return self._context.hooks.get("planet", {})
 
-    def _not_sponsor(self, client_transaction_id, what: str):
-        return self._refused(ResultCode.AUTHORIZATION_ERROR, f"Only the sponsoring client can {what} the planet",
-                             client_transaction_id)
+    @staticmethod
+    def _missing(planet_id: str):
+        return Refusal(ResultCode.OBJECT_DOES_NOT_EXIST, f"The planet {planet_id} does not exist")
+
+    def _owned(self, session, planet_id: str, what: str) -> PlanetRow:
+        """The planet, for its sponsor to change while no transfer is pending; a `Refusal` otherwise."""
+        row = session.get(PlanetRow, planet_id)
+        if row is None:
+            raise self._missing(planet_id)
+        if row.sponsor != self.sponsor_id:
+            raise Refusal(ResultCode.AUTHORIZATION_ERROR, f"Only the sponsoring client can {what} the planet")
+        if is_pending(session, planet_id):
+            raise Refusal(ResultCode.OBJECT_STATUS_PROHIBITS_OPERATION, f"The planet {planet_id} has a pending transfer")
+        return row
+
+    @staticmethod
+    def _check(row: PlanetRow) -> None:
+        """The invariants of the planet as it is to be stored."""
+        violations = planet_violations(row.type, row.radius, row.mass, row.auth_pw)
+        if violations:
+            raise Refusal(ResultCode.PARAMETER_VALUE_RANGE_ERROR, "; ".join(violations))
+
+    def _hook(self, extension_id: str):
+        hook = self._hooks.get(extension_id)
+        if hook is None:
+            raise Refusal(ResultCode.UNIMPLEMENTED_EXTENSION, f"The backend holds no members of {extension_id}")
+        return hook
 
     def check(self, id, client_transaction_id=None):
         with self._context.database.transaction() as session:
@@ -56,70 +82,92 @@ class SqlitePlanetGateway(SqliteGateway):
                         client_transaction_id)
 
     def info(self, id, client_transaction_id=None):
-        with self._context.database.transaction() as session:
-            row = session.get(PlanetRow, id)
-            if row is None:
-                return self._missing(id, client_transaction_id)
-            planet = to_planet(session, row, self.sponsor_id)
-        return self._ok(planet, client_transaction_id)
+        def work():
+            with self._context.database.transaction() as session:
+                row = session.get(PlanetRow, id)
+                if row is None:
+                    raise self._missing(id)
+                return self._ok(to_planet(session, row, self.sponsor_id, self._hooks), client_transaction_id)
+        return self._guarded(client_transaction_id, work)
 
     def create(self, planet: Planet, client_transaction_id=None):
-        if planet.authInfo is None or not planet.authInfo.pw:
-            return self._refused(ResultCode.REQUIRED_PARAMETER_MISSING, "A planet needs its authInfo",
-                                 client_transaction_id)
-        try:
-            with self._context.database.transaction() as session:
-                session.add(PlanetRow(
-                    id=planet.id, type=planet.type, radius=planet.radius, mass=planet.mass,
-                    auth_pw=planet.authInfo.pw, sponsor=self.sponsor_id, creator=self.sponsor_id, created=now()))
-        except IntegrityError:
-            return self._refused(ResultCode.OBJECT_EXISTS, f"The planet {planet.id} exists", client_transaction_id)
-        return self._ok(planet, client_transaction_id)
+        def work():
+            row = PlanetRow(
+                id=planet.id, type=planet.type, radius=planet.radius, mass=planet.mass,
+                auth_pw=planet.authInfo.pw if planet.authInfo else "", sponsor=self.sponsor_id, creator=self.sponsor_id,
+                created=now())
+            self._check(row)
+            try:
+                with self._context.database.transaction() as session:
+                    session.add(row)
+                    session.flush()
+                    for extension_id, value in planet.extensions.items():
+                        self._hook(extension_id).create(session, planet.id, value)
+            except IntegrityError:
+                raise Refusal(ResultCode.OBJECT_EXISTS, f"The planet {planet.id} exists") from None
+            return self._ok(planet, client_transaction_id)
+        return self._guarded(client_transaction_id, work)
 
-    def replace(self, wanted: PlanetReplacement, current=None, client_transaction_id=None):
-        with self._context.database.transaction() as session:
-            row = session.get(PlanetRow, wanted.id)
-            if row is None:
-                return self._missing(wanted.id, client_transaction_id)
-            if row.sponsor != self.sponsor_id:
-                return self._not_sponsor(client_transaction_id, "update")
-            if is_pending(session, row.id):
-                return self._refused(ResultCode.OBJECT_STATUS_PROHIBITS_OPERATION,
-                                     f"The planet {row.id} has a pending transfer", client_transaction_id)
-            password = wanted.authInfo.pw if wanted.authInfo else row.auth_pw
-            unchanged = (row.type, row.radius, row.mass, row.auth_pw) == (wanted.type, wanted.radius, wanted.mass, password)
-            if unchanged:
-                current = current or self._ok(to_planet(session, row, self.sponsor_id), client_transaction_id)
-                return ReplaceOutcome(current=current)
-            current = current or self._ok(to_planet(session, row, self.sponsor_id), client_transaction_id)
-            row.type, row.radius, row.mass, row.auth_pw = wanted.type, wanted.radius, wanted.mass, password
-            row.updater, row.updated = self.sponsor_id, now()
-        return ReplaceOutcome(current=current, update=wanted, mutation=self._ok(None, client_transaction_id))
+    def replace(self, replacement: PlanetReplacement, client_transaction_id=None):
+        def work():
+            with self._context.database.transaction() as session:
+                row = self._owned(session, replacement.id, "update")
+                row.type, row.radius, row.mass = replacement.type, replacement.radius, replacement.mass
+                if replacement.authInfo is not None:
+                    row.auth_pw = replacement.authInfo.pw or ""
+                for extension_id in replacement.extensions.keys() - self._hooks.keys():
+                    self._hook(extension_id)
+                for extension_id, hook in self._hooks.items():
+                    hook.replace(session, row.id, replacement.extensions.get(extension_id))
+                self._check(row)
+                row.updater, row.updated = self.sponsor_id, now()
+            return self._ok(None, client_transaction_id)
+        return self._guarded(client_transaction_id, work)
+
+    def patch(self, id: str, changes: PlanetChanges, client_transaction_id=None):
+        def work():
+            with self._context.database.transaction() as session:
+                row = self._owned(session, id, "update")
+                if changes.type is not None:
+                    row.type = changes.type
+                if changes.radius is not None:
+                    row.radius = changes.radius
+                if changes.mass is not None:
+                    row.mass = changes.mass
+                if changes.authInfo is not None:
+                    row.auth_pw = changes.authInfo.pw or ""
+                if "radius" in changes.cleared:
+                    row.radius = None
+                if "mass" in changes.cleared:
+                    row.mass = None
+                for extension_id, value in changes.extensions.items():
+                    self._hook(extension_id).change(session, id, value)
+                self._check(row)
+                row.updater, row.updated = self.sponsor_id, now()
+            return self._ok(None, client_transaction_id)
+        return self._guarded(client_transaction_id, work)
 
     def delete(self, id, client_transaction_id=None):
-        with self._context.database.transaction() as session:
-            row = session.get(PlanetRow, id)
-            if row is None:
-                return self._missing(id, client_transaction_id)
-            if row.sponsor != self.sponsor_id:
-                return self._not_sponsor(client_transaction_id, "delete")
-            if is_pending(session, id):
-                return self._refused(ResultCode.OBJECT_STATUS_PROHIBITS_OPERATION,
-                                     f"The planet {id} has a pending transfer", client_transaction_id)
-            if session.query(SatelliteRow).filter(SatelliteRow.planet_id == id).count():
-                return self._refused(ResultCode.OBJECT_ASSOCIATION_PROHIBITS_OPERATION,
-                                     f"The planet {id} has satellites", client_transaction_id)
-            transfer = transfer_of(session, id)
-            if transfer is not None:
-                session.delete(transfer)
-            session.delete(row)
-        return self._ok(None, client_transaction_id)
+        def work():
+            with self._context.database.transaction() as session:
+                row = self._owned(session, id, "delete")
+                if session.query(SatelliteRow).filter(SatelliteRow.planet_id == id).count():
+                    raise Refusal(ResultCode.OBJECT_ASSOCIATION_PROHIBITS_OPERATION, f"The planet {id} has satellites")
+                for hook in self._hooks.values():
+                    hook.delete(session, id)
+                transfer = transfer_of(session, id)
+                if transfer is not None:
+                    session.delete(transfer)
+                session.delete(row)
+            return self._ok(None, client_transaction_id)
+        return self._guarded(client_transaction_id, work)
 
     def transfer(self, transfer: PlanetTransfer, client_transaction_id=None):
         with self._context.database.transaction() as session:
             row = session.get(PlanetRow, transfer.id)
             if row is None:
-                return self._missing(transfer.id, client_transaction_id)
+                return self._refused(ResultCode.OBJECT_DOES_NOT_EXIST, f"The planet {transfer.id} does not exist",
+                                     client_transaction_id)
             latest = transfer_of(session, transfer.id)
             operation = transfer.operation
             if operation == TransferOperation.REQUEST:
