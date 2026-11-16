@@ -41,7 +41,8 @@ Problem Details, HTTP Headers and Endpoints that of core. How the extension is i
 proposal per affected draft: the draft, its revision, and for each change the section (title and anchor), whether
 text is added, replaced or removed, and the exact text in that draft's shape and notation, including its IANA
 Considerations and Changes History entries. Each proposal is a file per draft under `.spec/proposals/<issue>-<topic>/`
-(`data-objects.md`, `core.md`, `json.md`, `extension-guidelines.md`), written on the branch of the issue for the
+(`data-objects.md`, `core.md`, `json.md`, `extension-guidelines.md`). A proposal for a new draft is a file named
+after its topic, with the whole draft text in the shape of the profile, extension or base draft it is. Both are written on the branch of the issue for the
 experimental implementation (see [requirements.md](requirements.md)) and linked from that issue. A problem with the drafts that is not a proposal goes to
 [.spec/spec-issues.md](../../.spec/spec-issues.md).
 
