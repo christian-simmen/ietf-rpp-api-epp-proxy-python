@@ -9,7 +9,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
       `architecture.project.md`
 - [x] T1 Proposal for draft-ietf-rpp-data-objects: concepts, Preset and Profile Data Objects, Discovery, IANA, the EPP
       Compatibility Profile as a profile (`.spec/proposals/174-presets/data-objects.md`)
-- [~] T2 (draft written, in review) Proposal for draft-ietf-rpp-core: `RPP-Preset`, `preset`/`preset-version`, versioning, 02308
+- [~] T2 (draft amended, in review) Proposal for draft-ietf-rpp-core: `RPP-Preset`, `preset`/`preset-version`, versioning, 02308
 - [ ] T3 Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
       Validation, the JSON Schema part of the EPP Compatibility Profile
 - [ ] T4 Proposal for draft-wullink-rpp-extension-guidelines: a specification format for profiles
@@ -49,6 +49,11 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 - D10 (maintainer) The data-objects proposal is accepted with R1-R7 as drafted. The maintainer removed three rules of
   Profile Binding: that bound profiles do not depend on the client or the request, that a server SHOULD state every
   constraint on the form of a request in a profile, and that it SHOULD announce a change of its bound profiles.
+- D12 (maintainer) The schema of a preset is the Direct Access data element `schema` of the Preset Data Object
+  (Common Data Type Representation Schema, Visibility onDemand). Direct Access is allowed on any data element of
+  cardinality 0-1 or 1. Authentication of the Read operation, and so of the schema, is server policy. A value not
+  wrapped in an RPP message is served in its native media type, so media type signalling cannot carry its preset.
+  This amends the accepted data-objects proposal (R6) and replaces RC3 of the core proposal.
 - D11 (maintainer) The agent docs for specification writing go to `main` in their own PR,
   `docs/specification-agent-docs`. This branch is stacked on it.
 

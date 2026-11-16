@@ -2,7 +2,8 @@
 
 - Issue: #174 (this repository)
 - Base: draft-ietf-rpp-data-objects-02, upstream `src/draft-ietf-rpp-data-objects.md` at commit `5867f10`
-- Status: accepted by the maintainer, with the maintainer's edits
+- Status: accepted by the maintainer, with the maintainer's edits. Amended after review of the core proposal: the
+  schema of a preset is a Direct Access data element (R6), with C3a, C3b and the `schema` element added
 
 This proposal separates the current notion of a profile into three concepts: the extension, which adds functionality,
 the profile, which narrows, and the preset, which a client signals and which names a set of extensions and profiles.
@@ -30,8 +31,10 @@ Choices made while drafting that the requirements in #174 do not settle:
 - R4. A required extension and a profile or preset referenced as a base are matched by identifier and exact version.
 - R5. The `objects` element of today's Profile Data Object is not carried over to the Preset Data Object, as a preset
   is a list of extensions and can be standardised. The `objects` element of the Discovery Data Object stays as it is.
-- R6. The schema of a preset at a server is fetched with an endpoint that the core and json proposals define. It is not
-  an operation of the Preset Data Object here.
+- R6. (Amended, maintainer) The schema of a preset at a server is the data element `schema` of the Preset Data Object,
+  of the new Common Data Type Representation Schema, with Visibility `onDemand` and Direct Access, so that core derives
+  `/presets/{id}/schema` by its Rule 3. Direct Access is allowed on any data element of cardinality `0-1` or `1`, not
+  only on associations. Whether the Read operation, and with it the schema, needs authentication is server policy.
 - R7. Two initial preset registrations demonstrate the concept: `urn:ietf:params:rpp:preset:base` (no extension, no
   profile) and `urn:ietf:params:rpp:preset:epp-compatible` (built on `base`, with the EPP Compatibility Profile).
 - R8. A server SHOULD offer a standardised preset rather than a private one with the same extensions, to avoid
@@ -83,6 +86,27 @@ Extensions are additive. An extension MUST NOT narrow RPP or another extension. 
 * alter its semantics.
 
 An extension MAY define any cardinality and constraints for the data elements, input data elements and parameters it defines itself, including making them required. Narrowing is the purpose of a profile, see (#profiles).
+~~~~
+
+## C3a. Data Element Semantics (section 2.4)
+
+Action: replace the paragraph starting with "The Direct Access flag is applicable only to a data element whose Data
+Type is an association" with the following.
+
+~~~~markdown
+The Direct Access flag is applicable to a data element whose Data Type is an association (Aggregation, Composition, Labelled Aggregation, Dictionary Aggregation, Labelled Composition, or Dictionary Composition) with a Data Object, Component Object, or Process Object, of any cardinality. Where such a data element has a cardinality greater than `1`, the associated object type MUST define a Unique Identifier, so that an individual associated object can be addressed unambiguously among the collection.
+
+The Direct Access flag is also applicable to a data element of any other Data Type with a cardinality of `0-1` or `1`. The sub-resource of such a data element is the value of the data element.
+~~~~
+
+## C3b. Common Data Types (section 6)
+
+Action: add the following subsection after "Phone Number".
+
+~~~~markdown
+## Representation Schema {#representation-schema}
+
+A Representation Schema is a schema that describes the messages of RPP in one representation, in the schema language that the representation specification defines. Its content is not defined by this document. Each representation specification defines the schema language, how the schema of a preset combines the schemas of RPP, of the extensions of the preset and of its applicable profiles (#applicable-profiles), and the media type of a Representation Schema value, for example [@!I-D.ietf-rpp-json].
 ~~~~
 
 ## C4. EPP Compatibility Profile (section 2.8)
@@ -360,18 +384,29 @@ The following data elements are defined for the Preset Data Object. All data ele
   * Description: Indicates whether the preset is the default preset of the server, which applies to a request that signals no preset.
   * Constraints: Exactly one preset offered by the server MUST have the value `true`.
 
+* Schema
+  * Identifier: schema
+  * Cardinality: 1
+  * Mutability: read-only
+  * Data Type: Representation Schema
+  * Visibility: onDemand
+  * Direct Access: true
+  * Description: The schema of the preset at the server, which combines the schemas of RPP and of the extensions of the preset, narrowed by its applicable profiles (#applicable-profiles), see (#representation-schema).
+  * Constraints: The schema MUST reflect the profiles that the Profiles (`profiles`) and Bound Profiles (`boundProfiles`) data elements state.
+
 ## Operations
 
 ### Read Operation
 
 * Identifier: read
 
-The Read operation allows a client to retrieve the Preset Data Object identified by its identifier. It is the only operation supported for this object.
+The Read operation allows a client to retrieve the Preset Data Object identified by its identifier, and its Direct Access data element Schema (`schema`). It is the only operation supported for this object.
 
 * Input: (None)
 
 * Authorisation:
   * Any authenticated client is authorised to perform this operation.
+  * A server MAY, by its policy, also allow this operation without authentication, for example to publish the schemas of its presets.
 
 # Profile Data Object {#profile-data-object}
 
@@ -501,6 +536,7 @@ Data Elements
 | profiles       | Profiles       | 0+    | read-only  | Aggregation [Profile Data Object]| The profiles of the preset definition, including those of its base presets. |
 | boundProfiles  | Bound Profiles | 0+    | read-only  | Aggregation [Profile Data Object]| The profiles the server binds to the preset.                                |
 | defaultPreset  | Default Preset | 1     | read-only  | Boolean                          | Indicates whether this preset is the default preset of the server.          |
+| schema         | Schema         | 1     | read-only  | Representation Schema            | The schema of the preset at the server.                                     |
 
 Operations
 
@@ -677,6 +713,7 @@ Action: add the following entries to the subsection of the next revision.
 * separated extensions, which add functionality, from profiles, which narrow, and added presets, which a client signals and which name a set of extensions and profiles
 * added profile binding by the server and multiple inheritance of presets and profiles
 * added the Preset Data Object, redefined the Profile Data Object, and replaced the profiles of the Discovery Data Object by presets and profiles
+* added the Representation Schema common data type and the schema of a preset, and allowed Direct Access on data elements of cardinality 0-1 or 1 of any data type
 * restated the EPP Compatibility Profile as a registered profile
 * added the RPP Preset Registry and the `id` field of the RPP Extension Registry, and redefined the RPP Profile Registry
 ~~~~
