@@ -430,7 +430,7 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
 }
 ```
 
-The narrowings of the maps of the JSContact Card constrain every entry of a map through `additionalProperties`, and name the keys of a map only in `required` and `propertyNames`. The Profile Schema therefore declares no property that the Card does not declare [@!I-D.ietf-rpp-json]. The pattern `profile.ascii` restricts the internationalised form to printable US-ASCII characters. The localised form, in `localizations`, is not restricted.
+The narrowings of the maps of the JSContact Card constrain every entry of a map through `additionalProperties`, and name the keys of a map only in `required` and `propertyNames`. The pattern `profile.ascii` restricts the internationalised form to printable US-ASCII characters. The localised form, in `localizations`, is not restricted.
 
 # Constraints Not Expressed in JSON Schema
 
