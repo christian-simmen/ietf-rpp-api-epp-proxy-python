@@ -1,0 +1,128 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-the_default_preset_is_read",
+  "description": "The default preset of the server is read: its extensions, and the profiles of its definition, and none bound.",
+  "steps": [
+    {
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/urn:ietf:params:rpp:preset:epp-compatible",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "urn:ietf:params:rpp:preset:epp-compatible",
+          "name": "EPP compatible preset",
+          "version": "1.0",
+          "rppVersion": "1.0",
+          "defaultPreset": true,
+          "extensions": [],
+          "profiles": [
+            {
+              "@type": "profile",
+              "id": "urn:ietf:params:rpp:profile:epp-compatibility",
+              "version": "1.0"
+            }
+          ],
+          "boundProfiles": []
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.default_preset": "rri"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/de.denic.rpp.preset.rri",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "de.denic.rpp.preset.rri",
+          "name": "DENIC RRI preset",
+          "version": "1.0",
+          "rppVersion": "1.0",
+          "defaultPreset": true,
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "de.denic.rpp.rri",
+              "name": "DENIC RRI",
+              "version": "0.2.0"
+            }
+          ],
+          "profiles": [],
+          "boundProfiles": []
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.default_preset": "planets"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "org.example.rpp.preset.planets",
+          "name": "Planets preset",
+          "version": "1.0",
+          "rppVersion": "1.0",
+          "defaultPreset": true,
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets",
+              "name": "RPP Planets",
+              "version": "1.0"
+            }
+          ],
+          "profiles": [],
+          "boundProfiles": []
+        }
+      }
+    }
+  ]
+}
