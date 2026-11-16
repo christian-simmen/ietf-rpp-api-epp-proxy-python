@@ -25,6 +25,10 @@ docker build . -f ./.docker/Dockerfile -t pawelk/rpp_server_epp_proxy
 docker run --rm -p 8000:8091 pawelk/rpp_server_epp_proxy
 ```
 
+The deployment image and the Ansible roles are in `deploy/` ([deploy/README.md](../../deploy/README.md)). A change
+there is checked with `ansible-lint` and `ansible-playbook --syntax-check site.yml` in `deploy/ansible`, and with the
+image built (`docker build -f deploy/docker/Dockerfile .`).
+
 ## Checks before done
 
 There is no CI in this repository. Run these checks from the repository root, in this order:
