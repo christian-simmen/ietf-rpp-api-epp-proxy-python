@@ -15,7 +15,7 @@ from rpp.dto.rpp_contact import RPPContact
 from rpp.mapping.contact import phones
 from rpp.mapping.shared import auth_info, prov_metadata, statuses
 from rpp.mapping.shared.common import parse_rpp, reject_set
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 KIND_INDIVIDUAL = "individual"
 
@@ -159,7 +159,7 @@ def contact_from_rpp(contact_rpp: RPPContact) -> Contact:
 
 def rpp_to_model(rpp: dict) -> Contact:
     """Converts a create request to a Contact."""
-    validate_schema("contact.create", rpp)
+    validate_request_schema("contact.create", rpp)
     contact_rpp = parse_rpp(RPPContact, rpp)
     contact = contact_from_rpp(contact_rpp)
     reject_set(status=contact_rpp.status)

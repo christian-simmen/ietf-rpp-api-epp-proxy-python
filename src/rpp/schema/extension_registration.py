@@ -1,13 +1,11 @@
 """What the schema machinery takes from the extensions a deployment configured (`rpp_extensions`): their RPP extension
-schema, the data model of their objects and their RPP profiles. These stay process-global and additive, as the machinery
-already is (`EXTENSIONS`, the validators built for a tuple of extensions): a profile reaches a definition only through
-its `extensions`. Nothing is registered by an import: only `main` calls `register_all`, with the registry of the app it
+schema and the data model of their objects. These stay process-global and additive, as the machinery
+already is (`EXTENSIONS`); what is per app (the presets, their profiles, the schemas and the validators) is built by `create_app`. Nothing is registered by an import: only `main` calls `register_all`, with the registry of the app it
 builds. The per-app parts (paths, handlers, gateways) are not here."""
 from registration import ExtensionRegistry
 from rpp.schema.data_objects import register_data_objects
 from rpp.schema.effective_schema import bundle_definitions
 from rpp.schema.extensions import EXTENSIONS, _from_schema, register_extension
-from rpp.schema.profiles import register_profile
 
 
 def _own_name(name: str) -> str:
@@ -38,5 +36,3 @@ def register_all(registry: ExtensionRegistry) -> None:
         check_names(extension.schema)
         register_extension(extension.schema)
         register_data_objects(extension.data_objects)
-        for key, definition in extension.rpp_profiles.items():
-            register_profile(key, definition)

@@ -3,7 +3,7 @@ from dataclasses_json.undefined import UndefinedParameterError
 from core.capabilities.not_supported_by_backend import NotSupportedByBackend
 from rpp.dto.rpp_patch_operation import RPPPatchOperation
 from rpp.dto.rpp_period import RPPPeriod
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema
 
 
 def parse_rpp(rpp_class, rpp: dict):
@@ -43,5 +43,5 @@ def reject_push(transfer_dir: str | None, gaining_client_id: str | None):
 
 def reject_reason(schema: str, rpp_class, rpp: dict):
     """Validates the content of an approve or a reject, which EPP gives no reason (data-objects §10.1.1.5)."""
-    validate_schema(schema, rpp)
+    validate_request_schema(schema, rpp)
     reject_set(reason=parse_rpp(rpp_class, rpp).reason)

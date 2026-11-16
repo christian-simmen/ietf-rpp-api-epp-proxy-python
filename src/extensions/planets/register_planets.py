@@ -16,13 +16,13 @@ DATA_OBJECTS = {
 
 TRANSFER_OPERATIONS = ["request", "query", "cancel", "approve", "reject"]
 
-PROFILE_KEY = "demo"
+PRESET_KEY = "planets"
 
 
 def register(registry: ExtensionRegistry) -> None:
     """Registers every part of the extension in the pipeline: its schema, the data model, the OpenAPI fragment and the
     handlers of its paths, its objects, its part of the SQLite backend, the leaves it adds to the backend profile, and the
-    RPP profile that offers it."""
+    RPP preset that offers it."""
     registry.add(RegisteredExtension(
         id=EXTENSION_ID,
         schema=json.loads(SCHEMA.read_text(encoding="utf-8")),
@@ -37,13 +37,14 @@ def register(registry: ExtensionRegistry) -> None:
             "planet": {"processes": {"transfer": {"operations": TRANSFER_OPERATIONS}}},
         },
         profile_leaves={"planet.processes.transfer.operations": tuple},
-        rpp_profiles={PROFILE_KEY: {
-            "name": "org.example.rpp.profile.planets",
-            "description": "Demo profile of the planets extension: the planets and satellites of the SQLite backend",
+        presets={PRESET_KEY: {
+            "id": "org.example.rpp.preset.planets",
+            "name": "Planets preset",
+            "description": "Demo preset of the planets extension: the planets and satellites of the SQLite backend",
             "version": "1.0",
             "rppVersion": "1.0",
-            "baseProfile": "urn:ietf:params:rpp:profile:base",
-            "objects": ["planet", "satellite"],
-            "extensions": [EXTENSION_ID],
+            "basePresets": [{"id": "urn:ietf:params:rpp:preset:base", "version": "1.0"}],
+            "extensions": [{"id": EXTENSION_ID, "version": "1.0"}],
+            "profiles": [],
         }},
     ))

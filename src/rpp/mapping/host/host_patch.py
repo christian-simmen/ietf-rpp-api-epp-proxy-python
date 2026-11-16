@@ -12,7 +12,7 @@ from rpp.mapping.shared import json_patch, patch_statuses
 from rpp.mapping.shared.common import parse_rpp, reject_operation
 from rpp.mapping.shared.dns_records import ADDRESS_RECORDS, DNS_PARENTS
 from rpp.mapping.shared.needs_current_state import NeedsCurrentState
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 HOST_NAME_PATH = "/hostName"
 
@@ -131,7 +131,7 @@ def rpp_to_model_with_current(host_name: str, rpp: list, current: dict) -> HostR
         patch_statuses.without_server_statuses(current), operations, ARRAY_PATHS, absent_parents=DNS_PARENTS,
     )
     patched = patch_statuses.with_server_statuses(patched, current, "hostStatus")
-    validate_schema("host.read", patched)
+    validate_request_schema("host.read", patched, patched=True)
     requested = {member: value for member, value in patched.items() if member != READ_ONLY_MEMBER}
     host_rpp = parse_rpp(RPPHost, {**requested, "hostName": current["hostName"]})
     wanted = replacement_from_rpp(host_name, host_rpp)

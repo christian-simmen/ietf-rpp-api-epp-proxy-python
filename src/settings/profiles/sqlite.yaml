@@ -5,9 +5,10 @@
 # src/core/capabilities/backend_profile.py.
 name: SQLite
 objects: []                            # an extension adds its own
-profiles:                              # the RPP profiles offered (src/rpp/schema/schemas/profiles); an extension may bring more
+presets:                               # the RPP presets offered (src/rpp/schema/schemas/presets); an extension may bring more
   - base
-default_profile: base                  # applied when a request names none
+default_preset: base                   # applied when a request names none
+bound_profiles: {}                     # per preset, the profiles this server binds to it
 lgrs: []                               # no IDN
 extensions: []                         # an extension adds itself
 

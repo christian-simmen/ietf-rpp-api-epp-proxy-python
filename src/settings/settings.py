@@ -17,8 +17,8 @@ class Settings:
     backend over a database. `extensions` are the module paths of the extension packages the app is built with
     (`rpp_extensions`): each registers its part of the pipeline. `profile_layers`
     are the layers of its `BackendProfile`, the generic one of the protocol first, then the server's own
-    (`rpp_backend_profile`); main merges them with `lgrs`. `profile_signalling` is how a client names the profile of a
-    request (`rpp_profile_signalling`, core §14): `header` (the default, core §14.2), or `media-type` (§14.3).
+    (`rpp_backend_profile`); main merges them with `lgrs`. `preset_signalling` is how a client names the preset of a
+    request (`rpp_preset_signalling`, core §Preset Signalling): `header` (the default), or `media-type`.
     """
     epp: EppSettings
     discovery: DiscoverySettings
@@ -27,15 +27,15 @@ class Settings:
     extensions: tuple[str, ...] = ()
     backend: str = "epp"
     profile_layers: tuple[dict, ...] = ()
-    profile_signalling: str = "header"
+    preset_signalling: str = "header"
 
     def __post_init__(self):
         if self.backend not in BACKENDS:
             raise ValueError(f"rpp_backend must be one of {', '.join(BACKENDS)}, not {self.backend!r}")
-        if self.profile_signalling not in SIGNALLING_METHODS:
+        if self.preset_signalling not in SIGNALLING_METHODS:
             raise ValueError(
-                f"rpp_profile_signalling must be one of {', '.join(SIGNALLING_METHODS)}, not "
-                f"{self.profile_signalling!r}")
+                f"rpp_preset_signalling must be one of {', '.join(SIGNALLING_METHODS)}, not "
+                f"{self.preset_signalling!r}")
 
     @property
     def lgrs(self) -> tuple[str, ...]:

@@ -8,7 +8,8 @@ from starlette.exceptions import HTTPException
 from core.result.error_response import ErrorResponse
 from core.result.result_code import ResultCode
 from rpp.http.headers import problem_headers
-from rpp.http.profile_middleware import SELECTED_PROFILE, SIGNALLING
+from rpp.http.preset_middleware import SELECTED_PRESET, SIGNALLING
+from rpp.schema.profile_constraint_violation import ProfileConstraintViolation
 
 RPP_ERROR_TYPE = "urn:ietf:params:rpp:error"
 
@@ -61,10 +62,30 @@ def _default_result(status: int) -> ResultCode:
     return ResultCode.AUTHENTICATION_ERROR if status == 401 else ResultCode.COMMAND_SYNTAX_ERROR
 
 
+def profile_constraint_problem(violation: ProfileConstraintViolation) -> ProblemException:
+    """Core §Extensions and Profiles of a Request: a broken constraint of an applicable profile is 02308 (422), and the error
+    names the profile and the path where it can."""
+    code = ResultCode.DATA_MANAGEMENT_POLICY_VIOLATION
+    problem_exception = ProblemException(
+        status=http_status(code), title=code.value[1], detail=violation.reason, headers=problem_headers(code))
+    problem_exception.profile_violation = violation
+    return problem_exception
+
+
+def _error(exc: ProblemException, headers: dict) -> dict:
+    error = {"type": RPP_ERROR_TYPE, "result": headers["RPP-Code"], "reason": exc.detail or exc.title}
+    violation = getattr(exc, "profile_violation", None)
+    if violation is not None:
+        error["paths"] = [violation.path]
+        if violation.profile is not None:
+            error["profile"] = violation.profile
+    return error
+
+
 def handle_rpp_error(request: ConnexionRequest, exc: ProblemException) -> ConnexionResponse:
     """Renders every error as a core §9 Problem Detail with the RPP response headers."""
     headers = {**problem_headers(_default_result(exc.status)), **(exc.headers or {})}
-    selected = request.context.get(SELECTED_PROFILE)
+    selected = request.context.get(SELECTED_PRESET)
     if selected is not None:
         headers = request.context[SIGNALLING].problem_headers(selected, headers)
     if "RPP-Cltrid" in request.headers:
@@ -76,11 +97,7 @@ def handle_rpp_error(request: ConnexionRequest, exc: ProblemException) -> Connex
         type=RPP_ERROR_TYPE,
         instance=exc.instance,
         headers=headers,
-        ext={"errors": [{
-            "type": RPP_ERROR_TYPE,
-            "result": headers["RPP-Code"],
-            "reason": exc.detail or exc.title,
-        }]},
+        ext={"errors": [_error(exc, headers)]},
     )
 
 

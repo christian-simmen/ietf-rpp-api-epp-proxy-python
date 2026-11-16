@@ -4,14 +4,14 @@ from extensions.planets.rpp.dto.rpp_planet_reference import RPPPlanetReference
 from extensions.planets.rpp.dto.rpp_satellite import RPPSatellite
 from rpp.mapping.shared import prov_metadata
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 OBJECT = "satellite"
 
 
 def rpp_to_model(rpp: dict, extensions: tuple[str, ...] = ()) -> Satellite:
     """Converts a create request."""
-    validate_schema("satellite.create", rpp, extensions)
+    validate_request_schema("satellite.create", rpp, extensions)
     satellite = parse_rpp(RPPSatellite, rpp)
     return Satellite(id=satellite.id, planet=satellite.planet.id, orbitalPeriod=satellite.orbitalPeriod)
 

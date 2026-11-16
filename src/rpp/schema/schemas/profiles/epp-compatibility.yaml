@@ -1,0 +1,10 @@
+# The EPP Compatibility Profile (draft-kowalik-rpp-epp-compatibility, data-objects "EPP Compatibility Profile"). Its
+# Profile Schema is epp-compatibility.schema.json, copied from .spec/ by copy_models.sh.
+id: urn:ietf:params:rpp:profile:epp-compatibility
+name: EPP Compatibility Profile
+description: Constrains RPP to what EPP can represent, for a server that provisions a repository through RPP and EPP concurrently.
+version: "1.0"
+rppVersion: "1.0"
+url: https://datatracker.ietf.org/doc/draft-kowalik-rpp-epp-compatibility/
+baseProfiles: []
+requiredExtensions: []

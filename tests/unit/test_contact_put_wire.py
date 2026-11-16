@@ -155,10 +155,13 @@ def test_patch_that_removes_the_organisation_that_is_not_there_is_a_422():
     assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
 
 
-def test_patch_that_removes_the_name_is_a_501():
+def test_patch_that_removes_the_name_is_a_422_under_the_epp_compatibility_profile():
+    # the profile requires the name (draft-kowalik-rpp-epp-compatibility, profile.card); before presets this was the 501 of
+    # the mapper, which a preset without the profile still answers
     response = patch(info(), body=[{"op": "remove", "path": "/contactInfo/name"}])
 
-    assert response.status_code == 501 and response.headers["RPP-Code"] == "02102"
+    assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
+    assert response.json()["errors"][0]["profile"] == "urn:ietf:params:rpp:profile:epp-compatibility"
 
 
 def test_put_adding_a_localization_the_registry_ignores_is_a_500_with_02400():

@@ -2,7 +2,7 @@
 # extension. It needs no credentials and no server: the app is built in memory, and the clients are those of the
 # configuration, with the DEMO passwords of config.demo.yaml (`literal` below: the values are not variable names).
 config: config.demo.yaml               # RPP_CONFIG_FILE of the app under test
-profile: demo                          # the RPP profile the `{rpp:*}` placeholders stand for: the one the extension brings
+preset: planets                       # the RPP preset the `{rpp:*}` placeholders stand for: the one the extension brings
 max_workers: 8
 regacc: user                           # the sponsor id is the login
 registrars:                            # the slots the cases name

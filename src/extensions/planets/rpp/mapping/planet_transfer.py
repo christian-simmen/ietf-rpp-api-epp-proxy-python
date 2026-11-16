@@ -7,12 +7,12 @@ from rpp.dto.rpp_transfer_request import RPPTransferRequest
 from rpp.mapping.contact.contact_transfer_process import model_to_rpp  # noqa: F401 - the same process
 from rpp.mapping.shared import rpp_authorization
 from rpp.mapping.shared.common import parse_rpp, reject_push, reject_reason
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema
 
 
 def request_to_model(id: str, rpp: dict, authorization: str | None) -> PlanetTransfer:
     """Converts a transfer request, with the value of its RPP-Authorization header. Only the pull transfer is supported."""
-    validate_schema("transferProcess.create", rpp)
+    validate_request_schema("transferProcess.create", rpp)
     request = parse_rpp(RPPTransferRequest, rpp)
     reject_push(request.transferDir, request.gainingClientId)
     return PlanetTransfer(id=id, operation=TransferOperation.REQUEST, authInfo=rpp_authorization.rpp_to_model(authorization))

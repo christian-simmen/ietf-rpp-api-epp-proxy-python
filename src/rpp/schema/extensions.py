@@ -1,6 +1,6 @@
 """The RPP extensions the proxy implements, one schema file each (copied from `.spec/` by copy_models.sh) in
 `schemas/extensions/`, and those a deployment registers by its configuration (`rpp_extensions`, `register_extension`).
-Which of them a deployment offers is the `extensions` of its backend profile."""
+Which of them a deployment holds is the `extensions` of its backend profile, and which it offers those of its presets."""
 import json
 from pathlib import Path
 
@@ -26,9 +26,6 @@ def _from_schema(schema: dict) -> RppExtension:
         objects=tuple(about.get("objects", ())),
     )
 
-
-# The extensions that belong to the server and to no profile: discovery lists them next to those of the profiles.
-SERVER_EXTENSIONS = ("urn:ietf:params:rpp:extension:profile-schemas",)
 
 def _load(path: Path) -> RppExtension:
     with open(path, encoding="utf-8") as f:
@@ -60,19 +57,19 @@ def added_members(schema_name: str, extensions) -> frozenset[str]:
 
 
 def check_known(extensions):
-    """A profile that offers an extension the proxy does not implement is refused, so the app does not start."""
+    """A backend profile that holds an extension the proxy does not implement is refused, so the app does not start."""
     unknown = sorted(set(extensions) - set(EXTENSIONS))
     if unknown:
         raise ValueError(f"backend profile: unknown RPP extension {', '.join(unknown)}")
 
 
-def own_definitions() -> dict[str, str]:
+def own_definitions(extensions=None) -> dict[str, str]:
     """The definitions of the objects and types the extensions define, by the name a mapper validates with
     (`requestContact.create`), to the name of the extension's definition: with a prefix (`ext.rri.requestContact.create`),
     or the same name where an extension of new objects names them as the base definitions are (`planet.create`). The
     definitions an extension composes with a base one are not among them."""
     names = {}
-    for extension in EXTENSIONS.values():
+    for extension in (EXTENSIONS[ext] for ext in extensions) if extensions is not None else EXTENSIONS.values():
         composed = set(extension.extends.values())
         for name in extension.defs:
             if name in composed:

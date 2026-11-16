@@ -1,7 +1,7 @@
 """The media ranges of `Accept` and the media type of `Content-Type` (RFC 9110 §8.3.1, §12.5.1), as far as core §14.3
-reads them: the media type, the `q` weight, and the `profile` and `profile-version` parameters.
+reads them: the media type, the `q` weight, and the `preset` and `preset-version` parameters.
 
-A parameter value is a token or a quoted-string (RFC 9110 §5.6.6), and both mean the same. A profile URN holds a colon,
+A parameter value is a token or a quoted-string (RFC 9110 §5.6.6), and both mean the same. A preset URN holds a colon,
 which a token cannot, so a client quotes it.
 """
 import re
@@ -11,8 +11,8 @@ from decimal import Decimal
 from core.result.result_code import ResultCode
 from rpp.http.media_range_error import MediaRangeError
 
-PROFILE = "profile"
-PROFILE_VERSION = "profile-version"
+PRESET = "preset"
+PRESET_VERSION = "preset-version"
 
 _TOKEN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
 _QUALITY = re.compile(r"^(?:0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$")
@@ -33,18 +33,18 @@ class MediaRange:
     def parameter(self, name: str) -> str | None:
         return next((value for key, value in self.parameters if key == name), None)
 
-    def profile(self) -> tuple[str, Decimal] | None:
-        """The profile name and version it names, None when it names none."""
-        name, version = self.parameter(PROFILE), self.parameter(PROFILE_VERSION)
+    def preset(self) -> tuple[str, Decimal] | None:
+        """The preset identifier and version it names, None when it names none."""
+        name, version = self.parameter(PRESET), self.parameter(PRESET_VERSION)
         if name is None and version is None:
             return None
         if name is None or version is None:
             raise MediaRangeError(
                 ResultCode.REQUIRED_PARAMETER_MISSING,
-                f"The media type parameters {PROFILE} and {PROFILE_VERSION} go together (core §12.4)")
+                f"The media type parameters {PRESET} and {PRESET_VERSION} go together (core §Media Type Signalling)")
         if not _VERSION.match(version):
             raise MediaRangeError(
-                ResultCode.PARAMETER_VALUE_SYNTAX_ERROR, f"The {PROFILE_VERSION} is not a version such as 1.0")
+                ResultCode.PARAMETER_VALUE_SYNTAX_ERROR, f"The {PRESET_VERSION} is not a version such as 1.0")
         return name, Decimal(version)
 
 
@@ -116,7 +116,7 @@ def _parse(text: str, weighted: bool) -> MediaRange:
         raise _syntax("A media range is not type/subtype")
     parameters, quality = [], Decimal(1)
     if kind not in _READ_IN_FULL and not kind.startswith(RPP_PREFIX):
-        # A range of another media type is no concern of the profile: it only has to split, so an unclosed quote is
+        # A range of another media type is no concern of the preset: it only has to split, so an unclosed quote is
         # refused (it would swallow the ranges after it), and a parameter the grammar may not like is not.
         if _unclosed(text):
             raise _syntax("A quoted string of a media range is not closed")
@@ -133,7 +133,7 @@ def _parse(text: str, weighted: bool) -> MediaRange:
                 raise _syntax("The q weight of a media range is a number from 0 to 1 with at most three decimals")
             quality = Decimal(value.strip())
             break  # RFC 9110 §12.5.1: what follows q is an extension of the Accept, not a media type parameter
-        if name in (PROFILE, PROFILE_VERSION) and name in dict(parameters):
+        if name in (PRESET, PRESET_VERSION) and name in dict(parameters):
             raise _syntax(f"The media type parameter {name} is given twice")
         parameters.append((name, _value(value.strip())))
     return MediaRange(kind=kind, parameters=tuple(parameters), quality=quality)

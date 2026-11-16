@@ -5,7 +5,7 @@ from rpp.dto.rpp_domain import RPPDomain
 from rpp.mapping.domain import domain_request_contacts, domain_wanted
 from rpp.mapping.shared import auth_info, include_elements
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema
 
 TYPE = "@type"
 
@@ -22,7 +22,7 @@ def rpp_to_model(
 
     A member outside `domainName.update` is rejected, also a create-only or a read-only one (json §4.4, core §16.8).
     """
-    validate_schema("domainName.update", rpp, extensions=profile.extensions)
+    validate_request_schema("domainName.update", rpp, extensions=profile.extensions)
     for member in rpp.keys() - {TYPE, *domain_wanted.changeable(profile)}:
         raise ValueError(f"'{member}' cannot be sent in a full update")
     base, _ = domain_request_contacts.split(rpp, "domainName.update", profile.extensions)

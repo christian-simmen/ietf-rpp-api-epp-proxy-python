@@ -7,6 +7,8 @@ from rpp.dto.rpp_discovery_environment import RPPDiscoveryEnvironment
 from rpp.dto.rpp_discovery_version import RPPDiscoveryVersion
 from rpp.dto.rpp_extension import RPPExtension
 from rpp.dto.rpp_object import RPPObject, type_field
+from rpp.dto.rpp_preset import RPPPreset
+from rpp.dto.rpp_profile_reference import RPPProfileReference
 
 
 @dataclass_json(undefined=Undefined.RAISE)
@@ -17,6 +19,7 @@ class RPPDiscovery(RPPObject):
     environment: RPPDiscoveryEnvironment
     tlds: list[str]
     extensions: Optional[list[RPPExtension]] = None
-    profiles: list[str]
+    presets: list[RPPPreset]
+    profiles: Optional[list[RPPProfileReference]] = None
     objects: list[str]
     datetime: str

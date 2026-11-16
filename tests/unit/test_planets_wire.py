@@ -96,7 +96,7 @@ class Forbidden:
     """The gateway of an object the backend does not hold, in an app where the stubs must never be what answers."""
 
     def __getattr__(self, name):
-        raise AssertionError(f"The gateway was used ({name}): the profile middleware should have refused the request")
+        raise AssertionError(f"The gateway was used ({name}): the preset middleware should have refused the request")
 
 
 @pytest.fixture(scope="module")
@@ -125,13 +125,13 @@ def middleware_only_client():
     ("GET", "/hosts/ns.example.test", "host"), ("POST", "/contacts", "contact"),
     ("DELETE", "/domainNames/example.test", "domainName"),
 ])
-def test_an_object_of_the_drafts_is_refused_by_the_profile_middleware_before_any_gateway(
+def test_an_object_of_the_drafts_is_refused_by_the_preset_middleware_before_any_gateway(
         middleware_only_client, method, path, object_name):
     response = send(middleware_only_client, method, path, body={"@type": "contact"} if method == "POST" else None)
 
     assert response.status_code == 501
     assert code(response) == "02307"
-    assert response.json()["detail"] == f"The profile org.example.rpp.profile.planets has no {object_name} object on this server"
+    assert response.json()["detail"] == f"The preset org.example.rpp.preset.planets has no {object_name} object on this server"
 
 
 def test_a_client_that_is_unknown_or_has_a_wrong_password_is_refused(client):

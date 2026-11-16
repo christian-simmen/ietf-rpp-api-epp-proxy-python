@@ -12,7 +12,7 @@ from rpp.mapping.contact import contact_replacement, contacts
 from rpp.mapping.shared import auth_info, include_elements, json_patch, patch_statuses
 from rpp.mapping.shared.common import parse_rpp, reject_operation
 from rpp.mapping.shared.needs_current_state import NeedsCurrentState
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 CONTACT_INFO_PATH = "/contactInfo"
 
@@ -198,7 +198,7 @@ def rpp_to_model_with_current(contact_id: str, rpp: list, current: Contact, *, k
         ignored_paths=include_elements.on_demand_paths(OBJECT), absent_parents=ABSENT_PARENTS,
     )
     patched = patch_statuses.with_server_statuses(patched, read, "contactStatus")
-    validate_schema("contact.read", patched)
+    validate_request_schema("contact.read", patched, patched=True)
     patched = patched if kind_held else _with_derived_kind(patched, operations)
     requested = {member: value for member, value in patched.items() if member not in READ_ONLY_MEMBERS}
     auth_info_update = _PatchedUpdate()

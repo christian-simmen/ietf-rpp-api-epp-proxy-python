@@ -795,10 +795,23 @@
           },
           "readOnly": true
         },
+        "presets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/preset.read",
+            "required": [
+              "extensions",
+              "profiles",
+              "boundProfiles"
+            ]
+          },
+          "minItems": 1,
+          "readOnly": true
+        },
         "profiles": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/profile.reference"
           },
           "readOnly": true
         },
@@ -854,6 +867,7 @@
         "versions",
         "environment",
         "tlds",
+        "presets",
         "objects",
         "datetime"
       ]
@@ -2632,6 +2646,10 @@
           "const": "profile",
           "readOnly": true
         },
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
         "name": {
           "type": "string",
           "readOnly": true
@@ -2648,38 +2666,34 @@
           "type": "string",
           "readOnly": true
         },
-        "objects": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minItems": 1,
+        "url": {
+          "type": "string",
+          "format": "uri",
           "readOnly": true
         },
-        "extensions": {
+        "baseProfiles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/profile.reference"
+          },
+          "readOnly": true
+        },
+        "requiredExtensions": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/extension.read"
           },
           "readOnly": true
-        },
-        "baseProfile": {
-          "$ref": "#/$defs/profile.reference",
-          "readOnly": true
-        },
-        "defaultProfile": {
-          "type": "boolean",
-          "readOnly": true
         }
       },
       "required": [
         "@type",
+        "id",
         "name",
         "description",
         "version",
         "rppVersion",
-        "objects",
-        "defaultProfile"
+        "url"
       ]
     },
     "profile.reference": {
@@ -2689,14 +2703,19 @@
           "type": "string",
           "const": "profile"
         },
-        "name": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "version": {
           "type": "string",
           "readOnly": true
         }
       },
       "required": [
         "@type",
-        "name"
+        "id",
+        "version"
       ]
     },
     "provMetadata.read": {
@@ -3541,6 +3560,109 @@
       "required": [
         "@type",
         "label"
+      ]
+    },
+    "preset.reference": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "const": "preset"
+        },
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "version": {
+          "type": "string",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "@type",
+        "id",
+        "version"
+      ]
+    },
+    "preset.read": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "const": "preset",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string",
+          "readOnly": true
+        },
+        "version": {
+          "type": "string",
+          "readOnly": true
+        },
+        "rppVersion": {
+          "type": "string",
+          "readOnly": true
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "readOnly": true
+        },
+        "basePresets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/preset.reference"
+          },
+          "readOnly": true
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/extension.read"
+          },
+          "readOnly": true
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/profile.reference"
+          },
+          "readOnly": true
+        },
+        "boundProfiles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/profile.reference"
+          },
+          "readOnly": true
+        },
+        "defaultPreset": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "schema": {
+          "type": "object",
+          "additionalProperties": true,
+          "readOnly": true
+        }
+      },
+      "required": [
+        "@type",
+        "id",
+        "name",
+        "description",
+        "version",
+        "rppVersion",
+        "defaultPreset"
       ]
     }
   }

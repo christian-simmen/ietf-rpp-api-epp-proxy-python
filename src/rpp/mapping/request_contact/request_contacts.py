@@ -3,7 +3,7 @@ from core.model.request_contact.request_contact import RequestContact
 from rpp.dto.rpp_request_contact import RPPRequestContact
 from rpp.mapping.shared import prov_metadata
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 
 def check_requested(identifiers: list[str]) -> frozenset[str]:
@@ -15,7 +15,7 @@ def check_requested(identifiers: list[str]) -> frozenset[str]:
 
 def rpp_to_model(rpp: dict, extensions: tuple[str, ...] = ()) -> RequestContact:
     """Converts a create request. The registry checks the template beyond its length."""
-    validate_schema("requestContact.create", rpp, extensions)
+    validate_request_schema("requestContact.create", rpp, extensions)
     contact = parse_rpp(RPPRequestContact, rpp)
     return RequestContact(id=contact.id, uriTemplate=contact.uriTemplate)
 
