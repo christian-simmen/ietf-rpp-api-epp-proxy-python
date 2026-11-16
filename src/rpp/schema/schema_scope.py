@@ -129,7 +129,7 @@ class SchemaScope:
             if targets is None:
                 continue
             defs = profile.schema["$defs"]
-            if any(member in schema.get("required", ()) for sub in targets[1] for schema in expand([defs[sub]], defs)):
+            if any(member in _unconditional_required(defs[sub], defs) for sub in targets[1]):
                 raise ProfileConstraintViolation(
                     profile.id, f"$.{member}", f"A constraint of the profile {profile.id} requires '{member}'")
 
@@ -143,6 +143,20 @@ class SchemaScope:
         return frozenset(member for schema in expand([self._composed[target]], self._composed)
                          for member, sub in schema.get("properties", {}).items()
                          if isinstance(sub, dict) and sub.get("readOnly"))
+
+
+def _unconditional_required(schema, defs: dict, seen=frozenset()) -> set:
+    """The members that `schema` requires whatever the instance is: its `required` and those of its `allOf` branches and
+    references, not those of `if`, `then`, `else`, `anyOf`, `oneOf` or `not`, which hold only on some instances."""
+    if not isinstance(schema, dict) or id(schema) in seen:
+        return set()
+    seen = seen | {id(schema)}
+    found = set(schema.get("required", ()))
+    if isinstance(schema.get("$ref"), str) and schema["$ref"].startswith("#/$defs/"):
+        found |= _unconditional_required(defs.get(schema["$ref"].rsplit("/", 1)[-1]), defs, seen)
+    for branch in schema.get("allOf") or ():
+        found |= _unconditional_required(branch, defs, seen)
+    return found
 
 
 def _reason(error, profile) -> str:

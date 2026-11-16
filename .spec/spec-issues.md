@@ -600,9 +600,10 @@ they were. The proxy follows the proposals, with the following.
   to the object read for it, also where it needs no read without profiles (a status, the authInfo, a phone or the email), so that the
   profiles are enforced on every request (core, Extensions and Profiles of a Request). The native patch of an extension that has no read
   (the planets extension, D24) has no object: the value of each operation is checked against the profiles as the member it sets (a
-  constraint on that member), and the removal of a member that an applicable profile lists in `required` is refused with that profile.
-  What a profile requires of the members together (a `required` that another operation satisfies, a condition between two members) is not
-  enforced on a native patch.
+  error reported at the member's own path or below it counts), and the removal of a member that an applicable profile lists in an
+  unconditional `required` (its top level and its `allOf` branches, not `if`, `then`, `else`, `anyOf`, `oneOf` or `not`) is refused with that
+  profile. A constraint reported at the root of the object (`not` that forbids a member, `if` and `then`, `dependentRequired` and
+  other constraints between members) is not enforced on a native patch.
 
 ## Telephone number in the contact examples of json
 

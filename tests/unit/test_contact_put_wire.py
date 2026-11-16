@@ -189,3 +189,18 @@ def test_patch_without_a_read_under_the_epp_compatible_preset_is_checked_on_the_
     assert error["profile"] == "urn:ietf:params:rpp:profile:epp-compatibility"
     assert error["paths"][0].startswith("$.contactInfo.emails")
     assert len(session.client.sent) == 1 and "contact:info" in session.client.sent[0]       # the read, no update
+
+
+@pytest.mark.parametrize("preset, body, status, code", [
+    (None, [{"op": "replace", "path": "/foo", "value": 1}], 400, "02001"),
+    (BASE_PRESET, [{"op": "replace", "path": "/foo", "value": 1}], 400, "02001"),
+    (None, [{"op": "replace", "path": "/disclose", "value": {}}], 501, "02102"),
+    (BASE_PRESET, [{"op": "replace", "path": "/disclose", "value": {}}], 501, "02102"),
+])
+def test_an_invalid_patch_is_refused_alike_under_a_preset_with_profiles_and_without_and_sends_nothing(preset, body, status, code):
+    session = Session(MISSING)
+
+    response = session.request("patch", preset=preset, json=body)
+
+    assert response.status_code == status and response.headers["RPP-Code"] == code
+    assert session.client is None or session.client.sent == []        # no contact:info, no update

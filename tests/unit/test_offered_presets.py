@@ -201,7 +201,8 @@ def _extension(**sub):
     ({"properties": {"name": {"type": "string"}}}, "declares name, which domainName.create declares"),
     ({"properties": {"a": {}}, "required": ["b"]}, "requires b, which it does not declare"),
     ({"properties": {"a": {}}, "maxProperties": 3}, "uses maxProperties"),
-    ({"properties": {"a": {}}, "not": {}}, "uses not"),
+    ({"properties": {"a": {}}, "not": {"required": ["name"]}}, "names name"),
+    ({"properties": {"a": {}}, "if": {"required": ["authInfo"]}, "then": {}}, "names authInfo"),
 ])
 def test_an_extension_schema_that_constrains_stops_the_server(sub, message):
     with pytest.raises(ValueError, match=message):
@@ -280,3 +281,28 @@ def test_an_extension_uri_that_names_a_definition_of_the_base_stops_the_server()
 
     with pytest.raises(ValueError, match=f"constrains domainName.create, which the extension {RRI} does not define"):
         build(definitions_with([having], [wrong]), ["r3"], held=(RRI,))
+
+
+@pytest.mark.parametrize("sub", [
+    {"properties": {"a": {}, "b": {}}, "dependentRequired": {"a": ["b"]}},          # json: members of the extension only
+    {"properties": {"a": {}}, "patternProperties": {"^x-": {"type": "string"}}},    # a pattern no base member matches
+    {"properties": {"a": {}, "b": {}}, "if": {"required": ["a"]}, "then": {"required": ["b"]}},
+    {"properties": {"a": {}}, "not": {"required": ["a"]}},
+    {"properties": {"a": {}, "b": {}}, "dependentSchemas": {"a": {"required": ["b"]}}},
+])
+def test_an_extension_schema_may_relate_its_own_members_and_use_a_pattern_the_base_does_not_match(sub):
+    check_additive(_extension(**sub))
+
+
+@pytest.mark.parametrize("sub, message", [
+    ({"properties": {"a": {}}, "dependentRequired": {"a": ["authInfo"]}}, "names authInfo"),
+    ({"properties": {"a": {}}, "patternProperties": {"^auth": {"type": "string"}}}, "patternProperties '\\^auth' that matches authInfo"),
+])
+def test_an_extension_schema_that_names_a_member_of_the_base_through_a_dependency_or_a_pattern_stops_the_server(sub, message):
+    with pytest.raises(ValueError, match=message):
+        check_additive(_extension(**sub))
+
+
+def test_the_extensions_of_the_proxy_are_additive():
+    for extension in EXTENSIONS.values():
+        check_additive(extension)

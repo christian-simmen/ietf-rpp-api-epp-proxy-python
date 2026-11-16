@@ -194,3 +194,30 @@ def test_the_removal_of_a_member_a_profile_requires_is_refused_naming_the_profil
     assert error.value.profile == REQUIRES_RADIUS[0] and error.value.path == "$.registrant"
     scope.refuse_removal("domainName.update", "nameservers")       # no profile requires it
     scope.refuse_removal("host.update", "registrant")              # a definition no profile constrains
+
+
+def test_a_native_patch_does_not_enforce_a_constraint_reported_at_the_object_root():
+    # GAP (D24, .spec/spec-issues.md): a member check sees what is reported at the member or below it. A constraint such
+    # as `not` that forbids a member, reported at the root of the object, is not enforced on a native patch.
+    forbids = profile("forbids-radius", constraints={"domainName.update": "profile.f"},
+                      defs={"profile.f": {"not": {"required": ["registrant"]}}})
+    scope = scope_of(forbids)
+    body = {"@type": "domainName", "registrant": {"@type": "contact", "id": "C-1"}}
+
+    with pytest.raises(ProfileConstraintViolation):
+        scope.validate_request("domainName.update", body)                      # the whole object: refused
+    scope.validate_request("domainName.update", body, member="registrant")     # a native patch: not enforced
+
+
+def test_only_an_unconditional_requirement_refuses_a_removal():
+    conditional = profile("conditional", constraints={"domainName.update": "profile.c"}, defs={
+        "profile.c": {"if": {"required": ["nameservers"]}, "then": {"required": ["registrant"]},
+                      "anyOf": [{"required": ["registrant"]}, {"required": ["authInfo"]}]}})
+    nested = profile("nested-required", constraints={"domainName.update": "profile.n"}, defs={
+        "profile.n": {"allOf": [{"required": ["authInfo"]}]}})
+
+    scope_of(conditional).refuse_removal("domainName.update", "registrant")       # holds only on some objects
+    with pytest.raises(ProfileConstraintViolation):
+        scope_of(REQUIRES_RADIUS).refuse_removal("domainName.update", "registrant")
+    with pytest.raises(ProfileConstraintViolation):
+        scope_of(nested).refuse_removal("domainName.update", "authInfo")

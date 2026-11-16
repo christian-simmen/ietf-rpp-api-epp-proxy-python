@@ -114,6 +114,8 @@ def rpp_to_model(host_name: str, rpp: list) -> HostUpdate | None:
     object the patch results in (core §Extensions and Profiles of a Request: every request), which needs the current one.
     """
     if profiles_apply():     # the profiles are checked on the object the patch results in, which needs the current one
+        for operation in _operations(rpp):
+            _check(operation)       # an invalid patch is refused as without profiles, before any command
         return None
     update = _PatchedHostUpdate(host_name)
     try:
