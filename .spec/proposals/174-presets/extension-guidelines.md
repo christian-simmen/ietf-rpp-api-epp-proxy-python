@@ -7,9 +7,10 @@
 - Status: draft for review
 
 This proposal brings the guidelines in line with the separation of extensions, profiles and presets. Extensions only
-add, a requirement that only constrains becomes a profile, and the guidelines get a specification format for profiles and
-a short one for presets. Each change below names the section of the draft, the action, and the exact text. Section
-numbers are those of -00 and are given for orientation only: the title and the anchor identify the section.
+add, a requirement that only constrains becomes a profile, and the guidelines get a specification format for profiles
+and a short one for presets, each with an example appendix. Each change below names the section of the draft, the
+action, and the exact text. Section numbers are those of -00 and are given for orientation only: the title and the
+anchor identify the section.
 
 ## Review Points
 
@@ -29,7 +30,8 @@ Choices made while drafting that the requirements in #174 and the accepted propo
   or registries. These add functionality and belong to an extension.
 - RG6. The "Composition and Validation" example of the Example Extension appendix shows the in-place composition of the
   Preset Schema (json RJ2) instead of the `effective.` prefix. A new appendix "Example Profile" constrains the example
-  extension.
+  extension, and a new appendix "Example Preset" bundles the example extension and the example profile on top of the
+  base preset.
 - RG7. The IANA Registrations table names data-objects as the home of the RPP Extensions registry, where the registry
   is now defined, instead of core.
 
@@ -377,7 +379,58 @@ The following instance is valid under a preset with the example extension and wi
 **TODO:**
 ~~~~
 
-## C15. Change History (section 15)
+## C15. Example Preset (new Appendix C)
+
+Action: add the following appendix after "Example Profile".
+
+~~~~markdown
+# Example Preset {#preset-example}
+
+This appendix is informative. It shows a preset specification that follows the structure defined in "Presets". The example preset contains the example extension (#extension-example) and the example profile (#profile-example), and builds on the base preset defined in [@!I-D.ietf-rpp-data-objects].
+
+## Introduction
+
+This document provides an example of a preset specification, following the guidelines defined in [@I-D.wullink-rpp-extension-guidelines]. The example preset is intended for clients that use the example extension with servers that apply the example profile. A server that offers the preset can bind further profiles to it [@!I-D.ietf-rpp-data-objects].
+
+## Preset Overview
+
+| Field | Value |
+|---|---|
+| Name | RPP Example Preset |
+| Identifier | urn:ietf:params:rpp:preset:example-preset |
+| Version | 1.0 |
+| RPP version | 1.0 |
+| Extensions | urn:ietf:params:rpp:extension:example-ext-property 1.0 |
+| Profiles | urn:ietf:params:rpp:profile:example-profile 1.0 |
+| Base presets | urn:ietf:params:rpp:preset:base 1.0 |
+
+The example profile requires the example extension, which the preset contains.
+
+A client signals the preset with each request, as defined in [@!I-D.ietf-rpp-core]:
+
+```http-message
+RPP-Preset: preset=urn:ietf:params:rpp:preset:example-preset;version=1.0
+```
+
+## IANA Considerations
+
+A registration of the preset in the RPP Presets registry [@!I-D.ietf-rpp-data-objects] contains the following fields:
+
+- `name`: RPP Example Preset
+- `id`: urn:ietf:params:rpp:preset:example-preset
+- `version`: 1.0
+- `extensions`: urn:ietf:params:rpp:extension:example-ext-property 1.0
+- `profiles`: urn:ietf:params:rpp:profile:example-profile 1.0
+- `basePresets`: urn:ietf:params:rpp:preset:base 1.0
+- `url`: This document, (#preset-example)
+- `description`: RPP with the example extension, constrained by the example profile.
+
+## Security Considerations
+
+The preset adds no functionality and no constraints of its own. The security considerations of the example extension and of the example profile apply.
+~~~~
+
+## C16. Change History (section 15)
 
 Action: replace "**TODO**" with the following.
 
@@ -386,6 +439,6 @@ Action: replace "**TODO**" with the following.
 * replaced the rejection with 02103 of an unlisted extension by the rejection of an extension outside the signalled preset, as defined in rpp-core
 * added the Profile Specification Format and a Preset Specification Format
 * aligned Validation and the Example Extension with the Preset Schema of rpp-json
-* added an example profile
+* added an example profile and an example preset
 * added the RPP Profiles, RPP Presets and RPP JSON Schema Profiles registries to the IANA Registrations table
 ~~~~

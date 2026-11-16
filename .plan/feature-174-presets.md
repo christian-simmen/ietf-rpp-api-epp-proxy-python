@@ -12,7 +12,8 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 - [x] T2 Proposal for draft-ietf-rpp-core: `RPP-Preset`, `preset`/`preset-version`, versioning, 02308
 - [x] T3 Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
       Validation, the JSON Schema part of the EPP Compatibility Profile
-- [~] T4 (draft written, in review) Proposal for draft-wullink-rpp-extension-guidelines: a specification format for profiles
+- [~] T4 (draft written, in review) Proposal for draft-wullink-rpp-extension-guidelines: specification formats for profiles
+      and presets, with an example profile (Appendix B) and an example preset (Appendix C)
 - [~] T4a (draft written, in review) Proposal for a new draft, the RPP EPP Compatibility Profile, with the EPP
       elements copied from data-objects, core and json (`.spec/proposals/174-presets/draft-kowalik-rpp-epp-compatibility.md`, renamed
       and edited by the maintainer)
