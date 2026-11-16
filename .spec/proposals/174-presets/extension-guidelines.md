@@ -234,14 +234,14 @@ A profile constrains, and cannot remove a security service or relax a constraint
 Action: replace the text and the example of the subsection "Composition and Validation" with the following.
 
 ~~~~markdown
-For a deployment that offers a preset with the example extension, the Preset Schema contains the effective schema of `domainName.create` under the key of the base definition, so that every reference to it resolves to the composed definition [@!I-D.ietf-rpp-json]. The base definition is embedded in place and abbreviated here:
+For a deployment that offers the example preset (#preset-example), the Preset Schema contains the effective schema of `domainName.create` under the key of the base definition, so that every reference to it resolves to the composed definition [@!I-D.ietf-rpp-json]. The base definition and the sub-schema of the example extension are embedded in place, and the sub-schema of the extension is composed with the sub-schema of the example profile (#profile-example) that constrains it. The base definition is abbreviated here:
 
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://rpp.example/rpp/presets/org.example.rpp.preset.example/schema",
+  "$id": "https://rpp.example/rpp/presets/urn:ietf:params:rpp:preset:example-preset/schema",
   "rpp:preset": {
-    "id": "org.example.rpp.preset.example",
+    "id": "urn:ietf:params:rpp:preset:example-preset",
     "version": "1.0"
   },
   "$defs": {
@@ -259,11 +259,21 @@ For a deployment that offers a preset with the example extension, the Preset Sch
       ]
     },
     "ext.domainName.create": {
-      "type": "object",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "extProperty1": { "type": "string", "minLength": 1, "maxLength": 64 }
+          },
+          "required": ["extProperty1"]
+        },
+        { "$ref": "#/$defs/profile.extProperty1" }
+      ]
+    },
+    "profile.extProperty1": {
       "properties": {
-        "extProperty1": { "type": "string", "minLength": 1, "maxLength": 64 }
-      },
-      "required": ["extProperty1"]
+        "extProperty1": { "pattern": "^[a-z]{1,16}$" }
+      }
     }
   }
 }

@@ -572,7 +572,13 @@ A> TODO: examples for the constraints that are not expressed in JSON Schema.
 
 # EPP Compatible Preset {#epp-compatible-preset}
 
-The EPP compatible preset is a preset as defined in [@!I-D.ietf-rpp-data-objects], for clients of servers that provision a repository through RPP and EPP concurrently. It contains no extensions, and its applicable profiles include the EPP Compatibility Profile.
+This section follows the preset specification format of [@!I-D.wullink-rpp-extension-guidelines].
+
+## Introduction
+
+The EPP compatible preset is a preset as defined in [@!I-D.ietf-rpp-data-objects], for clients of servers that provision a repository through RPP and EPP concurrently. It contains no extensions, and its applicable profiles include the EPP Compatibility Profile. A server that offers the preset can bind further profiles to it [@!I-D.ietf-rpp-data-objects].
+
+## Preset Overview
 
 | Field | Value |
 |---|---|
@@ -583,6 +589,71 @@ The EPP compatible preset is a preset as defined in [@!I-D.ietf-rpp-data-objects
 | Extensions | None |
 | Profiles | urn:ietf:params:rpp:profile:epp-compatibility 1.0 |
 | Base presets | urn:ietf:params:rpp:preset:base 1.0 |
+
+The EPP Compatibility Profile requires no extensions.
+
+A client signals the preset with each request, as defined in [@!I-D.ietf-rpp-core]:
+
+```http-message
+RPP-Preset: preset=urn:ietf:params:rpp:preset:epp-compatible;version=1.0
+```
+
+## Preset Schema
+
+The Preset Schema of the preset at a server contains, for each definition that the EPP Compatibility Profile constrains, the base definition embedded in place and the reference to the sub-schema of the Profile Schema (#epp-compatibility-profile-schema) that constrains it [@!I-D.ietf-rpp-json].
+
+Example of the definition `restoreReport.create` in the Preset Schema:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpp.example/rpp/presets/urn:ietf:params:rpp:preset:epp-compatible/schema",
+  "rpp:preset": {
+    "id": "urn:ietf:params:rpp:preset:epp-compatible",
+    "version": "1.0"
+  },
+  "$defs": {
+    "restoreReport.create": {
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "@type": { "type": "string", "const": "restoreReport" },
+            "preData": { "type": "string" },
+            "postData": { "type": "string" },
+            "deleteTime": { "type": "string", "format": "date-time" },
+            "restoreTime": { "type": "string", "format": "date-time" },
+            "restoreReason": { "type": "string" },
+            "statements": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1,
+              "maxItems": 2
+            },
+            "other": { "type": "string" }
+          },
+          "required": ["@type", "statements"]
+        },
+        { "$ref": "#/$defs/profile.restoreReport" }
+      ]
+    },
+    "profile.restoreReport": {
+      "properties": {
+        "statements": { "minItems": 2 }
+      },
+      "required": ["restoreTime"]
+    }
+  }
+}
+```
+
+## IANA Considerations
+
+The registration of the preset is requested in (#iana-preset-registration).
+
+## Security Considerations
+
+The preset adds no functionality and no constraints of its own. The security considerations of the EPP Compatibility Profile apply, see (#security-considerations).
 
 # Correspondence with EPP {#epp-mapping}
 
@@ -618,7 +689,7 @@ The IANA is requested to register the following Profile Schema in the RPP JSON S
 - `RFC`: This document
 - `description`: The constraints of the EPP Compatibility Profile that JSON Schema can express, (#epp-compatibility-profile-schema).
 
-## RPP Presets Registry
+## RPP Presets Registry {#iana-preset-registration}
 
 The IANA is requested to register the following preset in the RPP Presets registry defined in [@!I-D.ietf-rpp-data-objects]:
 
@@ -633,7 +704,7 @@ The IANA is requested to register the following preset in the RPP Presets regist
 
 A> The registrations above are also requested by [@!I-D.ietf-rpp-data-objects] and [@!I-D.ietf-rpp-json] until the constraints are removed from them.
 
-# Security Considerations
+# Security Considerations {#security-considerations}
 
 The EPP Compatibility Profile only constrains RPP. It does not weaken the authentication and authorisation that [@!I-D.ietf-rpp-core] and [@!I-D.ietf-rpp-data-objects] require. A server enforces the constraints of the profile on every request, whether or not the client has validated the request against the Preset Schema.
 
