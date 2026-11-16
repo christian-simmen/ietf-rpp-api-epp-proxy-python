@@ -39,9 +39,9 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
       `BEGIN IMMEDIATE` per unit of work, an `fcntl` lock around `migrate()`; unit tests with several processes on one
       file. The in-process `RLock` stays for the in-memory database. Instead of an `fcntl` lock, `migrate()` runs in one
       `BEGIN IMMEDIATE` transaction (SQLite DDL is transactional): one mechanism for both.
-- [~] 3. Hardened image `deploy/docker/Dockerfile`: multi-stage, base pinned by digest, UID 10001, no pip or compilers in
+- [x] 3. Hardened image `deploy/docker/Dockerfile`: multi-stage, base pinned by digest, UID 10001, no pip or compilers in
       the final stage, `uvicorn --workers 3 --proxy-headers --forwarded-allow-ips`, config from `RPP_CONFIG_FILE`.
-- [ ] 4. Role `rootless_docker`: packages (docker-ce, rootless-extras, uidmap), the unprivileged user, its subuid
+- [~] 4. Role `rootless_docker`: packages (docker-ce, rootless-extras, uidmap), the unprivileged user, its subuid
       range, `dockerd-rootless-setuptool.sh`, linger, the user's systemd unit.
 - [ ] 5. Role `epp_server`: checkout of EPP-server-docker, its `.env` from vault, compose `setup` then `run` profiles,
       ports removed (override file), on network `rpp_backend_net`.
@@ -64,6 +64,12 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
 - Security known debt #14 (`TCPClient` prints sent EPP messages, the login `<pw>` included) means the `epp` instance's
   container log holds registrar passwords; the deployment caps and rotates logs, but does not fix it.
 - EPP-server-docker publishes ports under 1024 (43, 443); under rootless Docker these fail, hence D2.
+
+- Image check (devcontainer, docker outside of docker): read-only root, `cap_drop ALL`, no-new-privileges, UID 10001,
+  3 workers, healthy after about a minute (each worker builds the app from openapi.yaml), about 360 MiB with 3 workers.
+  60 concurrent planet creates against a file in `/data` stored 60 rows. The discovery healthcheck needs `RPP-Cltrid`.
+- uvicorn restarts a worker that dies (e.g. a bad config), so the container stays up and turns `unhealthy`; Docker does
+  not restart unhealthy containers, so the role waits for `healthy` after a deploy and fails otherwise.
 
 ## Open questions
 
