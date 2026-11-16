@@ -7,6 +7,7 @@
     "profile.domainName.registrant.min_count": 0,
     "env.domainName.contacts.foreign_supported": false
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts; RRI requires a holder, so a domain cannot be without a registrant; whether MTEST takes a contact of another RegAcc is not known (null). Review: registrant.min_count is incidental; the tech label and foreign_supported decide.",
   "description": "A contact of another registrar: the drafts leave it to server policy, the server refuses it (env.foreign_contacts_refused).",
   "steps": [
     {

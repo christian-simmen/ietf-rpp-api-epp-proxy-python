@@ -6,6 +6,7 @@
     },
     "profile.domainName.registrant.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI requires a holder, so a domain cannot be without a registrant.",
   "description": "The same nameserver twice: the drafts leave it open, the server refuses it as an object that exists.",
   "steps": [
     {

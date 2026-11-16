@@ -6,6 +6,7 @@
     },
     "profile.domainName.registrant.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts; RRI requires a holder, so a domain cannot be without a registrant.",
   "skip": "pawel-kow/epp#32",
   "description": "The same contact twice in one role: the drafts leave it open; refused as the same server refuses a nameserver twice (limits_domain/test56).",
   "steps": [

@@ -4,6 +4,7 @@
       "contains": "admin"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts. Review: The case checks a schema refusal before any command; the admin label is incidental to it.",
   "test_id": "test6-invalid_schema",
   "steps": [
     {

@@ -2,6 +2,7 @@
   "when": {
     "profile.contact.authInfo.supported": true
   },
+  "comment": "Skipped on rri-mtest: an RRI contact has no authInfo.",
   "test_id": "test14-put_auth_info",
   "steps": [
     {

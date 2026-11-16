@@ -5,6 +5,7 @@
       "contains": "mx"
     }
   },
+  "comment": "Skipped on epp-docker: EPP has no MX records of the domain.",
   "description": "A PATCH adds an MX record.",
   "steps": [
     {

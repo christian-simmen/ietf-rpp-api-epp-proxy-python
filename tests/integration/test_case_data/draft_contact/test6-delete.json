@@ -2,6 +2,7 @@
   "when": {
     "profile.contact.processes.delete.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI cannot delete a contact.",
   "test_id": "test6-delete",
   "steps": [
     {

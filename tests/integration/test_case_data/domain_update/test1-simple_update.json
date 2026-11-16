@@ -8,6 +8,7 @@
     },
     "profile.contact.authInfo.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI has no admin, tech or billing contacts; an RRI contact has no authInfo.",
   "test_id": "test1-simple_update",
   "steps": [
     {

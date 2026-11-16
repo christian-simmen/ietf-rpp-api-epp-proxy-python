@@ -5,6 +5,7 @@
       "min": 2
     }
   },
+  "comment": "Skipped on epp-docker: EPP holds one registrant; several holders are RRI's.",
   "description": "The same contact as two holders.",
   "steps": [
     {

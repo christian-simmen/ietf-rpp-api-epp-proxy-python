@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain.",
   "description": "EPP has no due date of a status, so the proxy refuses it before any command.",
   "steps": [
     {

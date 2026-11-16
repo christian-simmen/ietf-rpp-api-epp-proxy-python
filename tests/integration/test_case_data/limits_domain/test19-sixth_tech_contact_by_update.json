@@ -6,6 +6,7 @@
       "contains": "tech"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts.",
   "description": "A sixth tech contact added to a domain with five: the limit holds for the domain, not the command.",
   "steps": [
     {

@@ -5,6 +5,7 @@
       "contains": "mx"
     }
   },
+  "comment": "Skipped on epp-docker: EPP has no MX records of the domain.",
   "description": "An MX record the registry serves itself, read back. MTEST needs the exchange to resolve.",
   "steps": [
     {

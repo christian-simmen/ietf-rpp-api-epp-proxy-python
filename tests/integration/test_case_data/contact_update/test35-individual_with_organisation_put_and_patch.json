@@ -2,6 +2,7 @@
   "when": {
     "profile.contact.kind.supported": true
   },
+  "comment": "Skipped on epp-docker: an EPP contact has no kind (individual or organisation).",
   "test_id": "test35-individual_with_organisation_put_and_patch",
   "steps": [
     {

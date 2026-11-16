@@ -3,6 +3,7 @@
   "when": {
     "env.contact.phone.subscriber.min_length": 4
   },
+  "comment": "Skipped on epp-docker: the EPP test server takes a subscriber number of fewer than 4 digits.",
   "description": "RRI needs at least 4 digits after the country code.",
   "steps": [
     {

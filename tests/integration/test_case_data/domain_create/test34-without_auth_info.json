@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.registrant.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI requires a holder, so a domain cannot be without a registrant. Review: registrant.min_count stands in for 'authInfo is required at create', which RRI does not require; the fact named is not the subject.",
   "description": "The data objects allow a domain without authInfo (0-1); RFC 5731 requires one at create, which the registry refuses as a missing parameter.",
   "steps": [
     {

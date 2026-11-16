@@ -4,6 +4,7 @@
   "when": {
     "env.bugs.over_max_length_cut": false
   },
+  "comment": "Skipped on epp-docker: the EPP test server stores a value longer than its column cut instead of refusing it (pawel-kow/epp#21, pawel-kow/epp#31).",
   "description": "A name of 256 characters is over what RFC 5733 and RRI hold; a server that cuts it instead is a defect.",
   "steps": [
     {

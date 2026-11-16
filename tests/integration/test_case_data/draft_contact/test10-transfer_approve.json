@@ -7,6 +7,7 @@
       "contains": "approve"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no contact transfer.",
   "test_id": "test10-transfer_approve",
   "steps": [
     {

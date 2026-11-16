@@ -3,6 +3,7 @@
   "when": {
     "env.contact.street.max_count": 3
   },
+  "comment": "Skipped on rri-mtest: MTEST's limit of street lines is not known (null), and the 501 is the EPP Compatibility Profile's.",
   "description": "Four street lines, over the three of the EPP Compatibility Profile: 501 (spec-issues.md).",
   "steps": [
     {

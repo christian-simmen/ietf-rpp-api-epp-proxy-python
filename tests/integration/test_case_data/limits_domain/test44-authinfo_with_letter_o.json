@@ -3,6 +3,7 @@
   "when": {
     "env.domainName.authInfo.ambiguous_supported": false
   },
+  "comment": "Skipped on epp-docker: the EPP test server takes O, I, l, o, 0 and 1 in an authInfo.",
   "description": "RRI takes no O, I, l, o, 0 or 1 in an authInfo.",
   "steps": [
     {

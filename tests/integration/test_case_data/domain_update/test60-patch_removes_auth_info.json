@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.authInfo.read_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI does not show a domain's authInfo (it holds only its hash), so the case cannot read it back.",
   "description": "authInfo is 0-1: a PATCH may remove it (RFC 5731 domain:null).",
   "steps": [
     {

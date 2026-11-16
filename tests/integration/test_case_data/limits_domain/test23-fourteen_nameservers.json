@@ -5,6 +5,7 @@
       "contains": "host"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "description": "Fourteen nameservers at create.",
   "steps": [
     {

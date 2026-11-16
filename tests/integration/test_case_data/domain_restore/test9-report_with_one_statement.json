@@ -2,6 +2,7 @@
   "when": {
     "profile.domainName.processes.restore.report_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report.",
   "test_id": "test9-report_with_one_statement",
   "steps": [
     {

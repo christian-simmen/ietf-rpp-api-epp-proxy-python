@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain.",
   "description": "A domain holds every client status at once (data-objects §9.3).",
   "steps": [
     {

@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.localization.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI holds no localized form of a contact.",
   "description": "Two localizations, more than the backend holds: 501 (spec-issues.md).",
   "steps": [
     {

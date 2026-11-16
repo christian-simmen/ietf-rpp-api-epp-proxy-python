@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.org.person_name_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI holds no person name on an organisation contact.",
   "description": "A PATCH changes the name of the organization.",
   "steps": [
     {

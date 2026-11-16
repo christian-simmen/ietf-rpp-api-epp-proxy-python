@@ -5,6 +5,7 @@
       "contains": "tech"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts.",
   "description": "Five tech contacts, the most the EPP test server takes per role.",
   "steps": [
     {

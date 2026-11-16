@@ -5,6 +5,7 @@
       "min": 1
     }
   },
+  "comment": "Skipped on epp-docker: the EPP backend takes a contact without a phone number.",
   "description": "RRI needs a phone number.",
   "steps": [
     {

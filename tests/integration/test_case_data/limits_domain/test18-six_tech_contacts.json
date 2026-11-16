@@ -5,6 +5,7 @@
       "contains": "tech"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts.",
   "description": "Six tech contacts at create.",
   "steps": [
     {

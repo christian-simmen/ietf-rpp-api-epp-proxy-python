@@ -7,6 +7,7 @@
       "min": 1
     }
   },
+  "comment": "Skipped on epp-docker: EPP has no General Request or Abuse contact of a domain.",
   "test_id": "test37-remove_and_add_a_request_contact",
   "description": "A request contact of a domain is removed and added again: the counterpart of the admin and tech cases (test4, test9) for the members of RRI. A second removal answers 422, which proves the first.",
   "steps": [

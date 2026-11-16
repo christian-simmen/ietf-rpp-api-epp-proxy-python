@@ -228,6 +228,9 @@ Facts are in block style, without `{}`.
 | A step | `"when"` in the step | the step is left out. A step with `when` cannot `capture` |
 | Any value of a step | `{"select": [{"when": …, "then": …}, …, {"then": …}]}` | the `then` of the first entry that holds; the last entry is the default. An entry `{"omit": true}` instead of `then` leaves the member or list element out |
 
+A group or case `when` that skips it somewhere has a `"comment"` next to it, which says in which environment it is
+skipped and why, in terms of the backend; the runner ignores it.
+
 Selectors are resolved first, then the placeholders, then the captures. A selector key that names no fact, in any
 known environment, fails the case at load. A skip names the facts that did not hold. A case whose selectors skip it
 in every known environment fails, because it never runs. `any_of` stays for what the protocol leaves to the server,

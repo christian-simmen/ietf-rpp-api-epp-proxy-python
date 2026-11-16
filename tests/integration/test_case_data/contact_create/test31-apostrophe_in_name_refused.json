@@ -3,6 +3,7 @@
   "when": {
     "env.contact.name.charset_restricted": true
   },
+  "comment": "Skipped on rri-mtest: MTEST does not restrict the characters of a contact name. Test44 is its twin.",
   "description": "An apostrophe in a name, which US-ASCII allows; the server takes fewer characters (env.limit_contact_name_charset_restricted).",
   "steps": [
     {

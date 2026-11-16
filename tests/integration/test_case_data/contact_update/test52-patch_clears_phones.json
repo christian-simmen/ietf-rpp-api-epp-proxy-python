@@ -4,6 +4,7 @@
     "profile.contact.phone.min_count": 0,
     "profile.contact.fax.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI requires a phone number; RRI has no fax number.",
   "description": "A PATCH removes every phone.",
   "steps": [
     {

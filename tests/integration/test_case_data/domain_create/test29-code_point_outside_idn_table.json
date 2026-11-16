@@ -5,6 +5,7 @@
     },
     "env.domainName.name.lgr.latn_enye_supported": false
   },
+  "comment": "Skipped on rri-mtest: DENIC's IDN repertoire holds ñ, so the code point is not outside the table there. Review: No case covers a code point outside DENIC's repertoire on MTEST.",
   "test_id": "test29-code_point_outside_idn_table",
   "steps": [
     {

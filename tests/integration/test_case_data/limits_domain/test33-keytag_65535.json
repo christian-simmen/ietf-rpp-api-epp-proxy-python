@@ -5,6 +5,7 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "description": "keyTag 65535, the largest 16-bit value (RFC 4034 §5.1).",
   "steps": [
     {

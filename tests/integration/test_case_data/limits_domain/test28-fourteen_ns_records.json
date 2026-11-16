@@ -8,6 +8,7 @@
       }
     }
   },
+  "comment": "Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33).",
   "description": "Fourteen name servers, over the most RRI takes.",
   "steps": [
     {

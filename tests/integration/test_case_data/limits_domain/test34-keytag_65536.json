@@ -5,6 +5,7 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "description": "keyTag 65536 does not fit 16 bits (RFC 4034 §5.1).",
   "steps": [
     {

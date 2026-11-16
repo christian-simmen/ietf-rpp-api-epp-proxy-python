@@ -5,6 +5,7 @@
       "not": null
     }
   },
+  "comment": "Skipped on epp-docker: it waits for domainName.processes.create.failed_dns_period, and the server has no such transition; the EPP test server does not check the name servers of a new domain. Skipped on rri-mtest: it waits for domainName.processes.create.failed_dns_period, which needs 95040 s, the run waits at most 600 s (RPP_TEST_MAX_WAIT).",
   "test_id": "test44-failed_domain_deleted_by_the_registry",
   "description": "A domain whose name servers fail the registry's check, and that nobody fixes, is deleted by the registry when its failed period ends, into its redemption period (rri-5.0-reference §5.2: a failed domain must be fixed or is deleted). Not run yet: it needs RPP_TEST_MAX_WAIT of a day or more.",
   "steps": [

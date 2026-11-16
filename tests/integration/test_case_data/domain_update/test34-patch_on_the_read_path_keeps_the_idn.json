@@ -5,6 +5,7 @@
       "contains": "latn-1.0"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain. Review: The status only forces the read path; no case covers keeping the IDN on the read path on RRI.",
   "test_id": "test34-patch_on_the_read_path_keeps_the_idn",
   "steps": [
     {

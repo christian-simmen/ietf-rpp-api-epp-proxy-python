@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a contact.",
   "description": "A contact holds every client status at once (data-objects §9.5).",
   "steps": [
     {

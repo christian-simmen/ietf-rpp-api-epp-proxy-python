@@ -3,6 +3,7 @@
   "when": {
     "env.contact.postcode.lower_case_supported": false
   },
+  "comment": "Skipped on rri-mtest: MTEST takes a postcode in lower case; test42 is its twin.",
   "description": "A British postcode in lower case: the drafts put no case on it, the server refuses it (env.limit_postcode_lower_case_refused).",
   "steps": [
     {

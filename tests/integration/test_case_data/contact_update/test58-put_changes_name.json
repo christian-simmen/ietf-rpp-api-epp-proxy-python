@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.name.changeable": true
   },
+  "comment": "Skipped on rri-mtest: RRI cannot change a contact's name.",
   "description": "A PUT changes the name.",
   "steps": [
     {

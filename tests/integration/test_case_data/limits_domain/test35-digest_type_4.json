@@ -5,6 +5,7 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "description": "SHA-384 (digest type 4, RFC 6605): a server may support it; this one refuses it by policy, as its digest column holds 64 characters.",
   "steps": [
     {

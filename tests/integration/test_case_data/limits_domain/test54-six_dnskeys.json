@@ -10,6 +10,7 @@
       }
     }
   },
+  "comment": "Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33).",
   "description": "Six DNSKEY records: MTEST refuses them (66300068807, too many dnskeys).",
   "steps": [
     {

@@ -5,6 +5,7 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "description": "A PATCH removes one of two DS records.",
   "steps": [
     {

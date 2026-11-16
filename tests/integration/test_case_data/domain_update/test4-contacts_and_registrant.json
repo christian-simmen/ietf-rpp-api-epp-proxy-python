@@ -4,6 +4,7 @@
       "contains": "admin"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts. Test37 is the counterpart for RRI's request contacts.",
   "test_id": "test4-contacts_and_registrant",
   "steps": [
     {

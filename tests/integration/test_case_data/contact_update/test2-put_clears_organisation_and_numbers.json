@@ -4,6 +4,7 @@
     "profile.contact.phone.min_count": 0,
     "profile.contact.org.person_name_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no fax number; RRI requires a phone number; RRI holds no person name on an organisation contact.",
   "test_id": "test2-put_clears_organisation_and_numbers",
   "steps": [
     {

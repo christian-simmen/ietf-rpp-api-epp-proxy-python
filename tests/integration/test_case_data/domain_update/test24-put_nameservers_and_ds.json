@@ -7,6 +7,7 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "test_id": "test24-put_nameservers_and_ds",
   "steps": [
     {

@@ -4,6 +4,7 @@
   "when": {
     "env.contact.street.min_count": 1
   },
+  "comment": "Skipped on epp-docker: the EPP test server takes an address without a street line.",
   "description": "RRI needs at least one address line.",
   "steps": [
     {

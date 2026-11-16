@@ -5,6 +5,7 @@
       "contains": "aaaa"
     }
   },
+  "comment": "Skipped on epp-docker: EPP has no address records of the domain itself, only ns, ds and dnskey.",
   "description": "A PUT replaces the a record by an aaaa record.",
   "steps": [
     {

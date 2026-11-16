@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.region.supported": true
   },
+  "comment": "Skipped on rri-mtest: an RRI address has no region.",
   "description": "A PUT without the region removes it.",
   "steps": [
     {

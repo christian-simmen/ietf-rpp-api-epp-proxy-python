@@ -7,6 +7,7 @@
       "contains": "admin"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI has no admin, tech or billing contacts.",
   "test_id": "test17-put_replaces_nameservers_and_contacts",
   "steps": [
     {

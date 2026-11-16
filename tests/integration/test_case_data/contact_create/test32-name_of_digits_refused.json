@@ -3,6 +3,7 @@
   "when": {
     "env.contact.name.digits_only_supported": false
   },
+  "comment": "Skipped on epp-docker: the EPP test server takes a name of digits only; test45 is its twin.",
   "description": "A name of digits only: the server checks a name for completeness (env.limit_contact_name_completeness).",
   "steps": [
     {

@@ -2,6 +2,7 @@
   "when": {
     "profile.contact.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a contact. Review: The status is only the vehicle of a PATCH on a missing contact; another operation would let RRI run it too.",
   "test_id": "test28-patch_missing",
   "steps": [
     {

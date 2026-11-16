@@ -4,6 +4,7 @@
   "when": {
     "env.contact.city.max_length": 80
   },
+  "comment": "Skipped on epp-docker: the EPP test server takes a city of up to 255 characters, so 81 is no limit there.",
   "description": "A city of 81 characters, over the most RRI holds.",
   "steps": [
     {

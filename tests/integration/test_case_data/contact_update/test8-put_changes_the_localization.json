@@ -2,6 +2,7 @@
   "when": {
     "profile.contact.localization.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI holds no localized form of a contact.",
   "test_id": "test8-put_changes_the_localization",
   "steps": [
     {

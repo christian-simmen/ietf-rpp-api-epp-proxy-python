@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.authInfo.supported": true
   },
+  "comment": "Skipped on rri-mtest: an RRI contact has no authInfo.",
   "description": "A contact authInfo of 5 characters, under the 6 of the EPP test server.",
   "steps": [
     {

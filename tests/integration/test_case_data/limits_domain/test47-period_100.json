@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.period.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no registration period (a domain runs until it is deleted).",
   "description": "A period of 100 is over the 99 of data-objects §9.1.",
   "steps": [
     {

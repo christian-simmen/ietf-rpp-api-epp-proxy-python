@@ -4,6 +4,7 @@
     "profile.contact.region.supported": true,
     "env.contact.region.lower_case_supported": false
   },
+  "comment": "Skipped on rri-mtest: an RRI address has no region.",
   "description": "A region in lower case: the drafts put no case on it, the server refuses it (env.limit_region_lower_case_refused).",
   "steps": [
     {

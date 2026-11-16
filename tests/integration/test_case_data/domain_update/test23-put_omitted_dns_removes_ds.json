@@ -4,6 +4,7 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "test_id": "test23-put_omitted_dns_removes_ds",
   "steps": [
     {

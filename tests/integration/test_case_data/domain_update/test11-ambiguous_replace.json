@@ -4,6 +4,7 @@
       "contains": "admin"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts.",
   "test_id": "test11-ambiguous_replace",
   "steps": [
     {

@@ -4,6 +4,7 @@
     "wait.domainName.processes.restore.pending_period": true,
     "profile.domainName.processes.restore.report_supported": true
   },
+  "comment": "Skipped on rri-mtest: it waits for domainName.processes.restore.pending_period, and the server has no such transition; RRI's RESTORE is one step, without a restore report.",
   "test_id": "test13-pending_restore_without_report_ends",
   "description": "A restore request without a report holds the domain in pendingRestore; while it lasts a second request is refused, after it the domain is back in its redemption period and can be requested again (RFC 3915 §3.2).",
   "steps": [

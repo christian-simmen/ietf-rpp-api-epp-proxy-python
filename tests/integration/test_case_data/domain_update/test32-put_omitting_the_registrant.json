@@ -2,6 +2,7 @@
   "when": {
     "profile.domainName.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain. Review: The status only forces the read path; registrant.min_count is the fact that keeps the case off RRI.",
   "test_id": "test32-put_omitting_the_registrant",
   "steps": [
     {

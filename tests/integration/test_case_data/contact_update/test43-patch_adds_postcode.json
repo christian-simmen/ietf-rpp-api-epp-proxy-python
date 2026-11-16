@@ -3,6 +3,7 @@
   "when": {
     "env.contact.postcode.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: MTEST requires a postcode in an address.",
   "description": "A PATCH adds a postcode to an address without one.",
   "steps": [
     {

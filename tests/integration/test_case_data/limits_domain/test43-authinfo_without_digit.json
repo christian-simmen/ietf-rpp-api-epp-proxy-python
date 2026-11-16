@@ -3,6 +3,7 @@
   "when": {
     "env.domainName.authInfo.upper_and_digit_required": true
   },
+  "comment": "Skipped on rri-mtest: an RRI AuthInfo needs no upper case letter or digit.",
   "description": "The EPP test server needs a digit in an authInfo.",
   "steps": [
     {

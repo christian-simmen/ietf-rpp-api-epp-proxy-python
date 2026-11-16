@@ -6,6 +6,7 @@
       "contains": "host"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "description": "A fourteenth nameserver added to a domain with thirteen: the limit holds for the domain, not the command.",
   "steps": [
     {

@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain.",
   "description": "The data objects allow a status at create, which an EPP domain create has no element for (RFC 5731).",
   "steps": [
     {

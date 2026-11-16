@@ -5,6 +5,7 @@
       "min": 2
     }
   },
+  "comment": "Skipped on epp-docker: EPP holds one registrant; several holders are RRI's.",
   "description": "A PATCH removes the second of two holders.",
   "steps": [
     {

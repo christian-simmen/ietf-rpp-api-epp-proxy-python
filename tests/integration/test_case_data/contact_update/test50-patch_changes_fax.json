@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.fax.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no fax number.",
   "description": "A PATCH changes the fax number.",
   "steps": [
     {

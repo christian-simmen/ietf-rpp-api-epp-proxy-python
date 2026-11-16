@@ -4,6 +4,7 @@
     "wait.domainName.processes.delete.redemption_period": true,
     "wait.domainName.processes.delete.pending_delete_period": true
   },
+  "comment": "Skipped on rri-mtest: it waits for domainName.processes.delete.redemption_period, which needs 150480 s, the run waits at most 600 s (RPP_TEST_MAX_WAIT); it waits for domainName.processes.delete.pending_delete_period, which needs 63360 s, the run waits at most 600 s (RPP_TEST_MAX_WAIT).",
   "test_id": "test8-purged_after_the_redemption_period",
   "description": "A deleted domain can no longer be restored once its redemption period ends (pendingDelete), and is purged after its pending delete period (RFC 3915 §3.1).",
   "steps": [

@@ -5,6 +5,7 @@
       "not": null
     }
   },
+  "comment": "Skipped on epp-docker: the EPP test server does not check the name servers of a new domain.",
   "description": "A create whose name servers do not serve the domain succeeds where the registry checks them after the create, and the domain reads with the status of a failed check (RRI `failed`, with a `due`). Only for a registry that checks; every other case gives DNS data that passes.",
   "steps": [
     {

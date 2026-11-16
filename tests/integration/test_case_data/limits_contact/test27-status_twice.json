@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a contact.",
   "description": "The same client status added twice in one PATCH: the proxy sends the end state, one status.",
   "steps": [
     {

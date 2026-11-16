@@ -3,6 +3,7 @@
   "when": {
     "profile.contact.phone.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI requires a phone number.",
   "description": "A PATCH adds a voice number to a contact without one.",
   "steps": [
     {

@@ -3,6 +3,7 @@
   "when": {
     "env.bugs.over_max_length_cut": false
   },
+  "comment": "Skipped on epp-docker: the EPP test server stores a value longer than its column cut instead of refusing it (pawel-kow/epp#21, pawel-kow/epp#31).",
   "description": "The profile puts no limit on the extension; it is read back whole.",
   "steps": [
     {

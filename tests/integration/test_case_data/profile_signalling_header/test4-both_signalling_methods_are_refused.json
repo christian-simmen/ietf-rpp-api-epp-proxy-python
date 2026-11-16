@@ -7,6 +7,7 @@
   "when": {
     "env.profile_signalling": "header"
   },
+  "comment": "Skipped on rri-mtest: MTEST's config signals the profile by media type; the twin in profile_signalling_media_type/ covers it.",
   "steps": [
     {
       "request": {

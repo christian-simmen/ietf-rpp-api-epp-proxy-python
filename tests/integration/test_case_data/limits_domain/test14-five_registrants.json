@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.registrant.max_count": 5
   },
+  "comment": "Skipped on epp-docker: EPP holds one registrant; several holders are RRI's.",
   "description": "Five holders, the most RRI takes.",
   "steps": [
     {

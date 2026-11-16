@@ -4,6 +4,7 @@
       "contains": "reject"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI's transfer (CHPROV) is immediate, without a pending transfer to query, approve, cancel or reject.",
   "test_id": "test15-transfer_reject",
   "steps": [
     {

@@ -3,6 +3,7 @@
   "when": {
     "env.contact.postcode.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: MTEST requires a postcode in an address.",
   "description": "A PUT without the postcode removes it.",
   "steps": [
     {

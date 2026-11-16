@@ -3,6 +3,7 @@
   "when": {
     "env.contact.postcode.format_by_country": true
   },
+  "comment": "Skipped on epp-docker: the EPP test server does not check a postcode by country; test43 is its twin.",
   "description": "A German postcode of 4 digits: the server checks the postcode by country (env.limit_postcode_by_country).",
   "steps": [
     {

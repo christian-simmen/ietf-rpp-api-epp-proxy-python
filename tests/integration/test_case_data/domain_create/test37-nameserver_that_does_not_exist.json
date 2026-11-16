@@ -5,6 +5,7 @@
       "contains": "host"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "description": "A host object that does not exist is refused by the registry.",
   "steps": [
     {

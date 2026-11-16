@@ -2,6 +2,7 @@
   "when": {
     "profile.domainName.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain.",
   "test_id": "test13-replace_status_empty",
   "steps": [
     {

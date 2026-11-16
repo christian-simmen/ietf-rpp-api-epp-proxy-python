@@ -3,6 +3,7 @@
   "when": {
     "env.contact.postcode.format_by_country": false
   },
+  "comment": "Skipped on rri-mtest: MTEST checks a postcode by country; test30 is its twin.",
   "description": "A German postcode of 4 digits: the server does not check the postcode by country.",
   "steps": [
     {

@@ -5,6 +5,7 @@
       "contains": "request"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no registration period (a domain runs until it is deleted).",
   "test_id": "test11-transfer_request",
   "steps": [
     {

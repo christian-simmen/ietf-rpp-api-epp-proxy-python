@@ -5,6 +5,7 @@
       "min": 1
     }
   },
+  "comment": "Skipped on epp-docker: EPP has no General Request or Abuse contact of a domain.",
   "description": "RRI holds one abuse contact, which the member `abuse` holds: a list of two is refused.",
   "steps": [
     {

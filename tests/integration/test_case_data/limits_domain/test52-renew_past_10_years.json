@@ -3,6 +3,7 @@
   "when": {
     "profile.domainName.processes.renew.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no renew.",
   "description": "A renewal that puts the expiry more than 10 years ahead.",
   "steps": [
     {
