@@ -6,7 +6,7 @@
 - Status: accepted by the maintainer. Corrected while drafting the guidelines proposal: the Preset Schema also composes
   in place an extension sub-schema that a profile narrows (C6, Preset Schema)
 - Copied: the EPP Compatibility Profile elements of this proposal are also in the new draft proposed in
-  [epp-compatibility.md](epp-compatibility.md). They stay here until that draft is adopted
+  [draft-kowalik-rpp-epp-compatibility.md](draft-kowalik-rpp-epp-compatibility.md). They stay here until that draft is adopted
 
 This proposal defines the JSON side of the separation of extensions, profiles and presets. An extension schema only
 adds, a profile schema only narrows, and the schema of a preset at a server composes both in one self-contained JSON

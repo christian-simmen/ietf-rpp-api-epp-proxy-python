@@ -1,47 +1,3 @@
-# Proposal for a new draft: RPP EPP Compatibility Profile
-
-- Issue: #174 (this repository)
-- Sources: draft-ietf-rpp-data-objects-02 (upstream commit `5867f10`), draft-ietf-rpp-json-01 (`07068fc`),
-  draft-ietf-rpp-core (the revision of [core.md](core.md)), and the accepted proposals
-  [data-objects.md](data-objects.md), [core.md](core.md) and [json.md](json.md)
-- Builds on: [extension-guidelines.md](extension-guidelines.md) (in review), whose Profile Specification Format this
-  draft follows
-- Status: in review
-
-This proposal is a new draft that defines the EPP Compatibility Profile on its own, as a profile in the sense of the
-accepted proposals. It collects every constraint marked "In EPP Compatibility Profile" in data-objects, json and core,
-the EPP Compatibility Profile Schema of the json proposal, and the registrations of the profile, its Profile Schema and
-the preset `urn:ietf:params:rpp:preset:epp-compatible`.
-
-The constraints are copied, not moved. The three drafts and their proposals keep them as they are. Once this draft is
-adopted, a later change removes them from the three drafts and points to this one.
-
-## Review Points
-
-- RE1. The draft name `draft-kowalik-rpp-epp-compatibility` and its author are placeholders for the maintainer to set.
-- RE2. The draft follows the Profile Specification Format of the guidelines proposal. It adds two sections the format
-  does not list: "Narrowed Primitive Data Types" (the upper-case `T` and `Z` of a Timestamp) and "Correspondence with
-  EPP", which collects the informative statements that map an RPP construct to an EPP construct.
-- RE3. The constraints are sorted into the format by their kind of narrowing: what a client sends or a server returns
-  goes to Narrowed Data Objects and Narrowed Process Objects, and what a server MUST support (record types, RDATA
-  structures) goes to Server Requirements.
-- RE4. Three message queue rules of core (the `type` query parameter is ignored, a message stays `queued`, readers
-  receive the same message) change the behaviour of Retrieve rather than narrow it. They are copied as they are, under
-  the Message Data Object, and need a decision: keep them in the profile as a narrowing of the server behaviour, or
-  move them to an extension.
-- RE5. The Profile Schema is copied unchanged from the json proposal (three constraints). JSON Schema could express
-  more of them, for example the forbidden `reason` of the Transfer Reject operation or the required elements of a
-  contact. They are listed in "Constraints Not Expressed in JSON Schema" for now.
-- RE6. Examples cover the three constraints of the Profile Schema and the Problem Detail response from the core
-  proposal. The guidelines proposal requires an example for every constraint. Examples for the prose constraints are
-  a TODO.
-- RE7. The registrations of the profile, of its Profile Schema and of the preset `urn:ietf:params:rpp:preset:epp-compatible`
-  are in this draft and, until the removal, also in data-objects and json. IANA would receive them once, from the
-  draft that is published first.
-
-## Draft text
-
-~~~~markdown
 %%%
 title = "RESTful Provisioning Protocol (RPP) EPP Compatibility Profile"
 abbrev = "RPP EPP Compatibility Profile"
@@ -50,6 +6,7 @@ workgroup = "Network Working Group"
 submissiontype = "IETF"
 keyword = ["RPP", "EPP", "provisioning", "registry", "profile"]
 TocDepth = 4
+date = 2026-11-15
 
 [seriesInfo]
 name = "Internet-Draft"
@@ -65,6 +22,15 @@ organization = "DENIC"
   [author.address]
   email = "pawel.kowalik@denic.de"
   uri = "https://denic.de/"
+
+[[author]]
+initials="M."
+surname="Wullink"
+fullname="Maarten Wullink"
+organization = "SIDN Labs"
+  [author.address]
+  email = "maarten.wullink@sidn.nl"
+  uri = "https://sidn.nl/"
 
 %%%
 
@@ -84,7 +50,7 @@ A server that provisions a repository through RPP and EPP concurrently MUST incl
 
 This document also defines the EPP compatible preset (#epp-compatible-preset), a standardised preset for clients that work with such servers.
 
-A> The constraints of this document are also stated in [@!I-D.ietf-rpp-data-objects], [@!I-D.ietf-rpp-json] and [@!I-D.ietf-rpp-core], marked "In EPP Compatibility Profile". They are to be removed from those documents, which will then refer to this one.
+A> TODO: The constraints of this document are also stated in [@!I-D.ietf-rpp-data-objects], [@!I-D.ietf-rpp-json] and [@!I-D.ietf-rpp-core], marked "In EPP Compatibility Profile". They are to be removed from those documents, which will then refer to this one.
 
 ## Conventions and Terminology
 
@@ -198,6 +164,7 @@ None.
     * In the JSON representation [@!I-D.ietf-rpp-json], `card.name.full` MUST be provided.
     * In the JSON representation, `card.addresses.addr` MUST be provided, containing at least `countryCode` and a `"locality"` kind component.
     * In the JSON representation, `card.emails.email.address` MUST be provided.
+    * At most one email address, at most one voice telephone number and at most one facsimile telephone number are provided, as defined in [@!RFC5733]. In the JSON representation, the `emails` map contains only the key `email`, and the `phones` map contains only the keys `voice` and `fax`.
 
 ### Operations
 
@@ -350,7 +317,13 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
     "urn:ietf:params:rpp:schema:json-1.0#/$defs/domainName.create":
       "#/$defs/profile.domainNameContacts",
     "urn:ietf:params:rpp:schema:json-1.0#/$defs/domainName.read":
-      "#/$defs/profile.domainNameContacts"
+      "#/$defs/profile.domainNameContacts",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/contact.create":
+      "#/$defs/profile.contactCreate",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/contact.read":
+      "#/$defs/profile.contact",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/contact.update":
+      "#/$defs/profile.contact"
   },
   "$defs": {
     "profile.restoreReport": {
@@ -372,10 +345,92 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
           }
         }
       }
+    },
+    "profile.contactCreate": {
+      "$ref": "#/$defs/profile.contact",
+      "required": ["authInfo"]
+    },
+    "profile.contact": {
+      "properties": {
+        "contactInfo": { "$ref": "#/$defs/profile.card" }
+      }
+    },
+    "profile.card": {
+      "required": ["name", "addresses", "emails"],
+      "properties": {
+        "name": {
+          "required": ["full"],
+          "properties": {
+            "full": { "$ref": "#/$defs/profile.ascii" }
+          }
+        },
+        "organizations": {
+          "additionalProperties": {
+            "properties": {
+              "name": { "$ref": "#/$defs/profile.ascii" }
+            }
+          }
+        },
+        "addresses": {
+          "required": ["addr"],
+          "additionalProperties": {
+            "required": ["countryCode", "components"],
+            "properties": {
+              "components": {
+                "items": {
+                  "properties": {
+                    "value": { "$ref": "#/$defs/profile.ascii" }
+                  }
+                },
+                "allOf": [
+                  {
+                    "contains": {
+                      "properties": { "kind": { "const": "locality" } }
+                    },
+                    "minContains": 1
+                  },
+                  {
+                    "contains": {
+                      "properties": { "kind": { "const": "name" } }
+                    },
+                    "minContains": 0,
+                    "maxContains": 3
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "emails": {
+          "required": ["email"],
+          "propertyNames": { "const": "email" },
+          "additionalProperties": {
+            "properties": {
+              "address": { "$ref": "#/$defs/profile.ascii" }
+            }
+          }
+        },
+        "phones": {
+          "propertyNames": { "enum": ["voice", "fax"] },
+          "additionalProperties": {
+            "properties": {
+              "number": {
+                "pattern": "^tel:\\+[0-9]{1,3}\\.[0-9]{1,14}(;ext=[0-9]+)?$"
+              }
+            }
+          }
+        },
+        "localizations": { "maxProperties": 1 }
+      }
+    },
+    "profile.ascii": {
+      "pattern": "^[\\x20-\\x7E]*$"
     }
   }
 }
 ```
+
+The narrowings of the maps of the JSContact Card constrain every entry of a map through `additionalProperties`, and name the keys of a map only in `required` and `propertyNames`. The Profile Schema therefore declares no property that the Card does not declare [@!I-D.ietf-rpp-json]. The pattern `profile.ascii` restricts the internationalised form to printable US-ASCII characters. The localised form, in `localizations`, is not restricted.
 
 # Constraints Not Expressed in JSON Schema
 
@@ -383,7 +438,7 @@ The following constraints are not expressed in the Profile Schema and MUST be en
 
 * The upper-case "T" and "Z" of a Timestamp, see (#timestamp).
 * The `method` of the Authorisation Information Object for password-based authorisation, see (#authorisation-information-object).
-* The constraints on the Contact Information of the Contact Data Object and the data elements required in its Create operation, see (#contact-data-object).
+* The syntax of email addresses defined in [@!RFC5322], the country code of a telephone number defined in ITU-T E.164, and the country code of a postal address specified in ISO 3166-1, see (#contact-data-object).
 * The constraints on the DNS Data of the Host Data Object and the IP addresses of its Create operation, see (#host-data-object).
 * The limitations of the retrieval of messages, see (#message-data-object).
 * The forbidden `reason` of the Reject operation of the Transfer Process Object, see (#transfer-process-object).
@@ -450,6 +505,44 @@ The following Domain Name Data Object in a Create request is valid without the p
 ```
 
 The same request with the label `admin` is valid with the profile.
+
+The following Contact Data Object in a Create request is valid with the profile:
+
+```json
+{
+  "@type": "contact",
+  "id": "JD-1234",
+  "contactInfo": {
+    "@type": "Card",
+    "version": "2.0",
+    "name": { "full": "John Doe" },
+    "addresses": {
+      "addr": {
+        "components": [
+          { "kind": "name", "value": "123 Example Dr., Suite 100" },
+          { "kind": "locality", "value": "Dulles" },
+          { "kind": "region", "value": "VA" },
+          { "kind": "postcode", "value": "20166-6503" }
+        ],
+        "countryCode": "US"
+      }
+    },
+    "phones": {
+      "voice": { "number": "tel:+1.7035555555" }
+    },
+    "emails": {
+      "email": { "address": "jdoe@example.example" }
+    }
+  },
+  "authInfo": {
+    "@type": "authInfo",
+    "method": "authinfo",
+    "authdata": "2fooBAR"
+  }
+}
+```
+
+The same request is valid without the profile, and invalid with the profile, in each of the following cases: `emails` contains a second entry `email-1`, `name` is missing, the address has no `locality` component, the name contains a character outside US-ASCII such as `"J\u00f6rg Doe"`, the telephone number is `tel:+1-703-555-5555`, or `authInfo` is missing.
 
 A> TODO: examples for the constraints that are not expressed in JSON Schema.
 
@@ -520,13 +613,9 @@ A> The registrations above are also requested by [@!I-D.ietf-rpp-data-objects] a
 
 The EPP Compatibility Profile only narrows RPP. It does not weaken the authentication and authorisation that [@!I-D.ietf-rpp-core] and [@!I-D.ietf-rpp-data-objects] require. A server enforces the constraints of the profile on every request, whether or not the client has validated the request against the Preset Schema.
 
-Under the profile, a host object carries no authorisation information, so any client can read the full host object, as in [@!RFC5732].
-
 # Privacy Considerations
 
 The profile requires a contact to carry a name, an address and an email address, as EPP [@!RFC5733] does.
-
-**TODO:**
 
 {backmatter}
 
@@ -535,4 +624,3 @@ The profile requires a contact to carry a name, an address and an email address,
 ## draft-kowalik-rpp-epp-compatibility-00
 
 * Initial version, with the constraints marked "In EPP Compatibility Profile" in draft-ietf-rpp-data-objects-02, draft-ietf-rpp-json-01 and draft-ietf-rpp-core, the EPP Compatibility Profile Schema, and the EPP compatible preset.
-~~~~

@@ -5,7 +5,7 @@
 - Status: accepted by the maintainer, with the maintainer's edits. Amended after review of the core proposal: the
   schema of a preset is a Direct Access data element (R6), with C3a, C3b and the `schema` element added
 - Copied: the EPP Compatibility Profile elements of this proposal are also in the new draft proposed in
-  [epp-compatibility.md](epp-compatibility.md). They stay here until that draft is adopted
+  [draft-kowalik-rpp-epp-compatibility.md](draft-kowalik-rpp-epp-compatibility.md). They stay here until that draft is adopted
 
 This proposal separates the current notion of a profile into three concepts: the extension, which adds functionality,
 the profile, which narrows, and the preset, which a client signals and which names a set of extensions and profiles.
