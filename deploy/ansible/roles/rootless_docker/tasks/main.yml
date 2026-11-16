@@ -1,24 +1,12 @@
 ---
-- name: Check the platform
-  ansible.builtin.assert:
-    that:
-      - ansible_facts['distribution'] == 'Ubuntu'
-      - ansible_facts['distribution_major_version'] is version('22', '>=')
-    fail_msg: The deployment is made for Ubuntu 22.04 or later.
+- name: Look at the host before changing it
+  ansible.builtin.import_tasks: preflight.yml
+  tags: [preflight]
 
-# A host with Docker (the root daemon of nginx) often has the repository already, in a file of its own with another
-# key file. apt refuses two definitions of one source with different keys, so the role then uses that one, and removes
-# its own definition if an earlier run added it (before any apt task, which would fail on the conflict).
-- name: Find other definitions of the Docker CE repository
-  ansible.builtin.find:
-    paths: [/etc/apt/sources.list.d]
-    patterns: ["*.list", "*.sources"]
-    contains: '.*download\.docker\.com.*'
-    excludes: [docker.sources]
-  register: rootless_docker_other_repos
-
-- name: Remove the role's definition where another exists
-  when: rootless_docker_other_repos.matched > 0
+# An earlier version of the role added docker.sources beside the host's own definition with another key, which apt
+# refuses (two keys for one source). Removed only in that state, before any apt task.
+- name: Remove a docker.sources that conflicts with the host's definition
+  when: rootless_docker_repo_conflict | bool
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
@@ -31,8 +19,9 @@
     update_cache: true
     cache_valid_time: 3600
 
+# Only on a host without Docker CE and without a definition of its repository.
 - name: Add the Docker CE repository
-  when: rootless_docker_install_packages | bool and rootless_docker_other_repos.matched == 0
+  when: rootless_docker_add_repository | bool
   ansible.builtin.deb822_repository:
     name: docker
     types: [deb]
@@ -42,6 +31,7 @@
     architectures: ["{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"]
     signed_by: https://download.docker.com/linux/ubuntu/gpg
 
+# Installs what is missing only: installed packages keep their version, so the root daemon is not upgraded or restarted.
 - name: Install Docker CE with its rootless extras
   when: rootless_docker_install_packages | bool
   ansible.builtin.apt:
@@ -53,7 +43,7 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
-    update_cache: true
+    update_cache: "{{ rootless_docker_add_repository | bool }}"
 
 - name: Check whether AppArmor restricts unprivileged user namespaces
   ansible.builtin.stat:
@@ -61,7 +51,7 @@
   register: rootless_docker_userns_restriction
 
 - name: Allow rootlesskit its user namespace
-  when: rootless_docker_apparmor_profile | bool and rootless_docker_userns_restriction.stat.exists
+  when: rootless_docker_write_profile | bool and rootless_docker_userns_restriction.stat.exists
   ansible.builtin.template:
     src: usr.bin.rootlesskit.j2
     dest: /etc/apparmor.d/usr.bin.rootlesskit
@@ -125,6 +115,7 @@
     mode: "0700"
 
 - name: Configure the rootless daemon
+  when: rootless_docker_manage_config | bool
   become: true
   become_user: "{{ rootless_docker_user }}"
   ansible.builtin.template:
@@ -132,6 +123,15 @@
     dest: "{{ rootless_docker_home }}/.config/docker/daemon.json"
     mode: "0600"
   notify: Restart rootless docker
+
+- name: Mark the configuration as the role's
+  when: rootless_docker_manage_config | bool
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.copy:
+    dest: "{{ rootless_docker_home }}/.config/docker/{{ rootless_docker_marker }}"
+    content: "daemon.json beside this file is written by deploy/ansible (role rootless_docker).\n"
+    mode: "0600"
 
 - name: Install the rootless daemon as a service of the user
   become: true

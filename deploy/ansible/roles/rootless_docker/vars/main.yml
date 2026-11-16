@@ -1,0 +1,5 @@
+---
+# The file the role leaves beside a daemon.json it made: a daemon.json without it is someone else's and is not changed.
+rootless_docker_marker: .managed-by-rpp-deploy
+# The line the role's AppArmor profile carries: a profile at its path without it is someone else's.
+rootless_docker_profile_marker: "Managed by the rpp deployment (role rootless_docker)"

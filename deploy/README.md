@@ -55,6 +55,32 @@ isn't installed yet, the playbook installs Docker CE, which also starts the root
 
 ## Deploying
 
+Run the checks first. They change nothing on the host, and print what the role found and what it will do:
+
+```bash
+ansible-playbook -i inventory/prod/hosts.yml site.yml --tags preflight --ask-vault-pass --ask-become-pass
+```
+
+The summary lists:
+- the Docker packages and the repository definitions;
+- the root daemon;
+- the rootless daemons of all users;
+- what happens to the deployment user and its `daemon.json`;
+- the AppArmor profile.
+
+The run stops if Ubuntu's `docker.io` is installed, or if a port of an instance is in use by a program other than the
+deployment user's daemon. The role changes only the deployment user's own daemon:
+- **Packages:** it installs only what is missing, and never upgrades. It adds the Docker CE repository only to a host
+  that has no definition of it.
+- **The deployment user's daemon:** if the user already has a rootless daemon whose `daemon.json` the role didn't
+  write, the role uses it as it is, with no new configuration and no restart. The role leaves a marker file
+  `.managed-by-rpp-deploy` beside a `daemon.json` it wrote.
+- **AppArmor:** it writes `/etc/apparmor.d/usr.bin.rootlesskit` only when no profile there or elsewhere already covers
+  rootlesskit, or when the role wrote the one there.
+- **Other users' rootless daemons:** it reads them, and never changes them.
+
+Then deploy:
+
 ```bash
 cd deploy/ansible
 cp -r inventory/example inventory/prod                    # inventory/* other than example is ignored by git

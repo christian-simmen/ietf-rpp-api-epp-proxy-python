@@ -1,35 +1,7 @@
 ---
-- name: Check the instances
-  ansible.builtin.assert:
-    that:
-      - rpp_proxy_instances | map(attribute='name') | unique | length == rpp_proxy_instances | length
-      - rpp_proxy_instances | map(attribute='port') | unique | length == rpp_proxy_instances | length
-    fail_msg: Every instance needs a name and a port of its own.
-    quiet: true
-
-- name: Check the address the ports are published on
-  ansible.builtin.assert:
-    that:
-      - rpp_proxy_bind_address is match('^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$')
-    fail_msg: >-
-      rpp_proxy_bind_address is not set and docker0 has no address: start the root Docker daemon (of nginx) before the
-      playbook, or set the address.
-    quiet: true
-
-- name: Check each instance
-  ansible.builtin.assert:
-    that:
-      - instance.name is match('^[a-z0-9][a-z0-9-]*$')
-      - instance.port | int >= 1024 and instance.port | int <= 65535
-      - (instance.config_template is defined) != (instance.config is defined)
-    fail_msg: >-
-      Instance {{ instance.name | default('?') }}: a name of [a-z0-9-], a port of 1024 or more, exactly one of
-      config_template and config.
-    quiet: true
-  loop: "{{ rpp_proxy_instances }}"
-  loop_control:
-    loop_var: instance
-    label: "{{ instance.name | default('?') }}"
+- name: Check the instances and their ports before changing anything
+  ansible.builtin.import_tasks: preflight.yml
+  tags: [preflight]
 
 - name: Name the directories and the ids on the host
   ansible.builtin.set_fact:

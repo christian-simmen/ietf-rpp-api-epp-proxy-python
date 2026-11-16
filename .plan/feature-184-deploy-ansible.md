@@ -32,6 +32,12 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
   needs no change to roles or templates (maintainer, 2026-11-16).
 - D7 Draft PR opened early; every commit pushed (maintainer, 2026-11-16).
 
+- D8 The role looks before it changes (maintainer, 2026-11-16, after a real host failed on its existing Docker
+  repository): a preflight (`--tags preflight`, read only) reports packages, repositories, the root daemon, every
+  user's rootless daemon, the deployment user's daemon.json and the AppArmor profiles; the role adopts what it did not
+  make (daemon.json without its marker, another rootlesskit profile, an existing repository) and never changes another
+  user's daemon. The deployment uses its own user `rpp` beside the host's other rootless Docker (maintainer).
+
 ## Tasks
 
 - [x] 1. File the issue (#184); rename the branch; open the draft PR.
@@ -49,6 +55,10 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
       data directory owned by the subuid of UID 10001, compose with read-only root, tmpfs `/tmp`, `cap_drop: ALL`,
       `no-new-privileges`, memory and pids limits, healthcheck on `/.well-known/rpp`.
 - [x] 7. `deploy/README.md`: inventory, vault, running, the nginx `location`/`upstream` example.
+- [x] 10. Preflight and adoption (D8); checked in an Ubuntu 24.04 container in six states: bare host; Docker CE with
+      the conflicting docker.list + docker.sources, another user's running rootless daemon, an `rpp` with its own
+      daemon.json, another rootlesskit profile; a port of another user (uid 1001 reported); a port of `rpp` itself
+      (passes); the guide's docker.sources alone, and two definitions with the same key (both left alone).
 - [~] 9. Maintainer: a run on a real Ubuntu host, with the AppArmor profile and nginx; then out of draft.
 - [x] 8. Checks: `ansible-lint`, `ansible-playbook --syntax-check`, image build and a local run of the three instances,
       then the project checks (lint-imports, unit tests, smoke).
