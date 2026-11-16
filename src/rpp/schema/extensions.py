@@ -1,11 +1,15 @@
-"""The RPP extensions the proxy implements, one schema file each in `schemas/extensions/` (copied from `.spec/` by
-copy_models.sh). Which of them a deployment offers is the `extensions` of its backend profile."""
+"""The RPP extensions the proxy implements, one schema file each (copied from `.spec/` by copy_models.sh): in
+`schemas/extensions/`, or in the `schema/` folder of an extension whose code is encapsulated in `rpp/extensions/<name>/`.
+Which of them a deployment offers is the `extensions` of its backend profile."""
 import json
 from pathlib import Path
 
 from rpp.schema.rpp_extension import RppExtension
 
 FOLDER = Path(__file__).parent / "schemas" / "extensions"
+
+# The packages of the extensions whose code is encapsulated, each with its schema in `schema/`.
+PACKAGES = Path(__file__).parents[1] / "extensions"
 
 _DEF = "#/$defs/"
 
@@ -32,7 +36,7 @@ def _load(path: Path) -> RppExtension:
 SERVER_EXTENSIONS = ("urn:ietf:params:rpp:extension:profile-schemas",)
 
 EXTENSIONS: dict[str, RppExtension] = {
-    extension.id: extension for extension in map(_load, sorted(FOLDER.glob("*.json")))
+    extension.id: extension for extension in map(_load, sorted([*FOLDER.glob("*.json"), *PACKAGES.glob("*/schema/*.schema.json")]))
 }
 
 

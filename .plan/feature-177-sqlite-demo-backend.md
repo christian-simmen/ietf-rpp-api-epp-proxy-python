@@ -6,10 +6,10 @@ Part of #174, Story 1 of 4. Built on today's profile model. #178 moves it to pre
 ## Tasks
 
 - [x] T0 Plan (this file), approved
-- [~] T1 Extension `org.example.rpp.extension.planets` 1.0: schema `.spec/planets-extension.schema.json` (copied by
-      `copy_models.sh`), objects `planet` and `satellite`, and the specification `docs/demo/planets-extension.md` in
+- [x] T1 Extension `org.example.rpp.extension.planets` 1.0: schema `.spec/planets-extension.schema.json` (copied by
+      `copy_models.sh` to `src/rpp/extensions/planets/schema/`), objects `planet` and `satellite`, and the specification `docs/demo/planets-extension.md` in
       the extension format of the guidelines, with examples checked by a unit test (as `test_rri_extension_doc.py`)
-- [ ] T2 Core: `core/model/planet/` (Planet, Satellite, transfer state), `core/ports/planet_gateway.py` and
+- [~] T2 Core: `core/model/planet/` (Planet, Satellite, transfer state), `core/ports/planet_gateway.py` and
       `satellite_gateway.py`, `core/flows/planet/` (create, read, update, partial update, delete, availability, transfer request,
       query, cancel, approve, reject, satellites of a planet), a planet transfer event in `core/model/message/`,
       `planets` and `satellites` on `RegistryBackend`
@@ -20,8 +20,9 @@ Part of #174, Story 1 of 4. Built on today's profile model. #178 moves it to pre
       in a self-describing string), the generic backend profile `src/settings/profiles/sqlite.yaml` (objects `planet`,
       `satellite`, extension planets, profile `demo`), the RPP profile `src/rpp/schema/schemas/profiles/demo.yaml`,
       `config.demo.yaml`; the EPP and RRI profiles do not hold the objects
-- [ ] T5 RPP: paths of the objects (`extension_paths.py`: `planet` from the template `domainName` with its transfer
-      process, `satellite` from `host` without processes, and the Direct Access path `/planets/{id}/satellites`), DTOs,
+- [ ] T5 RPP, encapsulated in `src/rpp/extensions/planets/` (`dto`, `handlers`, `mapping`, `schema`): paths of the objects (`extension_paths.py`: `planet` from the template `domainName` with its transfer
+      process, `satellite` from `host` without processes, and the Direct Access path `/planets/{id}/satellites/{satelliteId}`), the Visibility of the
+      data elements from the extension's data model, DTOs,
       mappers, handlers, the message rendering of a planet transfer
 - [ ] T6 Integration environment `sqlite-demo` (`config.demo.yaml`, an in-memory or temporary database, no
       credentials) and test cases `planet_*`, `satellite_*` and `planet_transfer`, the smoke ones marked
@@ -53,8 +54,18 @@ Part of #174, Story 1 of 4. Built on today's profile model. #178 moves it to pre
 - D6 (maintainer) Planet and Satellite have the availability check (`/planets/{id}/availability`,
   `/satellites/{id}/availability`), as the domain name and the host.
 
+- D7 (maintainer) The RPP code of an extension is encapsulated in `src/rpp/extensions/<name>/` with `dto`, `handlers`,
+  `mapping` and `schema`. `<name>` is a Python package name (`planets` for `org.example.rpp.extension.planets`), as an
+  identifier with dots cannot be one. `rpp/schema/extensions.py` loads the schemas of both places.
+- D8 The Direct Access element of the satellites is `satellite` (cardinality 0+), as `transferProcess` of the
+  Processes Object, so core Rule 3 gives `/planets/{id}/satellites/{satelliteId}`.
+- D9 The transfer of a planet uses the base Transfer Process Object (`transferProcess.*`), as the contact's does.
+
 ## Corrections
 
 ## Open questions
+
+- Whether the RRI extension (`de.denic.rpp.rri`, request contacts) moves to `src/rpp/extensions/` too: not part of
+  #177, a follow-up issue if the maintainer wants it.
 
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` are the maintainer's local changes and stay unstaged.
