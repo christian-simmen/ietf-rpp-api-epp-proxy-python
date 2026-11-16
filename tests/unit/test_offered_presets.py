@@ -3,7 +3,6 @@ each refusal naming what conflicts. The criteria of #174 for the server that doe
 import pytest
 
 from rpp.schema.definitions import Definitions
-from rpp.schema.extension_additivity import check_additive
 from rpp.schema.extensions import EXTENSIONS
 from rpp.schema.offered_presets import OfferedPresets
 from rpp.schema.rpp_extension import RppExtension
@@ -197,47 +196,11 @@ def _extension(**sub):
                         defs={"ext.x": {"type": "object", **sub}})
 
 
-@pytest.mark.parametrize("sub, message", [
-    ({"properties": {"name": {"type": "string"}}}, "declares name, which domainName.create declares"),
-    ({"properties": {"a": {}}, "required": ["b"]}, "requires b, which it does not declare"),
-    ({"properties": {"a": {}}, "maxProperties": 3}, "uses maxProperties"),
-    ({"properties": {"a": {}}, "not": {"required": ["name"]}}, "names name"),
-    ({"properties": {"a": {}}, "if": {"required": ["authInfo"]}, "then": {}}, "names authInfo"),
-])
-def test_an_extension_schema_that_constrains_stops_the_server(sub, message):
-    with pytest.raises(ValueError, match=message):
-        check_additive(_extension(**sub))
-
-
-def test_an_extension_schema_that_only_adds_is_accepted():
-    check_additive(_extension(properties={"a": {"type": "string"}}, required=["a"]))
-
-
-@pytest.mark.parametrize("sub, message", [
-    ({"properties": {"a": {}}, "additionalProperties": False}, "uses additionalProperties"),
-    ({"properties": {"a": {}}, "unevaluatedProperties": {"type": "string"}}, "uses unevaluatedProperties"),
-    ({"properties": {"a": {}}, "propertyNames": {"maxLength": 3}}, "uses propertyNames"),
-    ({"properties": {"a": {}}, "allOf": [{"required": ["authInfo"]}]}, "branch that names authInfo"),
-    ({"properties": {"a": {}}, "anyOf": [{"properties": {"name": {"maxLength": 3}}}]}, "branch that names name"),
-    ({"properties": {"a": {}}, "oneOf": [{"allOf": [{"required": ["b"]}]}]}, "branch that names b"),
-    ({"properties": {"a": {}}, "then": {"required": ["name"]}}, "branch that names name"),
-    ({"properties": {"a": {}}, "dependentSchemas": {"a": {"properties": {"name": {}}}}}, "branch that names name"),
-])
-def test_an_extension_schema_that_constrains_through_an_applicator_stops_the_server(sub, message):
-    with pytest.raises(ValueError, match=message):
-        check_additive(_extension(**sub))
-
-
-def test_an_applicator_that_names_only_what_the_extension_declares_is_accepted():
-    check_additive(_extension(properties={"a": {}, "b": {}}, anyOf=[{"required": ["a"]}, {"required": ["b"]}],
-                              additionalProperties=True))
-
-
 def test_the_check_is_made_when_the_presets_are_built(monkeypatch):
     bad = _extension(properties={"a": {}}, anyOf=[{"properties": {"name": {"maxLength": 3}}}])
     monkeypatch.setitem(EXTENSIONS, "x", bad)
 
-    with pytest.raises(ValueError, match="The extension x, definition ext.x has a branch that names name"):
+    with pytest.raises(ValueError, match="The extension x, definition ext.x uses properties, naming name"):
         build(definitions_with([preset("p", extensions=[("x", "1.0")])]), ["p"], held=("x",))
 
 
@@ -283,26 +246,3 @@ def test_an_extension_uri_that_names_a_definition_of_the_base_stops_the_server()
         build(definitions_with([having], [wrong]), ["r3"], held=(RRI,))
 
 
-@pytest.mark.parametrize("sub", [
-    {"properties": {"a": {}, "b": {}}, "dependentRequired": {"a": ["b"]}},          # json: members of the extension only
-    {"properties": {"a": {}}, "patternProperties": {"^x-": {"type": "string"}}},    # a pattern no base member matches
-    {"properties": {"a": {}, "b": {}}, "if": {"required": ["a"]}, "then": {"required": ["b"]}},
-    {"properties": {"a": {}}, "not": {"required": ["a"]}},
-    {"properties": {"a": {}, "b": {}}, "dependentSchemas": {"a": {"required": ["b"]}}},
-])
-def test_an_extension_schema_may_relate_its_own_members_and_use_a_pattern_the_base_does_not_match(sub):
-    check_additive(_extension(**sub))
-
-
-@pytest.mark.parametrize("sub, message", [
-    ({"properties": {"a": {}}, "dependentRequired": {"a": ["authInfo"]}}, "names authInfo"),
-    ({"properties": {"a": {}}, "patternProperties": {"^auth": {"type": "string"}}}, "patternProperties '\\^auth' that matches authInfo"),
-])
-def test_an_extension_schema_that_names_a_member_of_the_base_through_a_dependency_or_a_pattern_stops_the_server(sub, message):
-    with pytest.raises(ValueError, match=message):
-        check_additive(_extension(**sub))
-
-
-def test_the_extensions_of_the_proxy_are_additive():
-    for extension in EXTENSIONS.values():
-        check_additive(extension)

@@ -305,7 +305,7 @@ two versions (also through two bases), an extension the proxy does not implement
 does not hold, a profile (also a bound one, and through its base profiles) that requires an extension its preset lacks, a
 Profile Schema that declares a property its target does not (`profile_schema_walk.py`, at any depth), that constrains a
 definition that does not exist, or whose `$defs` keys clash with RPP's, an extension's or another profile's, and an Extension
-Schema that is not additive (`extension_additivity.py`). Inheritance is a union without overriding (`preset_flattening.py`),
+Schema that is not additive (`extension_additivity.py`, a whitelist, see [spec-issues.md](../../.spec/spec-issues.md#presets-profiles-and-extensions)). Inheritance is a union without overriding (`preset_flattening.py`),
 each item once; the applicable profiles of a preset are its own, the bound ones and the base profiles of all, bases first.
 
 **Signalling** is `rpp_preset_signalling` (`Settings.preset_signalling`, default `header`), and
@@ -357,7 +357,7 @@ that `map_request` makes a 400, as before). `validate_request_schema` is for wha
 step 2 against the schema with the applicable profiles, whose failure is a `ProfileConstraintViolation` and answers 422 `02308`
 with `profile` and `paths` in the error (`profile_constraint_problem` in `rpp/http/problem.py`; the reason never holds a value of
 the request). A patch or a replacement is validated as the object it results in (`patched=True`) and a failure that concerns a
-read-only member of the base definition, which the server manages, is not the client's; under a preset with applicable profiles a patch of a contact, domain or host is always applied to the object read for it; the native patch
+read-only member of the base definition, which the server manages, is not the client's; under a preset with applicable profiles a patch of a contact, domain or host runs the same conversion that needs no read as without profiles (so it is refused alike), and is then applied to the object read for it; the native patch
 of an extension (no read) checks the value of each operation as the member it sets and refuses the removal of a member a profile requires, see [spec-issues.md](../../.spec/spec-issues.md#two-step-validation-of-a-patch).
 A response is validated with the preset schema without profiles, never with them. The prose constraints of a profile keep
 today's behaviour (the mapper's 501 or the backend's error), as does a request under a preset without the profile.

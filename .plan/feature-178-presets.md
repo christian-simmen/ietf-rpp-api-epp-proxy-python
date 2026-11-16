@@ -169,3 +169,12 @@ Plan approved by the orchestrator for the maintainer (2026-11-16). Answers:
 - The additivity check walks the applicators and refuses closed objects and `propertyNames`; a profile constrains only the
   extensions it requires (flattened); the walker follows `dependentSchemas` and `prefixItems`; `$id` keeps the colons of the URN;
   the server-managed members come from the composed definitions. The 13 changed cases also assert `errors[0].profile` and `paths`.
+
+## Review round 3 (orchestrator decisions)
+
+- The additivity check is a recursive whitelist (`extension_additivity.py`), stricter than json.md:300-304, recorded in spec-issues.md:
+  `not` and `oneOf` are refused, empty `allOf` and `anyOf` are refused, `type` other than `object` at any depth.
+- A PATCH under a preset with profiles runs the same no-read conversion as without profiles. What it refuses is refused alike. If it
+  raises `NeedsCurrentState`, or succeeds under a profile, `rpp_to_model` returns None and the patched object is checked in step 2
+  after the read. The separate pre-read checks of round 2 are gone. Consequence: a value the no-read conversion refuses (a non-ASCII
+  email address) is the same 400 under both presets, and a constraint only the profile has is checked after the read.

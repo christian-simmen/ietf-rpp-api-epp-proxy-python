@@ -174,33 +174,3 @@ def test_put_adding_a_localization_the_registry_ignores_is_a_500_with_02400():
 
     assert response.status_code == 500 and response.headers["RPP-Code"] == "02400"
     assert "loc" in response.json()["detail"]
-
-
-def test_patch_without_a_read_under_the_epp_compatible_preset_is_checked_on_the_patched_contact():
-    # replacing the email is one EPP value that needs no read, but the profile applies to every request (core): the contact
-    # is read, patched, and the Profile Schema refuses a non-ASCII address
-    session = Session(info())
-
-    response = session.request(
-        "patch", json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "jöhn@exämple.com"}])
-
-    assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
-    error = response.json()["errors"][0]
-    assert error["profile"] == "urn:ietf:params:rpp:profile:epp-compatibility"
-    assert error["paths"][0].startswith("$.contactInfo.emails")
-    assert len(session.client.sent) == 1 and "contact:info" in session.client.sent[0]       # the read, no update
-
-
-@pytest.mark.parametrize("preset, body, status, code", [
-    (None, [{"op": "replace", "path": "/foo", "value": 1}], 400, "02001"),
-    (BASE_PRESET, [{"op": "replace", "path": "/foo", "value": 1}], 400, "02001"),
-    (None, [{"op": "replace", "path": "/disclose", "value": {}}], 501, "02102"),
-    (BASE_PRESET, [{"op": "replace", "path": "/disclose", "value": {}}], 501, "02102"),
-])
-def test_an_invalid_patch_is_refused_alike_under_a_preset_with_profiles_and_without_and_sends_nothing(preset, body, status, code):
-    session = Session(MISSING)
-
-    response = session.request("patch", preset=preset, json=body)
-
-    assert response.status_code == status and response.headers["RPP-Code"] == code
-    assert session.client is None or session.client.sent == []        # no contact:info, no update

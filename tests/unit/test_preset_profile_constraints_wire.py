@@ -10,8 +10,9 @@ from rpp.http.app import create_app
 from tests.helper.epp_backends import epp_backends
 from tests.helper.fake_epp_client import FakeEppClient
 from tests.helper.preset_fixtures import (
-    ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED, BASE, ONE_NAMESERVER, preset, registry_with)
+    ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED, BASE, ONE_NAMESERVER, SHORT_EMAIL, preset, registry_with)
 from tests.helper.profiles import EPP_PROFILE
+from tests.unit.test_contact_put_wire import info as contact_info
 from tests.unit.test_domain_put_wire import DONE, info
 from tests.unit.test_rri_wire import DISCOVERY
 
@@ -22,8 +23,9 @@ AUTH = {"Authorization": "Basic " + base64.b64encode(b"user:pw").decode(), "Acce
 PLAIN = preset("plain", base_presets=[BASE["id"]])
 CONSTRAINED = preset("constrained", base_presets=[BASE["id"]], profiles=[ADMIN_ONLY[0]])
 LIMITED = preset("limited", base_presets=[BASE["id"]], profiles=[ONE_NAMESERVER[0]])
-PROFILES = [ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED, ONE_NAMESERVER]
-PRESETS = [PLAIN, CONSTRAINED, LIMITED]
+SHORT = preset("short", base_presets=[BASE["id"]], profiles=[SHORT_EMAIL[0]])
+PROFILES = [ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED, ONE_NAMESERVER, SHORT_EMAIL]
+PRESETS = [PLAIN, CONSTRAINED, LIMITED, SHORT]
 
 
 def epp_reply(code=1000):
@@ -32,7 +34,7 @@ def epp_reply(code=1000):
 
 
 class App:
-    def __init__(self, bound=None, offered=("plain", "constrained", "limited"), default="plain", signalling="header",
+    def __init__(self, bound=None, offered=("plain", "constrained", "limited", "short"), default="plain", signalling="header",
                  replies=()):
         self.clients = []
 
@@ -233,3 +235,27 @@ def test_a_configuration_the_checks_refuse_does_not_start_the_server(change, pre
 
     with pytest.raises(ValueError, match=message):
         create_app(None, profile, registry=registry_with(presets, PROFILES))
+
+
+LONG_EMAIL = [{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "a-long-address@example.example"}]
+
+
+def test_a_patch_that_needs_no_read_is_checked_on_the_patched_contact_under_a_preset_with_a_profile():
+    app = App(replies=[contact_info()])
+    short = {**AUTH, "RPP-Preset": f"preset={SHORT[0]};version=1.0"}
+
+    response = app.http.patch("/contacts/JD-1234", json=LONG_EMAIL, headers=short)
+
+    assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
+    error = response.json()["errors"][0]
+    assert error["profile"] == SHORT_EMAIL[0] and error["paths"][0].startswith("$.contactInfo.emails")
+    assert len(app.sent()) == 1 and "contact:info" in app.sent()[0]         # the read for it, and no update
+
+
+def test_the_same_patch_under_a_preset_without_the_profile_is_sent_without_a_read():
+    app = App(replies=[DONE, contact_info()])
+
+    response = app.http.patch("/contacts/JD-1234", json=LONG_EMAIL, headers=AUTH)
+
+    assert response.status_code == 200
+    assert "contact:update" in app.sent()[0]

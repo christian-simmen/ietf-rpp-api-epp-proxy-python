@@ -586,6 +586,14 @@ they were. The proxy follows the proposals, with the following.
   `https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/` for the presets `base` and `epp-compatible`. A private preset has none.
 - **An attribution.** A request that breaks the constraints of several profiles names the first profile (bases first) whose Profile Schema
   alone refuses it, and none where only their conjunction does (core: "a server can omit the field").
+- **Extension Schemas, a whitelist.** Json §Extension Framework (json.md:300-304) forbids three things and leaves the rest open. **Proxy:**
+  the check at start is stricter, a whitelist applied to the sub-schema and, recursively, to what `allOf`, `anyOf`, `if`, `then`, `else` and
+  the values of `dependentSchemas` reach: metadata, `type` `object`, `properties` (not of a member the base declares), `required`,
+  `dependentRequired` and `dependentSchemas` over the extension's own members, `patternProperties` that match no member of the base, open
+  `additionalProperties` and `unevaluatedProperties`, and the schema `true`. It refuses the rest, among it `not` (also over the extension's
+  own members, which would be additive), `oneOf` (branches that are each allowed can exclude each other, so that no base object matches),
+  an empty `allOf` or `anyOf`, `const`, `enum`, `propertyNames`, `minProperties`, `maxProperties`, `type` other than `object`, and the
+  schema `false`. A whitelist cannot let a schema that constrains the base slip through by a keyword the check did not think of.
 - **Responses.** The proposals do not say whether a response is validated against the profiles. **Proxy:** never; a response is validated
   against the preset schema without profiles.
 

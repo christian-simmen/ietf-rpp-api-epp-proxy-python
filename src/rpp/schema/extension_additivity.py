@@ -1,81 +1,104 @@
-"""The rule of json §Extension Framework: an extension only adds. A sub-schema of an Extension Schema MUST NOT declare a
-property that the base definition declares, list under `required` a property it does not declare, or use a keyword that
-constrains the base object as a whole. The applicators (`allOf`, `anyOf`, `oneOf`, `then`, `else`, `dependentSchemas`) are
-walked: a branch that names a member the sub-schema does not declare at its top level constrains the base object."""
+"""The rule of json §Extension Framework: an extension only adds. The proxy checks it with a whitelist, so that no schema that
+constrains the base object can pass by a keyword the check did not think of.
+
+The sub-schema that an Extension Schema maps to a base definition, and every sub-schema reached through `allOf`, `anyOf`,
+`if`, `then`, `else` and the values of `dependentSchemas`, may only use:
+
+- metadata: `$id`, `$schema`, `$comment`, `$defs`, `title`, `description`, `examples`, `deprecated`, and `rpp:*`;
+- `type` with the value `object`;
+- `properties`, whose keys the base definition does not declare (the values are free, they constrain the extension's own members);
+- `required` and `dependentRequired`, naming the extension's own members only (those the sub-schema declares in its top-level
+  `properties`), and `dependentSchemas` keyed by own members;
+- `patternProperties`, whose patterns match no member the base definition declares;
+- `additionalProperties` and `unevaluatedProperties`, absent or `true`;
+- the applicators listed above, with at least one branch, and the schema `true`. `oneOf` is not one of them: branches that are
+  each allowed can still exclude each other, so that no base object matches (`oneOf: [{}, {}]`).
+
+Everything else is refused (`not`, `oneOf`, `const`, `enum`, `propertyNames`, `minProperties`, `maxProperties`, the schema `false`, an empty `allOf` or `anyOf`, ...)
+naming the extension, the definition and the keyword. This is stricter than json: `not` over the extension's own members would
+be additive, and is refused too, because a whitelist cannot let a schema that constrains the base slip through."""
 import re
 
 from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.profile_schema_walk import expand
 from rpp.schema.rpp_extension import RppExtension
 
-# Keywords that constrain the base object whatever they name; those that name members are checked by what they name.
-WHOLE_OBJECT = ("maxProperties", "minProperties", "propertyNames")
-_NAMING = ("not", "if", "dependentRequired", "dependentSchemas")
-_OPEN_KEYWORDS = ("additionalProperties", "unevaluatedProperties")
-_APPLICATORS = ("allOf", "anyOf", "oneOf")
+_METADATA = ("$id", "$schema", "$comment", "$defs", "title", "description", "examples", "deprecated")
+_APPLICATORS_LIST = ("allOf", "anyOf")
+_APPLICATORS_SCHEMA = ("if", "then", "else")
+_OPEN = ("additionalProperties", "unevaluatedProperties")
 
 
-def _branches(sub: dict):
-    """The schemas an applicator of `sub` holds, at any depth."""
-    for keyword in _APPLICATORS:
-        for branch in sub.get(keyword) or ():
-            yield branch
-            yield from _branches(branch)
-    for keyword in ("then", "else"):
-        if isinstance(sub.get(keyword), dict):
-            yield sub[keyword]
-            yield from _branches(sub[keyword])
-    for branch in (sub.get("dependentSchemas") or {}).values():
-        yield branch
-        yield from _branches(branch)
+class _Check:
+    def __init__(self, extension: RppExtension, definition: str, base_name: str):
+        self.label = f"The extension {extension.id}, definition {definition}"
+        self.base_name = base_name
+        base = bundle_definitions()
+        self.declared = {name for schema in expand([base[base_name]], base) for name in schema.get("properties", {})}
+        self.own: set[str] = set()
 
+    def fail(self, keyword: str, why: str):
+        raise ValueError(f"{self.label} uses {keyword}, {why}")
 
-def _named(schema: dict) -> set:
-    """The members that a schema's `properties`, `required`, `dependentRequired`, `dependentSchemas`, `if`, `then`, `else` and
-    `not` name, at its top level and in what they hold."""
-    names = set(schema.get("properties", {})) | set(schema.get("required", []))
-    for member, required in (schema.get("dependentRequired") or {}).items():
-        names |= {member, *required}
-    for member, branch in (schema.get("dependentSchemas") or {}).items():
-        names |= {member} | _named(branch)
-    for keyword in ("not", "if", "then", "else"):
-        if isinstance(schema.get(keyword), dict):
-            names |= _named(schema[keyword])
-    return names
+    def run(self, sub) -> None:
+        if not isinstance(sub, dict):
+            self.fail("a schema that is not an object", f"which {self.base_name} cannot take as an addition")
+        self.own = set(sub.get("properties", {}))
+        clash = sorted(self.own & self.declared)
+        if clash:
+            raise ValueError(f"{self.label} declares {', '.join(clash)}, which {self.base_name} declares")
+        self.node(sub, top=True)
+
+    def node(self, node, top: bool = False) -> None:
+        if node is True:
+            return
+        if not isinstance(node, dict):
+            self.fail("the schema false" if node is False else "a schema that is not an object",
+                      f"which constrains {self.base_name}")
+        for keyword, value in node.items():
+            if keyword in _METADATA or keyword.startswith("rpp:"):
+                continue
+            if keyword == "type":
+                if value != "object":
+                    self.fail(f"type {value!r}", f"which is not the object {self.base_name} is")
+            elif keyword == "properties":
+                names = set(value)
+                if top and names & self.declared:
+                    continue    # named by `run`, as a declaration of what the base declares
+                if not top and names - self.own:
+                    self.fail("properties", f"naming {', '.join(sorted(names - self.own))}, which the sub-schema does not declare")
+            elif keyword == "required":
+                self.own_only(keyword, value)
+            elif keyword == "dependentRequired":
+                self.own_only(keyword, [*value, *(name for names in value.values() for name in names)])
+            elif keyword == "dependentSchemas":
+                self.own_only(keyword, list(value))
+                for branch in value.values():
+                    self.node(branch)
+            elif keyword == "patternProperties":
+                for pattern in value:
+                    hit = sorted(name for name in self.declared if re.search(pattern, name))
+                    if hit:
+                        self.fail(f"patternProperties {pattern!r}", f"which matches {', '.join(hit)}, declared by {self.base_name}")
+            elif keyword in _OPEN:
+                if value is not True:
+                    self.fail(keyword, f"which constrains {self.base_name} as a whole")
+            elif keyword in _APPLICATORS_LIST:
+                if not value:
+                    self.fail(f"an empty {keyword}", f"which no instance of {self.base_name} matches or constrains it")
+                for branch in value:
+                    self.node(branch)
+            elif keyword in _APPLICATORS_SCHEMA:
+                self.node(value)
+            else:
+                self.fail(keyword, f"which {self.base_name} cannot take from an extension")
+
+    def own_only(self, keyword: str, names) -> None:
+        stray = sorted(set(names) - self.own)
+        if stray:
+            self.fail(keyword, f"naming {', '.join(stray)}, which the sub-schema does not declare, so it constrains {self.base_name}")
 
 
 def check_additive(extension: RppExtension) -> None:
-    base = bundle_definitions()
     for base_name, ext_name in extension.extends.items():
-        sub = extension.defs[ext_name]
-        label = f"The extension {extension.id}, definition {ext_name}"
-        declared = {name for schema in expand([base[base_name]], base) for name in schema.get("properties", {})}
-        own = set(sub.get("properties", {}))
-        clash = sorted(own & declared)
-        if clash:
-            raise ValueError(f"{label} declares {', '.join(clash)}, which {base_name} declares")
-        missing = sorted(set(sub.get("required", [])) - own)
-        if missing:
-            raise ValueError(f"{label} requires {', '.join(missing)}, which it does not declare")
-        used = sorted(keyword for keyword in WHOLE_OBJECT if keyword in sub)
-        if used:
-            raise ValueError(f"{label} uses {', '.join(used)}, which constrains {base_name} as a whole")
-        for pattern in sub.get("patternProperties") or {}:
-            hit = sorted(name for name in declared if re.search(pattern, name))
-            if hit:
-                raise ValueError(f"{label} has a patternProperties {pattern!r} that matches {', '.join(hit)}, "
-                                 f"which {base_name} declares")
-        closed = sorted(keyword for keyword in _OPEN_KEYWORDS if sub.get(keyword, True) is not True)
-        if closed:
-            raise ValueError(f"{label} uses {', '.join(closed)}, which constrains {base_name} as a whole")
-        if "rpp:constraints" in sub:
-            raise ValueError(f"{label} contains rpp:constraints")
-        for schema in (sub, *_branches(sub)):
-            named = _named(schema) - own
-            if named:
-                raise ValueError(f"{label} has a branch that names {', '.join(sorted(named))}, which it does not declare, "
-                                 f"so it constrains {base_name}")
-        for branch in _branches(sub):
-            used = sorted(keyword for keyword in (*WHOLE_OBJECT, *_OPEN_KEYWORDS) if keyword in branch)
-            if used:
-                raise ValueError(f"{label} has a branch that uses {', '.join(used)}, which constrains {base_name} as a whole")
+        _Check(extension, ext_name, base_name).run(extension.defs[ext_name])

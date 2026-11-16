@@ -49,6 +49,12 @@ ONE_NAMESERVER = profile("one-nameserver", constraints={"domainName.update": "pr
                          defs={"profile.oneNs": {"properties": {"nameservers": {"maxItems": 1}}}})
 
 
+# a profile that limits the length of the email address of a contact, which a PATCH sets without a read
+SHORT_EMAIL = profile("short-email", constraints={"contact.read": "profile.shortEmail"}, defs={
+    "profile.shortEmail": {"properties": {"contactInfo": {"properties": {"emails": {"properties": {
+        "email": {"properties": {"address": {"maxLength": 12}}}}}}}}}})
+
+
 def registry_with(presets=(), profiles=()) -> ExtensionRegistry:
     """A registry of one extension that brings only these presets and profiles (`{key: definition}` pairs)."""
     registry = ExtensionRegistry()

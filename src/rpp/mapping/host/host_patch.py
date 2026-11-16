@@ -110,19 +110,17 @@ def rpp_to_model(host_name: str, rpp: list) -> HostUpdate | None:
     """Converts a partial update (JSON Patch, json draft §5.2) to a HostUpdate.
 
     None when an operation needs the current host, then `rpp_to_model_with_current` converts it.
-    Under a preset with applicable profiles it is always None: the profiles are checked on the
+    Under a preset with applicable profiles it is None too, after the same conversion (so what that refuses is refused alike): the profiles are checked on the
     object the patch results in (core §Extensions and Profiles of a Request: every request), which needs the current one.
     """
-    if profiles_apply():     # the profiles are checked on the object the patch results in, which needs the current one
-        for operation in _operations(rpp):
-            _check(operation)       # an invalid patch is refused as without profiles, before any command
-        return None
     update = _PatchedHostUpdate(host_name)
     try:
         for operation in _operations(rpp):
             update.apply(operation)
     except NeedsCurrentState:
         return None
+    if profiles_apply():     # the profiles are checked on the object the patch results in, which needs the current one
+        return None     # the conversion above is the same as without profiles: what it refuses is refused alike
     return update.to_host_update()
 
 

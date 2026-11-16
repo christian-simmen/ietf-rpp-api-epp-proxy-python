@@ -52,16 +52,6 @@ def _matched_contact(match: dict, profile: BackendProfile) -> ContactReferenceNe
     return _contact(label, target["id"])
 
 
-def _check(operation: RPPPatchOperation, profile: BackendProfile):
-    """What `_PatchedUpdate.apply` refuses before it looks at a value: an operation or a path a patch cannot have."""
-    if operation.op not in ("add", "remove", "replace"):
-        raise ValueError(f"Operation '{operation.op}' is not allowed")
-    request_paths = tuple(f"/{member}" for member in domain_request_contacts.members("domainName.update", profile.extensions))
-    if not (operation.path in STATE_PATHS or operation.path in request_paths or operation.path in ARRAY_PATHS
-            or operation.path in OBJECT_PATHS):
-        raise ValueError(f"Path '{operation.path}' cannot be changed")
-
-
 class _PatchedUpdate:
     """Collects the effect of the patch operations on a DomainUpdate."""
 
@@ -173,19 +163,17 @@ def rpp_to_model(domain_name: str, rpp: list, *, profile: BackendProfile) -> Dom
     """Converts a partial update (JSON Patch, json draft §5.2) to a DomainUpdate.
 
     None when an operation needs the current domain, then `rpp_to_model_with_current` converts it.
-    Under a preset with applicable profiles it is always None: the profiles are checked on the
+    Under a preset with applicable profiles it is None too, after the same conversion (so what that refuses is refused alike): the profiles are checked on the
     object the patch results in (core §Extensions and Profiles of a Request: every request), which needs the current one.
     """
-    if profiles_apply():     # the profiles are checked on the object the patch results in, which needs the current one
-        for operation in _operations(rpp):
-            _check(operation, profile)       # an invalid patch is refused as without profiles, before any command
-        return None
     update = _PatchedUpdate(profile)
     try:
         for operation in _operations(rpp):
             update.apply(operation)
     except NeedsCurrentState:
         return None
+    if profiles_apply():     # the profiles are checked on the object the patch results in, which needs the current one
+        return None     # the conversion above is the same as without profiles: what it refuses is refused alike
     return update.to_domain_update(domain_name)
 
 
