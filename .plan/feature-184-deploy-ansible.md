@@ -35,10 +35,11 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
 ## Tasks
 
 - [x] 1. File the issue (#184); rename the branch; open the draft PR.
-- [~] 2. SQLite with several writers (`src/registry_adapter/sqlite/sqlite_database.py`): WAL, `busy_timeout`,
+- [x] 2. SQLite with several writers (`src/registry_adapter/sqlite/sqlite_database.py`): WAL, `busy_timeout`,
       `BEGIN IMMEDIATE` per unit of work, an `fcntl` lock around `migrate()`; unit tests with several processes on one
-      file. The in-process `RLock` stays for the in-memory database.
-- [ ] 3. Hardened image `deploy/docker/Dockerfile`: multi-stage, base pinned by digest, UID 10001, no pip or compilers in
+      file. The in-process `RLock` stays for the in-memory database. Instead of an `fcntl` lock, `migrate()` runs in one
+      `BEGIN IMMEDIATE` transaction (SQLite DDL is transactional): one mechanism for both.
+- [~] 3. Hardened image `deploy/docker/Dockerfile`: multi-stage, base pinned by digest, UID 10001, no pip or compilers in
       the final stage, `uvicorn --workers 3 --proxy-headers --forwarded-allow-ips`, config from `RPP_CONFIG_FILE`.
 - [ ] 4. Role `rootless_docker`: packages (docker-ce, rootless-extras, uidmap), the unprivileged user, its subuid
       range, `dockerd-rootless-setuptool.sh`, linger, the user's systemd unit.
@@ -55,6 +56,13 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
 
 - `SqliteDatabase` serialises with a `threading.RLock`, which does not cover 3 worker processes; `migrate()` runs in
   every worker at start and would race on `create_all`.
+- Reproduced before the fix (`tests/unit/test_sqlite_database_processes.py`): 6 processes doing 25 read-then-write
+  units of work each ended at 25, not 150, with no error: pysqlite begins only at the first write, so the read ran
+  outside the transaction. The startup race failed about 1 in 6 runs; after the fix, switching a new file to WAL still
+  failed with "database is locked" without the busy timeout (SQLite does not wait there), hence the retry in
+  `_write_ahead`. After the fix: 0 failures in 30 runs.
+- Security known debt #14 (`TCPClient` prints sent EPP messages, the login `<pw>` included) means the `epp` instance's
+  container log holds registrar passwords; the deployment caps and rotates logs, but does not fix it.
 - EPP-server-docker publishes ports under 1024 (43, 443); under rootless Docker these fail, hence D2.
 
 ## Open questions
