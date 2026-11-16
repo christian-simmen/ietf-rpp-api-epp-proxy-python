@@ -1,0 +1,105 @@
+---
+- name: Check the settings of the EPP server
+  ansible.builtin.assert:
+    that:
+      - epp_server_mysql_password is defined
+      - epp_server_mysql_password | length >= 12
+    fail_msg: Set epp_server_mysql_password (12 characters or more), in the vault.
+    quiet: true
+
+- name: Check out EPP-server-docker
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.git:
+    repo: "{{ epp_server_repo }}"
+    dest: "{{ rootless_docker_home }}/epp-server-docker"
+    version: "{{ epp_server_version }}"
+    recursive: false
+  register: epp_server_checkout
+
+- name: Fetch the EPP server sources (submodule)
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.command:
+    argv: >-
+      {{ ['git'] + (['-c', 'url.https://github.com/.insteadOf=git@github.com:'] if epp_server_git_https_rewrite else [])
+         + ['submodule', 'update', '--init', '--recursive'] }}
+    chdir: "{{ rootless_docker_home }}/epp-server-docker"
+  register: epp_server_submodule
+  changed_when: epp_server_submodule.stdout | length > 0
+
+- name: Write the settings of the EPP server
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ rootless_docker_home }}/epp-server-docker/{{ item.dest }}"
+    mode: "0600"
+  loop:
+    - {src: env.j2, dest: .env}
+    - {src: compose.rpp.yml.j2, dest: compose.rpp.yml}
+  register: epp_server_settings
+
+- name: Check whether the registry database exists
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.command: docker volume inspect {{ epp_server_project }}_mariadb_data
+  environment:
+    DOCKER_HOST: "{{ rootless_docker_host }}"
+  register: epp_server_database
+  changed_when: false
+  failed_when: false
+
+- name: Prepare the registry database (first deployment only)
+  when: epp_server_database.rc != 0
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ rootless_docker_home }}/epp-server-docker"
+    project_name: "{{ epp_server_project }}"
+    files: [docker-compose.yml, compose.rpp.yml]
+    profiles: [setup]
+    services: [mariadb_prep]
+    docker_host: "{{ rootless_docker_host }}"
+    build: always
+    state: present
+    wait: false
+
+- name: Wait for the database preparation to finish
+  when: epp_server_database.rc != 0
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.command: docker wait {{ epp_server_project }}-mariadb_prep-1
+  environment:
+    DOCKER_HOST: "{{ rootless_docker_host }}"
+  register: epp_server_prep
+  changed_when: true
+  failed_when: epp_server_prep.rc != 0 or epp_server_prep.stdout | trim != '0'
+
+- name: Remove the preparation container
+  when: epp_server_database.rc != 0
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ rootless_docker_home }}/epp-server-docker"
+    project_name: "{{ epp_server_project }}"
+    files: [docker-compose.yml, compose.rpp.yml]
+    profiles: [setup]
+    services: [mariadb_prep]
+    docker_host: "{{ rootless_docker_host }}"
+    state: absent
+
+- name: Run the EPP server
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ rootless_docker_home }}/epp-server-docker"
+    project_name: "{{ epp_server_project }}"
+    files: [docker-compose.yml, compose.rpp.yml]
+    profiles: [run]
+    docker_host: "{{ rootless_docker_host }}"
+    build: "{{ 'always' if epp_server_checkout is changed or epp_server_submodule is changed else 'policy' }}"
+    recreate: "{{ 'always' if epp_server_settings is changed else 'auto' }}"
+    state: present
+    wait: true
+    wait_timeout: 600

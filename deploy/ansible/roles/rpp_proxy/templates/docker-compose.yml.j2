@@ -1,0 +1,49 @@
+# {{ ansible_managed }}
+# One service per entry of rpp_proxy_instances. The image is the same for all; the configuration makes the instance.
+name: {{ rpp_proxy_project }}
+
+x-hardening: &hardening
+  image: {{ rpp_proxy_image }}
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: {max-size: "{{ rootless_docker_log_max_size }}", max-file: "{{ rootless_docker_log_max_file }}"}
+
+services:
+{% for instance in rpp_proxy_instances %}
+  {{ instance.name }}:
+    <<: *hardening
+    tmpfs:
+      - /tmp:size={{ instance.tmpfs_size | default(rpp_proxy_tmpfs_size) }},noexec,nosuid,nodev
+    mem_limit: {{ instance.mem_limit | default(rpp_proxy_mem_limit) }}
+    cpus: {{ instance.cpus | default(rpp_proxy_cpus) }}
+    pids_limit: {{ instance.pids_limit | default(rpp_proxy_pids_limit) }}
+    environment:
+      {{ ({'WEB_CONCURRENCY': instance.workers | default(rpp_proxy_workers) | string,
+           'FORWARDED_ALLOW_IPS': rpp_proxy_forwarded_allow_ips}
+          | combine(instance.environment | default({}))) | to_json }}
+    labels:
+      org.example.rpp.config-sha256: "{{ rpp_proxy_config_checksums[instance.name] }}"
+    ports:
+      - "{{ rpp_proxy_bind_address }}:{{ instance.port }}:8000"
+    volumes:
+      - {{ rpp_proxy_dir }}/instances/{{ instance.name }}/config:/config:ro
+{% if instance.data | default(false) %}
+      - {{ rpp_proxy_dir }}/instances/{{ instance.name }}/data:/data
+{% endif %}
+    networks:
+      - default
+{% if instance.epp_network | default(false) %}
+      - {{ rpp_proxy_epp_network }}
+{% endif %}
+{% endfor %}
+
+networks:
+  default: {}
+{% if rpp_proxy_instances | selectattr('epp_network', 'defined') | selectattr('epp_network') | list %}
+  {{ rpp_proxy_epp_network }}:
+    external: true
+{% endif %}

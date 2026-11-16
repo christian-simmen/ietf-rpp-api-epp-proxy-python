@@ -1,0 +1,162 @@
+---
+- name: Check the platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Ubuntu'
+      - ansible_facts['distribution_major_version'] is version('22', '>=')
+    fail_msg: The deployment is made for Ubuntu 22.04 or later.
+
+- name: Install the prerequisites of rootless Docker
+  ansible.builtin.apt:
+    name: [ca-certificates, git, uidmap, dbus-user-session, slirp4netns, acl, iptables]
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Add the Docker CE repository
+  when: rootless_docker_install_packages | bool
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: [deb]
+    uris: https://download.docker.com/linux/ubuntu
+    suites: ["{{ ansible_facts['distribution_release'] }}"]
+    components: [stable]
+    architectures: ["{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"]
+    signed_by: https://download.docker.com/linux/ubuntu/gpg
+
+- name: Install Docker CE with its rootless extras
+  when: rootless_docker_install_packages | bool
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-ce-rootless-extras
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+
+- name: Check whether AppArmor restricts unprivileged user namespaces
+  ansible.builtin.stat:
+    path: /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+  register: rootless_docker_userns_restriction
+
+- name: Allow rootlesskit its user namespace
+  when: rootless_docker_userns_restriction.stat.exists
+  ansible.builtin.template:
+    src: usr.bin.rootlesskit.j2
+    dest: /etc/apparmor.d/usr.bin.rootlesskit
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload apparmor profile of rootlesskit
+
+- name: Apply the AppArmor profile before the daemon starts
+  ansible.builtin.meta: flush_handlers
+
+- name: Create the unprivileged user
+  ansible.builtin.user:
+    name: "{{ rootless_docker_user }}"
+    shell: /bin/bash
+    create_home: true
+    password: "!"
+    system: false
+  register: rootless_docker_account
+
+- name: Check that the user cannot use the root daemon
+  ansible.builtin.command: id -nG {{ rootless_docker_user }}
+  register: rootless_docker_groups
+  changed_when: false
+  failed_when: "'docker' in rootless_docker_groups.stdout.split()"
+
+- name: Read the subordinate id ranges
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop: [/etc/subuid, /etc/subgid]
+  register: rootless_docker_subid_files
+
+- name: Find the subordinate ids of the user
+  ansible.builtin.set_fact:
+    rootless_docker_uid: "{{ rootless_docker_account.uid }}"
+    rootless_docker_home: "{{ rootless_docker_account.home }}"
+    rootless_docker_subuid_start: >-
+      {{ (rootless_docker_subid_files.results[0].content | b64decode)
+         | regex_search('(?m)^' ~ rootless_docker_user ~ ':(\d+):(\d+)$', '\1') | first }}
+    rootless_docker_subgid_start: >-
+      {{ (rootless_docker_subid_files.results[1].content | b64decode)
+         | regex_search('(?m)^' ~ rootless_docker_user ~ ':(\d+):(\d+)$', '\1') | first }}
+    rootless_docker_host: "unix:///run/user/{{ rootless_docker_account.uid }}/docker.sock"
+
+- name: Keep the user's services running without a login
+  ansible.builtin.command: loginctl enable-linger {{ rootless_docker_user }}
+  args:
+    creates: /var/lib/systemd/linger/{{ rootless_docker_user }}
+
+- name: Wait for the user's systemd instance
+  ansible.builtin.wait_for:
+    path: /run/user/{{ rootless_docker_uid }}/bus
+    timeout: 60
+
+- name: Create the configuration directory of the rootless daemon
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.file:
+    path: "{{ rootless_docker_home }}/.config/docker"
+    state: directory
+    mode: "0700"
+
+- name: Configure the rootless daemon
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: "{{ rootless_docker_home }}/.config/docker/daemon.json"
+    mode: "0600"
+  notify: Restart rootless docker
+
+- name: Install the rootless daemon as a service of the user
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ rootless_docker_uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ rootless_docker_uid }}/bus"
+  ansible.builtin.command: dockerd-rootless-setuptool.sh install
+  args:
+    creates: "{{ rootless_docker_home }}/.config/systemd/user/docker.service"
+
+- name: Run the rootless daemon
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ rootless_docker_uid }}"
+  ansible.builtin.systemd_service:
+    name: docker
+    scope: user
+    enabled: true
+    state: started
+
+- name: Point the user's Docker CLI at the rootless daemon
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.lineinfile:
+    path: "{{ rootless_docker_home }}/.bashrc"
+    line: export DOCKER_HOST={{ rootless_docker_host }}
+    create: true
+    mode: "0644"
+
+- name: Apply a changed daemon configuration before the containers start
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for the rootless daemon
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.command: docker info --format '{{ "{{" }}.SecurityOptions{{ "}}" }}'
+  environment:
+    DOCKER_HOST: "{{ rootless_docker_host }}"
+  register: rootless_docker_info
+  until: rootless_docker_info.rc == 0
+  retries: 20
+  delay: 3
+  changed_when: false
+  failed_when: rootless_docker_info.rc != 0 or 'rootless' not in rootless_docker_info.stdout
