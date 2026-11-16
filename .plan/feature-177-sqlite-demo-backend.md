@@ -161,6 +161,22 @@ src/registry_adapter/sqlite/       the SQLite backend
   #180 on #179.
 - D17 (coder, delegated) The stash is reused for model, ports and flows (S1), without its `RegistryBackend` change.
 
+- D18 (maintainer, via orchestrator, 2026-11-16) Plan approved. The schema and the data model are process-global and
+  additive (keyed by extension id, idempotent), everything else per app. The schema is registered only by `register()`
+  of a configured extension, with no import side effects. T2 is designed so #178 can make the schema registry per app
+  (per-preset validators) without redoing registration.
+- D19 (maintainer) `src/registration/`, stdlib only, a new root package of import-linter, which imports none of `core`,
+  `rpp`, `registry_adapter`, `settings`, `extensions`.
+- D20 (maintainer) Stub gateways of the SQLite backend raise the not-supported error. A test shows the domain, contact
+  and host paths answer 501 `02307` on `sqlite-demo`, so the stubs are never the path that answers.
+- D21 (maintainer) Satellites move silently with their planet, as subordinate hosts with their domain (RFC 5731
+  section 3.2.4). Only the events of the planet's transfer queue messages.
+- D22 (maintainer) Client passwords are `hashlib.scrypt` in a self-describing string, compared with
+  `hmac.compare_digest`. The demo passwords in `config.demo.yaml` are documented demo values. Neither password nor hash
+  is logged.
+- D23 (maintainer) Fully qualified operationIds are fine. An app without the extension has no operationId pointing at
+  `extensions.*` in its spec.
+
 ## Stash decision (S1)
 
 Reused, moved to `src/extensions/planets/core/{model,ports,flows}/` with imports changed: `Planet`,
@@ -169,5 +185,7 @@ the flows of planet and satellite. The flows take the extension's gateways objec
 Dropped: the `planets` and `satellites` attributes on `core/ports/registry_backend.py` (D11, D13).
 
 ## Open questions
+
+- Follow-up for #178: a per-app schema registry (the schema and data model are process-global today, D18).
 
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` are the maintainer's local changes and stay unstaged.
