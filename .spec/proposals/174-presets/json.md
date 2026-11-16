@@ -3,7 +3,8 @@
 - Issue: #174 (this repository)
 - Base: draft-ietf-rpp-json-01, upstream `src/draft-ietf-rpp-json.md` at commit `07068fc`
 - Builds on: [data-objects.md](data-objects.md) and [core.md](core.md) (accepted)
-- Status: draft for review
+- Status: accepted by the maintainer. Corrected while drafting the guidelines proposal: the Preset Schema also composes
+  in place an extension sub-schema that a profile narrows (C6, Preset Schema)
 
 This proposal defines the JSON side of the separation of extensions, profiles and presets. An extension schema only
 adds, a profile schema only narrows, and the schema of a preset at a server composes both in one self-contained JSON
@@ -379,6 +380,7 @@ The Preset Schema MUST be self-contained: it MUST NOT reference a schema outside
 - Its `$defs` contains every definition of RPP under the key of the definition.
 - The value of a definition that an extension extends or a profile narrows is its effective schema: an `allOf` of the base definition, embedded in place, and the references to the extension and profile sub-schemas, in that order.
 - Its `$defs` contains the sub-schemas of the Extension Schemas of the extensions of the preset and of the Profile Schemas of the applicable profiles, under their keys.
+- The value of a sub-schema of an Extension Schema that a profile narrows is the `allOf` of the sub-schema, embedded in place, and the references to the profile sub-schemas.
 
 A nested reference to a definition, for example from the `create` view of a Process Object to the `create` view of a Component Object, therefore resolves to its effective schema.
 

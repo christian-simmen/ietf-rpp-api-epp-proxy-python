@@ -10,9 +10,9 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 - [x] T1 Proposal for draft-ietf-rpp-data-objects: concepts, Preset and Profile Data Objects, Discovery, IANA, the EPP
       Compatibility Profile as a profile (`.spec/proposals/174-presets/data-objects.md`)
 - [x] T2 Proposal for draft-ietf-rpp-core: `RPP-Preset`, `preset`/`preset-version`, versioning, 02308
-- [~] T3 (draft written, in review) Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
+- [x] T3 Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
       Validation, the JSON Schema part of the EPP Compatibility Profile
-- [ ] T4 Proposal for draft-wullink-rpp-extension-guidelines: a specification format for profiles
+- [~] T4 (draft written, in review) Proposal for draft-wullink-rpp-extension-guidelines: a specification format for profiles
 - [ ] T5 Link the approved proposals from #174
 - [ ] T6 Implementation plan for the proxy (tasks added here once T1-T4 are approved)
 
@@ -55,13 +55,17 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
   wrapped in an RPP message is served in its native media type, so media type signalling cannot carry its preset.
   This amends the accepted data-objects proposal (R6) and replaces RC3 of the core proposal.
 - D13 (maintainer) The core proposal is accepted with RC1-RC7 as drafted.
+- D14 (maintainer) The json proposal is accepted with RJ1-RJ9 as drafted.
 - D11 (maintainer) The agent docs for specification writing go to `main` in their own PR,
   `docs/specification-agent-docs`. This branch is stacked on it.
 
 ## Corrections
 
+- C1 The accepted json proposal did not say how the Preset Schema composes an extension sub-schema that a profile
+  narrows (the case of the Example Profile of the guidelines). Added as a bullet of its Preset Schema section.
+
 ## Open questions
 
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` were changed on `main` before the branch. They are the
   maintainer's and are left unstaged.
-- Review points RJ1-RJ9 of `.spec/proposals/174-presets/json.md` await the maintainer.
+- Review points RG1-RG7 of `.spec/proposals/174-presets/extension-guidelines.md` await the maintainer.
