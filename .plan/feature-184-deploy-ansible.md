@@ -85,8 +85,7 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
   a changed base_url recreated rri-mtest only, removing the entry removed the container and kept its directory.
 - Checks: lint-imports 25 kept; unit 2687 passed; smoke 94 passed, 113 skipped; ansible-lint production profile, 0
   failures; syntax-check ok.
-- Not fixed, for issues before merge: requirements.txt holds the test packages (pytest, xdist) next to the runtime
-  ones; the image uninstalls them.
+- Not fixed: requirements.txt holds the test packages next to the runtime ones (#191); the image uninstalls them.
 
 ## Open questions
 
