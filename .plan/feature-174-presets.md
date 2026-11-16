@@ -9,8 +9,8 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
       `architecture.project.md`
 - [x] T1 Proposal for draft-ietf-rpp-data-objects: concepts, Preset and Profile Data Objects, Discovery, IANA, the EPP
       Compatibility Profile as a profile (`.spec/proposals/174-presets/data-objects.md`)
-- [~] T2 (draft amended, in review) Proposal for draft-ietf-rpp-core: `RPP-Preset`, `preset`/`preset-version`, versioning, 02308
-- [ ] T3 Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
+- [x] T2 Proposal for draft-ietf-rpp-core: `RPP-Preset`, `preset`/`preset-version`, versioning, 02308
+- [~] T3 (draft written, in review) Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
       Validation, the JSON Schema part of the EPP Compatibility Profile
 - [ ] T4 Proposal for draft-wullink-rpp-extension-guidelines: a specification format for profiles
 - [ ] T5 Link the approved proposals from #174
@@ -54,6 +54,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
   cardinality 0-1 or 1. Authentication of the Read operation, and so of the schema, is server policy. A value not
   wrapped in an RPP message is served in its native media type, so media type signalling cannot carry its preset.
   This amends the accepted data-objects proposal (R6) and replaces RC3 of the core proposal.
+- D13 (maintainer) The core proposal is accepted with RC1-RC7 as drafted.
 - D11 (maintainer) The agent docs for specification writing go to `main` in their own PR,
   `docs/specification-agent-docs`. This branch is stacked on it.
 
@@ -63,4 +64,4 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` were changed on `main` before the branch. They are the
   maintainer's and are left unstaged.
-- Review points RC1-RC6 of `.spec/proposals/174-presets/core.md` await the maintainer.
+- Review points RJ1-RJ9 of `.spec/proposals/174-presets/json.md` await the maintainer.
