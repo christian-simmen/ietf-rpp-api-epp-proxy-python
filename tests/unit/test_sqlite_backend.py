@@ -156,6 +156,7 @@ MALFORMED = {
     "n is one": "scrypt$1$8$1$AA==$AA==",
     "n not a power of two": "scrypt$3$8$1$AA==$AA==",
     "n negative": "scrypt$-1024$8$1$AA==$AA==",
+    "n not below 2^(16r)": "scrypt$65536$1$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
     "r is zero": "scrypt$1024$0$1$AA==$AA==",
     "p negative": "scrypt$1024$8$-1$AA==$AA==",
     "too much memory": "scrypt$134217728$8$1$AA==$AA==",

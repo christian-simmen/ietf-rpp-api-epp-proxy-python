@@ -49,6 +49,8 @@ def check_hash(stored: str) -> str | None:
         return "n, r and p are not integers"
     if n < 2 or n & (n - 1):
         return "n is not a power of two above 1"
+    if r >= 1 and n >= 2 ** (16 * r):
+        return "n is not below 2^(16r)"
     if r < 1 or p < 1:
         return "r and p are not positive"
     if 128 * n * r > MAX_MEMORY or r * p >= 2 ** 30:
