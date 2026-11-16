@@ -3,10 +3,15 @@
 Branch `feature/177-sqlite-demo-backend` from `main` (`f4f8ddc`). The requirements and acceptance criteria are in #177.
 Part of #174, Story 1 of 4. Built on today's profile model. #178 moves it to presets.
 
-**Status: frozen by the maintainer (2026-11-16) after T1.** No further code until the maintainer resumes it. The core
-work started before the freeze is not committed: it is in `git stash` ("177 T2 core work in progress (frozen)"). It
-predates D11 to D14 (it puts the planet model in `core/` and attributes on `RegistryBackend`), so it is reworked into
-`src/extensions/planets/core/` or dropped when development resumes.
+**Status: unfrozen by the maintainer (2026-11-16).** Resumed after T1; the plan below is reviewed against the code. The
+stack of PRs is #177, then #178 on #177, #179 on #178 and #180 on #179, each targeting `main` (maintainer decision). The
+registration of extensions (D11 to D14) is built so that #178 and #179 register more extensions, profiles and presets
+through it.
+
+The core work started before the freeze was in `git stash` ("177 T2 core work in progress (frozen)"). It predated D11 to
+D14. Decision (coder, delegated by the maintainer): reuse the model, ports and flows files, moved into
+`src/extensions/planets/core/` (S1); drop its change of `RegistryBackend` (the `planets` and `satellites` attributes,
+which D11 and D13 exclude). The stash stays in place until T3 has taken its files, then it is dropped by the coder.
 
 ## Target layout (D12)
 
@@ -29,7 +34,7 @@ src/registry_adapter/sqlite/       the SQLite backend
       `docs/demo/planets-extension.md` in the extension format of the guidelines, with examples checked by a unit test.
       To move: the schema copy from `src/rpp/extensions/planets/schema/` to `src/extensions/planets/rpp/schema/`, and
       its loading from the folder scan of `rpp/schema/extensions.py` to the registration (T2)
-- [ ] T2 Registration (D11, D13). The configuration key `rpp_extensions` lists the module paths of the extension
+- [ ] T2 Registration (D11, D13), see "Design of the registration" below. The configuration key `rpp_extensions` lists the module paths of the extension
       packages (`extensions.planets`). `main` imports each and calls `register(registry)`. The registry collects every
       element of the pipeline, and the generic code reads only the registry:
       - the schema and the definitions (`rpp/schema/extensions.py` without the folder scan of the encapsulated ones)
@@ -43,7 +48,7 @@ src/registry_adapter/sqlite/       the SQLite backend
         for each configured extension
       - the backend profile leaves of the extension (the transfer operations of a planet), merged into the generic
         profile of the backend
-- [ ] T3 Core of the extension, `src/extensions/planets/core/`: model (Planet, Satellite, replacements, transfer),
+- [ ] T3 Core of the extension, `src/extensions/planets/core/` (the files of the stash, moved, S1): model (Planet, Satellite, replacements, transfer),
       ports (planet and satellite gateways), flows (create and replace with read back, the satellite of a planet at its
       Direct Access path). A planet transfer reuses the generic transfer process of the core (`ContactTransferProcess`,
       rendered as `transferProcess.read`) and `TransferEvent` of the messages with the object type `planet` (D9)
@@ -73,6 +78,34 @@ src/registry_adapter/sqlite/       the SQLite backend
 - [ ] T10 Docs: `overview.project.md` (third backend), `architecture.project.md` (the registration of extensions,
       the SQLite backend), `testing.project.md` (the environment), `README.md`
 - [ ] T11 Checks: `lint-imports`, unit, smoke (`epp-docker` and `sqlite-demo`). MTEST pending for the maintainer.
+
+## Design of the registration (T2)
+
+- `src/registration/` (new generic package, pure Python, stdlib only): `ExtensionRegistry` and `load_extensions(paths)`.
+  `main` builds one registry per app from `rpp_extensions`, imports each module and calls `register(registry)`. An
+  extension module imports generic `core`, `rpp.schema` types and `registration`, never an adapter.
+- What it holds, one entry per extension id: the RPP extension schema; the data model of its objects (Visibility); the
+  OpenAPI fragment (paths and schemas); the package of its handlers; its object identifiers; the factory of its
+  gateways (`session -> object`, by extension id); the name of its SQLite part; the backend profile leaves it adds.
+- Per app and passed explicitly: the OpenAPI fragments (`create_app`), the handler resolver, the objects
+  (`ProfileMiddleware`, discovery), the gateways (`RegistryBackend.extension(id)`), the profile leaves
+  (`BackendProfile.from_layers` with the registered leaves), the SQLite part (`SqliteBackend`).
+- Process-global and additive, as the schema machinery already is (`EXTENSIONS`, `own_definitions`, the validator
+  cache `_effective`): the extension schema and the data model. They are keyed by extension id, so registering twice
+  is idempotent, and a profile reaches a definition only through its `extensions`. `EXTENSIONS` keeps the built-in
+  ones (the `schemas/extensions` folder) and gains `register_extension()`; the folder scan of `rpp/extensions/` is
+  removed.
+- The handlers of a fragment: operationIds are fully qualified module paths
+  (`extensions.planets.rpp.handlers.planet_handlers.planets_create`), resolved by a resolver that takes the registered
+  handler packages and otherwise falls back to the `RelativeResolver('rpp.handlers')`.
+- `RegistryBackend` gains `extension(extension_id)`, which returns the gateways object of that extension (for planets,
+  a `PlanetsGateways` with `planets` and `satellites`) or raises `KeyError`. EPP and RRI answer `KeyError` (they have
+  no extension gateways). The flows of the extension take that object, not the backend.
+- Backend profile leaves of the extension: `BackendProfile.from_layers` takes the registry's extra leaves next to
+  `LEAVES`, so the closed list stays closed (an unregistered leaf is still an error).
+- The SQLite backend has stub gateways for domain, contact, host and request contact (the `RegistryBackend`
+  protocol still has them): each returns the not-supported error. `ProfileMiddleware` answers 501 `02307` first.
+- #183 moves the RRI extension to the same mechanism; #178 and #179 add extensions, profiles and presets with it.
 
 ## Findings (evidence)
 
@@ -123,6 +156,17 @@ src/registry_adapter/sqlite/       the SQLite backend
 - C1 The planets schema and specification of T1 used the prefix `ext.planets.`. Renamed after D10.
 - C2 The schema copy of T1 is in `src/rpp/extensions/planets/schema/` and found by a folder scan. Both change with
   D12 and D13 (T1, T2).
+
+- D16 (maintainer, 2026-11-16) #177 is unfrozen. PRs are stacked, each targeting `main`: #178 on #177, #179 on #178,
+  #180 on #179.
+- D17 (coder, delegated) The stash is reused for model, ports and flows (S1), without its `RegistryBackend` change.
+
+## Stash decision (S1)
+
+Reused, moved to `src/extensions/planets/core/{model,ports,flows}/` with imports changed: `Planet`,
+`PlanetReplacement`, `PlanetTransfer`, `Satellite`, `SatelliteReplacement`, `PlanetGateway`, `SatelliteGateway`, and
+the flows of planet and satellite. The flows take the extension's gateways object instead of `backend.planets`.
+Dropped: the `planets` and `satellites` attributes on `core/ports/registry_backend.py` (D11, D13).
 
 ## Open questions
 
