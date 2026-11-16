@@ -152,9 +152,9 @@
               "profile.contact.name.removable": false
             },
             "then": {
-              "status": 501,
+              "status": 422,
               "headers": {
-                "RPP-Code": "02102"
+                "RPP-Code": "02308"
               },
               "content_type": "application/problem+json",
               "body": {

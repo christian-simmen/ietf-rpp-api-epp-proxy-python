@@ -28,20 +28,20 @@ staged. The clean-main/pull step is skipped by the maintainer's decision.
 
 ## Tasks
 
-- [~] T0 Plan, approved by the orchestrator
-- [ ] I1 Contract
-- [ ] I2 Definitions
-- [ ] I3 Checks at start
-- [ ] I4 Configuration
-- [ ] I5 Preset Schema
-- [ ] I6 Two-step validation
-- [ ] I7 Signalling
-- [ ] I8 Endpoints
-- [ ] I9 Discovery
-- [ ] I10 Mappers
-- [ ] I11 Tests
-- [ ] I12 Docs
-- [ ] I13 Checks: `lint-imports`, unit, full smoke including `rri-mtest` (no MTEST login retry), on the final commit
+- [x] T0 Plan, approved by the orchestrator
+- [x] I1 Contract
+- [x] I2 Definitions
+- [x] I3 Checks at start
+- [x] I4 Configuration
+- [x] I5 Preset Schema
+- [x] I6 Two-step validation
+- [x] I7 Signalling
+- [x] I8 Endpoints
+- [x] I9 Discovery
+- [x] I10 Mappers
+- [x] I11 Tests
+- [x] I12 Docs
+- [~] I13 Checks: `lint-imports`, unit, full smoke including `rri-mtest` (no MTEST login retry), on the final commit
 
 Approach per task: see the report of checkpoint 1 and the sections below. The orchestrator's answers are recorded under
 "Decisions".
@@ -144,3 +144,18 @@ Plan approved by the orchestrator for the maintainer (2026-11-16). Answers:
   Those that diverge from a proposal are recorded in `.spec/spec-issues.md`.
 - Test cases whose expectation changes from 400/501 to 422 under `epp-docker` are listed in the PR description with the
   constraint that causes each. The scripted `{rpp:profile}` to `{rpp:preset}` rename is its own commit.
+
+## Implementation notes
+
+- Two-step validation: `rpp_operation` sets a context variable with the schemas of the request's preset (`rpp/schema/request_schemas.py`),
+  so the mappers are not passed a scope. `validate_request_schema` for what a client sent, `validate_schema` for the rest.
+- EC Profile Schema shipped in full: the walker on the real bundle found no violation (Q3 needed no drop).
+- `preset.read.schema` has `additionalProperties: true` in `.spec/auto`, or the injection would reject the embedded schema.
+- Cases changed from 400/501 to 422 `02308` under `epp-compatible` (constraint of the EC Profile Schema): contact_create test18
+  (`emails` `propertyNames` const `email`), test19 (`profile.ascii` on `name.full`), test23 (`name` required), test25 (`emails` required);
+  limits_contact test10 (at most three `name` components), test21 (`phones` `propertyNames` voice or fax), test23 (`localizations`
+  `maxProperties` 1); contact_update test5 (PUT omits name and emails: required), test20 (remove `name`), test21 (remove `emails`);
+  draft_contact test5 (PUT omits `name`); domain_restore test8 (`restoreTime` required), test9 (`statements` `minItems` 2).
+  Other environments keep their old expectation (a `select` on `profile.default_preset`).
+- Gap for the PR: a PATCH that needs no read is validated by fragments only.
+- #179: demo profiles need a `url` (required), pointing to their `docs/demo/` specification.

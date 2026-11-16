@@ -13,7 +13,7 @@
             "version": "2.0",
             "kind": "individual",
             "name": {
-              "full": "Jörg Müller"
+              "full": "J\u00f6rg M\u00fcller"
             },
             "addresses": {
               "addr": {
@@ -75,14 +75,35 @@
         }
       },
       "response": {
-        "status": 400,
-        "content_type": "application/problem+json",
-        "body": {
-          "type": "urn:ietf:params:rpp:error"
-        },
-        "headers": {
-          "RPP-Code": "02001"
-        }
+        "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible"
+            },
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 400,
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              },
+              "headers": {
+                "RPP-Code": "02001"
+              }
+            }
+          }
+        ]
       }
     }
   ]

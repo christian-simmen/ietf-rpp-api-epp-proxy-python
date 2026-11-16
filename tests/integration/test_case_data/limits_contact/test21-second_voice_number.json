@@ -79,14 +79,35 @@
         }
       },
       "response": {
-        "status": 501,
-        "content_type": "application/problem+json",
-        "headers": {
-          "RPP-Code": "02102"
-        },
-        "body": {
-          "type": "urn:ietf:params:rpp:error"
-        }
+        "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible"
+            },
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 501,
+              "content_type": "application/problem+json",
+              "headers": {
+                "RPP-Code": "02102"
+              },
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          }
+        ]
       }
     }
   ]

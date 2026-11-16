@@ -71,45 +71,66 @@
         }
       },
       "response": {
-        "any_of": [
+        "select": [
           {
-            "status": 400,
-            "headers": {
-              "RPP-Code": "02001"
+            "when": {
+              "profile.default_preset": "epp-compatible"
             },
-            "content_type": "application/problem+json",
-            "body": {
-              "type": "urn:ietf:params:rpp:error"
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
             }
           },
           {
-            "status": 400,
-            "headers": {
-              "RPP-Code": "02003"
-            },
-            "content_type": "application/problem+json",
-            "body": {
-              "type": "urn:ietf:params:rpp:error"
-            }
-          },
-          {
-            "status": 400,
-            "headers": {
-              "RPP-Code": "02005"
-            },
-            "content_type": "application/problem+json",
-            "body": {
-              "type": "urn:ietf:params:rpp:error"
-            }
-          },
-          {
-            "status": 422,
-            "headers": {
-              "RPP-Code": "02306"
-            },
-            "content_type": "application/problem+json",
-            "body": {
-              "type": "urn:ietf:params:rpp:error"
+            "then": {
+              "any_of": [
+                {
+                  "status": 400,
+                  "headers": {
+                    "RPP-Code": "02001"
+                  },
+                  "content_type": "application/problem+json",
+                  "body": {
+                    "type": "urn:ietf:params:rpp:error"
+                  }
+                },
+                {
+                  "status": 400,
+                  "headers": {
+                    "RPP-Code": "02003"
+                  },
+                  "content_type": "application/problem+json",
+                  "body": {
+                    "type": "urn:ietf:params:rpp:error"
+                  }
+                },
+                {
+                  "status": 400,
+                  "headers": {
+                    "RPP-Code": "02005"
+                  },
+                  "content_type": "application/problem+json",
+                  "body": {
+                    "type": "urn:ietf:params:rpp:error"
+                  }
+                },
+                {
+                  "status": 422,
+                  "headers": {
+                    "RPP-Code": "02306"
+                  },
+                  "content_type": "application/problem+json",
+                  "body": {
+                    "type": "urn:ietf:params:rpp:error"
+                  }
+                }
+              ]
             }
           }
         ]

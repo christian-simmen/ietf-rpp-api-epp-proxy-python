@@ -10,7 +10,7 @@
     }
   ],
   "test_id": "test5-put_keeps_what_epp_cannot_clear",
-  "description": "A full update is the wanted state (core §16.8), so the name, address and email it omits are cleared, which EPP cannot do: 501, see spec-issues.md (Full update of a contact).",
+  "description": "A full update is the wanted state (core \u00a716.8), so the name, address and email it omits are cleared, which EPP cannot do: 501, see spec-issues.md (Full update of a contact).",
   "steps": [
     {
       "request": {
@@ -178,9 +178,9 @@
               "profile.contact.name.removable": false
             },
             "then": {
-              "status": 501,
+              "status": 422,
               "headers": {
-                "RPP-Code": "02102"
+                "RPP-Code": "02308"
               },
               "content_type": "application/problem+json",
               "body": {

@@ -21,6 +21,9 @@
         "status": 404,
         "headers": {
           "RPP-Code": "02303"
+        },
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
         }
       }
     }

@@ -10,7 +10,7 @@
     }
   ],
   "test_id": "test5-update",
-  "description": "The request is the example of json 8.2.4 (kind and name are omitted, and so are the organizations). The draft's response keeps `name` and `organizations`. This server takes a full update as the wanted state (core §16.8), so the omitted name is cleared, which EPP cannot do: 501, see spec-issues.md (Full update of a contact).",
+  "description": "The request is the example of json 8.2.4 (kind and name are omitted, and so are the organizations). The draft's response keeps `name` and `organizations`. This server takes a full update as the wanted state (core \u00a716.8), so the omitted name is cleared, which EPP cannot do: 501, see spec-issues.md (Full update of a contact).",
   "steps": [
     {
       "request": {
@@ -200,9 +200,9 @@
               "profile.contact.name.removable": false
             },
             "then": {
-              "status": 501,
+              "status": 422,
               "headers": {
-                "RPP-Code": "02102"
+                "RPP-Code": "02308"
               },
               "content_type": "application/problem+json",
               "body": {

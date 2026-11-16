@@ -109,22 +109,22 @@ by [pacer.py](../../tests/helper/pacer.py)), the registrars, a user the backend 
 `BackendProfile`, the TLD, the environment name and the LGRs are read from that config, as the app reads them, and not
 repeated. A run with more workers than an environment it tests allows does not start.
 
-The descriptor's `profile` is the key of the RPP profile (`epp`, `rri`, `base`) that the placeholders of the profile
-headers stand for. The runner adds and rewrites nothing: every request of every case states its profile headers in the
-case, `"RPP-Profile": "{rpp:profile}"`, `"Accept": "{rpp:accept}"` and `"Content-Type": "{rpp:content-type}"` (on
+The descriptor's `preset` is the key of the RPP preset (`epp-compatible`, `rri`, `planets`, `base`) that the placeholders of
+the preset headers stand for. The runner adds and rewrites nothing: every request of every case states its preset headers in
+the case, `"RPP-Preset": "{rpp:preset}"`, `"Accept": "{rpp:accept}"` and `"Content-Type": "{rpp:content-type}"` (on
 every request, one without a body too, core §13), and the runner resolves each as a whole header value from the
-descriptor's `profile` and the `rpp_profile_signalling` of its config (`with_rpp_headers`):
+descriptor's `preset` and the `rpp_preset_signalling` of its config (`with_rpp_headers`):
 
 | Placeholder | `header` | `media-type` |
 |---|---|---|
-| `{rpp:profile}` | `profile=<name>;version=1.0` | omitted: the header is not sent |
-| `{rpp:accept}`, `{rpp:content-type}` | `application/rpp+json` | `application/rpp+json; profile="<name>"; profile-version="1.0"` |
+| `{rpp:preset}` | `preset=<id>;version=1.0` | omitted: the header is not sent |
+| `{rpp:accept}`, `{rpp:content-type}` | `application/rpp+json` | `application/rpp+json; preset="<id>"; preset-version="1.0"` |
 
 A header the case writes literally is sent as written, so a case can send what the runner would not (a value of another
-media type, a profile the server does not offer). The signalling method is the environment fact `env.profile_signalling`
-(`header` or `media-type`, read from the config, not stated twice). The cases of `profile_signalling_header/` and `profile_signalling_media_type/` hold literal headers and are each active for one
+media type, a preset the server does not offer). The signalling method is the environment fact `env.preset_signalling`
+(`header` or `media-type`, read from the config, not stated twice). The cases of `preset_signalling_header/` and `preset_signalling_media_type/` hold literal headers and are each active for one
 method (a case-level `when` on that fact), so a case that needs a backend as well as a method runs only where an
-environment has both (the rri-only refusals are in `profile_signalling_media_type/`, as no RRI environment uses the header); a step that differs per server selects by the facts, for example `profile.profiles` contains `rri`, never by the
+environment has both (the rri-only refusals are in `preset_signalling_media_type/`, as no RRI environment uses the header); a step that differs per server selects by the facts, for example `profile.presets` contains `rri`, never by the
 backend's name. An expected `content_type` without parameters is the media type of the response whatever its
 parameters; one with parameters is the whole value.
 
@@ -142,7 +142,7 @@ into the `Authorization` header when it sends the request, never into the case, 
 | `{regacc:a}` | the sponsor id of `a`: its login on EPP, the RegAccId of its login on RRI, its user on the SQLite demo backend |
 | `{tld}` | the TLD the environment registers under, the first of `rpp_tlds` of its config |
 | `{env:environment_name}` | `rpp_environment_name` of its config |
-| `{env:profile_signalling}` | `rpp_profile_signalling` of its config |
+| `{env:preset_signalling}` | `rpp_preset_signalling` of its config |
 | `{env:<path>}` | a fact of the environment. A list fact is a whole value only, and the response may hold any of its entries: `"label": "{env:domainName.processes.create.success_status}"` |
 | `{lower:TEXT}` | TEXT in lower case, after the placeholders in it, for an id sent in another case than stored |
 
@@ -156,8 +156,8 @@ values of the config (they are no secrets). It has four registrars: `a` and `b` 
 cases of the message queue only, so that no other case adds to those queues. Its `facts` are those of `epp-docker`, which
 no selector of its cases reads: every group of the drafts' objects has a `_group.json` with
 `{"when": {"profile.objects": {"contains": "contact"}}}` (or the object), so that those groups run where the backend holds
-them. The extension registers its RPP profile `demo`, which the descriptor names: `load` registers the extensions of the
-config before it looks the profile up. The cases are in the smoke suite.
+them. The extension registers its RPP preset `planets`, which the descriptor names: `load` registers the extensions of the
+config before it looks the preset up. The cases are in the smoke suite.
 
 ### DENIC MTEST
 
@@ -279,7 +279,7 @@ Unit tests in `tests/unit/` inject test doubles through constructors:
 - `SessionPool(backend_factory)` takes a factory returning a backend.
   [epp_backends](../../tests/helper/epp_backends.py) turns a factory of fake EPP clients into one, so the test still
   sees the clients.
-- `create_app(sessions, profile)` builds a full app around that session pool and a `BackendProfile`
+- `create_app(sessions, profile, registry=...)` builds a full app around that session pool and a `BackendProfile`
   (`EPP_PROFILE` or `RRI_PROFILE` of [profiles.py](../../tests/helper/profiles.py), the generic profiles; a test
   changes one with `with_changes({"contact": {"fax": {"supported": False}}})`), so a handler can be tested through
   `test_client()` without a registry. See [test_app_injection.py](../../tests/unit/test_app_injection.py).
@@ -391,3 +391,17 @@ Isolate one update facet per file (authInfo-only, hostObj add/remove,
 contacts+registrant, …). `domainNames_create`, `domainNames_updatePartial` and `domainNames_update` build their
 success body from a follow-up EPP **Info** call, so a passing update test also transitively
 exercises Info and `domains.model_to_rpp`.
+
+### Presets and profiles
+
+The proxy criteria of #174 are unit tests over the wire and without an app:
+[test_offered_presets.py](../../tests/unit/test_offered_presets.py) (the checks at start, each refusal naming what conflicts),
+[test_schema_scope.py](../../tests/unit/test_schema_scope.py) (the two steps of validation and the validators of a preset),
+[test_preset_schemas.py](../../tests/unit/test_preset_schemas.py) (the Preset Schema and its endpoint),
+[test_preset_profile_constraints_wire.py](../../tests/unit/test_preset_profile_constraints_wire.py) (a profile constrains, 422
+and the same request without it), [test_presets_wire.py](../../tests/unit/test_presets_wire.py) (Preset and Profile Data
+Objects, discovery) and the signalling tests (`test_preset_header_wire.py`, `test_preset_media_type_wire.py`). The presets and
+profiles of the tests are registered as an extension brings them, with
+[preset_fixtures.py](../../tests/helper/preset_fixtures.py) (`registry_with(presets, profiles)`), so the multiple inheritance
+and the bindings of #180 are covered without its configurations. A mapper called without an app takes its schemas from
+`SchemaScope.of(extensions)`, built on first use and without profiles; an app gives a request the schemas of its preset.

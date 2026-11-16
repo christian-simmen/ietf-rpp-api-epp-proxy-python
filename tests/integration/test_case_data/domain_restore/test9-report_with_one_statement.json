@@ -31,17 +31,41 @@
         }
       },
       "response": {
-        "status": 400,
-        "content_type": "application/problem+json",
-        "headers": {
-          "RPP-Code": "02001",
-          "RPP-Cltrid": {
-            "type": "not_empty_string"
+        "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible"
+            },
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308",
+                "RPP-Cltrid": {
+                  "type": "not_empty_string"
+                }
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 400,
+              "content_type": "application/problem+json",
+              "headers": {
+                "RPP-Code": "02001",
+                "RPP-Cltrid": {
+                  "type": "not_empty_string"
+                }
+              },
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
           }
-        },
-        "body": {
-          "type": "urn:ietf:params:rpp:error"
-        }
+        ]
       }
     }
   ]
