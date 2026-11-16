@@ -1,0 +1,76 @@
+{
+  "test_id": "test9-change_auth_info",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-pu9}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-pu9}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "/planets/{handle:a:-pu9}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": [
+          {
+            "op": "replace",
+            "path": "/authInfo",
+            "value": {
+              "@type": "authInfo",
+              "method": "authinfo",
+              "authdata": "Other-Word2"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "authInfo": {
+            "authdata": "Other-Word2"
+          }
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-delete",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-pd1}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-pd1}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/planets/{handle:a:-pd1}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/planets/{handle:a:-pd1}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 404,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 404
+        },
+        "headers": {
+          "RPP-Code": "02303"
+        }
+      }
+    }
+  ]
+}

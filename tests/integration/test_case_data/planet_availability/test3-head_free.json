@@ -1,0 +1,27 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-head_free",
+  "steps": [
+    {
+      "request": {
+        "method": "HEAD",
+        "url": "/planets/{handle:a:-pa3}/availability",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    }
+  ]
+}

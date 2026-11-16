@@ -39,11 +39,24 @@ header with a new value.
 |---|---|---|---|
 | `epp` (the default when the key is absent) | EPP (RFC 5730 ff.) over TCP | `rpp_epp_*` | [config.yaml](config.yaml) |
 | `rri` | DENIC RRI 5.0 (XML) over TCP | `rpp_rri_*` | [config.rri-mtest.yaml](config.rri-mtest.yaml) |
+| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [config.demo.yaml](config.demo.yaml) |
 
 One process speaks one protocol: the one `rpp_backend` names is on, the other is off and its settings are ignored.
 The RPP API is the same for both. With RRI, what RPP has no place for is in the `de.denic.rpp.rri` extension
 ([docs/rri/rri-extension.md](docs/rri/rri-extension.md)), and what RRI cannot hold or do answers 501: host objects,
 client statuses, renew, transfers, contact deletion, a readable authInfo. See [docs/rri/](docs/rri/) for the mapping.
+
+The `sqlite` backend is a test bed for protocol features, bare RPP over a database. It holds none of the drafts' data
+objects (their paths answer 501 `02307`), but the planets and satellites of the demo extension
+`org.example.rpp.extension.planets` ([docs/demo/planets-extension.md](docs/demo/planets-extension.md)), with create,
+read, update, partial update, delete, availability and, for planets, the EPP-style transfer with its messages. The
+extension is registered by the config (`rpp_extensions: [extensions.planets]`), and without it the proxy does not know it.
+The clients are `rpp_sqlite_clients`, a user and the `scrypt` hash of its password
+(`echo -n secret | python -m registry_adapter.sqlite.hash_password`, from `src/`); the user is the sponsoring client.
+```
+cd src
+RPP_CONFIG_FILE=../config.demo.yaml uvicorn main:app          # clients demo-a and demo-b, passwords demo-a-password ...
+```
 
 A config for RRI states at least:
 ```yaml

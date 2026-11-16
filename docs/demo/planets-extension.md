@@ -252,7 +252,7 @@ The Planet Data Object supports the Transfer Process Object [@!I-D.ietf-rpp-data
 
 * Only the pull transfer is supported. A request for a push transfer is rejected.
 * A client that is not the sponsoring client requests the transfer with the Object Authorisation of the planet. A server MUST reject a request without it, with an Object Authorisation that does not match, and a request of the sponsoring client.
-* The transfer is pending until the sponsoring client approves or rejects it, or the requesting client cancels it. A server MUST NOT approve a pending transfer on its own after a period.
+* The transfer is pending until the sponsoring client approves or rejects it, or the requesting client cancels it. A server MUST NOT approve a pending transfer on its own after a period. As no period ends it, the `actionDate` of a pending transfer is the `requestDate`.
 * The sponsoring client and the requesting client of the latest transfer can query it.
 * On approval, the requesting client becomes the sponsoring client of the planet and of all its satellites.
 * A server informs the sponsoring client of a request and of a cancellation, and the requesting client of an approval and of a rejection, with a message [@!I-D.ietf-rpp-core]. The message is a Transfer Request Message or a Transfer Outcome Message with the Object Type `planet`.

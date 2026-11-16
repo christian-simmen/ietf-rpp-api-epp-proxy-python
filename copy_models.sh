@@ -10,4 +10,4 @@ cp -v .spec/rri-extension.schema.json ./src/rpp/schema/schemas/extensions/
 cp -v .spec/epp-compatibility.schema.json ./src/rpp/schema/schemas/extensions/
 cp -v .spec/profile-schemas.schema.json ./src/rpp/schema/schemas/extensions/
 # The demo extension of the SQLite backend, described in docs/demo/planets-extension.md.
-cp -v .spec/planets-extension.schema.json ./src/rpp/extensions/planets/schema/
+cp -v .spec/planets-extension.schema.json ./src/extensions/planets/rpp/schema/

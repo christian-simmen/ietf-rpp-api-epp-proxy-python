@@ -1,5 +1,5 @@
-"""The RPP extensions the proxy implements, one schema file each (copied from `.spec/` by copy_models.sh): in
-`schemas/extensions/`, or in the `schema/` folder of an extension whose code is encapsulated in `rpp/extensions/<name>/`.
+"""The RPP extensions the proxy implements, one schema file each (copied from `.spec/` by copy_models.sh) in
+`schemas/extensions/`, and those a deployment registers by its configuration (`rpp_extensions`, `register_extension`).
 Which of them a deployment offers is the `extensions` of its backend profile."""
 import json
 from pathlib import Path
@@ -7,9 +7,6 @@ from pathlib import Path
 from rpp.schema.rpp_extension import RppExtension
 
 FOLDER = Path(__file__).parent / "schemas" / "extensions"
-
-# The packages of the extensions whose code is encapsulated, each with its schema in `schema/`.
-PACKAGES = Path(__file__).parents[1] / "extensions"
 
 _DEF = "#/$defs/"
 
@@ -20,9 +17,7 @@ def _name(ref: str) -> str:
     return ref[len(_DEF):]
 
 
-def _load(path: Path) -> RppExtension:
-    with open(path, encoding="utf-8") as f:
-        schema = json.load(f)
+def _from_schema(schema: dict) -> RppExtension:
     about = schema["rpp:extension"]
     return RppExtension(
         id=about["id"], name=about["name"], version=about["version"], url=schema["$id"],
@@ -35,9 +30,23 @@ def _load(path: Path) -> RppExtension:
 # The extensions that belong to the server and to no profile: discovery lists them next to those of the profiles.
 SERVER_EXTENSIONS = ("urn:ietf:params:rpp:extension:profile-schemas",)
 
+def _load(path: Path) -> RppExtension:
+    with open(path, encoding="utf-8") as f:
+        return _from_schema(json.load(f))
+
+
 EXTENSIONS: dict[str, RppExtension] = {
-    extension.id: extension for extension in map(_load, sorted([*FOLDER.glob("*.json"), *PACKAGES.glob("*/schema/*.schema.json")]))
+    extension.id: extension for extension in map(_load, sorted(FOLDER.glob("*.json")))
 }
+
+
+def register_extension(schema: dict) -> RppExtension:
+    """Adds the extension of a schema a configured extension registered. It is process-global and keyed by id, so
+    registering it again is no change. Only `register()` of an extension the configuration names calls this."""
+    extension = _from_schema(schema)
+    if extension.id not in EXTENSIONS:
+        EXTENSIONS[extension.id] = extension
+    return EXTENSIONS[extension.id]
 
 
 def added_members(schema_name: str, extensions) -> frozenset[str]:

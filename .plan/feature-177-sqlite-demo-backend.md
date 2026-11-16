@@ -34,7 +34,7 @@ src/registry_adapter/sqlite/       the SQLite backend
       `docs/demo/planets-extension.md` in the extension format of the guidelines, with examples checked by a unit test.
       To move: the schema copy from `src/rpp/extensions/planets/schema/` to `src/extensions/planets/rpp/schema/`, and
       its loading from the folder scan of `rpp/schema/extensions.py` to the registration (T2)
-- [ ] T2 Registration (D11, D13), see "Design of the registration" below. The configuration key `rpp_extensions` lists the module paths of the extension
+- [x] T2 Registration (D11, D13), see "Design of the registration" below. The configuration key `rpp_extensions` lists the module paths of the extension
       packages (`extensions.planets`). `main` imports each and calls `register(registry)`. The registry collects every
       element of the pipeline, and the generic code reads only the registry:
       - the schema and the definitions (`rpp/schema/extensions.py` without the folder scan of the encapsulated ones)
@@ -48,36 +48,36 @@ src/registry_adapter/sqlite/       the SQLite backend
         for each configured extension
       - the backend profile leaves of the extension (the transfer operations of a planet), merged into the generic
         profile of the backend
-- [ ] T3 Core of the extension, `src/extensions/planets/core/` (the files of the stash, moved, S1): model (Planet, Satellite, replacements, transfer),
+- [x] T3 Core of the extension, `src/extensions/planets/core/` (the files of the stash, moved, S1): model (Planet, Satellite, replacements, transfer),
       ports (planet and satellite gateways), flows (create and replace with read back, the satellite of a planet at its
       Direct Access path). A planet transfer reuses the generic transfer process of the core (`ContactTransferProcess`,
       rendered as `transferProcess.read`) and `TransferEvent` of the messages with the object type `planet` (D9)
-- [ ] T4 SQLite backend, `src/registry_adapter/sqlite/` (D12):
+- [x] T4 SQLite backend, `src/registry_adapter/sqlite/` (D12):
       - common: SQLAlchemy 2.x engine and file or memory database, migrations (each part's tables in its own
         metadata, created at start, with a schema version per part), clients and authentication, base classes of the
         models and gateways, the message queue (`MessageGateway`), `SqliteBackend` (one user's session, sponsor id)
       - `extensions/planets/`: the models (planet, satellite, transfer) and the gateways, with the sponsor checks, the
         pending transfer, the satellites that move with their planet, and the messages of a transfer
-- [ ] T5 Settings: `rpp_backend: sqlite`, `rpp_sqlite_url`, `rpp_sqlite_clients` (user to password hash,
+- [x] T5 Settings: `rpp_backend: sqlite`, `rpp_sqlite_url`, `rpp_sqlite_clients` (user to password hash,
       `hashlib.scrypt` in a self-describing string), `rpp_extensions`, the generic backend profile
       `src/settings/profiles/sqlite.yaml` (no objects of its own), the RPP profile `demo`, `config.demo.yaml`
-- [ ] T6 RPP of the extension, `src/extensions/planets/rpp/`: the OpenAPI fragment (availability, create, read, update
+- [x] T6 RPP of the extension, `src/extensions/planets/rpp/`: the OpenAPI fragment (availability, create, read, update
       and delete of both objects, the transfer of a planet, the Direct Access path
       `/planets/{id}/satellites/{satelliteId}`, D8), DTOs, mappers, handlers. A partial update reads the object, applies
       the JSON Patch of json §5.2 to its update view, and replaces it
-- [ ] T7 Integration environment `sqlite-demo` (`config.demo.yaml`, a temporary database, no credentials) and test
+- [x] T7 Integration environment `sqlite-demo` (`config.demo.yaml`, a temporary database, no credentials) and test
       cases `planet_*`, `satellite_*` and `planet_transfer`, the smoke ones marked. A unit test that an app built
       without `rpp_extensions` has no planet path and no loaded module of `extensions`
-- [ ] T8 Checks at start: no definition of an extension has the name of a base definition or of another extension's
+- [x] T8 Checks at start: no definition of an extension has the name of a base definition or of another extension's
       (D10); an extension named in the configuration loads and registers, or the app does not start
-- [ ] T9 Import contracts in `pyproject.toml`: no generic package (`core`, `rpp`, `registry_adapter` outside
+- [x] T9 Import contracts in `pyproject.toml`: no generic package (`core`, `rpp`, `registry_adapter` outside
       `registry_adapter.sqlite.extensions`, `settings`) imports `extensions`; inside `extensions.<name>`, `rpp` over
       `core`, and the layers of `rpp` (`handlers` over `mapping` over `dto | schema`); `registry_adapter.sqlite.extensions`
       imports `extensions.<name>.core` only; `registry_adapter.sqlite` independent of `epp` and `rri`. `sqlalchemy` in
       `requirements.txt`
-- [ ] T10 Docs: `overview.project.md` (third backend), `architecture.project.md` (the registration of extensions,
+- [x] T10 Docs: `overview.project.md` (third backend), `architecture.project.md` (the registration of extensions,
       the SQLite backend), `testing.project.md` (the environment), `README.md`
-- [ ] T11 Checks: `lint-imports`, unit, smoke (`epp-docker` and `sqlite-demo`). MTEST pending for the maintainer.
+- [~] T11 Checks: `lint-imports`, unit, smoke (`epp-docker` and `sqlite-demo`). MTEST pending for the maintainer.
 
 ## Design of the registration (T2)
 
@@ -106,6 +106,23 @@ src/registry_adapter/sqlite/       the SQLite backend
 - The SQLite backend has stub gateways for domain, contact, host and request contact (the `RegistryBackend`
   protocol still has them): each returns the not-supported error. `ProfileMiddleware` answers 501 `02307` first.
 - #183 moves the RRI extension to the same mechanism; #178 and #179 add extensions, profiles and presets with it.
+
+## Implementation notes (draft PR)
+
+- Registry: `src/registration/` (`ExtensionRegistry`, `RegisteredExtension`, `load_extensions`, `with_extensions`);
+  `src/registry_setup.py` (`load_registry`, `backend_profile`) is used by `main` and by the test environments, so that
+  building a profile composes no app. `rpp/schema/extension_registration.py` registers the schema, the data model and
+  the RPP profiles process-globally (and checks the names, T8); `extension_paths.add_registered_paths` and
+  `ExtensionResolver` are per app.
+- The RPP profile `demo` (`org.example.rpp.profile.planets`) is brought by the extension (`rpp_profiles`), so the generic
+  `sqlite.yaml` offers `base` only and `config.demo.yaml` offers `base` and `demo`.
+- The satellites of a planet have no sponsor column: their sponsor is the planet's, so they move with it (D4, D21).
+- The action date of a pending transfer is its request date, as no period ends it. One sentence added to the
+  specification.
+- Cases of the drafts' objects: 20 groups got a `_group.json` (`profile.objects` contains `contact`), so that they are
+  skipped on `sqlite-demo`. Groups that had one select by leaves that are false on the SQLite profile.
+- `sqlite-demo` has registrars `c` and `d` for the message cases (no other case adds to their queues).
+- MTEST run: pending for the maintainer (no machine on the allowlist).
 
 ## Findings (evidence)
 
@@ -185,6 +202,9 @@ the flows of planet and satellite. The flows take the extension's gateways objec
 Dropped: the `planets` and `satellites` attributes on `core/ports/registry_backend.py` (D11, D13).
 
 ## Open questions
+
+- The stubs of the drafts' objects return `UNIMPLEMENTED_OBJECT_SERVICE` as an `ErrorResponse`, the port convention, and
+  do not raise (D20: "raising the not-supported error").
 
 - Follow-up for #178: a per-app schema registry (the schema and data model are process-global today, D18).
 

@@ -1,0 +1,49 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test5-discovery_lists_the_extension_and_its_objects",
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "discovery",
+          "objects": [
+            "planet",
+            "satellite"
+          ],
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets",
+              "name": "RPP Planets",
+              "version": "1.0",
+              "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json"
+            },
+            {
+              "@type": "extension",
+              "id": "urn:ietf:params:rpp:extension:profile-schemas",
+              "name": "RPP Profile Schemas",
+              "version": "1.0"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

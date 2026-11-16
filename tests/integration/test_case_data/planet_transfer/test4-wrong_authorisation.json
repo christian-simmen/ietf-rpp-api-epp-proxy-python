@@ -1,0 +1,68 @@
+{
+  "test_id": "test4-wrong_authorisation",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-pt4}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-pt4}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pt4}/processes/transferProcesses",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Authorization": "authinfo value=V3JvbmctV29yZDk="
+        },
+        "body_json": {
+          "@type": "transferProcess",
+          "transferDir": "pull"
+        }
+      },
+      "response": {
+        "status": 401,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 401
+        },
+        "headers": {
+          "RPP-Code": "02202"
+        }
+      }
+    }
+  ]
+}

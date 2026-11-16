@@ -12,8 +12,12 @@ registry object (#120). The rules below are checked by `import-linter`.
 ```
 src/
 ├── main.py                  composition root, the only module that knows all others
+├── registry_setup.py        the extensions the settings name, registered, and the backend profile built with them
 ├── settings/                loads config.yaml once into typed sections, which main.py passes on
-│   └── profiles/            epp.yaml, rri.yaml: the generic backend profile of each protocol (not the RPP profiles)
+│   └── profiles/            epp.yaml, rri.yaml, sqlite.yaml: the generic backend profile of each protocol (not the RPP profiles)
+├── registration/            the registry of the extensions a configuration names: stdlib only, knows no other package
+├── extensions/<name>/       one extension (today `planets`): register_<name>.py, core/{model,ports,flows}/ and
+│                            rpp/{dto,mapping,handlers,schema}/, see Registered extensions below
 ├── core/                    pure Python: no I/O, no framework, no protocol
 │   ├── model/{shared,domain,contact,host,message,request_contact}/
 │   ├── result/              ResultCode, UnknownResultCode, OperationResponse, ErrorResponse
@@ -39,6 +43,8 @@ src/
     │   ├── gateways/        EppBackend, Epp*Gateway
     │   ├── idn_tables.py    lgr <-> EPP IDN table
     │   └── refusals.py, contact_refusal.py
+    ├── sqlite/              the demo backend over SQLAlchemy: database, migrations, clients, the message queue, the
+    │   │                    session (SqliteBackend); extensions/<name>/ holds the models and gateways of an extension
     ├── rri/
     │   ├── session/         RriClient: LOGIN (no greeting), LOGOUT, lock, re-login, RegAccId of the login
     │   ├── xml/             codec, generated/ (xsdata, from docs/rri/xsd by generate_rri_models.sh)
@@ -68,6 +74,12 @@ Package `__init__.py` files are empty, except `rpp/handlers/__init__.py`, which 
 - `registry_adapter/<protocol>` imports `core` and `registry_adapter/common`, never another protocol and never `rpp`.
 - `registry_adapter/common` imports no project package: no `core`, no protocol, no `settings`.
 - Only `main` imports more than one adapter. Nobody but `main` imports `settings`.
+- `registration` imports no other package of the proxy. No generic package (`core`, `rpp`, `registry_adapter`,
+  `settings`, `registration`) imports `extensions`, but `registry_adapter/sqlite/extensions/<name>` imports the `core` of
+  its extension and nothing else of it. An extension imports no registry adapter, settings or XML; its `core` imports
+  the `core` of the proxy only; inside it `register_<name> → rpp → core`, `rpp: handlers → mapping → dto, schema`,
+  `core: flows → ports → model`. The common part of `registry_adapter/sqlite` never imports the part of an extension
+  (it loads it by name) and `registry_adapter/sqlite` stays independent of `epp` and `rri`.
 - Inside `core`: `flows → ports → model, result, capabilities`. The object sub-packages of `model` import only
   `model/shared`, except `domain → contact` for contact references.
 - Inside `rpp`: `handlers → mapping, http`; `mapping → dto, schema`. `mapping` never imports `http`, Flask or
@@ -96,7 +108,7 @@ Package `__init__.py` files are empty, except `rpp/handlers/__init__.py`, which 
 [pyproject.toml](../../pyproject.toml) and run with `PYTHONPATH=src lint-imports` (see
 [process.project.md](process.project.md#checks-before-done)). A forbidden contract also follows indirect imports.
 `main.py` is a module, which import-linter cannot take as a root, so an import of `main` is forbidden by name and what
-`main` imports is not checked. `protocols-independent` keeps `epp` and `rri` apart. Every
+`main` imports is not checked. `protocols-independent` keeps `epp`, `rri` and `sqlite` apart. Every
 `ignore_imports` entry is known debt below; never add one for new code. The "must never know" table is not checked
 by imports where it is about names and messages; see the known debt.
 
@@ -356,7 +368,8 @@ The extension paths exist for the extensions of every offered profile, so those 
 ## RPP extensions
 
 An RPP extension (json §7) is a schema file in `.spec/`, copied by [copy_models.sh](../../copy_models.sh) to
-`src/rpp/schema/schemas/extensions/`, and specified under `docs/` as
+`src/rpp/schema/schemas/extensions/` (or, for an extension registered by configuration, to its own package, see
+[Registered extensions](#registered-extensions)), and specified under `docs/` as
 [specification.project.md](specification.project.md#kinds-of-specification) describes. `rpp/schema/extensions.py` loads them (`RppExtension`): the
 Extension Object discovery states, the definitions each adds to a base definition, and the data objects it defines
 (`objects` of `rpp:extension`). A deployment offers those of its offered profiles; `create_app`
@@ -415,6 +428,39 @@ The EPP renew reply carries the new expiry date, so there is no read-back, and t
 
 `RppRequestBodyValidator` and `RppResponseBodyValidator` in `rpp/http/validators/` let a body be absent where the
 OpenAPI allows it, which Connexion's validators do not. The handler then gets an empty dict.
+
+### Registered extensions
+
+An extension of the proxy's own that is not built into the generic code is registered by the configuration: `rpp_extensions`
+lists the module paths of the extension packages (`extensions.planets`), and `registry_setup.load_registry` imports
+each and calls its `register(registry)` ([registration/](../../src/registration/)). The module registers one
+`RegisteredExtension`, every element of the pipeline as data, and imports nothing of an adapter:
+
+| Element | Is read by |
+|---|---|
+| the RPP extension schema, the data model of its objects (Visibility), its RPP profiles | `rpp.schema` (`register_all`), process-global, keyed by extension id, so registering twice is no change. Nothing registers by import; a process that composes no app with the extension never sees it |
+| the OpenAPI fragment of its paths, and the package of its handlers (every operationId is a fully qualified function name) | `create_app` (`add_registered_paths`, `ExtensionResolver`), per app |
+| its objects | `ProfileMiddleware` and discovery, through the extension's schema |
+| its part of a backend (`backend_parts`) | the backend: the SQLite backend imports `registry_adapter.sqlite.extensions.<name>`, which has `PART` (its tables, in a metadata of their own, with a schema version) and `gateways(context)` |
+| the leaves it adds to the backend profile (`objects`, `extensions` are added to the generic profile's, other leaves are new) | `BackendProfile.from_layers(..., extra_leaves=...)`: the list of leaves stays closed, and without the extension a leaf of it is unknown |
+
+A backend gives the gateways of an extension by its id, `RegistryBackend.extension(extension_id)` (a `KeyError` where the
+backend does not hold it), so no backend names an extension. An extension the configuration names that does not import,
+has no `register`, has a definition named as a base definition or as another extension's, or has no part in the
+configured backend, stops the app. The schema and the data model being process-global is a limit, noted for #178, where
+presets need validators per preset.
+
+The SQLite backend (`rpp_backend: sqlite`, [config.demo.yaml](../../config.demo.yaml)) is made as a test bed: the clients
+are `rpp_sqlite_clients` (user to a `scrypt$...` hash, made by `python -m registry_adapter.sqlite.hash_password`, compared
+in constant time; the user is the sponsoring client), the database is `rpp_sqlite_url` (a file, or `sqlite://` in
+memory), and every unit of work holds one lock. The tables of each part are created at start with their schema version
+(`schema_versions`), and a version that differs stops the app: there is no migration yet. Its generic profile
+(`settings/profiles/sqlite.yaml`) holds none of the drafts' objects, so their paths answer 501 `02307` from
+`ProfileMiddleware`; the stub gateways of those objects (`UnsupportedGateway`) are never what answers. The message queue
+holds the events of a transfer (`TransferEvent`, object type `planet`). The planets extension
+([docs/demo/planets-extension.md](../demo/planets-extension.md)) follows EPP for the transfer of a planet (RFC 5731
+section 3.2.4): a pull that waits for the sponsor, its satellites have no sponsor of their own and so move with it, and
+only the planet's events queue messages.
 
 ## Generated artifacts: do not hand-edit
 
@@ -522,7 +568,8 @@ turns both checks off, for test backends only, and `main.py` warns when it is on
 `rpp_epp_objects`, `rpp_epp_extensions` and `rpp_epp_connection_cache` are read into `EppSettings`, but nothing uses
 them.
 
-`rpp_backend` names the protocol (`Settings.backend`). `RriSettings` holds `rpp_rri_host`, `rpp_rri_port` (51131),
+`rpp_extensions` lists the extension modules to register, see [Registered extensions](#registered-extensions).
+`SqliteSettings` holds `rpp_sqlite_url` and `rpp_sqlite_clients`. `rpp_backend` names the protocol (`Settings.backend`). `RriSettings` holds `rpp_rri_host`, `rpp_rri_port` (51131),
 `rpp_rri_use_tls`, `rpp_rri_tls_insecure_skip_verify` (test backends only, main warns), `rpp_rri_timeout` (unused,
 like the EPP one) and `rpp_rri_lgr`, the one LGR a client may name for DENIC's repertoire (gap Q11). There is no
 RegAccId setting: it is taken from the login.
@@ -540,8 +587,9 @@ does not check the `version` parameter of the media type, so core §12's 406 is 
 
 [src/main.py](../../src/main.py) is the composition root. `compose(settings)` builds the app of one settings, and
 `main` composes the settings it loads once as `main:app`; the integration tests compose one per test environment.
-`rpp_backend` (`epp` by default, or `rri`) picks
-`new_epp_backend` or `new_rri_backend` from `backends`, and builds the `BackendProfile` from the layers of the
+`rpp_backend` (`epp` by default, `rri`, or `sqlite`) picks
+`new_epp_backend`, `new_rri_backend` or the SQLite factory from `backends`, after `load_registry` has registered the
+extensions of `rpp_extensions`, and builds the `BackendProfile` from the layers of the
 settings, which both the backend and the app get; nothing else knows which backend runs.
 `new_epp_backend` builds an `EppBackend` over the default
 `EPPClient`, with the namespace map and the `IdnTables`, and `new_rri_backend` an `RriBackend` over an `RriClient`

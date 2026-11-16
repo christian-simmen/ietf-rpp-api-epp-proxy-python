@@ -1,0 +1,28 @@
+{
+  "test_id": "test3-unknown_message",
+  "steps": [
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/messages/999999",
+        "headers": {
+          "Authorization": "{auth:d}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 404,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 404
+        },
+        "headers": {
+          "RPP-Code": "02303"
+        }
+      }
+    }
+  ]
+}

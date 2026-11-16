@@ -1,0 +1,130 @@
+{
+  "test_id": "test3-planet_cannot_change",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-su3}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-su3}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/satellites",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "satellite",
+          "id": "{handle:a:-su3s}",
+          "planet": {
+            "@type": "planet",
+            "id": "{handle:a:-su3}"
+          },
+          "orbitalPeriod": 0.32
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "satellite",
+          "id": "{handle:a:-su3s}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "/satellites/{handle:a:-su3s}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": [
+          {
+            "op": "replace",
+            "path": "/planet",
+            "value": {
+              "@type": "planet",
+              "id": "x"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 400
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/satellites/{handle:a:-su3s}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "satellite",
+          "planet": {
+            "@type": "planet",
+            "id": "x"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 400
+        }
+      }
+    }
+  ]
+}

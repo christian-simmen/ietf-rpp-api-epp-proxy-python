@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 from jsonschema import ValidationError
 
+from rpp.schema.extensions import register_extension
 from rpp.schema.validator import validate_schema
 
 # the tests map without an app, so a validator is built on first use (tests/conftest.py)
@@ -19,6 +20,10 @@ ROOT = Path(__file__).parents[2]
 DOC = (ROOT / "docs" / "demo" / "planets-extension.md").read_text(encoding="utf-8")
 
 SCHEMA = json.loads((ROOT / ".spec" / "planets-extension.schema.json").read_text(encoding="utf-8"))
+
+# The extension is registered by the configuration of a deployment, never by an import: this test registers it as a
+# configured deployment would.
+register_extension(SCHEMA)
 
 EXTENSIONS = (SCHEMA["rpp:extension"]["id"],)
 
@@ -62,5 +67,5 @@ def test_the_mapping_and_the_overview_are_those_of_the_schema():
 
 
 def test_the_copy_in_the_app_is_the_schema():
-    copy = ROOT / "src" / "rpp" / "extensions" / "planets" / "schema" / "planets-extension.schema.json"
+    copy = ROOT / "src" / "extensions" / "planets" / "rpp" / "schema" / "planets-extension.schema.json"
     assert json.loads(copy.read_text(encoding="utf-8")) == SCHEMA

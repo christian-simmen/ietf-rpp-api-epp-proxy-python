@@ -1,0 +1,350 @@
+{
+  "test_id": "test2-cancel_and_reject_queue_messages",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-pm2}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-pm2}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pm2}/processes/transferProcesses",
+        "headers": {
+          "Authorization": "{auth:d}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Authorization": "authinfo value=U2VjcmV0LVdvcmQx"
+        },
+        "body_json": {
+          "@type": "transferProcess",
+          "transferDir": "pull"
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "transferProcess",
+          "trStatus": "pending"
+        },
+        "headers": {
+          "RPP-Code": "01001"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/planets/{handle:a:-pm2}/processes/transferProcesses/latest",
+        "headers": {
+          "Authorization": "{auth:d}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "trStatus": "clientCancelled"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pm2}/processes/transferProcesses",
+        "headers": {
+          "Authorization": "{auth:d}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Authorization": "authinfo value=U2VjcmV0LVdvcmQx"
+        },
+        "body_json": {
+          "@type": "transferProcess",
+          "transferDir": "pull"
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "transferProcess",
+          "trStatus": "pending"
+        },
+        "headers": {
+          "RPP-Code": "01001"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pm2}/processes/transferProcesses/latest/transferReject",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "trStatus": "clientRejected"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/messages",
+        "headers": {
+          "Authorization": "{auth:d}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": [
+          {
+            "data": {
+              "@type": "transferOutcomeMessage",
+              "objectId": "{handle:a:-pm2}",
+              "trStatus": "clientRejected"
+            }
+          }
+        ],
+        "headers": {
+          "RPP-Queue-Size": "1",
+          "RPP-Code": "01301"
+        }
+      },
+      "capture": {
+        "head": "0.id"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/messages/{capture:head}",
+        "headers": {
+          "Authorization": "{auth:d}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/messages",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": [
+          {
+            "data": {
+              "@type": "transferRequestMessage",
+              "objectId": "{handle:a:-pm2}"
+            }
+          }
+        ],
+        "headers": {
+          "RPP-Queue-Size": "3",
+          "RPP-Code": "01301"
+        }
+      },
+      "capture": {
+        "head": "0.id"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/messages/{capture:head}",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/messages",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": [
+          {
+            "data": {
+              "@type": "transferOutcomeMessage",
+              "objectId": "{handle:a:-pm2}",
+              "trStatus": "clientCancelled"
+            }
+          }
+        ],
+        "headers": {
+          "RPP-Queue-Size": "2",
+          "RPP-Code": "01301"
+        }
+      },
+      "capture": {
+        "head": "0.id"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/messages/{capture:head}",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/messages",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": [
+          {
+            "data": {
+              "@type": "transferRequestMessage",
+              "objectId": "{handle:a:-pm2}"
+            }
+          }
+        ],
+        "headers": {
+          "RPP-Queue-Size": "1",
+          "RPP-Code": "01301"
+        }
+      },
+      "capture": {
+        "head": "0.id"
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/messages/{capture:head}",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    }
+  ]
+}

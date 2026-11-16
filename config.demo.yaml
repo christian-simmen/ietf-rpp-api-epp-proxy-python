@@ -1,0 +1,42 @@
+# The proxy over the SQLite demo backend (rpp_backend: sqlite): bare RPP with the demo objects Planet and Satellite of
+# the extension org.example.rpp.extension.planets (docs/demo/planets-extension.md). It runs without a registry, and is
+# the test environment `sqlite-demo` of the integration suite (RPP_TEST_ENV=sqlite-demo).
+rpp_backend: sqlite
+
+# The database: a SQLAlchemy URL, a file (sqlite:///demo.db) or one in memory (sqlite://), which starts empty.
+rpp_sqlite_url: sqlite://
+
+# The clients: the user of the Basic authentication, and the hash of its password (`scrypt$...`, made by
+# `python -m registry_adapter.sqlite.hash_password`, which reads the password from its standard input). The user is the
+# sponsoring client of what it creates. The passwords are DEMO values, the same as in
+# tests/integration/environments/sqlite-demo.yaml: demo-a-password, demo-b-password, demo-c-password and
+# demo-d-password (the cases about the message queue use c and d only, so that no other case adds to their queues). A real deployment never keeps
+# them: it makes its own hashes.
+rpp_sqlite_clients:
+  demo-a: scrypt$4096$8$1$/KkO8lOLGvobDljcFirbIg==$UdihO4qzdOTc1fYD1mk/cuVD4CpSQomj9tKX/79SnM4=
+  demo-b: scrypt$4096$8$1$/2DzvTsWK2PM5ra/Q4ZZVw==$xXScrBzRxgzIkXg4ukOtCCFTsF02PVdhxJZCNsz2CTk=
+  demo-c: scrypt$4096$8$1$PwbpFHgXKZxhnlm8bGEdFA==$jFEoc+sV7exqTS4gyvGgbfDrbdV4eCLECJeQP5xNSo4=
+  demo-d: scrypt$4096$8$1$y+jGjUJj/qZbBXfkBRh3yQ==$PGBsQP5Ebg/aywY1PmRW3KMaj4va7+qlThhdeyYSNio=
+
+# The extensions this deployment is built with: the module paths of the extension packages. Each registers its schema,
+# paths, handlers, objects, SQLite part and profile leaves. Without them the proxy does not know the extension.
+rpp_extensions:
+  - extensions.planets
+
+rpp_profile_signalling: header
+
+# The profile of this server: src/settings/profiles/sqlite.yaml, which holds none of the drafts' objects, and what the
+# planets extension adds. The RPP profile `demo` is the one the extension brings.
+rpp_backend_profile:
+  extends: sqlite
+  profiles:
+    - base
+    - demo
+  default_profile: demo
+
+# What the discovery document states (placeholders for the test deployment).
+rpp_base_url: https://localhost:8000
+rpp_tlds:
+  - example
+rpp_environment_name: rpp-sqlite-demo.example
+rpp_environment_status: test

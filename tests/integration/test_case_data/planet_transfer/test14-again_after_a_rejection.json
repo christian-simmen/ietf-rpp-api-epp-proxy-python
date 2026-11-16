@@ -1,0 +1,144 @@
+{
+  "test_id": "test14-again_after_a_rejection",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-pt14}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-pt14}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pt14}/processes/transferProcesses",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Authorization": "authinfo value=U2VjcmV0LVdvcmQx"
+        },
+        "body_json": {
+          "@type": "transferProcess",
+          "transferDir": "pull"
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "transferProcess",
+          "trStatus": "pending"
+        },
+        "headers": {
+          "RPP-Code": "01001"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pt14}/processes/transferProcesses/latest/transferReject",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "trStatus": "clientRejected"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pt14}/processes/transferProcesses",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Authorization": "authinfo value=U2VjcmV0LVdvcmQx"
+        },
+        "body_json": {
+          "@type": "transferProcess",
+          "transferDir": "pull"
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "transferProcess",
+          "trStatus": "pending"
+        },
+        "headers": {
+          "RPP-Code": "01001"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pt14}/processes/transferProcesses/latest/transferApprove",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "trStatus": "clientApproved"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    }
+  ]
+}

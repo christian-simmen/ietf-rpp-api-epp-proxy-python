@@ -139,12 +139,25 @@ into the `Authorization` header when it sends the request, never into the case, 
 | `{auth:a}`, `{auth:b}` | HTTP Basic of registrar `a` or `b` |
 | `{auth:unknown_user}` | a user the backend does not know. No case logs in to a test account with a wrong password, which could lock it |
 | `{handle:a:SUFFIX}` | `<prefix of a>{random_id_10}SUFFIX`, a contact id `a` may create |
-| `{regacc:a}` | the sponsor id of `a`: its login on EPP, the RegAccId of its login on RRI |
+| `{regacc:a}` | the sponsor id of `a`: its login on EPP, the RegAccId of its login on RRI, its user on the SQLite demo backend |
 | `{tld}` | the TLD the environment registers under, the first of `rpp_tlds` of its config |
 | `{env:environment_name}` | `rpp_environment_name` of its config |
 | `{env:profile_signalling}` | `rpp_profile_signalling` of its config |
 | `{env:<path>}` | a fact of the environment. A list fact is a whole value only, and the response may hold any of its entries: `"label": "{env:domainName.processes.create.success_status}"` |
 | `{lower:TEXT}` | TEXT in lower case, after the placeholders in it, for an id sent in another case than stored |
+
+### The SQLite demo backend
+
+`RPP_TEST_ENV=sqlite-demo pytest -n 4 tests/integration` runs the cases of the demo backend (`planet_*`, `satellite_*`,
+`planet_transfer`, `planet_message`, `sqlite_drafts_objects`) against an app composed from
+[config.demo.yaml](../../config.demo.yaml), with a database in memory per worker. It needs no credentials and no server:
+the descriptor marks its registrars `literal`, so `user`, `password` and `prefix` are the values themselves, the DEMO
+values of the config (they are no secrets). It has four registrars: `a` and `b` for the cases, and `c` and `d` for the
+cases of the message queue only, so that no other case adds to those queues. Its `facts` are those of `epp-docker`, which
+no selector of its cases reads: every group of the drafts' objects has a `_group.json` with
+`{"when": {"profile.objects": {"contains": "contact"}}}` (or the object), so that those groups run where the backend holds
+them. The extension registers its RPP profile `demo`, which the descriptor names: `load` registers the extensions of the
+config before it looks the profile up. The cases are in the smoke suite.
 
 ### DENIC MTEST
 
