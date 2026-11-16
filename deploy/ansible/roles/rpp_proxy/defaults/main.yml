@@ -3,9 +3,10 @@ rpp_proxy_repo: https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python.git
 # A branch, tag or commit. The image is tagged with the commit it is built from.
 rpp_proxy_version: main
 rpp_proxy_project: rpp-proxy
-# Where the instances publish their ports: the gateway of the root daemon's default bridge, which the nginx container
-# reaches as host.docker.internal (extra_hosts: host-gateway). Nothing outside the host reaches it.
-rpp_proxy_bind_address: 172.17.0.1
+# Where the instances publish their ports: the gateway of the root daemon's default bridge (docker0, usually 172.17.0.1),
+# which the nginx container reaches as host.docker.internal (extra_hosts: host-gateway). Nothing outside the host
+# reaches it. Without a value it is the address docker0 has, so the root daemon must run when the playbook does.
+rpp_proxy_bind_address: "{{ ansible_facts['docker0']['ipv4']['address'] | default('') }}"
 # The UID and GID the image runs as (deploy/docker/Dockerfile). On the host they are subordinate ids of the user.
 rpp_proxy_container_uid: 10001
 rpp_proxy_container_gid: 10001

@@ -28,16 +28,17 @@
   register: epp_server_submodule
   changed_when: epp_server_submodule.stdout | length > 0
 
+# Outside the checkout: its .env is tracked, and a changed one would stop the next checkout.
 - name: Write the settings of the EPP server
   become: true
   become_user: "{{ rootless_docker_user }}"
   ansible.builtin.template:
     src: "{{ item.src }}"
-    dest: "{{ rootless_docker_home }}/epp-server-docker/{{ item.dest }}"
+    dest: "{{ rootless_docker_home }}/{{ item.dest }}"
     mode: "0600"
   loop:
-    - {src: env.j2, dest: .env}
-    - {src: compose.rpp.yml.j2, dest: compose.rpp.yml}
+    - {src: env.j2, dest: epp-server.env}
+    - {src: compose.rpp.yml.j2, dest: epp-server.compose.yml}
   register: epp_server_settings
 
 - name: Check whether the registry database exists
@@ -57,7 +58,8 @@
   community.docker.docker_compose_v2:
     project_src: "{{ rootless_docker_home }}/epp-server-docker"
     project_name: "{{ epp_server_project }}"
-    files: [docker-compose.yml, compose.rpp.yml]
+    files: ["{{ rootless_docker_home }}/epp-server-docker/docker-compose.yml", "{{ rootless_docker_home }}/epp-server.compose.yml"]
+    env_files: ["{{ rootless_docker_home }}/epp-server.env"]
     profiles: [setup]
     services: [mariadb_prep]
     docker_host: "{{ rootless_docker_host }}"
@@ -83,7 +85,8 @@
   community.docker.docker_compose_v2:
     project_src: "{{ rootless_docker_home }}/epp-server-docker"
     project_name: "{{ epp_server_project }}"
-    files: [docker-compose.yml, compose.rpp.yml]
+    files: ["{{ rootless_docker_home }}/epp-server-docker/docker-compose.yml", "{{ rootless_docker_home }}/epp-server.compose.yml"]
+    env_files: ["{{ rootless_docker_home }}/epp-server.env"]
     profiles: [setup]
     services: [mariadb_prep]
     docker_host: "{{ rootless_docker_host }}"
@@ -95,7 +98,8 @@
   community.docker.docker_compose_v2:
     project_src: "{{ rootless_docker_home }}/epp-server-docker"
     project_name: "{{ epp_server_project }}"
-    files: [docker-compose.yml, compose.rpp.yml]
+    files: ["{{ rootless_docker_home }}/epp-server-docker/docker-compose.yml", "{{ rootless_docker_home }}/epp-server.compose.yml"]
+    env_files: ["{{ rootless_docker_home }}/epp-server.env"]
     profiles: [run]
     docker_host: "{{ rootless_docker_host }}"
     build: "{{ 'always' if epp_server_checkout is changed or epp_server_submodule is changed else 'policy' }}"

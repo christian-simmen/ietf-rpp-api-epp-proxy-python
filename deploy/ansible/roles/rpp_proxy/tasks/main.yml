@@ -7,6 +7,15 @@
     fail_msg: Every instance needs a name and a port of its own.
     quiet: true
 
+- name: Check the address the ports are published on
+  ansible.builtin.assert:
+    that:
+      - rpp_proxy_bind_address is match('^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$')
+    fail_msg: >-
+      rpp_proxy_bind_address is not set and docker0 has no address: start the root Docker daemon (of nginx) before the
+      playbook, or set the address.
+    quiet: true
+
 - name: Check each instance
   ansible.builtin.assert:
     that:

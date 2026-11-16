@@ -8,7 +8,7 @@
 
 - name: Install the prerequisites of rootless Docker
   ansible.builtin.apt:
-    name: [ca-certificates, git, uidmap, dbus-user-session, slirp4netns, acl, iptables]
+    name: [ca-certificates, git, uidmap, dbus-user-session, slirp4netns, acl, iptables, iproute2, python3-debian]
     state: present
     update_cache: true
     cache_valid_time: 3600
@@ -43,7 +43,7 @@
   register: rootless_docker_userns_restriction
 
 - name: Allow rootlesskit its user namespace
-  when: rootless_docker_userns_restriction.stat.exists
+  when: rootless_docker_apparmor_profile | bool and rootless_docker_userns_restriction.stat.exists
   ansible.builtin.template:
     src: usr.bin.rootlesskit.j2
     dest: /etc/apparmor.d/usr.bin.rootlesskit

@@ -5,7 +5,6 @@ rootless_docker_user: rpp
 
 rpp_proxy_version: main # pin a commit or tag for a repeatable deployment
 epp_server_version: main
-rpp_proxy_bind_address: 172.17.0.1
 
 epp_server_enabled: true
 epp_server_mysql_password: "{{ vault_epp_server_mysql_password }}"
