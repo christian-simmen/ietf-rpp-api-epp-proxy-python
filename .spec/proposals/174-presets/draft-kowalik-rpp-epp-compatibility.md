@@ -164,6 +164,7 @@ None.
     * In the JSON representation [@!I-D.ietf-rpp-json], `card.name.full` MUST be provided.
     * In the JSON representation, `card.addresses.addr` MUST be provided, containing at least `countryCode` and a `"locality"` kind component.
     * In the JSON representation, `card.emails.email.address` MUST be provided.
+    * In the JSON representation, a localization MUST NOT contain `emails`. A localized `name` MUST contain `full`, a localized organization MUST contain `name`, and a localized address MUST contain `countryCode`, a `"locality"` kind component and at most three `"name"` kind components. A member that a localization leaves out takes the value of the internationalised form, as in JSContact.
     * At most one email address, at most one voice telephone number and at most one facsimile telephone number are provided, as defined in [@!RFC5733]. In the JSON representation, the `emails` map contains only the key `email`, and the `phones` map contains only the keys `voice` and `fax`.
 
 ### Operations
@@ -374,29 +375,14 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
         "addresses": {
           "required": ["addr"],
           "additionalProperties": {
-            "required": ["countryCode", "components"],
+            "$ref": "#/$defs/profile.address",
             "properties": {
               "components": {
                 "items": {
                   "properties": {
                     "value": { "$ref": "#/$defs/profile.ascii" }
                   }
-                },
-                "allOf": [
-                  {
-                    "contains": {
-                      "properties": { "kind": { "const": "locality" } }
-                    },
-                    "minContains": 1
-                  },
-                  {
-                    "contains": {
-                      "properties": { "kind": { "const": "name" } }
-                    },
-                    "minContains": 0,
-                    "maxContains": 3
-                  }
-                ]
+                }
               }
             }
           }
@@ -420,7 +406,43 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
             }
           }
         },
-        "localizations": { "maxProperties": 1 }
+        "localizations": {
+          "maxProperties": 1,
+          "additionalProperties": {
+            "properties": {
+              "name": { "required": ["full"] },
+              "organizations": {
+                "additionalProperties": { "required": ["name"] }
+              },
+              "addresses": {
+                "additionalProperties": { "$ref": "#/$defs/profile.address" }
+              },
+              "emails": false
+            }
+          }
+        }
+      }
+    },
+    "profile.address": {
+      "required": ["countryCode", "components"],
+      "properties": {
+        "components": {
+          "allOf": [
+            {
+              "contains": {
+                "properties": { "kind": { "const": "locality" } }
+              },
+              "minContains": 1
+            },
+            {
+              "contains": {
+                "properties": { "kind": { "const": "name" } }
+              },
+              "minContains": 0,
+              "maxContains": 3
+            }
+          ]
+        }
       }
     },
     "profile.ascii": {
@@ -430,7 +452,9 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
 }
 ```
 
-The narrowings of the maps of the JSContact Card constrain every entry of a map through `additionalProperties`, and name the keys of a map only in `required` and `propertyNames`. The pattern `profile.ascii` restricts the internationalised form to printable US-ASCII characters. The localised form, in `localizations`, is not restricted.
+The narrowings of the maps of the JSContact Card constrain every entry of a map through `additionalProperties`, and name the keys of a map only in `required` and `propertyNames`. The pattern `profile.ascii` restricts the internationalised form to printable US-ASCII characters. The localised form, in `localizations`, is not restricted to US-ASCII.
+
+A> The narrowing of a localization entry assumes that the base Card schema declares the members of a localization. Today [@!I-D.ietf-rpp-json] declares `localizations` as an object without members. The definition of the localization entry is requested in https://github.com/SIDN/ietf-rpp-jscontact-profile/issues/36.
 
 # Constraints Not Expressed in JSON Schema
 
@@ -542,7 +566,7 @@ The following Contact Data Object in a Create request is valid with the profile:
 }
 ```
 
-The same request is valid without the profile, and invalid with the profile, in each of the following cases: `emails` contains a second entry `email-1`, `name` is missing, the address has no `locality` component, the name contains a character outside US-ASCII such as `"J\u00f6rg Doe"`, the telephone number is `tel:+1-703-555-5555`, or `authInfo` is missing.
+The same request is valid without the profile, and invalid with the profile, in each of the following cases: `emails` contains a second entry `email-1`, `name` is missing, the address has no `locality` component, the name contains a character outside US-ASCII such as `"J\u00f6rg Doe"`, the telephone number is `tel:+1-703-555-5555`, `authInfo` is missing, `localizations` contains a second language, a localization contains `emails`, or a localized address has no `locality` component.
 
 A> TODO: examples for the constraints that are not expressed in JSON Schema.
 

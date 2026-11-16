@@ -66,6 +66,10 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
   email, US-ASCII internationalised form, one localisation, the telephone format, and `authInfo` on create. New
   constraint: one email, at most one voice and one fax number (RFC 5733). Map entries are narrowed through
   `additionalProperties`, `required` and `propertyNames`, so no property is declared that the Card does not declare.
+- D17 (maintainer) The EPP Compatibility Profile narrows a localization entry with JSContact patch semantics: no
+  `emails`, a localized `name` with `full`, a localized organization with `name`, a localized address complete
+  (`countryCode`, locality, at most three street lines). The base definition of the entry is requested upstream in
+  SIDN/ietf-rpp-jscontact-profile#36, together with moving the Card schema from json to the JSContact profile draft.
 - D11 (maintainer) The agent docs for specification writing go to `main` in their own PR,
   `docs/specification-agent-docs`. This branch is stacked on it.
 

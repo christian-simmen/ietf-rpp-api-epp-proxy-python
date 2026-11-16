@@ -570,4 +570,9 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 
 ## Telephone number in the contact examples of json
 
-- The contact examples of json (for example the Create request of the Contact Data Object) use `tel:+1-703-555-5555`. The RPP JSContact profile (draft-wullink-rpp-jscontact-profile §4.1.8) requires `tel:+<cc>.<digits>`, for example `tel:+1.7035555555`, and an RPP server MUST reject other values. The `Card` schema of json has no `pattern` for `number`, so the examples validate against it.
+- The contact examples of json (for example the Create request of the Contact Data Object) use `tel:+1-703-555-5555`. The RPP JSContact profile (draft-wullink-rpp-jscontact-profile §4.1.8) requires `tel:+<cc>.<digits>`, for example `tel:+1.7035555555`, and an RPP server MUST reject other values. The `Card` schema of json has no `pattern` for `number`, so the examples validate against it. Filed as SIDN/ietf-rpp-jscontact-profile#29.
+
+## Localization entries of the JSContact Card
+
+- Json §6.2.9 declares `localizations` as `{ "type": "object" }`. With the enrichment of json §4.9.1 that rejects every localization, without it the entries are unchecked, and a profile cannot narrow an entry without declaring members the base does not declare. Filed as SIDN/ietf-rpp-jscontact-profile#36, which also asks to move the Card schema from json into the JSContact profile draft.
+- **Proxy:** `Localization` and `RecordLocalization` in `.spec/auto/json-schema/rpp.schema.json` declare the entry (`name`, `organizations`, `addresses`, `emails`, keyed by a language tag).
