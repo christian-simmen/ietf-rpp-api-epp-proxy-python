@@ -14,7 +14,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
       Validation, the JSON Schema part of the EPP Compatibility Profile
 - [x] T4 Proposal for draft-wullink-rpp-extension-guidelines: specification formats for profiles
       and presets, with an example profile (Appendix B) and an example preset (Appendix C)
-- [~] T4a (draft written, in review) Proposal for a new draft, the RPP EPP Compatibility Profile, with the EPP
+- [x] T4a Proposal for a new draft, the RPP EPP Compatibility Profile, with the EPP
       elements copied from data-objects, core and json (`.spec/proposals/174-presets/draft-kowalik-rpp-epp-compatibility.md`, renamed
       and edited by the maintainer)
 - [ ] T5 Link the approved proposals from #174
@@ -73,6 +73,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
   SIDN/ietf-rpp-jscontact-profile#36, together with moving the Card schema from json to the JSContact profile draft.
 - D18 (maintainer) The guidelines proposal is accepted with RG1-RG7 as drafted, plus the Example Preset appendix
   (Appendix C) and the composition example of the Example Extension aligned with it.
+- D19 (maintainer) The EPP Compatibility Profile draft is accepted.
 - D11 (maintainer) The agent docs for specification writing go to `main` in their own PR,
   `docs/specification-agent-docs`. This branch is stacked on it.
 
@@ -85,4 +86,3 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` were changed on `main` before the branch. They are the
   maintainer's and are left unstaged.
-- The EPP Compatibility Profile draft awaits the maintainer's review.
