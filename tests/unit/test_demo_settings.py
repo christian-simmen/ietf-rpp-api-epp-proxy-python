@@ -1,6 +1,9 @@
 """The settings of the extensions and of the SQLite backend."""
+import dataclasses
+
 import pytest
 
+from main import compose
 from settings.load_settings import load_settings
 from settings.sqlite_settings import SqliteSettings
 from tests.helper.test_environment import REPOSITORY
@@ -42,3 +45,12 @@ def test_the_hashes_are_not_in_the_repr_of_the_settings():
     settings = SqliteSettings(rpp_sqlite_clients={"a": "scrypt$secret"})
 
     assert "secret" not in repr(settings)
+
+
+def test_an_unusable_client_hash_stops_the_app_without_naming_the_hash():
+    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    bad = dataclasses.replace(settings, sqlite=SqliteSettings(rpp_sqlite_clients={"demo-a": "scrypt$3$8$1$AA==$AA=="}))
+
+    with pytest.raises(ValueError, match="rpp_sqlite_clients: the hash of the client 'demo-a'") as refused:
+        compose(bad)
+    assert "AA==" not in str(refused.value)

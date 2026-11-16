@@ -11,7 +11,7 @@ from registry_adapter.sqlite.client_directory import ClientDirectory
 from registry_adapter.sqlite.common_part import COMMON_PART
 from registry_adapter.sqlite.gateways.unsupported_gateway import UnsupportedGateway
 from registry_adapter.sqlite.models.message_row import MessageRow
-from registry_adapter.sqlite.password_hash import N, P, R, hash_password, verify_password
+from registry_adapter.sqlite.password_hash import N, P, R, check_hash, hash_password, verify_password
 from registry_adapter.sqlite.schema_version_row import SchemaVersionRow
 from registry_adapter.sqlite.sqlite_backend import SqliteBackend
 from registry_adapter.sqlite.sqlite_database import SqliteDatabase
@@ -131,12 +131,46 @@ def test_the_protocol_backends_hold_no_extension():
             backend.extension("org.example.rpp.extension.planets")
 
 
-def test_an_unknown_user_is_compared_with_the_highest_parameters_of_the_configured_hashes():
-    clients = ClientDirectory({"a": hash_password("pw", n=1024, r=8, p=1), "b": hash_password("pw", n=2048, r=4, p=2)})
+@pytest.mark.parametrize("configured, expected", [
+    ([(1024, 8, 1), (2048, 8, 1)], (2048, 8, 1)),
+    ([(1024, 8, 1), (2048, 4, 2)], (2048, 4, 2)),   # no component-wise maximum: one configured hash's parameters
+    ([(2 ** 16, 2, 1), (2 ** 10, 64, 1)], (2 ** 16, 2, 1)),   # whose component-wise maximum would need 1 GiB
+    ([(1024, 8, 1), (2048, 4, 1)], (1024, 8, 1)),   # equal cost: the first wins
+])
+def test_an_unknown_user_is_compared_with_the_parameters_of_the_costliest_configured_hash(configured, expected):
+    clients = ClientDirectory({f"u{i}": hash_password("pw", n=n, r=r, p=p) for i, (n, r, p) in enumerate(configured)})
 
-    assert clients.stand_in_parameters == (2048, 8, 2)
+    assert clients.stand_in_parameters == expected
     assert not clients.verify("ghost", "pw")
 
 
 def test_without_configured_hashes_the_stand_in_has_the_default_parameters():
     assert ClientDirectory({}).stand_in_parameters == (N, R, P)
+
+
+MALFORMED = {
+    "wrong scheme": "md5$1024$8$1$AA==$AA==",
+    "not six parts": "scrypt$1024$8$1$AA==",
+    "n not a number": "scrypt$x$8$1$AA==$AA==",
+    "n is zero": "scrypt$0$8$1$AA==$AA==",
+    "n is one": "scrypt$1$8$1$AA==$AA==",
+    "n not a power of two": "scrypt$3$8$1$AA==$AA==",
+    "n negative": "scrypt$-1024$8$1$AA==$AA==",
+    "r is zero": "scrypt$1024$0$1$AA==$AA==",
+    "p negative": "scrypt$1024$8$-1$AA==$AA==",
+    "too much memory": "scrypt$134217728$8$1$AA==$AA==",
+    "salt not base64": "scrypt$1024$8$1$!!$AA==",
+    "hash not base64": "scrypt$1024$8$1$AA==$!!",
+}
+
+
+@pytest.mark.parametrize("stored", MALFORMED.values(), ids=MALFORMED.keys())
+def test_a_malformed_client_hash_stops_the_app_naming_the_client_and_not_the_hash(stored):
+    assert check_hash(stored) is not None
+    with pytest.raises(ValueError, match="rpp_sqlite_clients: the hash of the client 'demo'") as refused:
+        ClientDirectory({"demo": stored})
+    assert stored not in str(refused.value)
+
+
+def test_a_good_hash_passes_the_check():
+    assert check_hash(hash_password("pw", n=1024)) is None

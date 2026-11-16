@@ -136,7 +136,12 @@ src/registry_adapter/sqlite/       the SQLite backend
   satellites (unit and `planet_message` cases); message ids are ASCII digits; `generic-not-extensions` has no
   `ignore_imports`; `registry_setup` documented as part of the composition root; T3 and T6 rewritten; test imports at
   module level; one helper for the hooks in `SqliteGateway`.
-- MTEST run: pending (the MTEST login fails now; with the maintainer) for the maintainer (no machine on the allowlist).
+- Review round 2: the stand-in hash has the parameters of the one configured hash with the largest n*r*p (a
+  component-wise maximum could cost more than every real hash, or exceed the memory limit); `check_hash` in
+  `password_hash.py` validates every client hash. It is called from `ClientDirectory` (so by `compose`), not from
+  `SqliteSettings`, because `settings` may not import an adapter (contract `settings-standalone`). A unit test walks the
+  SQLite common modules and asserts each is a source module of both contracts that name them.
+- MTEST run: see the result of the last check run below. for the maintainer (no machine on the allowlist).
 
 ## Findings (evidence)
 

@@ -465,7 +465,9 @@ is not built yet.
 
 The SQLite backend (`rpp_backend: sqlite`, [config.demo.yaml](../../config.demo.yaml)) is made as a test bed: the clients
 are `rpp_sqlite_clients` (user to a `scrypt$...` hash, made by `python -m registry_adapter.sqlite.hash_password`, compared
-in constant time; the user is the sponsoring client), the database is `rpp_sqlite_url` (a file, or `sqlite://` in
+in constant time; the user is the sponsoring client; `ClientDirectory` checks each hash with `check_hash` at start, and a
+hash that cannot be used stops the app with a `ValueError` naming the client and never the hash, as `settings` may not
+import an adapter), the database is `rpp_sqlite_url` (a file, or `sqlite://` in
 memory), and every unit of work holds one lock. The tables of each part are created at start with their schema version
 (`schema_versions`), and a version that differs stops the app: there is no migration yet. Its generic profile
 (`settings/profiles/sqlite.yaml`) holds none of the drafts' objects, so their paths answer 501 `02307` from

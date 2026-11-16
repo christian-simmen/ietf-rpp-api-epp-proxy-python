@@ -38,6 +38,29 @@ def verify_password(password: str, stored: str) -> bool:
     return hmac.compare_digest(actual, expected)
 
 
+def check_hash(stored: str) -> str | None:
+    """Why a hash cannot be used, None where it can. The reason never holds the hash or a part of it."""
+    parts = stored.split("$") if isinstance(stored, str) else []
+    if len(parts) != 6 or parts[0] != SCHEME:
+        return f"it is not a {SCHEME}$n$r$p$salt$hash string"
+    try:
+        n, r, p = (int(value) for value in parts[1:4])
+    except ValueError:
+        return "n, r and p are not integers"
+    if n < 2 or n & (n - 1):
+        return "n is not a power of two above 1"
+    if r < 1 or p < 1:
+        return "r and p are not positive"
+    if 128 * n * r > MAX_MEMORY or r * p >= 2 ** 30:
+        return "its parameters need more memory than the backend allows"
+    try:
+        base64.b64decode(parts[4], validate=True)
+        base64.b64decode(parts[5], validate=True)
+    except ValueError:
+        return "the salt or the hash is not base64"
+    return None
+
+
 def parameters(stored: str) -> tuple[int, int, int] | None:
     """The scrypt parameters (n, r, p) a hash states, None for one that is malformed."""
     try:
