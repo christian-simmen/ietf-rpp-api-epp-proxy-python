@@ -1,9 +1,9 @@
 {
-  "test_id": "test2-label_of_61",
   "when": {
-    "env.bugs.over_max_length_cut": false
+    "env.bugs.long_label_cut": false
   },
-  "comment": "Skipped on epp-docker: the EPP test server stores a value longer than its column cut instead of refusing it (pawel-kow/epp#21, pawel-kow/epp#31). Review: over_max_length_cut (pawel-kow/epp#21) stands in for the defect that breaks it, a label of 61 to 63 under .example (pawel-kow/epp#30).",
+  "comment": "Skipped on epp-docker: the EPP test server stores a label of 61 to 63 characters cut and sends no reply (pawel-kow/epp#30).",
+  "test_id": "test2-label_of_61",
   "description": "A label of 61 characters, within the 63 octets of DNS (RFC 1035 §2.3.4), is registered and read back whole.",
   "steps": [
     {

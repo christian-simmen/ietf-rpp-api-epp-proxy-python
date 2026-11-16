@@ -1,11 +1,9 @@
 {
   "when": {
-    "profile.domainName.status.client_supported": true,
     "profile.lgrs": {
       "contains": "latn-1.0"
     }
   },
-  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain. Review: The status only forces the read path; no case covers keeping the IDN on the read path on RRI.",
   "test_id": "test34-patch_on_the_read_path_keeps_the_idn",
   "steps": [
     {
@@ -155,7 +153,10 @@
       }
     },
     {
-      "comment": "Patches domain IDN bücher-u34: replace /status clientHold; expects 200. The operation this case checks.",
+      "comment": "Patches domain IDN bücher-u34: replace /status clientHold, which takes the read path; expects 200 with the name, uName and lgr kept. The operation this case checks. Only where a domain has client statuses.",
+      "when": {
+        "profile.domainName.status.client_supported": true
+      },
       "request": {
         "method": "PATCH",
         "url": "/domainNames/{alabel:bücher-u34}.{tld}",
@@ -194,6 +195,66 @@
             }
           ]
         }
+      }
+    },
+    {
+      "comment": "Patches domain IDN bücher-u34: replace /dns/records, which takes the read path; expects 200 with the name, uName and lgr kept. The operation this case checks. Only where a domain has no client statuses.",
+      "when": {
+        "profile.domainName.status.client_supported": false
+      },
+      "request": {
+        "method": "PATCH",
+        "url": "/domainNames/{alabel:bücher-u34}.{tld}",
+        "headers": {
+          "Content-Type": "{rpp:content-type}",
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": [
+          {
+            "op": "replace",
+            "path": "/dns/records",
+            "value": [
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "a",
+                "rdata": {
+                  "address": "192.0.2.11"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "domainName",
+          "name": "{alabel:bücher-u34}.{tld}",
+          "uName": "{ulabel:bücher-u34}.{tld}",
+          "lgr": "latn-1.0"
+        }
+      }
+    },
+    {
+      "comment": "Deletes domain IDN bücher-u34; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
+      "request": {
+        "method": "DELETE",
+        "url": "/domainNames/{alabel:bücher-u34}.{tld}",
+        "headers": {
+          "Content-Type": "{rpp:content-type}",
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200
       }
     }
   ]

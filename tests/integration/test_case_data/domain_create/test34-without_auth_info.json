@@ -1,9 +1,9 @@
 {
-  "test_id": "test34-without_auth_info",
   "when": {
-    "profile.domainName.registrant.min_count": 0
+    "env.domainName.authInfo.min_count": 1
   },
-  "comment": "Skipped on rri-mtest: RRI requires a holder, so a domain cannot be without a registrant. Review: registrant.min_count stands in for 'authInfo is required at create', which RRI does not require; the fact named is not the subject.",
+  "comment": "Skipped on rri-mtest: RRI takes a domain without authInfo at create; the case checks the refusal where one is required.",
+  "test_id": "test34-without_auth_info",
   "description": "The data objects allow a domain without authInfo (0-1); RFC 5731 requires one at create, which the registry refuses as a missing parameter.",
   "steps": [
     {

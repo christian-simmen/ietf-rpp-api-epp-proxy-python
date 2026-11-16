@@ -1,11 +1,11 @@
 {
-  "test_id": "test32-null_mx_record",
   "when": {
     "profile.domainName.dns.record_types": {
-      "contains": "aaaa"
+      "contains": "mx"
     }
   },
-  "comment": "Skipped on epp-docker: EPP has no address records of the domain itself, only ns, ds and dnskey. Review: aaaa stands in for mx, the record type the case is about.",
+  "comment": "Skipped on epp-docker: EPP has no MX records of the domain.",
+  "test_id": "test32-null_mx_record",
   "description": "A null MX (RFC 7505) next to an a record.",
   "steps": [
     {

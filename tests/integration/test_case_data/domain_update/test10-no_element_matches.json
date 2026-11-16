@@ -1,10 +1,4 @@
 {
-  "when": {
-    "profile.objects": {
-      "contains": "host"
-    }
-  },
-  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). Review: A match on an ns record would cover 'no element matches' on RRI.",
   "test_id": "test10-no_element_matches",
   "steps": [
     {
@@ -77,7 +71,12 @@
       }
     },
     {
-      "comment": "Creates host ns1.u10 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
+      "comment": "Creates host ns1.u10 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects.",
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -116,7 +115,12 @@
       }
     },
     {
-      "comment": "Creates host ns2.u10 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
+      "comment": "Creates host ns2.u10 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects.",
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -228,7 +232,12 @@
       }
     },
     {
-      "comment": "Patches domain up-test10: add /nameservers; expects 200. The operation this case checks.",
+      "comment": "Patches domain up-test10: add /nameservers; expects 200. The operation this case checks. Only where the backend has host objects.",
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test10-{random_name}.{tld}",
@@ -257,7 +266,12 @@
       }
     },
     {
-      "comment": "Patches domain up-test10: replace /nameservers with a match; expects 422 02308. The error answer this case checks.",
+      "comment": "Patches domain up-test10: replace /nameservers with a match no name server has; expects 422 02308. The error answer this case checks. Only where the backend has host objects.",
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test10-{random_name}.{tld}",
@@ -297,6 +311,80 @@
         "headers": {
           "RPP-Code": "02308"
         }
+      }
+    },
+    {
+      "comment": "Patches domain up-test10: replace /dns/records with a match no record has; expects 422 02308. The error answer this case checks. Only where name servers are dns records, not host objects.",
+      "when": {
+        "profile.objects": {
+          "not": {
+            "contains": "host"
+          }
+        }
+      },
+      "request": {
+        "method": "PATCH",
+        "url": "/domainNames/up-test10-{random_name}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "{rpp:content-type}"
+        },
+        "body_json": [
+          {
+            "op": "replace",
+            "path": "/dns/records",
+            "match": {
+              "type": "a",
+              "rdata": {
+                "address": "192.0.2.99"
+              }
+            },
+            "value": {
+              "@type": "dnsRecord",
+              "name": "@",
+              "type": "a",
+              "rdata": {
+                "address": "192.0.2.11"
+              }
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error",
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308"
+            }
+          ]
+        },
+        "headers": {
+          "RPP-Code": "02308"
+        }
+      }
+    },
+    {
+      "comment": "Deletes domain up-test10; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
+      "request": {
+        "method": "DELETE",
+        "url": "/domainNames/up-test10-{random_name}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "{rpp:content-type}"
+        }
+      },
+      "response": {
+        "status": 200
       }
     }
   ]

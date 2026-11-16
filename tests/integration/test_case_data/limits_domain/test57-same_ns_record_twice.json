@@ -1,11 +1,12 @@
 {
-  "test_id": "test57-same_ns_record_twice",
   "when": {
     "profile.domainName.dns.record_types": {
-      "contains": "aaaa"
-    }
+      "contains": "ns"
+    },
+    "env.bugs.host_attr_without_address_refused": false
   },
-  "comment": "Skipped on epp-docker: EPP has no address records of the domain itself, only ns, ds and dnskey. Review: aaaa stands in for 'no host objects': the subject is ns records.",
+  "comment": "Skipped on epp-docker: the case sends ns records of external name servers without addresses, which a backend with host objects sends as hostAttr, and the EPP test server refuses those (pawel-kow/epp#33).",
+  "test_id": "test57-same_ns_record_twice",
   "description": "The same ns record twice: the drafts leave it open, the server takes it.",
   "steps": [
     {

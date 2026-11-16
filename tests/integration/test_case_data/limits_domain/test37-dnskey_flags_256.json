@@ -1,13 +1,13 @@
 {
-  "test_id": "test37-dnskey_flags_256",
   "when": {
     "profile.domainName.dns.record_types": {
-      "not": {
-        "contains": "ds"
-      }
-    }
+      "contains": "dnskey"
+    },
+    "env.domainName.dns.dnskey_supported": true,
+    "env.bugs.host_attr_without_address_refused": false
   },
-  "comment": "Skipped on epp-docker: the case is about RRI's DNSKEY records, and EPP takes DS data (RFC 5910). Review: 'no ds' stands in for 'DNSKEY records with ns records', which test53 and test54 name directly.",
+  "comment": "Skipped on epp-docker: the EPP test server takes DS data only, no DNSKEY (RFC 5910), and the ns records of the case would be hostAttr without addresses, which it refuses (pawel-kow/epp#33).",
+  "test_id": "test37-dnskey_flags_256",
   "description": "A DNSKEY with flags 256 (ZSK), which RRI takes. RRI takes a DNSKEY only with name servers, not next to an a record.",
   "steps": [
     {

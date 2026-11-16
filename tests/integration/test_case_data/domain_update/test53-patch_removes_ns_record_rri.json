@@ -1,11 +1,9 @@
 {
-  "test_id": "test53-patch_removes_ns_record_rri",
   "when": {
-    "profile.domainName.dns.record_types": {
-      "contains": "aaaa"
-    }
+    "env.domainName.processes.update.dns_checked": true
   },
-  "comment": "Skipped on epp-docker: EPP has no address records of the domain itself, only ns, ds and dnskey. Review: aaaa stands in for 'no host objects': the subject is ns records.",
+  "comment": "Skipped on epp-docker: the EPP test server does not check the name servers of an update, so the refusal the case expects never comes.",
+  "test_id": "test53-patch_removes_ns_record_rri",
   "skip": "#143",
   "description": "A PATCH removes one of three ns records. MTEST checks the delegation of an update: name servers that do not serve the zone are refused.",
   "steps": [

@@ -1,8 +1,9 @@
 {
   "when": {
+    "profile.domainName.registrant.min_count": 0,
     "profile.domainName.status.client_supported": true
   },
-  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain. Review: The status only forces the read path; registrant.min_count is the fact that keeps the case off RRI.",
+  "comment": "Skipped on rri-mtest: RRI requires a registrant, so the PUT that omits it is refused there; the PATCH also removes /status to take the read path, and RRI has no client statuses.",
   "test_id": "test32-put_omitting_the_registrant",
   "steps": [
     {

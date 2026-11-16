@@ -176,7 +176,8 @@ show (`profile.domainName.metadata`) and a domain's authInfo are left out where 
 reads with right after its create is one of `env.domainName.processes.create.success_status` (`ok` on the EPP test
 server; on MTEST `pendingCreate` while the predelegation check runs, `ok` once it passed). A case gives DNS data that
 passes the check (an `a` record DENIC serves itself), unless the check is its subject: name servers that do not serve
-the domain make it `inactive` (`env.domainName.processes.create.failed_dns_status`, `domain_create/test43`). Passwords
+the domain make it `inactive` (`env.domainName.processes.create.failed_dns_status`, `domain_create/test43`), and an
+update with them is refused where `env.domainName.processes.update.dns_checked` (`domain_update/test48`). Passwords
 are of the characters an RRI AuthInfo takes. Where a function exists on one backend only, a counterpart case covers
 the other (`domain_update/test37`, `domain_lifecycle/`). Where the cases would have the same subject and differ only in
 steps of a function one backend lacks, they are one case whose steps say where they run (`domain_restore/test1`,
@@ -220,7 +221,8 @@ an object. A leaf means the same wherever it is:
 | `changeable`, `removable` | whether an update can change or clear the field |
 
 `null` says the field is not there or the limit is not known. A defect of a server that breaks cases is a fact under
-`bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`).
+`bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`). A `when` names the fact the case depends on,
+not another that happens to go with it on today's backends (`aaaa` records do not stand in for "no host objects").
 Facts are in block style, without `{}`.
 
 | Where | Form | Effect |
@@ -359,7 +361,9 @@ What the drafts define is the oracle; a limit they leave to the server is expect
 `02004`, `02005`) or 422 (`02306`), never 500 or 501. A limit that differs by server is a fact of the environment
 (`contact.city.max_length`), and `bugs.over_max_length_cut` marks a server that stores a value cut instead of refusing
 it, where the cases over a column do not run. The EPP test server cuts strings (pawel-kow/epp#21) and phone extensions (pawel-kow/epp#31),
-breaks on a label of 61 to 63 characters under `.example` (pawel-kow/epp#30), and counts nameservers, contacts a role
+breaks on a label of 61 to 63 characters under `.example` (pawel-kow/epp#30, `bugs.long_label_cut`), refuses a
+`hostAttr` without addresses, which is what `ns` records become on a backend with host objects (pawel-kow/epp#33,
+`bugs.host_attr_without_address_refused`), and counts nameservers, contacts a role
 and host addresses per command, so an update can pass its limits (pawel-kow/epp#29). It sends no reply to a domain
 create that names one contact twice in a role (pawel-kow/epp#32), and refuses a `hostAttr` without addresses, also of
 an external host (pawel-kow/epp#33), so `ns` records cannot be added to a domain there. A duplicate the drafts leave
