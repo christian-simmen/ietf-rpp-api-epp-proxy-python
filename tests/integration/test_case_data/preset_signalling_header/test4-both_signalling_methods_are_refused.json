@@ -3,9 +3,9 @@
     "smoke"
   ],
   "test_id": "test4-both_signalling_methods_are_refused",
-  "description": "Core 14: the two methods MUST NOT be used simultaneously. Profile parameters in the Accept of a request with an RPP-Profile header are 400 with RPP-Code 02001.",
+  "description": "Core 14: the two methods MUST NOT be used simultaneously. Preset parameters in the Accept of a request with an RPP-Preset header are 400 with RPP-Code 02001.",
   "when": {
-    "env.profile_signalling": "header"
+    "env.preset_signalling": "header"
   },
   "steps": [
     {
@@ -15,16 +15,16 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
           "Content-Type": "application/rpp+json",
-          "RPP-Profile": "profile=urn:ietf:params:rpp:profile:base;version=1.0"
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
         }
       },
       "response": {
         "status": 400,
         "headers": {
           "RPP-Code": "02001",
-          "RPP-Profile": null
+          "RPP-Preset": null
         },
         "content_type": "application/problem+json",
         "body": {

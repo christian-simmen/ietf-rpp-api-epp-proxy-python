@@ -2,17 +2,17 @@
   "markers": [
     "smoke"
   ],
-  "test_id": "test3-the_profile_of_the_other_server_is_refused",
-  "description": "A profile the server does not offer in the Accept of a request whose Content-Type is offered (base): the Accept lists no profile the server offers, 406 with RPP-Code 02004 (core 14.3).",
+  "test_id": "test3-the_preset_of_the_other_server_is_refused",
+  "description": "A preset the server does not offer in the Accept of a request whose Content-Type is offered (base): the Accept lists no preset the server offers, 406 with RPP-Code 02004 (core 14.3).",
   "when": {
-    "env.profile_signalling": "media-type"
+    "env.preset_signalling": "media-type"
   },
   "steps": [
     {
       "when": {
-        "profile.profiles": {
+        "profile.presets": {
           "not": {
-            "contains": "epp"
+            "contains": "epp-compatible"
           }
         }
       },
@@ -22,15 +22,15 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:epp-compatibility\"; profile-version=\"1.0\"",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         }
       },
       "response": {
         "status": 406,
         "headers": {
           "RPP-Code": "02004",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept"
         },
         "content_type": "application/problem+json",
@@ -41,7 +41,7 @@
     },
     {
       "when": {
-        "profile.profiles": {
+        "profile.presets": {
           "not": {
             "contains": "rri"
           }
@@ -53,15 +53,15 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"de.denic.rpp.profile.rri\"; profile-version=\"1.0\"",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Accept": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         }
       },
       "response": {
         "status": 406,
         "headers": {
           "RPP-Code": "02004",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept"
         },
         "content_type": "application/problem+json",

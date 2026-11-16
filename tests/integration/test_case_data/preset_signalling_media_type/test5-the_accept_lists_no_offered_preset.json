@@ -3,9 +3,9 @@
     "smoke"
   ],
   "test_id": "test5-the_accept_lists_no_offered_profile",
-  "description": "An Accept without a profile the server offers (an unknown profile or version, a weight of 0, another media type) is 406 with RPP-Code 02004 (core 14.3).",
+  "description": "An Accept without a preset the server offers (an unknown preset or version, a weight of 0, another media type) is 406 with RPP-Code 02004 (core 14.3).",
   "when": {
-    "env.profile_signalling": "media-type"
+    "env.preset_signalling": "media-type"
   },
   "steps": [
     {
@@ -15,15 +15,15 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"urn:example:nope\"; profile-version=\"1.0\"",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Accept": "application/rpp+json; preset=\"urn:example:nope\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         }
       },
       "response": {
         "status": 406,
         "headers": {
           "RPP-Code": "02004",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept"
         },
         "content_type": "application/problem+json",
@@ -39,15 +39,15 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"2.0\"",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"2.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         }
       },
       "response": {
         "status": 406,
         "headers": {
           "RPP-Code": "02004",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept"
         },
         "content_type": "application/problem+json",
@@ -63,15 +63,15 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"; q=0",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; q=0",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         }
       },
       "response": {
         "status": 406,
         "headers": {
           "RPP-Code": "02004",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept"
         },
         "content_type": "application/problem+json",
@@ -88,14 +88,14 @@
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Accept": "text/html",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         }
       },
       "response": {
         "status": 406,
         "headers": {
           "RPP-Code": "02004",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept"
         },
         "content_type": "application/problem+json",

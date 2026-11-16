@@ -1,11 +1,11 @@
 {
   "test_id": "test2-base_refuses_the_rri_specifics",
-  "description": "Under the base profile a server that holds the rri profile refuses what only the rri extension adds: a domain member of the extension is undeclared, and the request contact object is not in the profile.",
+  "description": "Under the base preset a server that holds the rri preset refuses what only the rri extension adds: a domain member of the extension is undeclared, and the request contact object is not in the profile.",
   "when": {
-    "profile.profiles": {
+    "profile.presets": {
       "contains": "rri"
     },
-    "env.profile_signalling": "media-type"
+    "env.preset_signalling": "media-type"
   },
   "steps": [
     {
@@ -14,9 +14,9 @@
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         },
         "body_json": {
           "@type": "domainName",
@@ -35,7 +35,7 @@
         },
         "headers": {
           "RPP-Code": "02001",
-          "RPP-Profile": null
+          "RPP-Preset": null
         }
       }
     },
@@ -45,9 +45,9 @@
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:a}",
-          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         },
         "body_json": {
           "@type": "requestContact",
@@ -63,7 +63,7 @@
         },
         "headers": {
           "RPP-Code": "02307",
-          "RPP-Profile": null
+          "RPP-Preset": null
         }
       }
     }

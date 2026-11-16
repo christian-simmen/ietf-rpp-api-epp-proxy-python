@@ -2,10 +2,10 @@
   "markers": [
     "smoke"
   ],
-  "test_id": "test8-the_request_and_the_response_profile_differ",
-  "description": "The request is read under the profile of its Content-Type (base) and answered under the profile its Accept prefers (the one of the server), both offered (core 14.3).",
+  "test_id": "test8-the_request_and_the_response_preset_differ",
+  "description": "The request is read under the preset of its Content-Type (base) and answered under the preset its Accept prefers (the one of the server), both offered (core 14.3).",
   "when": {
-    "env.profile_signalling": "media-type"
+    "env.preset_signalling": "media-type"
   },
   "steps": [
     {
@@ -15,8 +15,8 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"de.denic.rpp.profile.rri\"; profile-version=\"1.0\", application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"; q=0.5",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Accept": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\", application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; q=0.5",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         },
         "body_json": {
           "select": [
@@ -127,9 +127,9 @@
         "status": 201,
         "headers": {
           "RPP-Code": "01000",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept",
-          "Content-Type": "application/rpp+json; profile=\"de.denic.rpp.profile.rri\"; profile-version=\"1.0\""
+          "Content-Type": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\""
         },
         "body": {
           "@type": "contact",
@@ -137,7 +137,7 @@
         }
       },
       "when": {
-        "profile.default_profile": "rri"
+        "profile.default_preset": "rri"
       }
     },
     {
@@ -147,8 +147,8 @@
         "headers": {
           "Authorization": "{auth:a}",
           "RPP-Cltrid": "{unique_cltrid}",
-          "Accept": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:epp-compatibility\"; profile-version=\"1.0\", application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"; q=0.5",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\""
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\", application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; q=0.5",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
         },
         "body_json": {
           "select": [
@@ -259,9 +259,9 @@
         "status": 201,
         "headers": {
           "RPP-Code": "01000",
-          "RPP-Profile": null,
+          "RPP-Preset": null,
           "Vary": "Accept",
-          "Content-Type": "application/rpp+json; profile=\"urn:ietf:params:rpp:profile:epp-compatibility\"; profile-version=\"1.0\""
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\""
         },
         "body": {
           "@type": "contact",
@@ -269,7 +269,7 @@
         }
       },
       "when": {
-        "profile.default_profile": "epp"
+        "profile.default_preset": "epp-compatible"
       }
     }
   ]
