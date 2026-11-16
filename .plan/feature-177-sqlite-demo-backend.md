@@ -80,11 +80,24 @@ work of T2 started before the freeze is not committed: it is in `git stash` ("17
   (`planet.create`, `planetType`), without the `ext.<name>.` prefix. The prefix stays for the sub-schemas an extension
   composes with a base definition (`rpp:extends`). `own_definitions` maps both forms.
 
+- D11 (maintainer) The planets extension is registered by configuration: the environment configuration names the
+  extensions to load, and each one registers its routes, schemas, data model, handlers and backend parts. Without
+  it in the configuration, the generic code does not know the extension exists: no import, no name, no path, no
+  attribute of `RegistryBackend`. This changes T2, T3, T5 and T7 (see the open questions on the design).
+
 ## Corrections
 
 - C1 The planets schema and specification of T1 used the prefix `ext.planets.`. Renamed after D10.
 
 ## Open questions
+
+- Design of D11, to settle before development resumes:
+  - Where the core model, ports and flows and the SQLite storage of an extension live: in the extension package
+    beside its RPP code, or in `core/` and `registry_adapter/` behind a generic registry.
+  - The form of the registration: the configuration key, and the interface an extension package implements.
+  - Whether the paths come from an OpenAPI fragment of the extension or from the templates of `extension_paths.py`,
+    with the template choice moved into the extension.
+  - Whether the RRI extension (#183) and the configuration of the EPP and RRI backends move to the same mechanism.
 
 - Whether the RRI extension (`de.denic.rpp.rri`, request contacts) moves to `src/rpp/extensions/` too: not part of
   #177, a follow-up issue if the maintainer wants it.
