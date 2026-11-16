@@ -13,6 +13,8 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 - [x] T3 Proposal for draft-ietf-rpp-json: additive-only Extension Framework, profile schema composition, Profiles and
       Validation, the JSON Schema part of the EPP Compatibility Profile
 - [~] T4 (draft written, in review) Proposal for draft-wullink-rpp-extension-guidelines: a specification format for profiles
+- [~] T4a (draft written, in review) Proposal for a new draft, the RPP EPP Compatibility Profile, with the EPP
+      elements copied from data-objects, core and json (`.spec/proposals/174-presets/epp-compatibility.md`)
 - [ ] T5 Link the approved proposals from #174
 - [ ] T6 Implementation plan for the proxy (tasks added here once T1-T4 are approved)
 
@@ -56,6 +58,8 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
   This amends the accepted data-objects proposal (R6) and replaces RC3 of the core proposal.
 - D13 (maintainer) The core proposal is accepted with RC1-RC7 as drafted.
 - D14 (maintainer) The json proposal is accepted with RJ1-RJ9 as drafted.
+- D15 (maintainer) The EPP Compatibility Profile gets its own draft. Its constraints, Profile Schema and registrations
+  are copied into it and stay in data-objects, core and json for now.
 - D11 (maintainer) The agent docs for specification writing go to `main` in their own PR,
   `docs/specification-agent-docs`. This branch is stacked on it.
 
@@ -68,4 +72,5 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` were changed on `main` before the branch. They are the
   maintainer's and are left unstaged.
+- Review points RE1-RE7 of `.spec/proposals/174-presets/epp-compatibility.md` await the maintainer.
 - Review points RG1-RG7 of `.spec/proposals/174-presets/extension-guidelines.md` await the maintainer.

@@ -4,6 +4,8 @@
 - Base: draft-ietf-rpp-core-01, upstream `src/draft-ietf-rpp-core.md` at commit `7467c9e`
 - Builds on: [data-objects.md](data-objects.md) (accepted, amended with the `schema` element of the Preset Data Object)
 - Status: accepted by the maintainer
+- Copied: the EPP Compatibility Profile elements of this proposal are also in the new draft proposed in
+  [epp-compatibility.md](epp-compatibility.md). They stay here until that draft is adopted
 
 This proposal replaces profile signalling by preset signalling. A client signals a preset, which states the extensions
 it uses. The server applies the applicable profiles of the preset, which the client never signals. A request that
