@@ -17,10 +17,6 @@ from registry_adapter.sqlite.gateways.sqlite_gateway import SqliteGateway
 class SqliteSatelliteGateway(SqliteGateway):
     """The satellites of the demo backend. The sponsor of a satellite is that of its planet."""
 
-    @property
-    def _hooks(self):
-        return self._context.hooks.get("satellite", {})
-
     @staticmethod
     def _missing(satellite_id: str):
         return Refusal(ResultCode.OBJECT_DOES_NOT_EXIST, f"The satellite {satellite_id} does not exist")
@@ -45,12 +41,6 @@ class SqliteSatelliteGateway(SqliteGateway):
         if violations:
             raise Refusal(ResultCode.PARAMETER_VALUE_RANGE_ERROR, "; ".join(violations))
 
-    def _hook(self, extension_id: str):
-        hook = self._hooks.get(extension_id)
-        if hook is None:
-            raise Refusal(ResultCode.UNIMPLEMENTED_EXTENSION, f"The backend holds no members of {extension_id}")
-        return hook
-
     def check(self, id, client_transaction_id=None):
         with self._context.database.transaction() as session:
             taken = session.get(SatelliteRow, id) is not None
@@ -63,7 +53,7 @@ class SqliteSatelliteGateway(SqliteGateway):
                 row = session.get(SatelliteRow, id)
                 if row is None:
                     raise self._missing(id)
-                return self._ok(to_satellite(session, row, session.get(PlanetRow, row.planet_id), self._hooks),
+                return self._ok(to_satellite(session, row, session.get(PlanetRow, row.planet_id), self._hooks_for("satellite")),
                                 client_transaction_id)
         return self._guarded(client_transaction_id, work)
 
@@ -83,7 +73,7 @@ class SqliteSatelliteGateway(SqliteGateway):
                         creator=self.sponsor_id, created=now()))
                     session.flush()
                     for extension_id, value in satellite.extensions.items():
-                        self._hook(extension_id).create(session, satellite.id, value)
+                        self._hook("satellite", extension_id).create(session, satellite.id, value)
             except IntegrityError:
                 raise Refusal(ResultCode.OBJECT_EXISTS, f"The satellite {satellite.id} exists") from None
             return self._ok(satellite, client_transaction_id)
@@ -94,10 +84,7 @@ class SqliteSatelliteGateway(SqliteGateway):
             with self._context.database.transaction() as session:
                 row = self._owned(session, replacement.id, "update")
                 row.orbital_period = replacement.orbitalPeriod
-                for extension_id in replacement.extensions.keys() - self._hooks.keys():
-                    self._hook(extension_id)
-                for extension_id, hook in self._hooks.items():
-                    hook.replace(session, row.id, replacement.extensions.get(extension_id))
+                self._replace_members(session, "satellite", row.id, replacement.extensions)
                 self._check(row.orbital_period)
                 row.updater, row.updated = self.sponsor_id, now()
             return self._ok(None, client_transaction_id)
@@ -112,7 +99,7 @@ class SqliteSatelliteGateway(SqliteGateway):
                 if "orbitalPeriod" in changes.cleared:
                     row.orbital_period = None
                 for extension_id, value in changes.extensions.items():
-                    self._hook(extension_id).change(session, id, value)
+                    self._hook("satellite", extension_id).change(session, id, value)
                 self._check(row.orbital_period)
                 row.updater, row.updated = self.sponsor_id, now()
             return self._ok(None, client_transaction_id)
@@ -122,7 +109,7 @@ class SqliteSatelliteGateway(SqliteGateway):
         def work():
             with self._context.database.transaction() as session:
                 row = self._owned(session, id, "delete")
-                for hook in self._hooks.values():
+                for hook in self._hooks_for("satellite").values():
                     hook.delete(session, id)
                 session.delete(row)
             return self._ok(None, client_transaction_id)

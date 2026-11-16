@@ -3,13 +3,20 @@ import pytest
 from sqlalchemy import MetaData
 from sqlalchemy.orm import Session
 
+from core.result.error_response import ErrorResponse
+from core.result.result_code import ResultCode
+from registry_adapter.epp.gateways.epp_backend import EppBackend
+from registry_adapter.rri.gateways.rri_backend import RriBackend
 from registry_adapter.sqlite.client_directory import ClientDirectory
 from registry_adapter.sqlite.common_part import COMMON_PART
+from registry_adapter.sqlite.gateways.unsupported_gateway import UnsupportedGateway
 from registry_adapter.sqlite.models.message_row import MessageRow
-from registry_adapter.sqlite.password_hash import hash_password, verify_password
+from registry_adapter.sqlite.password_hash import N, P, R, hash_password, verify_password
 from registry_adapter.sqlite.schema_version_row import SchemaVersionRow
+from registry_adapter.sqlite.sqlite_backend import SqliteBackend
 from registry_adapter.sqlite.sqlite_database import SqliteDatabase
 from registry_adapter.sqlite.sqlite_part import SqlitePart
+from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE, generic_profile
 
 
 def test_a_hash_is_self_describing_and_salted():
@@ -94,10 +101,6 @@ def test_a_failed_unit_of_work_is_rolled_back():
 
 
 def test_a_gateway_of_an_object_the_backend_does_not_hold_refuses_every_command():
-    from core.result.error_response import ErrorResponse
-    from core.result.result_code import ResultCode
-    from registry_adapter.sqlite.gateways.unsupported_gateway import UnsupportedGateway
-
     gateway = UnsupportedGateway("contact")
 
     for answer in (gateway.info("c1", client_transaction_id="t"), gateway.transfer(object()), gateway.renew(object())):
@@ -107,9 +110,6 @@ def test_a_gateway_of_an_object_the_backend_does_not_hold_refuses_every_command(
 
 
 def test_the_session_of_a_client_is_that_client():
-    from registry_adapter.sqlite.sqlite_backend import SqliteBackend
-    from tests.helper.profiles import generic_profile
-
     database = SqliteDatabase("sqlite://", [COMMON_PART])
     clients = ClientDirectory({"demo": hash_password("pw", n=1024)})
     profile = generic_profile("sqlite")
@@ -126,10 +126,17 @@ def test_the_session_of_a_client_is_that_client():
 
 
 def test_the_protocol_backends_hold_no_extension():
-    from registry_adapter.epp.gateways.epp_backend import EppBackend
-    from registry_adapter.rri.gateways.rri_backend import RriBackend
-    from tests.helper.profiles import EPP_PROFILE, RRI_PROFILE
-
     for backend in (EppBackend(object(), {}, EPP_PROFILE), RriBackend(object(), RRI_PROFILE)):
         with pytest.raises(KeyError):
             backend.extension("org.example.rpp.extension.planets")
+
+
+def test_an_unknown_user_is_compared_with_the_highest_parameters_of_the_configured_hashes():
+    clients = ClientDirectory({"a": hash_password("pw", n=1024, r=8, p=1), "b": hash_password("pw", n=2048, r=4, p=2)})
+
+    assert clients.stand_in_parameters == (2048, 8, 2)
+    assert not clients.verify("ghost", "pw")
+
+
+def test_without_configured_hashes_the_stand_in_has_the_default_parameters():
+    assert ClientDirectory({}).stand_in_parameters == (N, R, P)

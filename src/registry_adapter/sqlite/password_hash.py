@@ -38,5 +38,10 @@ def verify_password(password: str, stored: str) -> bool:
     return hmac.compare_digest(actual, expected)
 
 
-# What a login with an unknown user is compared with, so that it takes as long as a known one's.
-UNKNOWN_USER_HASH = hash_password("no-such-client", n=2 ** 10)
+def parameters(stored: str) -> tuple[int, int, int] | None:
+    """The scrypt parameters (n, r, p) a hash states, None for one that is malformed."""
+    try:
+        scheme, n, r, p, _salt, _key = stored.split("$")
+        return (int(n), int(r), int(p)) if scheme == SCHEME else None
+    except ValueError:
+        return None

@@ -11,6 +11,7 @@ import pytest
 
 from main import compose
 from rpp.schema.extension_registration import check_names
+from rpp.schema.extensions import register_extension
 from settings.load_settings import load_settings
 from tests.helper.test_environment import REPOSITORY
 
@@ -102,7 +103,6 @@ def test_a_definition_named_as_a_base_definition_is_refused():
 
 
 def test_a_definition_named_as_another_extensions_is_refused():
-    from rpp.schema.extensions import register_extension
     register_extension(SCHEMA)
 
     with pytest.raises(ValueError, match="which the extension org.example.rpp.extension.planets defines"):

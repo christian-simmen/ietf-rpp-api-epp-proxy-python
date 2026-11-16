@@ -7,7 +7,15 @@ import sqlite3
 
 import pytest
 
+from core.session.session_pool import SessionPool
 from main import compose
+from registry_adapter.sqlite.client_directory import ClientDirectory
+from registry_adapter.sqlite.common_part import COMMON_PART
+from registry_adapter.sqlite.extension_part import load_extension_parts
+from registry_adapter.sqlite.sqlite_backend import SqliteBackend
+from registry_adapter.sqlite.sqlite_database import SqliteDatabase
+from registry_setup import backend_profile, load_registry
+from rpp.http.app import create_app
 from settings.load_settings import load_settings
 from settings.sqlite_settings import SqliteSettings
 from tests.helper.test_environment import REPOSITORY
@@ -84,12 +92,46 @@ def test_discovery_lists_the_extension_and_the_objects(client):
     assert "org.example.rpp.extension.planets" in [extension["id"] for extension in document["extensions"]]
 
 
-@pytest.mark.parametrize("path", ["/domainNames/example.test", "/contacts/c1", "/hosts/ns.example.test"])
-def test_an_object_of_the_drafts_answers_501_02307(client, path):
-    response = send(client, "GET", path)
+class Forbidden:
+    """The gateway of an object the backend does not hold, in an app where the stubs must never be what answers."""
+
+    def __getattr__(self, name):
+        raise AssertionError(f"The gateway was used ({name}): the profile middleware should have refused the request")
+
+
+@pytest.fixture(scope="module")
+def middleware_only_client():
+    """An app whose backend fails the test when a gateway of the drafts' objects is called."""
+    settings = load_settings(str(REPOSITORY / "config.demo.yaml"))
+    registry = load_registry(settings)
+    profile = backend_profile(settings, registry)
+    parts = load_extension_parts(registry.backend_parts("sqlite"))
+    database = SqliteDatabase("sqlite://", [COMMON_PART, *(part.part for part in parts)])
+    clients = ClientDirectory(settings.sqlite.rpp_sqlite_clients)
+
+    def backend_of(user, password):
+        backend = SqliteBackend(database, clients, profile, parts, user, password)
+        backend.domains = backend.contacts = backend.hosts = backend.request_contacts = Forbidden()
+        return backend
+
+    sessions = SessionPool(backend_of)
+    yield create_app(sessions, profile, discovery_settings=settings.discovery, registry=registry).test_client()
+    sessions.close()
+    database.close()
+
+
+@pytest.mark.parametrize("method, path, object_name", [
+    ("GET", "/domainNames/example.test", "domainName"), ("GET", "/contacts/c1", "contact"),
+    ("GET", "/hosts/ns.example.test", "host"), ("POST", "/contacts", "contact"),
+    ("DELETE", "/domainNames/example.test", "domainName"),
+])
+def test_an_object_of_the_drafts_is_refused_by_the_profile_middleware_before_any_gateway(
+        middleware_only_client, method, path, object_name):
+    response = send(middleware_only_client, method, path, body={"@type": "contact"} if method == "POST" else None)
 
     assert response.status_code == 501
     assert code(response) == "02307"
+    assert response.json()["detail"] == f"The profile org.example.rpp.profile.planets has no {object_name} object on this server"
 
 
 def test_a_client_that_is_unknown_or_has_a_wrong_password_is_refused(client):
@@ -350,6 +392,68 @@ def test_a_message_of_another_client_cannot_be_acknowledged(client):
 
     assert send(client, "DELETE", f"/messages/{message['id']}", "b").status_code == 404
     assert send(client, "GET", "/messages", "b").json() == []
+
+
+def drain(client, who):
+    """The messages of a client's queue in order, as (type of the data, object type, object id, trStatus), acknowledged."""
+    seen = []
+    while True:
+        head = send(client, "GET", "/messages", who).json()
+        if not head:
+            return seen
+        data = head[0]["data"]
+        seen.append((data["@type"], data["objectType"], data["objectId"], data.get("trStatus", data.get("status"))))
+        assert send(client, "DELETE", f"/messages/{head[0]['id']}", who).status_code == 200
+
+
+def planet_with_satellites(client):
+    send(client, "POST", "/planets", body=planet())
+    for name in ("phobos", "deimos"):
+        assert send(client, "POST", "/satellites", body=satellite(name)).status_code == 201
+
+
+def test_the_satellites_of_a_transferred_planet_queue_no_message_of_their_own(client):
+    planet_with_satellites(client)
+
+    transfer_request(client)
+    assert send(client, "GET", "/messages", "a").headers["RPP-Queue-Size"] == "1"
+    assert send(client, "GET", "/messages", "b").json() == []
+    send(client, "POST", "/planets/mars/processes/transferProcesses/latest/transferApprove", "a")
+
+    assert send(client, "GET", "/messages", "b").headers["RPP-Queue-Size"] == "1"
+    assert drain(client, "a") == [("transferRequestMessage", "planet", "mars", "pending")]
+    assert drain(client, "b") == [("transferOutcomeMessage", "planet", "mars", "clientApproved")]
+
+
+@pytest.mark.parametrize("answer, who, status, queued", [
+    ("transferReject", "a", "clientRejected", {"a": 1, "b": 1}),
+    ("cancel", "b", "clientCancelled", {"a": 2, "b": 0}),
+])
+def test_a_rejected_or_cancelled_transfer_queues_messages_of_the_planet_only(client, answer, who, status, queued):
+    planet_with_satellites(client)
+    transfer_request(client)
+    latest = "/planets/mars/processes/transferProcesses/latest"
+
+    if answer == "cancel":
+        send(client, "DELETE", latest, who)
+    else:
+        send(client, "POST", f"{latest}/{answer}", who)
+
+    messages = {user: drain(client, user) for user in "ab"}
+    assert {user: len(found) for user, found in messages.items()} == queued
+    assert all(object_type == "planet" and object_id == "mars" for found in messages.values()
+               for _kind, object_type, object_id, _status in found)
+    assert status in [entry[3] for found in messages.values() for entry in found]
+
+
+def test_a_message_id_is_ascii_digits_only(client):
+    send(client, "POST", "/planets", body=planet())
+    transfer_request(client)
+
+    for id in ("١", "٣"):  # ARABIC-INDIC DIGITS ONE and THREE: decimal, but not ASCII
+        assert send(client, "DELETE", f"/messages/{id}", "a").status_code == 404
+        assert send(client, "GET", f"/messages/{id}", "a").status_code in (404, 501)
+    assert send(client, "GET", "/messages", "a").headers["RPP-Queue-Size"] == "1"
 
 
 def test_the_messages_of_an_empty_queue_are_an_empty_list(client):

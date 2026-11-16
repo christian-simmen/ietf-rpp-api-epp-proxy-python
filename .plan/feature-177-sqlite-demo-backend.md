@@ -49,8 +49,10 @@ src/registry_adapter/sqlite/       the SQLite backend
       - the backend profile leaves of the extension (the transfer operations of a planet), merged into the generic
         profile of the backend
 - [x] T3 Core of the extension, `src/extensions/planets/core/` (the files of the stash, moved, S1): model (Planet, Satellite, replacements, transfer),
-      ports (planet and satellite gateways), flows (create and replace with read back, the satellite of a planet at its
-      Direct Access path). A planet transfer reuses the generic transfer process of the core (`ContactTransferProcess`,
+      change sets `PlanetChanges` and `SatelliteChanges` (members to set, `cleared`, and `extensions` by extension id,
+      D25), ports (planet and satellite gateways with native `replace(replacement)` and `patch(id, changes)`, no `current`,
+      D24), flows (create, replace and patch call the gateway and read back; the satellite of a planet at its Direct
+      Access path). A planet transfer reuses the generic transfer process of the core (`ContactTransferProcess`,
       rendered as `transferProcess.read`) and `TransferEvent` of the messages with the object type `planet` (D9)
 - [x] T4 SQLite backend, `src/registry_adapter/sqlite/` (D12):
       - common: SQLAlchemy 2.x engine and file or memory database, migrations (each part's tables in its own
@@ -63,15 +65,17 @@ src/registry_adapter/sqlite/       the SQLite backend
       `src/settings/profiles/sqlite.yaml` (no objects of its own), the RPP profile `demo`, `config.demo.yaml`
 - [x] T6 RPP of the extension, `src/extensions/planets/rpp/`: the OpenAPI fragment (availability, create, read, update
       and delete of both objects, the transfer of a planet, the Direct Access path
-      `/planets/{id}/satellites/{satelliteId}`, D8), DTOs, mappers, handlers. A partial update reads the object, applies
-      the JSON Patch of json §5.2 to its update view, and replaces it
+      `/planets/{id}/satellites/{satelliteId}`, D8), DTOs, mappers, handlers. PUT builds a `PlanetReplacement` or `SatelliteReplacement`, and `rpp/mapping`
+      translates the JSON Patch of json §5.2 into `PlanetChanges` or `SatelliteChanges` after checking each value against
+      the update schema (D24, D25); nothing of JSON reaches core or the backend, and no read comes before the write
 - [x] T7 Integration environment `sqlite-demo` (`config.demo.yaml`, a temporary database, no credentials) and test
       cases `planet_*`, `satellite_*` and `planet_transfer`, the smoke ones marked. A unit test that an app built
       without `rpp_extensions` has no planet path and no loaded module of `extensions`
 - [x] T8 Checks at start: no definition of an extension has the name of a base definition or of another extension's
       (D10); an extension named in the configuration loads and registers, or the app does not start
-- [x] T9 Import contracts in `pyproject.toml`: no generic package (`core`, `rpp`, `registry_adapter` outside
-      `registry_adapter.sqlite.extensions`, `settings`) imports `extensions`; inside `extensions.<name>`, `rpp` over
+- [x] T9 Import contracts in `pyproject.toml` (no `ignore_imports`: the source modules of the generic contracts list
+      the SQLite common modules, not `registry_adapter.sqlite.extensions`): no generic package (`core`, `rpp`,
+      `registry_adapter` outside `registry_adapter.sqlite.extensions`, `settings`) imports `extensions`; inside `extensions.<name>`, `rpp` over
       `core`, and the layers of `rpp` (`handlers` over `mapping` over `dto | schema`); `registry_adapter.sqlite.extensions`
       imports `extensions.<name>.core` only; `registry_adapter.sqlite` independent of `epp` and `rri`. `sqlalchemy` in
       `requirements.txt`
@@ -126,7 +130,13 @@ src/registry_adapter/sqlite/       the SQLite backend
   sets and the `extensions` mappings in core, `MemberHook` and `HOOKS` in the SQLite part, the patch translated in
   `rpp/mapping`. Unit tests with a dummy extension: `tests/unit/test_planets_gateways.py`,
   `tests/unit/test_planets_patch_mapping.py`.
-- MTEST run: pending for the maintainer (no machine on the allowlist).
+- Review round 1 (7 findings) fixed: the stand-in hash of an unknown user takes the highest n, r, p of the configured
+  hashes (`ClientDirectory.stand_in_parameters`); the 501 `02307` of the drafts' objects is tested with a backend whose
+  gateways fail when called, and the middleware's `detail`; D21 tested by exact queue sizes and message types with
+  satellites (unit and `planet_message` cases); message ids are ASCII digits; `generic-not-extensions` has no
+  `ignore_imports`; `registry_setup` documented as part of the composition root; T3 and T6 rewritten; test imports at
+  module level; one helper for the hooks in `SqliteGateway`.
+- MTEST run: pending (the MTEST login fails now; with the maintainer) for the maintainer (no machine on the allowlist).
 
 ## Findings (evidence)
 

@@ -73,7 +73,10 @@ Package `__init__.py` files are empty, except `rpp/handlers/__init__.py`, which 
 - `rpp` imports `core` only, never `registry_adapter`.
 - `registry_adapter/<protocol>` imports `core` and `registry_adapter/common`, never another protocol and never `rpp`.
 - `registry_adapter/common` imports no project package: no `core`, no protocol, no `settings`.
-- Only `main` imports more than one adapter. Nobody but `main` imports `settings`.
+- Only `main` imports more than one adapter. Nobody but `main` and `registry_setup` imports `settings`: `registry_setup`
+  is part of the composition root (it builds the registry and the backend profile from the settings, so that the test
+  environments can build a profile without composing an app). `core`, `registration`, `rpp`, `extensions` and
+  `registry_adapter` are forbidden to import `settings` by their contracts.
 - `registration` imports no other package of the proxy. No generic package (`core`, `rpp`, `registry_adapter`,
   `settings`, `registration`) imports `extensions`, but `registry_adapter/sqlite/extensions/<name>` imports the `core` of
   its extension and nothing else of it. An extension imports no registry adapter, settings or XML; its `core` imports

@@ -10,6 +10,12 @@ from registry_adapter.sqlite.models.message_row import MessageRow
 from registry_adapter.sqlite.sqlite_context import SqliteContext
 
 
+def _is_id(message_id) -> bool:
+    """A message id is the decimal digits of ASCII: `isdecimal` alone takes those of other scripts."""
+    text = str(message_id)
+    return text.isascii() and text.isdecimal()
+
+
 def _message(row: MessageRow) -> QueueMessage:
     process = ContactTransferProcess(
         id=row.object_id, trStatus=row.tr_status, reqClientId=row.requesting_client, requestDate=row.request_date,
@@ -44,7 +50,7 @@ class SqliteMessageGateway:
     def ack(self, message_id, client_transaction_id=None):
         client, store = self._context.sponsor_id, self._context.messages
         with self._context.database.transaction() as session:
-            row = session.get(MessageRow, int(message_id)) if str(message_id).isdecimal() else None
+            row = session.get(MessageRow, int(message_id)) if _is_id(message_id) else None
             if row is None or row.client != client:
                 return MessageErrorResponse(
                     queue_size=store.size(session, client), code=ResultCode.OBJECT_DOES_NOT_EXIST,

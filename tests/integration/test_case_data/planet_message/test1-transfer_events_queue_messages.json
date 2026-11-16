@@ -42,6 +42,72 @@
     {
       "request": {
         "method": "POST",
+        "url": "/satellites",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "satellite",
+          "id": "{handle:a:-pm1s}",
+          "planet": {
+            "@type": "planet",
+            "id": "{handle:a:-pm1}"
+          },
+          "orbitalPeriod": 0.32
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "satellite",
+          "id": "{handle:a:-pm1s}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/satellites",
+        "headers": {
+          "Authorization": "{auth:c}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "satellite",
+          "id": "{handle:a:-pm1t}",
+          "planet": {
+            "@type": "planet",
+            "id": "{handle:a:-pm1}"
+          },
+          "orbitalPeriod": 0.32
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "satellite",
+          "id": "{handle:a:-pm1t}"
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
         "url": "/planets/{handle:a:-pm1}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:d}",

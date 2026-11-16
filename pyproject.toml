@@ -157,11 +157,19 @@ forbidden_modules = ["core", "extensions", "main", "registry_adapter", "rpp", "s
 
 [[tool.importlinter.contracts]]
 id = "generic-not-extensions"
-name = "No generic package imports an extension, but the SQLite part of one imports its core"
+name = "No generic package imports an extension"
 type = "forbidden"
-source_modules = ["core", "registration", "registry_adapter", "rpp", "settings"]
+source_modules = [
+    "core", "registration", "rpp", "settings", "registry_adapter.common", "registry_adapter.epp", "registry_adapter.rri",
+    "registry_adapter.sqlite.client_directory", "registry_adapter.sqlite.clock", "registry_adapter.sqlite.common_part",
+    "registry_adapter.sqlite.extension_part", "registry_adapter.sqlite.gateways", "registry_adapter.sqlite.hash_password",
+    "registry_adapter.sqlite.member_hook", "registry_adapter.sqlite.member_refused", "registry_adapter.sqlite.message_store",
+    "registry_adapter.sqlite.migrations", "registry_adapter.sqlite.models", "registry_adapter.sqlite.password_hash",
+    "registry_adapter.sqlite.schema_version_row", "registry_adapter.sqlite.sqlite_backend",
+    "registry_adapter.sqlite.sqlite_context", "registry_adapter.sqlite.sqlite_database",
+    "registry_adapter.sqlite.sqlite_part",
+]
 forbidden_modules = ["extensions"]
-ignore_imports = ["registry_adapter.sqlite.extensions.** -> extensions.*.core.**"]
 
 [[tool.importlinter.contracts]]
 id = "extension-layers"
@@ -203,10 +211,13 @@ forbidden_modules = ["main", "registry_adapter", "settings", "lxml", "sqlalchemy
 
 [[tool.importlinter.contracts]]
 id = "sqlite-extensions-core-only"
-name = "The SQLite part of an extension imports the core of the extension only"
+name = "The SQLite part of an extension imports the core of an extension only, of the extensions only what it needs"
 type = "forbidden"
 source_modules = ["registry_adapter.sqlite.extensions"]
-forbidden_modules = ["extensions.planets.rpp", "extensions.planets.register_planets", "rpp", "core.flows", "core.session"]
+forbidden_modules = [
+    "extensions.*.rpp", "extensions.*.core.flows", "extensions.planets.register_planets", "rpp", "core.flows",
+    "core.session", "registration", "settings",
+]
 
 [[tool.importlinter.contracts]]
 id = "sqlite-common-not-extensions"
@@ -214,7 +225,8 @@ name = "The common part of the SQLite backend does not import the part of an ext
 type = "forbidden"
 source_modules = [
     "registry_adapter.sqlite.client_directory", "registry_adapter.sqlite.clock", "registry_adapter.sqlite.common_part",
-    "registry_adapter.sqlite.extension_part", "registry_adapter.sqlite.gateways", "registry_adapter.sqlite.message_store",
+    "registry_adapter.sqlite.extension_part", "registry_adapter.sqlite.gateways", "registry_adapter.sqlite.hash_password",
+    "registry_adapter.sqlite.member_hook", "registry_adapter.sqlite.member_refused", "registry_adapter.sqlite.message_store",
     "registry_adapter.sqlite.migrations", "registry_adapter.sqlite.models", "registry_adapter.sqlite.password_hash",
     "registry_adapter.sqlite.schema_version_row", "registry_adapter.sqlite.sqlite_backend",
     "registry_adapter.sqlite.sqlite_context", "registry_adapter.sqlite.sqlite_database",

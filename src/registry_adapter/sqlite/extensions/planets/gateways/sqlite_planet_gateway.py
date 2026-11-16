@@ -43,10 +43,6 @@ class SqlitePlanetGateway(SqliteGateway):
     by a transfer; only the sponsor changes or deletes it, and the transfer is EPP's (RFC 5731 section 3.2.4): a pull
     that waits until the sponsor answers it, with no approval after a period."""
 
-    @property
-    def _hooks(self):
-        return self._context.hooks.get("planet", {})
-
     @staticmethod
     def _missing(planet_id: str):
         return Refusal(ResultCode.OBJECT_DOES_NOT_EXIST, f"The planet {planet_id} does not exist")
@@ -69,12 +65,6 @@ class SqlitePlanetGateway(SqliteGateway):
         if violations:
             raise Refusal(ResultCode.PARAMETER_VALUE_RANGE_ERROR, "; ".join(violations))
 
-    def _hook(self, extension_id: str):
-        hook = self._hooks.get(extension_id)
-        if hook is None:
-            raise Refusal(ResultCode.UNIMPLEMENTED_EXTENSION, f"The backend holds no members of {extension_id}")
-        return hook
-
     def check(self, id, client_transaction_id=None):
         with self._context.database.transaction() as session:
             taken = session.get(PlanetRow, id) is not None
@@ -87,7 +77,7 @@ class SqlitePlanetGateway(SqliteGateway):
                 row = session.get(PlanetRow, id)
                 if row is None:
                     raise self._missing(id)
-                return self._ok(to_planet(session, row, self.sponsor_id, self._hooks), client_transaction_id)
+                return self._ok(to_planet(session, row, self.sponsor_id, self._hooks_for("planet")), client_transaction_id)
         return self._guarded(client_transaction_id, work)
 
     def create(self, planet: Planet, client_transaction_id=None):
@@ -102,7 +92,7 @@ class SqlitePlanetGateway(SqliteGateway):
                     session.add(row)
                     session.flush()
                     for extension_id, value in planet.extensions.items():
-                        self._hook(extension_id).create(session, planet.id, value)
+                        self._hook("planet", extension_id).create(session, planet.id, value)
             except IntegrityError:
                 raise Refusal(ResultCode.OBJECT_EXISTS, f"The planet {planet.id} exists") from None
             return self._ok(planet, client_transaction_id)
@@ -115,10 +105,7 @@ class SqlitePlanetGateway(SqliteGateway):
                 row.type, row.radius, row.mass = replacement.type, replacement.radius, replacement.mass
                 if replacement.authInfo is not None:
                     row.auth_pw = replacement.authInfo.pw or ""
-                for extension_id in replacement.extensions.keys() - self._hooks.keys():
-                    self._hook(extension_id)
-                for extension_id, hook in self._hooks.items():
-                    hook.replace(session, row.id, replacement.extensions.get(extension_id))
+                self._replace_members(session, "planet", row.id, replacement.extensions)
                 self._check(row)
                 row.updater, row.updated = self.sponsor_id, now()
             return self._ok(None, client_transaction_id)
@@ -141,7 +128,7 @@ class SqlitePlanetGateway(SqliteGateway):
                 if "mass" in changes.cleared:
                     row.mass = None
                 for extension_id, value in changes.extensions.items():
-                    self._hook(extension_id).change(session, id, value)
+                    self._hook("planet", extension_id).change(session, id, value)
                 self._check(row)
                 row.updater, row.updated = self.sponsor_id, now()
             return self._ok(None, client_transaction_id)
@@ -153,7 +140,7 @@ class SqlitePlanetGateway(SqliteGateway):
                 row = self._owned(session, id, "delete")
                 if session.query(SatelliteRow).filter(SatelliteRow.planet_id == id).count():
                     raise Refusal(ResultCode.OBJECT_ASSOCIATION_PROHIBITS_OPERATION, f"The planet {id} has satellites")
-                for hook in self._hooks.values():
+                for hook in self._hooks_for("planet").values():
                     hook.delete(session, id)
                 transfer = transfer_of(session, id)
                 if transfer is not None:

@@ -29,6 +29,25 @@ class SqliteGateway:
         return ErrorResponse(code=code, msg=msg, server_transaction_id=new_server_transaction_id(),
                              client_transaction_id=client_transaction_id)
 
+    def _hooks_for(self, target: str):
+        """The hooks of the extensions that add members to the objects of `target`, by extension id."""
+        return self._context.hooks.get(target, {})
+
+    def _hook(self, target: str, extension_id: str):
+        hook = self._hooks_for(target).get(extension_id)
+        if hook is None:
+            raise Refusal(ResultCode.UNIMPLEMENTED_EXTENSION, f"The backend holds no members of {extension_id}")
+        return hook
+
+    def _replace_members(self, session, target: str, object_id: str, members) -> None:
+        """A full update of the members the extensions add: one a hook holds and `members` lacks is removed, and members of
+        an extension without a hook are refused."""
+        hooks = self._hooks_for(target)
+        for extension_id in members.keys() - hooks.keys():
+            self._hook(target, extension_id)
+        for extension_id, hook in hooks.items():
+            hook.replace(session, object_id, members.get(extension_id))
+
     def _guarded(self, client_transaction_id, work):
         """Runs `work`, a unit of work that answers or raises `Refusal` (or `MemberRefused` for a hook): a refusal has rolled
         the unit back, and answers as the refusal says."""
