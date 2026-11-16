@@ -2,6 +2,7 @@
   "test_id": "test4-ack_with_content",
   "steps": [
     {
+      "comment": "Acknowledges message MSG37-nosuch; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/messages/MSG37-nosuch-{random_id_10}",

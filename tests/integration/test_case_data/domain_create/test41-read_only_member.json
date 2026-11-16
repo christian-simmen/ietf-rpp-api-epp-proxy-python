@@ -3,6 +3,7 @@
   "description": "A read-only member in a create is refused (json §4.4).",
   "steps": [
     {
+      "comment": "Creates contact V41 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -89,6 +90,7 @@
       }
     },
     {
+      "comment": "Creates domain gc41 with authInfo, registrant V41 (by backend), dns records a (by backend), provMetadata; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

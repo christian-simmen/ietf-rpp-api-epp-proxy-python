@@ -12,6 +12,7 @@
   "test_id": "test3-add_tech_contact",
   "steps": [
     {
+      "comment": "Creates host ns1.p3 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -50,6 +51,7 @@
       }
     },
     {
+      "comment": "Creates host ns2.p3 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Creates contact M03 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -198,6 +201,7 @@
       }
     },
     {
+      "comment": "Creates contact J3 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -308,6 +312,7 @@
       }
     },
     {
+      "comment": "Creates contact S3 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -418,6 +423,7 @@
       }
     },
     {
+      "comment": "Creates domain ex3 with 2 nameservers, registrant J3, contacts admin, tech (by backend), authInfo, processes (includeElements=authInfo); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": {
@@ -644,6 +650,7 @@
       }
     },
     {
+      "comment": "Patches domain ex3: add /contacts tech; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/ex3-{random_name}.{tld}",

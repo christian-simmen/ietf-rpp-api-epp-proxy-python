@@ -8,6 +8,7 @@
   "test_id": "test11-ambiguous_replace",
   "steps": [
     {
+      "comment": "Creates contact uj1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -90,6 +91,7 @@
       }
     },
     {
+      "comment": "Creates contact uj2 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -172,6 +174,7 @@
       }
     },
     {
+      "comment": "Creates domain up-test11 with authInfo, registrant uj1, contacts admin, tech, tech (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -267,6 +270,7 @@
       }
     },
     {
+      "comment": "Patches domain up-test11: replace /contacts with a match billing; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test11-{random_name}.{tld}",

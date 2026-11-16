@@ -12,6 +12,7 @@
   "description": "One name server, under the two RRI requires.",
   "steps": [
     {
+      "comment": "Creates contact X25 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -97,6 +98,7 @@
       }
     },
     {
+      "comment": "Creates domain t25 with authInfo, registrant X25 (by backend), dns records ns; expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

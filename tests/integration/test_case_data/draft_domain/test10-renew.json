@@ -7,6 +7,7 @@
   "test_id": "test10-renew",
   "steps": [
     {
+      "comment": "Creates contact HR10; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -75,6 +76,7 @@
       }
     },
     {
+      "comment": "Creates domain ex10 with authInfo, registrant HR10 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -149,6 +151,7 @@
       }
     },
     {
+      "comment": "Renews domain ex10 with renewalPeriod; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/ex10-{random_name}.{tld}/processes/renewProcesses",

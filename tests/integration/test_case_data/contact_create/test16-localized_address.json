@@ -6,6 +6,7 @@
   "test_id": "test16-localized_address",
   "steps": [
     {
+      "comment": "Creates contact 16 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -118,6 +119,7 @@
       }
     },
     {
+      "comment": "Reads contact 16; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:-16}",

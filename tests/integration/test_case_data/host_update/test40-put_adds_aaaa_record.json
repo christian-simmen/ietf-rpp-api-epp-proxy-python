@@ -3,6 +3,7 @@
   "description": "A PUT adds an aaaa record.",
   "steps": [
     {
+      "comment": "Creates host hu40.….net with dns records ns; expects 201. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -40,6 +41,7 @@
       }
     },
     {
+      "comment": "Replaces host hu40.….net by a full update with dns records ns, aaaa; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/hu40.{random_name}.net",
@@ -105,6 +107,7 @@
       }
     },
     {
+      "comment": "Reads host hu40.….net; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/hosts/hu40.{random_name}.net",

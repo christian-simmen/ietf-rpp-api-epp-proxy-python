@@ -2,6 +2,7 @@
   "test_id": "test36-patch_add_only_own_ns_record",
   "steps": [
     {
+      "comment": "Creates host t36.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t36.….net: add /dns/records; expects 400 02003. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t36.{random_name}.net",

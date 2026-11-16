@@ -8,6 +8,7 @@
   "test_id": "test4-replace_nameservers",
   "steps": [
     {
+      "comment": "Creates contact HP4; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -76,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.p4 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -114,6 +116,7 @@
       }
     },
     {
+      "comment": "Creates host ns2.p4 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -152,6 +155,7 @@
       }
     },
     {
+      "comment": "Creates domain ex4 with authInfo, registrant HP4 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -224,6 +228,7 @@
       }
     },
     {
+      "comment": "Patches domain ex4: add /nameservers; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/ex4-{random_name}.{tld}",
@@ -252,6 +257,7 @@
       }
     },
     {
+      "comment": "Patches domain ex4: replace /nameservers; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/ex4-{random_name}.{tld}",

@@ -10,6 +10,7 @@
   "description": "A PUT adds contacts to a domain without any.",
   "steps": [
     {
+      "comment": "Creates contact R44 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -96,6 +97,7 @@
       }
     },
     {
+      "comment": "Creates domain gu44 with authInfo, registrant R44 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -170,6 +172,7 @@
       }
     },
     {
+      "comment": "Creates contact T44 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -252,6 +255,7 @@
       }
     },
     {
+      "comment": "Replaces domain gu44 by a full update with contacts tech; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/gu44-{random_name}.{tld}",
@@ -292,6 +296,7 @@
       }
     },
     {
+      "comment": "Reads domain gu44; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/gu44-{random_name}.{tld}",
@@ -320,6 +325,7 @@
       }
     },
     {
+      "comment": "Deletes domain gu44; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/gu44-{random_name}.{tld}",

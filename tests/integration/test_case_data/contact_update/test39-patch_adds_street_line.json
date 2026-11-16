@@ -3,6 +3,7 @@
   "description": "A PATCH adds a second street line.",
   "steps": [
     {
+      "comment": "Creates contact P39 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -85,6 +86,7 @@
       }
     },
     {
+      "comment": "Patches contact P39: add /contactInfo/addresses/addr/components; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P39}",
@@ -140,6 +142,7 @@
       }
     },
     {
+      "comment": "Reads contact P39; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:P39}",

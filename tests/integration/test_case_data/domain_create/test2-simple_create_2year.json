@@ -6,6 +6,7 @@
   "test_id": "test2-simple_create_2year",
   "steps": [
     {
+      "comment": "Creates contact HC2; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -74,6 +75,7 @@
       }
     },
     {
+      "comment": "Creates domain test2 with authInfo, processes, registrant HC2 (by backend), dns records a (by backend) (includeElements=authInfo); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": {

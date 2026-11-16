@@ -3,6 +3,7 @@
   "test_id": "test1-create_then_get",
   "steps": [
     {
+      "comment": "Creates contact G1 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -142,6 +143,7 @@
       }
     },
     {
+      "comment": "Reads contact G1 (includeElements=authInfo) (the request differs by backend); expects 200 01000. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": {

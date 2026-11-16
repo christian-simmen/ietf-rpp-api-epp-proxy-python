@@ -6,6 +6,7 @@
   "test_id": "test28-patch_missing",
   "steps": [
     {
+      "comment": "Patches contact 28Z: add /status clientDeleteProhibited; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:28Z}",

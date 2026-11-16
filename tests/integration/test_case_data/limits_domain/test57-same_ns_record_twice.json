@@ -9,6 +9,7 @@
   "description": "The same ns record twice: the drafts leave it open, the server takes it.",
   "steps": [
     {
+      "comment": "Creates contact V57 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -95,6 +96,7 @@
       }
     },
     {
+      "comment": "Creates domain t57 with authInfo, registrant V57 (by backend), dns records 3 ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

@@ -6,6 +6,7 @@
   "test_id": "test14-put_auth_info",
   "steps": [
     {
+      "comment": "Creates contact 14A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -122,6 +123,7 @@
       }
     },
     {
+      "comment": "Replaces contact 14A by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:14A}",
@@ -220,6 +222,7 @@
       }
     },
     {
+      "comment": "Reads contact 14A (includeElements=authInfo); expects 200 01000. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:14A}?includeElements=authInfo",
@@ -245,6 +248,7 @@
       }
     },
     {
+      "comment": "Replaces contact 14A by a full update with authInfo (by backend) (includeElements=authInfo); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:14A}?includeElements=authInfo",
@@ -363,6 +367,7 @@
       }
     },
     {
+      "comment": "Replaces contact 14A by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:14A}",
@@ -461,6 +466,7 @@
       }
     },
     {
+      "comment": "Reads contact 14A (includeElements=authInfo); expects 200 01000. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:14A}?includeElements=authInfo",

@@ -3,6 +3,7 @@
   "description": "Thirteen name servers, the most both servers take: host objects where the backend has them (the EPP test server), ns records where it has none (RRI).",
   "steps": [
     {
+      "comment": "Creates contact X22 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -88,6 +89,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -129,6 +131,7 @@
       }
     },
     {
+      "comment": "Creates host ns2.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -170,6 +173,7 @@
       }
     },
     {
+      "comment": "Creates host ns3.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -211,6 +215,7 @@
       }
     },
     {
+      "comment": "Creates host ns4.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -252,6 +257,7 @@
       }
     },
     {
+      "comment": "Creates host ns5.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -293,6 +299,7 @@
       }
     },
     {
+      "comment": "Creates host ns6.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -334,6 +341,7 @@
       }
     },
     {
+      "comment": "Creates host ns7.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -375,6 +383,7 @@
       }
     },
     {
+      "comment": "Creates host ns8.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -416,6 +425,7 @@
       }
     },
     {
+      "comment": "Creates host ns9.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -457,6 +467,7 @@
       }
     },
     {
+      "comment": "Creates host ns10.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -498,6 +509,7 @@
       }
     },
     {
+      "comment": "Creates host ns11.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -539,6 +551,7 @@
       }
     },
     {
+      "comment": "Creates host ns12.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -580,6 +593,7 @@
       }
     },
     {
+      "comment": "Creates host ns13.n22 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -621,6 +635,7 @@
       }
     },
     {
+      "comment": "Creates domain t22 with authInfo, registrant X22 (by backend), dns records a (by backend), 13 nameservers; expects 201. Setup: the domain the steps below name. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -753,6 +768,7 @@
       }
     },
     {
+      "comment": "Creates domain t22 with authInfo, registrant X22 (by backend), dns records 13 ns; expects 201. The create this case checks. Only where the backend has no host objects (rri-mtest).",
       "when": {
         "profile.objects": {
           "not": {
@@ -915,6 +931,7 @@
       }
     },
     {
+      "comment": "Deletes domain t22; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it. Only where the backend has no host objects (rri-mtest).",
       "when": {
         "profile.objects": {
           "not": {

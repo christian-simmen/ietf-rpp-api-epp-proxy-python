@@ -11,6 +11,7 @@
   "test_id": "test24-put_nameservers_and_ds",
   "steps": [
     {
+      "comment": "Creates contact HU24; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -79,6 +80,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.u24 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -117,6 +119,7 @@
       }
     },
     {
+      "comment": "Creates domain put24 with authInfo, dns records ds, registrant HU24 (by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -183,6 +186,7 @@
       }
     },
     {
+      "comment": "Replaces domain put24 by a full update with 1 nameserver, dns records ds, registrant HU24 (by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put24-{random_name}.{tld}",

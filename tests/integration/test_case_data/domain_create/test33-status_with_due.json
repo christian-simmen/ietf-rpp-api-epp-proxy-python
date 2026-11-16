@@ -7,6 +7,7 @@
   "description": "EPP has no due date of a status, so the proxy refuses it before any command.",
   "steps": [
     {
+      "comment": "Creates domain gc33 with authInfo, dns records a (by backend), status clientHold; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

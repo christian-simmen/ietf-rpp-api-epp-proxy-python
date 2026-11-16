@@ -6,6 +6,7 @@
   "test_id": "test2-replace_status",
   "steps": [
     {
+      "comment": "Creates contact HP2; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -74,6 +75,7 @@
       }
     },
     {
+      "comment": "Creates domain ex2 with authInfo, registrant HP2 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -146,6 +148,7 @@
       }
     },
     {
+      "comment": "Patches domain ex2: replace /status with a match clientUpdateProhibited; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/ex2-{random_name}.{tld}",

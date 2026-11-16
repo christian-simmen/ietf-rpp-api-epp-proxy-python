@@ -8,6 +8,7 @@
   "test_id": "test2-put_clears_organisation_and_numbers",
   "steps": [
     {
+      "comment": "Creates contact 02A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -143,6 +144,7 @@
       }
     },
     {
+      "comment": "Creates contact 02B with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -278,6 +280,7 @@
       }
     },
     {
+      "comment": "Patches contact 02B: remove /contactInfo/phones/voice; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:02B}",
@@ -308,6 +311,7 @@
       }
     },
     {
+      "comment": "Patches contact 02B: remove /contactInfo/phones/fax; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:02B}",
@@ -338,6 +342,7 @@
       }
     },
     {
+      "comment": "Patches contact 02B: remove /contactInfo/organizations/org; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:02B}",
@@ -368,6 +373,7 @@
       }
     },
     {
+      "comment": "Replaces contact 02A by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:02A}",
@@ -449,6 +455,7 @@
       }
     },
     {
+      "comment": "Patches contact 02A: remove /contactInfo/organizations/org; expects 422 02308. An error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:02A}",
@@ -478,6 +485,7 @@
       }
     },
     {
+      "comment": "Patches contact 02A: remove /contactInfo/phones/voice; expects 422 02308. An error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:02A}",
@@ -507,6 +515,7 @@
       }
     },
     {
+      "comment": "Patches contact 02A: remove /contactInfo/phones/fax; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:02A}",

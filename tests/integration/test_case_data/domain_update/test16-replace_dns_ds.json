@@ -8,6 +8,7 @@
   "test_id": "test16-replace_dns_ds",
   "steps": [
     {
+      "comment": "Creates contact HU16; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -76,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates domain t16 with authInfo, dns records ds, registrant HU16 (by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -142,6 +144,7 @@
       }
     },
     {
+      "comment": "Patches domain t16: replace /dns; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/t16-{random_name}.{tld}",
@@ -203,6 +206,7 @@
       }
     },
     {
+      "comment": "Reads domain t16; expects 200 01000. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/t16-{random_name}.{tld}",

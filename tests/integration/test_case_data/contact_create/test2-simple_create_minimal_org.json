@@ -3,6 +3,7 @@
   "test_id": "test2-simple_create_minimal_org",
   "steps": [
     {
+      "comment": "Creates contact 02 with authInfo (by backend) (includeElements=authInfo); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": {

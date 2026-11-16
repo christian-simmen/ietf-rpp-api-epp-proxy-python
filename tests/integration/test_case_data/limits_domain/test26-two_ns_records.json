@@ -11,6 +11,7 @@
   "description": "Two name servers, the fewest RRI takes.",
   "steps": [
     {
+      "comment": "Creates contact X26 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -96,6 +97,7 @@
       }
     },
     {
+      "comment": "Creates domain t26 with authInfo, registrant X26 (by backend), dns records 2 ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -163,6 +165,7 @@
       }
     },
     {
+      "comment": "Deletes domain t26; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/t26-{random_name}.{tld}",

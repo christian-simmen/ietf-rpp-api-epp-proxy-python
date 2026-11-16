@@ -3,6 +3,7 @@
   "markers": ["smoke"],
   "steps": [
     {
+      "comment": "Creates domain t1 with authInfo; expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -32,6 +33,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of domain t1 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/t1-{random_name}.{tld}/processes/transferProcesses",
@@ -64,6 +66,7 @@
       }
     },
     {
+      "comment": "Approves the pending transfer of domain t1; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/t1-{random_name}.{tld}/processes/transferProcesses/latest/transferApprove",
@@ -88,6 +91,7 @@
       }
     },
     {
+      "comment": "Reads domain t1 as registrar b; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/t1-{random_name}.{tld}",

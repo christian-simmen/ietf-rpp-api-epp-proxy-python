@@ -7,6 +7,7 @@
   "description": "A PATCH changes the name of the organization.",
   "steps": [
     {
+      "comment": "Creates contact P57 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -94,6 +95,7 @@
       }
     },
     {
+      "comment": "Patches contact P57: replace /contactInfo/organizations/org/name; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P57}",

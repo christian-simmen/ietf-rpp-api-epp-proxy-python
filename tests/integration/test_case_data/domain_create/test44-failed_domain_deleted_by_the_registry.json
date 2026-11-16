@@ -10,6 +10,7 @@
   "description": "A domain whose name servers fail the registry's check, and that nobody fixes, is deleted by the registry when its failed period ends, into its redemption period (rri-5.0-reference §5.2: a failed domain must be fixed or is deleted). Not run yet: it needs RPP_TEST_MAX_WAIT of a day or more.",
   "steps": [
     {
+      "comment": "Creates contact G44 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -95,6 +96,7 @@
       }
     },
     {
+      "comment": "Creates domain dc44 with authInfo, registrant G44 (by backend), dns records 2 ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -168,6 +170,7 @@
       }
     },
     {
+      "comment": "Reads domain dc44; expects 200. Reads what the steps above created. Waits first for domainName.processes.create.failed_dns_period.",
       "wait": "domainName.processes.create.failed_dns_period",
       "request": {
         "method": "GET",

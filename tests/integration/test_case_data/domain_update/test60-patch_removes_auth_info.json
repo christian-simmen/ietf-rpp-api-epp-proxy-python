@@ -7,6 +7,7 @@
   "description": "authInfo is 0-1: a PATCH may remove it (RFC 5731 domain:null).",
   "steps": [
     {
+      "comment": "Creates contact R61 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -93,6 +94,7 @@
       }
     },
     {
+      "comment": "Creates domain gu61 with authInfo, registrant R61 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -167,6 +169,7 @@
       }
     },
     {
+      "comment": "Patches domain gu61: remove /authInfo; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/gu61-{random_name}.{tld}",
@@ -193,6 +196,7 @@
       }
     },
     {
+      "comment": "Deletes domain gu61; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/gu61-{random_name}.{tld}",

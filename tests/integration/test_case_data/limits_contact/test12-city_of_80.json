@@ -3,6 +3,7 @@
   "description": "A city of 80 characters, the most RRI holds.",
   "steps": [
     {
+      "comment": "Creates contact Z12 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -83,6 +84,7 @@
       }
     },
     {
+      "comment": "Reads contact Z12; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:Z12}",

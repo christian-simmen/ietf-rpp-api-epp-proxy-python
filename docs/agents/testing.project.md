@@ -231,7 +231,9 @@ Facts are in block style, without `{}`.
 | Any value of a step | `{"select": [{"when": …, "then": …}, …, {"then": …}]}` | the `then` of the first entry that holds; the last entry is the default. An entry `{"omit": true}` instead of `then` leaves the member or list element out |
 
 A group or case `when` that skips it somewhere has a `"comment"` next to it, which says in which environment it is
-skipped and why, in terms of the backend; the runner ignores it.
+skipped and why, in terms of the backend; the runner ignores it. Every step starts with a `"comment"` too: what it
+sends, what it expects, and why it is there (setup, the check of the case, a read back, cleanup), and where it runs
+when it has a `when`. A comment holds no `{` or `}`, since the runner replaces placeholders in every string.
 
 Selectors are resolved first, then the placeholders, then the captures. A selector key that names no fact, in any
 known environment, fails the case at load. A skip names the facts that did not hold. A case whose selectors skip it

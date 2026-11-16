@@ -10,6 +10,7 @@
   "description": "A sixth tech contact added to a domain with five: the limit holds for the domain, not the command.",
   "steps": [
     {
+      "comment": "Creates contact Qa2 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -90,6 +91,7 @@
       }
     },
     {
+      "comment": "Creates contact Qb2 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -170,6 +172,7 @@
       }
     },
     {
+      "comment": "Creates contact Qc2 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -250,6 +253,7 @@
       }
     },
     {
+      "comment": "Creates contact Qd2 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -330,6 +334,7 @@
       }
     },
     {
+      "comment": "Creates contact Qe2 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -410,6 +415,7 @@
       }
     },
     {
+      "comment": "Creates contact Qf2 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -490,6 +496,7 @@
       }
     },
     {
+      "comment": "Creates domain t19 with authInfo, registrant Qa2 (by backend), dns records a (by backend), contacts tech, tech, tech, tech, tech; expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -600,6 +607,7 @@
       }
     },
     {
+      "comment": "Patches domain t19: add /contacts tech; expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/t19-{random_name}.{tld}",

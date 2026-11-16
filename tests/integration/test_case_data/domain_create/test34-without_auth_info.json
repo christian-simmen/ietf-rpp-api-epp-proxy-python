@@ -7,6 +7,7 @@
   "description": "The data objects allow a domain without authInfo (0-1); RFC 5731 requires one at create, which the registry refuses as a missing parameter.",
   "steps": [
     {
+      "comment": "Creates domain gc34; expects 400 02003. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

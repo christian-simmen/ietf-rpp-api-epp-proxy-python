@@ -2,6 +2,7 @@
   "test_id": "test8-malformed_json",
   "steps": [
     {
+      "comment": "Sends a contact create without a name or id, with a fixed RPP-Cltrid, a raw body that is no valid JSON; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

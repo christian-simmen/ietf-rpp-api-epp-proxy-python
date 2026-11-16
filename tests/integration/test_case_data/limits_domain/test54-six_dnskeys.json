@@ -14,6 +14,7 @@
   "description": "Six DNSKEY records: MTEST refuses them (66300068807, too many dnskeys).",
   "steps": [
     {
+      "comment": "Creates contact V54 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -100,6 +101,7 @@
       }
     },
     {
+      "comment": "Creates domain t54 with authInfo, registrant V54 (by backend), dns records 2 ns, 6 dnskey; expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

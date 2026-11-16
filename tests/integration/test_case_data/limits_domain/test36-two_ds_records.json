@@ -9,6 +9,7 @@
   "description": "Two DS records.",
   "steps": [
     {
+      "comment": "Creates contact X36 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -94,6 +95,7 @@
       }
     },
     {
+      "comment": "Creates domain t36 with authInfo, registrant X36 (by backend), dns records 2 ds; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -167,6 +169,7 @@
       }
     },
     {
+      "comment": "Reads domain t36; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/domainNames/t36-{random_name}.{tld}",
@@ -201,6 +204,7 @@
       }
     },
     {
+      "comment": "Deletes domain t36; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/t36-{random_name}.{tld}",

@@ -3,6 +3,7 @@
   "description": "A contact with a phone is created, changed by PATCH and read back.",
   "steps": [
     {
+      "comment": "Creates contact L7 with authInfo (the request differs by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -130,6 +131,7 @@
       }
     },
     {
+      "comment": "Patches contact L7: replace /contactInfo/emails/email/address; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:L7}",
@@ -165,6 +167,7 @@
       }
     },
     {
+      "comment": "Reads contact L7; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:L7}",
@@ -198,6 +201,7 @@
       }
     },
     {
+      "comment": "Checks whether contact L7 is available; expects 404. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:L7}/availability",

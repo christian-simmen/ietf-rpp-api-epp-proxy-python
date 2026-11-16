@@ -6,6 +6,7 @@
   "description": "Discovery lists the URL of the effective schema of each offered profile (extension profile-schemas): each is fetched, without authentication and without a profile header, as application/schema+json.",
   "steps": [
     {
+      "comment": "Reads the discovery document without credentials; expects 200 01000. The operation this case checks. Keeps schemaA, schemaB for later steps.",
       "request": {
         "method": "GET",
         "url": "/.well-known/rpp",
@@ -66,6 +67,7 @@
       }
     },
     {
+      "comment": "Reads the captured schemaA without credentials, with Accept application/schema+json; expects 200 01000. Follows a link the steps above captured.",
       "request": {
         "method": "GET",
         "url": "{capture:schemaA}",
@@ -87,6 +89,7 @@
       }
     },
     {
+      "comment": "Reads the captured schemaB without credentials, with Accept application/schema+json; expects 200 01000. Follows a link the steps above captured.",
       "request": {
         "method": "GET",
         "url": "{capture:schemaB}",

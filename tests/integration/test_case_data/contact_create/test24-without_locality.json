@@ -3,6 +3,7 @@
   "description": "An address without a locality is refused: RFC 5733 requires the city.",
   "steps": [
     {
+      "comment": "Creates contact K24 with authInfo (by backend); expects one of 400 02001 or 400 02003. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

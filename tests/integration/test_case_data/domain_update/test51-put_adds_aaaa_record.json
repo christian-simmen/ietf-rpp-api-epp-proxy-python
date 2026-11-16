@@ -9,6 +9,7 @@
   "description": "A PUT adds an aaaa record next to the a record.",
   "steps": [
     {
+      "comment": "Creates contact R52 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -95,6 +96,7 @@
       }
     },
     {
+      "comment": "Creates domain gu52 with authInfo, registrant R52 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -169,6 +171,7 @@
       }
     },
     {
+      "comment": "Replaces domain gu52 by a full update with registrant R52, dns records a, aaaa; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/gu52-{random_name}.{tld}",
@@ -237,6 +240,7 @@
       }
     },
     {
+      "comment": "Reads domain gu52; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/gu52-{random_name}.{tld}",
@@ -277,6 +281,7 @@
       }
     },
     {
+      "comment": "Deletes domain gu52; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/gu52-{random_name}.{tld}",

@@ -2,6 +2,7 @@
   "test_id": "test3-availability_head_free",
   "steps": [
     {
+      "comment": "Checks whether domain ex3 is available with HEAD; expects 200. The operation this case checks.",
       "request": {
         "method": "HEAD",
         "url": "/domainNames/ex3-{random_name}.{tld}/availability",

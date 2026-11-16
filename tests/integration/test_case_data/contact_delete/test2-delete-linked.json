@@ -2,6 +2,7 @@
   "test_id": "test2-delete-linked",
   "steps": [
     {
+      "comment": "Creates contact D02 with authInfo; expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -62,6 +63,7 @@
       }
     },
     {
+      "comment": "Creates domain test2 with authInfo, registrant D02; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -102,6 +104,7 @@
       }
     },
     {
+      "comment": "Deletes contact D02; expects 409 02305. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/contacts/{handle:a:D02}",

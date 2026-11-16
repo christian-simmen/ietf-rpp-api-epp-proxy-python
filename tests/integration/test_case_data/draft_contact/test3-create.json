@@ -2,6 +2,7 @@
   "test_id": "test3-create",
   "steps": [
     {
+      "comment": "Creates contact J03 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

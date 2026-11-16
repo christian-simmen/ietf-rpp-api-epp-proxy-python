@@ -2,6 +2,7 @@
   "test_id": "test2-missing",
   "steps": [
     {
+      "comment": "Reads host t2.….net; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/hosts/t2.{random_name}.net",

@@ -3,6 +3,7 @@
   "test_id": "test1-free",
   "steps": [
     {
+      "comment": "Checks whether contact a1 is available; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:-a1}/availability",

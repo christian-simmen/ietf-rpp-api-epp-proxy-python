@@ -2,6 +2,7 @@
   "test_id": "test1-availability_free",
   "steps": [
     {
+      "comment": "Checks whether domain ex1 is available; expects 200. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/domainNames/ex1-{random_name}.{tld}/availability",

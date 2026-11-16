@@ -7,6 +7,7 @@
   "description": "A contact transfer nobody approves or rejects is approved by the server when its pending period ends.",
   "steps": [
     {
+      "comment": "Creates contact C18 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -61,6 +62,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of contact C18 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C18}/processes/transferProcesses",
@@ -93,6 +95,7 @@
       }
     },
     {
+      "comment": "Reads contact C18 as registrar b; expects 200. Reads back to prove the change above. Waits first for contact.processes.transfer.pending_period.",
       "wait": "contact.processes.transfer.pending_period",
       "request": {
         "method": "GET",

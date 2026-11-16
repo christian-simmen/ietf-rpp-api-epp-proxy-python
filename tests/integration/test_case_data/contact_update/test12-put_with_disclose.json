@@ -2,6 +2,7 @@
   "test_id": "test12-put_with_disclose",
   "steps": [
     {
+      "comment": "Creates contact 12A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -118,6 +119,7 @@
       }
     },
     {
+      "comment": "Replaces contact 12A by a full update with disclose (the request differs by backend); expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:12A}",

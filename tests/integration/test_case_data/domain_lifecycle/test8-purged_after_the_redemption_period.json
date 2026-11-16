@@ -9,6 +9,7 @@
   "description": "A deleted domain can no longer be restored once its redemption period ends (pendingDelete), and is purged after its pending delete period (RFC 3915 §3.1).",
   "steps": [
     {
+      "comment": "Creates contact L8; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -77,6 +78,7 @@
       }
     },
     {
+      "comment": "Creates domain t8 with authInfo, registrant L8 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -151,6 +153,7 @@
       }
     },
     {
+      "comment": "Deletes domain t8; expects 200. The operation this case checks. Waits first for domainName.processes.create.add_grace_period.",
       "wait": "domainName.processes.create.add_grace_period",
       "request": {
         "method": "DELETE",
@@ -168,6 +171,7 @@
       }
     },
     {
+      "comment": "Requests a restore of domain t8; expects 409 02304. An error answer this case checks. Waits first for domainName.processes.delete.redemption_period.",
       "wait": "domainName.processes.delete.redemption_period",
       "request": {
         "method": "POST",
@@ -195,6 +199,7 @@
       }
     },
     {
+      "comment": "Reads domain t8; expects 404 02303. The error answer this case checks. Waits first for domainName.processes.delete.pending_delete_period.",
       "wait": "domainName.processes.delete.pending_delete_period",
       "request": {
         "method": "GET",

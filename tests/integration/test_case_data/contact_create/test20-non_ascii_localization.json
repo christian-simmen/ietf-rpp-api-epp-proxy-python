@@ -6,6 +6,7 @@
   "test_id": "test20-non_ascii_localization",
   "steps": [
     {
+      "comment": "Creates contact 20 with authInfo (by backend); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -90,6 +91,7 @@
       }
     },
     {
+      "comment": "Reads contact 20; expects 200 01000. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:-20}",

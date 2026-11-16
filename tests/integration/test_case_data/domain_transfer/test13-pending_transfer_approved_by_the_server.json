@@ -7,6 +7,7 @@
   "description": "A transfer nobody approves or rejects is approved by the server when its pending period ends, and the domain is the gaining registrar's.",
   "steps": [
     {
+      "comment": "Creates domain t13 with authInfo; expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -36,6 +37,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of domain t13 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/t13-{random_name}.{tld}/processes/transferProcesses",
@@ -68,6 +70,7 @@
       }
     },
     {
+      "comment": "Reads domain t13 as registrar b; expects 200. Reads back to prove the change above. Waits first for domainName.processes.transfer.pending_period.",
       "wait": "domainName.processes.transfer.pending_period",
       "request": {
         "method": "GET",

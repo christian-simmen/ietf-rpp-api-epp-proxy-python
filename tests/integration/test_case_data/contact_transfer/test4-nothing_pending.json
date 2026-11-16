@@ -2,6 +2,7 @@
   "test_id": "test4-nothing_pending",
   "steps": [
     {
+      "comment": "Creates contact C4 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -56,6 +57,7 @@
       }
     },
     {
+      "comment": "Queries the transfer of contact C4; expects 409 02301. An error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:C4}/processes/transferProcesses/latest",
@@ -79,6 +81,7 @@
       }
     },
     {
+      "comment": "Approves the pending transfer of contact C4; expects 409 02301. An error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C4}/processes/transferProcesses/latest/transferApprove",
@@ -102,6 +105,7 @@
       }
     },
     {
+      "comment": "Rejects the pending transfer of contact C4; expects 409 02301. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C4}/processes/transferProcesses/latest/transferReject",

@@ -3,6 +3,7 @@
   "description": "A second organization: the JSContact profile has the key org only.",
   "steps": [
     {
+      "comment": "Creates contact K38 with authInfo (by backend); expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

@@ -5,6 +5,7 @@
   "test_id": "test1-read",
   "steps": [
     {
+      "comment": "Reads the discovery document without credentials; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/.well-known/rpp",

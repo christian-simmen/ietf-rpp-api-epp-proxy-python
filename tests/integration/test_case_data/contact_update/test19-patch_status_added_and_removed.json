@@ -6,6 +6,7 @@
   "test_id": "test19-patch_status_added_and_removed",
   "steps": [
     {
+      "comment": "Creates contact 19A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -122,6 +123,7 @@
       }
     },
     {
+      "comment": "Patches contact 19A: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:19A}",
@@ -161,6 +163,7 @@
       }
     },
     {
+      "comment": "Patches contact 19A: remove /status with a match; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:19A}",
@@ -199,6 +202,7 @@
       }
     },
     {
+      "comment": "Patches contact 19A: remove /status with a match; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:19A}",
@@ -232,6 +236,7 @@
       }
     },
     {
+      "comment": "Patches contact 19A: remove /status with a match; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:19A}",

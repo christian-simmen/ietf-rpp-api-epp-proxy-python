@@ -4,6 +4,7 @@
   "description": "A fourteenth address added to a host with thirteen: the limit holds for the host, not the command.",
   "steps": [
     {
+      "comment": "Creates contact Y7 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -89,6 +90,7 @@
       }
     },
     {
+      "comment": "Creates domain h7 with authInfo, registrant Y7 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -162,6 +164,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.h7 with dns records ns, 13 a; expects 201. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -302,6 +305,7 @@
       }
     },
     {
+      "comment": "Patches host ns1.h7: add /dns/records; expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/ns1.h7-{random_name}.{tld}",

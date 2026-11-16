@@ -10,6 +10,7 @@
   "comment": "Skipped on rri-mtest: MTEST's config signals the profile by media type; the twin in profile_signalling_media_type/ covers it.",
   "steps": [
     {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=urn:ietf:params:rpp:profile:epp-compatibility;version=1.0; expects 400 02004. An error answer this case checks. Only where the server offers no epp profile (rri-mtest).",
       "when": {
         "profile.profiles": {
           "not": {
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=de.denic.rpp.profile.rri;version=1.0; expects 400 02004. The error answer this case checks. Only where the server offers no rri profile (epp-docker).",
       "when": {
         "profile.profiles": {
           "not": {

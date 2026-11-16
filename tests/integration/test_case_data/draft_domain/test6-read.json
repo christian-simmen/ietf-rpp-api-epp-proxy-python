@@ -9,6 +9,7 @@
   "test_id": "test6-read",
   "steps": [
     {
+      "comment": "Creates host ns1.d6 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -47,6 +48,7 @@
       }
     },
     {
+      "comment": "Creates host ns2.d6 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -85,6 +87,7 @@
       }
     },
     {
+      "comment": "Creates contact J6 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -195,6 +198,7 @@
       }
     },
     {
+      "comment": "Creates contact S6 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -305,6 +309,7 @@
       }
     },
     {
+      "comment": "Creates domain ex6 with 2 nameservers, registrant J6, contacts admin, tech (by backend), authInfo, processes (includeElements=authInfo); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": {
@@ -531,6 +536,7 @@
       }
     },
     {
+      "comment": "Reads domain ex6 (includeElements=authInfo) (the request differs by backend); expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": {

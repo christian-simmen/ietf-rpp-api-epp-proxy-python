@@ -9,6 +9,7 @@
   "test_id": "test29-code_point_outside_idn_table",
   "steps": [
     {
+      "comment": "Creates contact HC29; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -77,6 +78,7 @@
       }
     },
     {
+      "comment": "Creates domain IDN español-t29 with authInfo, lgr, registrant HC29 (by backend), dns records a (by backend); expects 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

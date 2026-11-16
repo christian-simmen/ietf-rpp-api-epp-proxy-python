@@ -2,6 +2,7 @@
   "test_id": "test26-patch_remove_records_by_partial_match",
   "steps": [
     {
+      "comment": "Creates host t26.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t26.….net: add /dns/records; add /dns/records; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t26.{random_name}.net",
@@ -89,6 +91,7 @@
       }
     },
     {
+      "comment": "Patches host t26.….net: remove /dns/records with a match; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t26.{random_name}.net",

@@ -3,6 +3,7 @@
   "description": "A registrant that does not exist is refused by the registry.",
   "steps": [
     {
+      "comment": "Creates domain gc36 with authInfo, registrant N36, dns records a (by backend); expects one of 404 02303 or 409 02305 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

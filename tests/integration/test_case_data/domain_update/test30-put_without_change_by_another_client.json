@@ -3,6 +3,7 @@
   "description": "A full update by a client that is not the sponsor is refused, also when it changes nothing (core §16.8): a domain with an a record or ns records on every backend, one with host objects where the backend has them.",
   "steps": [
     {
+      "comment": "Creates contact U35 with authInfo (the request differs by backend); expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -130,6 +131,7 @@
       }
     },
     {
+      "comment": "Creates domain t35 with registrant U35, dns records a, authInfo (the request differs by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -213,6 +215,7 @@
       }
     },
     {
+      "comment": "Replaces domain t35 by a full update with registrant U35, dns records a as registrar b (the request differs by backend); expects 403 02201. An error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/t35-{random_name}.{tld}",
@@ -276,6 +279,7 @@
       }
     },
     {
+      "comment": "Deletes domain t35; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/t35-{random_name}.{tld}",
@@ -292,6 +296,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.u30 with dns records ns; expects 201. Setup: a nameserver of the domain below. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -335,6 +340,7 @@
       }
     },
     {
+      "comment": "Creates domain put30 with authInfo, 1 nameserver; expects 201 01000. Setup: the domain the steps below work on. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"
@@ -378,6 +384,7 @@
       }
     },
     {
+      "comment": "Replaces domain put30 by a full update with 1 nameserver as registrar b; expects 403 02201. The error answer this case checks. Only where the backend has host objects (epp-docker).",
       "when": {
         "profile.objects": {
           "contains": "host"

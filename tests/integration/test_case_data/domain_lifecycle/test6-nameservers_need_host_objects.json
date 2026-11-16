@@ -11,6 +11,7 @@
   "description": "A backend without host objects refuses nameservers before any command.",
   "steps": [
     {
+      "comment": "Creates domain t6 with 1 nameserver; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

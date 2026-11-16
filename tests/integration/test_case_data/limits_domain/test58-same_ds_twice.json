@@ -9,6 +9,7 @@
   "description": "The same DS record twice: the drafts leave it open, the server refuses it by policy.",
   "steps": [
     {
+      "comment": "Creates contact V58 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -95,6 +96,7 @@
       }
     },
     {
+      "comment": "Creates domain t58 with authInfo, registrant V58 (by backend), dns records 2 ds; expects 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

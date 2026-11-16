@@ -8,6 +8,7 @@
   "test_id": "test23-put_omitted_dns_removes_ds",
   "steps": [
     {
+      "comment": "Creates contact HU23; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -76,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates domain put23 with authInfo, dns records ds, registrant HU23 (by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -142,6 +144,7 @@
       }
     },
     {
+      "comment": "Patches domain put23: replace /dns/records with a match; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/put23-{random_name}.{tld}",
@@ -185,6 +188,7 @@
       }
     },
     {
+      "comment": "Replaces domain put23 by a full update with registrant HU23 (by backend), dns records a (by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put23-{random_name}.{tld}",
@@ -256,6 +260,7 @@
       }
     },
     {
+      "comment": "Patches domain put23: replace /dns/records with a match; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/put23-{random_name}.{tld}",
