@@ -1,6 +1,6 @@
 # Skipped integration tests
 
-Full run `pytest -n 4 tests/integration` on both environments, branch `chore/skip-reasons` (from `main` at f4f8ddc), 2026-11-16: 700 passed, 6 failed, 390 skipped.
+Full run `pytest -n 4 tests/integration` on both environments, branch `chore/skip-reasons` (from `main` at f4f8ddc), 2026-11-16: 700 passed, 6 failed, 389 skipped (390 in the run; domain_restore/test3 has since been merged into test1, which runs on both).
 
 Failed (not skipped, not part of this review): rri-mtest limits_domain/test1-label_of_60, rri-mtest limits_domain/test2-label_of_61, rri-mtest limits_domain/test3-label_of_63, rri-mtest limits_domain/test5-leading_hyphen, rri-mtest limits_domain/test6-underscore, rri-mtest message/test6-read_head_then_ack.
 
@@ -96,7 +96,7 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | request_contact/test6-template_too_short | group | profile.objects is ('domainName', 'host', 'contact'), not {'contains': 'requestContact'} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
 | request_contact/test7-other_registrar_cannot_change | group | profile.objects is ('domainName', 'host', 'contact'), not {'contains': 'requestContact'} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
 
-## rri-mtest (305 skipped)
+## rri-mtest (304 skipped)
 
 | Case | `when` of | Skip reason (runner) | Why (`comment`) | Verdict |
 |---|---|---|---|---|
@@ -192,7 +192,6 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | domain_renew/test9-list_not_supported | group | profile.domainName.processes.renew.supported is False, not True | Skipped on rri-mtest: RRI has no renew. | ok |
 | domain_restore/test12-restore_cycle_with_patch | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_restore/test13-pending_restore_without_report_ends | case | wait.domainName.processes.restore.pending_period: the server has no such transition; profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: it waits for domainName.processes.restore.pending_period, and the server has no such transition; RRI's RESTORE is one step, without a restore report. | ok |
-| domain_restore/test3-report_on_active_domain | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_restore/test4-patch_report_on_active_domain | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_restore/test8-report_without_restore_time | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_restore/test9-report_with_one_statement | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
