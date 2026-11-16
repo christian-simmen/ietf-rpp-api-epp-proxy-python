@@ -119,4 +119,28 @@ Grounded in the proposals (DO data-objects, CO core, JS json, EG guidelines, EC 
 
 ## Decisions
 
-(none yet)
+Plan approved by the orchestrator for the maintainer (2026-11-16). Answers:
+
+- Q1 `bound_profiles: {<preset key>: [profile keys]}` is one map leaf of the backend profile (I4).
+- Q2 Per-app `Definitions` catalogue, no new global. `EXTENSIONS` stays global (D18).
+- Q3 Ship EC in full, run the walker on the real bundle. If the localization constraints fail the RJ4 rule (EC flags this,
+  `draft-kowalik-rpp-epp-compatibility.md:457`), drop only those sub-schemas from the proxy's copy, keep the mapper checks,
+  record the drop in `.spec/spec-issues.md` with a link to SIDN/ietf-rpp-jscontact-profile#36.
+- Q4 Publish the Preset Schema without `unevaluatedProperties`, inject them for validation (json.md:389).
+- Q5 `/presets/{id}/schema` is outside signalling (core RC7) and public (RC3: server policy). `Accept`: `application/schema+json`,
+  a range including it, or none; anything else 406.
+- Q6 Hand-edit `.spec/draft-ietf-rpp-data-objects.yaml` together with `.spec/auto`.
+- Q7 Step 2 (json.md:72-77, RJ5) runs on the patched or replaced object without its server-managed read-only members.
+  Responses are never validated against profiles. The proposals do not say how two-step validation applies to PATCH:
+  recorded as a gap in `.spec/spec-issues.md`.
+- Q8 Core RC4: an extension path whose extension is not in the signalled preset is a 400 with the result code the proxy
+  already gives for schema-nonconforming content (to be checked and cited). A base object the backend lacks stays 501 `02307`.
+- Q9 No invented IANA URLs. Profile `epp-compatibility` url `https://datatracker.ietf.org/doc/draft-kowalik-rpp-epp-compatibility/`;
+  presets `base` and `epp-compatible` url `https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/`. rri and demo presets
+  have no `url`. Profile `url` is required (data-objects.md:573): for #179, the demo profiles point to their `docs/demo/` spec.
+- Q10 Remove `profiles`, `extensions`, `profile_schemas` from core `Discovery`, pass the offered presets to the discovery mapper.
+- Disagreements: 1 D12 wins. 2 EC wins. 3 proposal wins. 5 RC4 wins (Q8). 6 the issue wins: prose keeps 501, no profile of this
+  story makes an operation unavailable; RC6 is recorded as not implemented in `RPP_IMPLEMENTATION_NOTES.md`. 7 Q9. 8 Q5.
+  Those that diverge from a proposal are recorded in `.spec/spec-issues.md`.
+- Test cases whose expectation changes from 400/501 to 422 under `epp-docker` are listed in the PR description with the
+  constraint that causes each. The scripted `{rpp:profile}` to `{rpp:preset}` rename is its own commit.
