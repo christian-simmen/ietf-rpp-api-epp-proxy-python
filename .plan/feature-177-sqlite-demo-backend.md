@@ -194,6 +194,14 @@ src/registry_adapter/sqlite/       the SQLite backend
 - D23 (maintainer) Fully qualified operationIds are fine. An app without the extension has no operationId pointing at
   `extensions.*` in its spec.
 
+- D24 (maintainer, 2026-11-16) The SQLite backend supports PUT (replace) and PATCH (partial update) natively, without the
+  flow reading the object first. The gateway ports of the planets extension get a native `replace(replacement)` (no
+  `current`) and `patch(id, changes)`, each atomic in one database transaction, so there is no read-modify-write race.
+  The flow calls the gateway directly; a read back afterwards is fine. Not found, sponsor checks and validation of the
+  result are the gateway's, with the same errors (404, authorisation error, 400). The emulation of the commit `416cf6c`
+  (`info`, `wanted_from_current`, `replace(current=)`) is to be replaced. Port signatures proposed to the maintainer
+  before implementing (the carrying of the JSON Patch and the place of validation are open).
+
 ## Stash decision (S1)
 
 Reused, moved to `src/extensions/planets/core/{model,ports,flows}/` with imports changed: `Planet`,
