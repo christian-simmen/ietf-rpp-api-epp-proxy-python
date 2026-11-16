@@ -4,7 +4,7 @@
 - Base: draft-wullink-rpp-extension-guidelines-00, upstream `SIDN/ietf-rpp-extension-guidelines`,
   `src/draft-wullink-rpp-extension-guidelines.md` at commit `cbd3142`
 - Builds on: [data-objects.md](data-objects.md), [core.md](core.md) and [json.md](json.md) (accepted)
-- Status: draft for review
+- Status: accepted by the maintainer, with the Example Preset appendix (C15) and C13 aligned with it
 
 This proposal brings the guidelines in line with the separation of extensions, profiles and presets. Extensions only
 add, a requirement that only constrains becomes a profile, and the guidelines get a specification format for profiles
