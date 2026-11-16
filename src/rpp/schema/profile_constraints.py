@@ -3,6 +3,7 @@ and the sub-schemas that constrain them by JSON Pointer. The URI is that of the 
 an extension the profile requires (its `$id`)."""
 from dataclasses import dataclass
 
+from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.extensions import EXTENSIONS
 from rpp.schema.rpp_profile import RppProfile
 
@@ -42,9 +43,17 @@ class ProfileConstraints:
             definition = _name("#" + fragment, label)
             if schema_uri == BASE_SCHEMA:
                 extension = None
+                if definition not in bundle_definitions():
+                    raise ValueError(f"{label} constrains {definition}, which does not exist in RPP")
             elif schema_uri in by_schema:
                 extension = by_schema[schema_uri]
+                if definition not in EXTENSIONS[extension].defs:
+                    raise ValueError(f"{label} constrains {definition}, which the extension {extension} does not define")
             else:
+                unrequired = next((ext.id for ext in EXTENSIONS.values() if ext.url == schema_uri), None)
+                if unrequired is not None:
+                    raise ValueError(f"{label} constrains {definition} of the extension {unrequired}, "
+                                     f"which the profile does not require")
                 raise ValueError(f"{label} constrains {uri}, a schema of neither RPP nor an extension the profile requires")
             known = targets.setdefault(definition, (extension, []))
             sub = _name(pointer, label)

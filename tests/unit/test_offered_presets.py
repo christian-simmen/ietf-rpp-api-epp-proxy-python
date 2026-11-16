@@ -4,6 +4,7 @@ import pytest
 
 from rpp.schema.definitions import Definitions
 from rpp.schema.extension_additivity import check_additive
+from rpp.schema.extensions import EXTENSIONS
 from rpp.schema.offered_presets import OfferedPresets
 from rpp.schema.rpp_extension import RppExtension
 from tests.helper.preset_fixtures import (
@@ -209,3 +210,73 @@ def test_an_extension_schema_that_constrains_stops_the_server(sub, message):
 
 def test_an_extension_schema_that_only_adds_is_accepted():
     check_additive(_extension(properties={"a": {"type": "string"}}, required=["a"]))
+
+
+@pytest.mark.parametrize("sub, message", [
+    ({"properties": {"a": {}}, "additionalProperties": False}, "uses additionalProperties"),
+    ({"properties": {"a": {}}, "unevaluatedProperties": {"type": "string"}}, "uses unevaluatedProperties"),
+    ({"properties": {"a": {}}, "propertyNames": {"maxLength": 3}}, "uses propertyNames"),
+    ({"properties": {"a": {}}, "allOf": [{"required": ["authInfo"]}]}, "branch that names authInfo"),
+    ({"properties": {"a": {}}, "anyOf": [{"properties": {"name": {"maxLength": 3}}}]}, "branch that names name"),
+    ({"properties": {"a": {}}, "oneOf": [{"allOf": [{"required": ["b"]}]}]}, "branch that names b"),
+    ({"properties": {"a": {}}, "then": {"required": ["name"]}}, "branch that names name"),
+    ({"properties": {"a": {}}, "dependentSchemas": {"a": {"properties": {"name": {}}}}}, "branch that names name"),
+])
+def test_an_extension_schema_that_constrains_through_an_applicator_stops_the_server(sub, message):
+    with pytest.raises(ValueError, match=message):
+        check_additive(_extension(**sub))
+
+
+def test_an_applicator_that_names_only_what_the_extension_declares_is_accepted():
+    check_additive(_extension(properties={"a": {}, "b": {}}, anyOf=[{"required": ["a"]}, {"required": ["b"]}],
+                              additionalProperties=True))
+
+
+def test_the_check_is_made_when_the_presets_are_built(monkeypatch):
+    bad = _extension(properties={"a": {}}, anyOf=[{"properties": {"name": {"maxLength": 3}}}])
+    monkeypatch.setitem(EXTENSIONS, "x", bad)
+
+    with pytest.raises(ValueError, match="The extension x, definition ext.x has a branch that names name"):
+        build(definitions_with([preset("p", extensions=[("x", "1.0")])]), ["p"], held=("x",))
+
+
+def test_a_profile_that_constrains_an_extension_it_does_not_require_stops_the_server_naming_both():
+    url = EXTENSIONS[RRI].url
+    sneaky = profile("sneaky", constraints={}, defs={"profile.s": {"properties": {}}})
+    sneaky[1]["schema"]["rpp:constraints"] = {f"{url}#/$defs/ext.rri.domainName.create": "#/$defs/profile.s"}
+    having = preset("r", base_presets=[BASE["id"]], extensions=[(RRI, "0.2.0")], profiles=[sneaky[0]])
+
+    with pytest.raises(ValueError, match=f"{sneaky[0]} constrains ext.rri.domainName.create of the extension {RRI}, "
+                                         "which the profile does not require"):
+        build(definitions_with([having], [sneaky]), ["r"], held=(RRI,))
+
+
+def test_a_profile_that_requires_the_extension_may_constrain_it_and_the_composition_holds_it():
+    url = EXTENSIONS[RRI].url
+    ok = profile("ok", required=[(RRI, "0.2.0")], constraints={}, defs={"profile.s": {"properties": {}}})
+    ok[1]["schema"]["rpp:constraints"] = {f"{url}#/$defs/ext.rri.domainName.create": "#/$defs/profile.s"}
+    having = preset("r", base_presets=[BASE["id"]], extensions=[(RRI, "0.2.0")], profiles=[ok[0]])
+
+    offered = build(definitions_with([having], [ok]), ["r"], held=(RRI,)).offered[0]
+
+    from rpp.schema.effective_schema import compose
+    composed = compose(offered.extensions, offered.applicable, False, offered.required)
+    assert composed["ext.rri.domainName.create"]["allOf"][1] == {"$ref": "#/$defs/profile.s"}
+
+
+def test_a_base_uri_that_names_a_definition_of_an_extension_stops_the_server():
+    mislabel = profile("mislabel", constraints={"ext.rri.domainName.create": "profile.q"}, defs={"profile.q": {}})
+    having = preset("r2", base_presets=[BASE["id"]], extensions=[(RRI, "0.2.0")], profiles=[mislabel[0]])
+
+    with pytest.raises(ValueError, match="constrains ext.rri.domainName.create, which does not exist in RPP"):
+        build(definitions_with([having], [mislabel]), ["r2"], held=(RRI,))
+
+
+def test_an_extension_uri_that_names_a_definition_of_the_base_stops_the_server():
+    url = EXTENSIONS[RRI].url
+    wrong = profile("wrong", required=[(RRI, "0.2.0")], constraints={}, defs={"profile.w": {}})
+    wrong[1]["schema"]["rpp:constraints"] = {f"{url}#/$defs/domainName.create": "#/$defs/profile.w"}
+    having = preset("r3", base_presets=[BASE["id"]], extensions=[(RRI, "0.2.0")], profiles=[wrong[0]])
+
+    with pytest.raises(ValueError, match=f"constrains domainName.create, which the extension {RRI} does not define"):
+        build(definitions_with([having], [wrong]), ["r3"], held=(RRI,))

@@ -357,8 +357,8 @@ that `map_request` makes a 400, as before). `validate_request_schema` is for wha
 step 2 against the schema with the applicable profiles, whose failure is a `ProfileConstraintViolation` and answers 422 `02308`
 with `profile` and `paths` in the error (`profile_constraint_problem` in `rpp/http/problem.py`; the reason never holds a value of
 the request). A patch or a replacement is validated as the object it results in (`patched=True`) and a failure that concerns a
-read-only member of the base definition, which the server manages, is not the client's; a patch that needs no read has no
-object to validate, so only its fragments are checked, see [spec-issues.md](../../.spec/spec-issues.md#two-step-validation-of-a-patch).
+read-only member of the base definition, which the server manages, is not the client's; under a preset with applicable profiles a patch of a contact, domain or host is always applied to the object read for it; the native patch
+of an extension (no read) checks the value of each operation as the member it sets and refuses the removal of a member a profile requires, see [spec-issues.md](../../.spec/spec-issues.md#two-step-validation-of-a-patch).
 A response is validated with the preset schema without profiles, never with them. The prose constraints of a profile keep
 today's behaviour (the mapper's 501 or the backend's error), as does a request under a preset without the profile.
 

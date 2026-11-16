@@ -91,7 +91,16 @@
               },
               "content_type": "application/problem+json",
               "body": {
-                "type": "urn:ietf:params:rpp:error"
+                "type": "urn:ietf:params:rpp:error",
+                "errors": [
+                  {
+                    "result": "02308",
+                    "profile": "urn:ietf:params:rpp:profile:epp-compatibility",
+                    "paths": [
+                      "$.contactInfo.phones"
+                    ]
+                  }
+                ]
               }
             }
           },

@@ -159,3 +159,13 @@ Plan approved by the orchestrator for the maintainer (2026-11-16). Answers:
   Other environments keep their old expectation (a `select` on `profile.default_preset`).
 - Gap for the PR: a PATCH that needs no read is validated by fragments only.
 - #179: demo profiles need a `url` (required), pointing to their `docs/demo/` specification.
+
+## Review round 1 (orchestrator decisions)
+
+- The profile of a 02308 is the first applicable profile (bases first) whose own validator fails, with its own error.
+- Under a preset with applicable profiles a PATCH of a contact, domain or host is always applied to the read object (this overrides
+  the earlier gap). The native PATCH of the planets extension (no read, D24) checks each value as the member it sets, and refuses
+  the removal of a member a profile requires; cross-member constraints are not enforced there.
+- The additivity check walks the applicators and refuses closed objects and `propertyNames`; a profile constrains only the
+  extensions it requires (flattened); the walker follows `dependentSchemas` and `prefixItems`; `$id` keeps the colons of the URN;
+  the server-managed members come from the composed definitions. The 13 changed cases also assert `errors[0].profile` and `paths`.

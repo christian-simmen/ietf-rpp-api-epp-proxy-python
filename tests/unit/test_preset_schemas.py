@@ -24,7 +24,7 @@ BASE_URL = DISCOVERY.rpp_base_url
 
 
 def url_of(identifier):
-    return f"{BASE_URL}/presets/{quote(identifier, safe='')}/schema"
+    return f"{BASE_URL}/presets/{quote(identifier, safe=':')}/schema"
 
 
 def schema_of(client, identifier):
@@ -67,6 +67,12 @@ def test_each_offered_schema_is_a_valid_2020_12_self_contained_document_without_
         assert document["rpp:preset"] == {"id": identifier, "version": "1.0"}
         Draft202012Validator.check_schema(document)
         assert list(external_refs(document)) == []      # json §Preset Schema: MUST be self-contained
+
+
+def test_the_id_is_the_url_of_the_sub_resource_with_the_colons_of_the_urn_as_json_shows_it():
+    document = schema_of(epp_client(), EPP)
+
+    assert document["$id"] == "https://rpp.example/presets/urn:ietf:params:rpp:preset:epp-compatible/schema"
 
 
 def test_the_published_schema_has_no_unevaluated_properties_keyword_the_validator_adds_them():

@@ -6,6 +6,7 @@ from rpp.schema.definitions import Definitions
 from rpp.schema.offered_presets import OfferedPresets
 from rpp.schema.profile_constraint_violation import ProfileConstraintViolation
 from rpp.schema.schema_scope import SchemaNotBuilt, SchemaScope
+from rpp.schema.extensions import EXTENSIONS
 from tests.helper.preset_fixtures import ADMIN_ONLY, AUTH_REQUIRED, BASE, definitions_with, preset, profile
 
 PROV_REQUIRED = profile("prov-required", constraints={"domainName.read": "profile.prov"}, defs={
@@ -17,10 +18,11 @@ READ = {"@type": "domainName", "name": "foo.example", "status": [{"@type": "doma
         "provMetadata": {"@type": "provMetadata", "spClientId": "clientA", "crClientId": "clientA", "crDate": "2025-01-01T00:00:00Z"}}
 
 
-def scope_of(*profiles, extensions=()):
-    entries = [preset("p", base_presets=[BASE["id"]], profiles=[p[0] for p in profiles])]
-    offered = OfferedPresets.build(definitions_with(entries, list(profiles)), ["p"], "p", {}, extensions).offered[0]
-    return SchemaScope(offered.extensions, offered.applicable)
+def scope_of(*profiles, extensions=(), held=()):
+    entries = [preset("p", base_presets=[BASE["id"]], profiles=[p[0] for p in profiles],
+                      extensions=[(e, EXTENSIONS[e].version) for e in extensions])]
+    offered = OfferedPresets.build(definitions_with(entries, list(profiles)), ["p"], "p", {}, held or extensions).offered[0]
+    return SchemaScope(offered.extensions, offered.applicable, offered.required)
 
 
 def test_without_a_profile_the_two_steps_are_the_one_validation():
@@ -115,3 +117,80 @@ def test_the_extensions_of_a_preset_are_the_ones_it_validates_for():
     assert scope.extensions == ("de.denic.rpp.rri",) and rri.id == "de.denic.rpp.preset.rri"
     scope.validate("requestContact.create", {"@type": "requestContact", "id": "DENIC-1000022-GR",
                                              "uriTemplate": "https://example.com/c?d={Alabel}"})
+
+
+def test_the_profile_named_is_the_first_whose_own_schema_the_request_breaks():
+    # both break the request: the profile that applies first is named, with its own error, not the best of the union
+    scope = scope_of(ADMIN_ONLY, AUTH_REQUIRED)
+    body = {"@type": "domainName", "name": "a.example",
+            "contacts": [{"label": "tech", "object": {"@type": "contact", "id": "C-1"}}]}
+
+    with pytest.raises(ProfileConstraintViolation) as error:
+        scope.validate_request("domainName.create", body)
+
+    assert error.value.profile == ADMIN_ONLY[0] and error.value.path == "$.contacts[0].label"
+
+
+def test_a_failure_of_a_later_profile_is_named_when_the_first_one_holds():
+    scope = scope_of(ADMIN_ONLY, AUTH_REQUIRED)
+    body = {"@type": "domainName", "name": "a.example",
+            "contacts": [{"label": "admin", "object": {"@type": "contact", "id": "C-1"}}]}
+
+    with pytest.raises(ProfileConstraintViolation) as error:
+        scope.validate_request("domainName.create", body)
+
+    assert error.value.profile == AUTH_REQUIRED[0] and "authInfo" in error.value.reason
+
+
+def test_a_patched_object_names_the_profile_of_the_failure_the_client_caused_not_a_server_managed_one():
+    scope = scope_of(PROV_REQUIRED, ONE_CONTACT)
+    contact = {"label": "admin", "object": {"@type": "contact", "id": "C-1"}}
+
+    with pytest.raises(ProfileConstraintViolation) as error:
+        scope.validate_request("domainName.read", {**READ, "contacts": [contact, contact]}, patched=True)
+
+    assert error.value.profile == ONE_CONTACT[0] and error.value.path == "$.contacts"
+
+
+def test_the_server_managed_members_are_those_of_the_composed_definition_including_an_extension_object():
+    url = EXTENSIONS["de.denic.rpp.rri"].url
+    managed = profile("managed", required=[("de.denic.rpp.rri", "0.2.0")], constraints={}, defs={
+        "profile.m": {"properties": {"provMetadata": {"required": ["repositoryId"]}, "uriTemplate": {"minLength": 40}}}})
+    managed[1]["schema"]["rpp:constraints"] = {f"{url}#/$defs/ext.rri.requestContact.read": "#/$defs/profile.m"}
+    scope = scope_of(managed, extensions=("de.denic.rpp.rri",))
+    stored = {"@type": "requestContact", "id": "DENIC-1000022-GR", "uriTemplate": "https://example.com/c?d={Alabel}",
+              "provMetadata": {"@type": "provMetadata", "spClientId": "DENIC-1000022", "crDate": "2025-01-01T00:00:00Z"}}
+
+    with pytest.raises(ProfileConstraintViolation) as client:
+        scope.validate_request("requestContact.read", stored, patched=True)       # the template is the client's
+    with pytest.raises(ProfileConstraintViolation, match="repositoryId"):
+        scope.validate_request("requestContact.read", {**stored, "uriTemplate": "https://example.com/contact-form?domain={Alabel}"})   # not patched
+
+    assert client.value.path == "$.uriTemplate" and client.value.profile == managed[0]
+    scope.validate_request("requestContact.read", {**stored, "uriTemplate": "https://example.com/contact-form?domain={Alabel}"}, patched=True)
+
+
+REQUIRES_RADIUS = profile("needs-mass", constraints={"domainName.update": "profile.n"}, defs={
+    "profile.n": {"properties": {"contacts": {"maxItems": 1}}, "required": ["registrant"]}})
+
+
+def test_a_member_is_checked_against_the_profiles_without_what_the_other_members_lack():
+    scope = scope_of(REQUIRES_RADIUS)
+    contact = {"label": "admin", "object": {"@type": "contact", "id": "C-1"}}
+
+    scope.validate_request("domainName.update", {"@type": "domainName", "nameservers": []}, member="nameservers")
+    with pytest.raises(ProfileConstraintViolation) as error:
+        scope.validate_request("domainName.update", {"@type": "domainName", "contacts": [contact, contact]}, member="contacts")
+
+    assert error.value.profile == REQUIRES_RADIUS[0] and error.value.path == "$.contacts"
+
+
+def test_the_removal_of_a_member_a_profile_requires_is_refused_naming_the_profile():
+    scope = scope_of(REQUIRES_RADIUS)
+
+    with pytest.raises(ProfileConstraintViolation) as error:
+        scope.refuse_removal("domainName.update", "registrant")
+
+    assert error.value.profile == REQUIRES_RADIUS[0] and error.value.path == "$.registrant"
+    scope.refuse_removal("domainName.update", "nameservers")       # no profile requires it
+    scope.refuse_removal("host.update", "registrant")              # a definition no profile constrains

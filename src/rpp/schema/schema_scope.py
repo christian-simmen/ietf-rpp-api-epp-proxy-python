@@ -4,9 +4,12 @@ import jsonschema
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import best_match
 
-from rpp.schema.effective_schema import UNEVALUATED, bundle_definitions, compose
+from rpp.schema.bundle_definitions import bundle_definitions
+from rpp.schema.effective_schema import UNEVALUATED, compose, required_of
 from rpp.schema.extensions import EXTENSIONS, own_definitions
 from rpp.schema.profile_constraint_violation import ProfileConstraintViolation
+from rpp.schema.profile_constraints import ProfileConstraints
+from rpp.schema.profile_schema_walk import expand
 
 _UNEXPECTED = re.compile(r"\((.*) (?:was|were) unexpected\)")
 
@@ -37,18 +40,22 @@ class SchemaScope:
     `ProfileConstraintViolation`. A scope without an app (the mappers' own tests) is `SchemaScope.of`.
     """
 
-    def __init__(self, extensions, profiles=()):
+    def __init__(self, extensions, profiles=(), required=None):
         self.extensions = tuple(extension.id for extension in extensions)
         self._profiles = tuple(profile for profile in profiles if profile.schema is not None)
         names = {*bundle_definitions(), *own_definitions(self.extensions)}
         self._plain = _build(compose(extensions, (), True), names)
+        # the composition without injection, in which a definition keeps its key: where the members of a definition are read
+        self._composed = compose(extensions, self._profiles, False, required)
         if not self._profiles:
             self._full = self._plain
-            self._single = {}
         else:
-            self._full = _build(compose(extensions, self._profiles, True), names)
-            self._single = {} if len(self._profiles) == 1 else {
-                profile.id: _build(compose(extensions, (profile,), True), names) for profile in self._profiles}
+            self._full = _build(compose(extensions, self._profiles, True, required), names)
+        # one validator set per profile, to name the profile a failure belongs to
+        self._single = {profile.id: _build(compose(extensions, (profile,), True, required), names)
+                        for profile in self._profiles} if len(self._profiles) > 1 else {}
+        self._constraints = {profile.id: ProfileConstraints.of(profile, required_of(profile, required))
+                             for profile in self._profiles}
         self.profile_ids = tuple(profile.id for profile in self._profiles)
 
     _of: dict[tuple[str, ...], "SchemaScope"] = {}
@@ -87,34 +94,55 @@ class SchemaScope:
                 raise ValueError(f"Undeclared property: {names.group(1) if names else error.message}") from None
             raise
 
-    def validate_request(self, name: str, data, patched: bool = False) -> None:
+    def validate_request(self, name: str, data, patched: bool = False, member: str | None = None) -> None:
         """The two steps. `patched`: `data` is an object a client's patch or replacement results in, whose read-only members
-        the server manages: a failure that concerns one of them is not the client's."""
+        the server manages: a failure that concerns one of them is not the client's. `member`: only a failure at this member
+        of `data` counts (a native patch checks the value of one member, and not what the others of the object lack)."""
         self.validate(name, data)
         if self._full is self._plain:
             return
-        errors = list(self._lookup(self._full, name).iter_errors(data))
+        if not self._errors(self._full, name, data, patched, member):
+            return
+        for profile in self._profiles:          # in the order they apply, the bases first
+            validators = self._single[profile.id] if self._single else self._full
+            errors = self._errors(validators, name, data, patched, member)
+            if errors:
+                error = best_match(errors)
+                raise ProfileConstraintViolation(profile.id, _path(error), _reason(error, profile.id))
+        error = best_match(self._errors(self._full, name, data, patched, member))
+        raise ProfileConstraintViolation(None, _path(error), _reason(error, None))
+
+    def _errors(self, validators: dict, name: str, data, patched: bool, member: str | None) -> list:
+        errors = list(self._lookup(validators, name).iter_errors(data))
         if patched:
             server_managed = self._read_only(name)
             errors = [error for error in errors if not (error.absolute_path and error.absolute_path[0] in server_managed)]
-        if not errors:
-            return
-        profile = self._attribute(name, data, patched)
-        error = best_match(errors)
-        raise ProfileConstraintViolation(profile, _path(error), _reason(error, profile))
+        if member is not None:
+            errors = [error for error in errors if error.absolute_path and error.absolute_path[0] == member]
+        return errors
 
-    def _attribute(self, name: str, data, patched: bool) -> str | None:
-        if len(self._profiles) == 1:
-            return self._profiles[0].id
+    def refuse_removal(self, name: str, member: str) -> None:
+        """A removal of `member` of an object of the definition `name` that an applicable profile requires (it lists the
+        member in `required`) is a broken constraint of that profile."""
         for profile in self._profiles:
-            if any(self._lookup(self._single[profile.id], name).iter_errors(data)):
-                return profile.id
-        return None
+            targets = self._constraints[profile.id].targets.get(name)
+            if targets is None:
+                continue
+            defs = profile.schema["$defs"]
+            if any(member in schema.get("required", ()) for sub in targets[1] for schema in expand([defs[sub]], defs)):
+                raise ProfileConstraintViolation(
+                    profile.id, f"$.{member}", f"A constraint of the profile {profile.id} requires '{member}'")
 
-    @staticmethod
-    def _read_only(name: str) -> frozenset:
-        schema = bundle_definitions().get(name, {})
-        return frozenset(member for member, sub in schema.get("properties", {}).items() if sub.get("readOnly"))
+    def _read_only(self, name: str) -> frozenset:
+        """The top-level members of the definition that the server manages (`readOnly`), whether RPP or an extension defines
+        the definition or the member."""
+        own = own_definitions(self.extensions)
+        target = name if name in self._composed else own.get(name)
+        if target not in self._composed:
+            return frozenset()
+        return frozenset(member for schema in expand([self._composed[target]], self._composed)
+                         for member, sub in schema.get("properties", {}).items()
+                         if isinstance(sub, dict) and sub.get("readOnly"))
 
 
 def _reason(error, profile) -> str:

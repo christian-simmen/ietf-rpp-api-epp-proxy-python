@@ -15,6 +15,7 @@ from rpp.mapping.shared import auth_info, include_elements, json_patch, patch_st
 from rpp.mapping.shared.common import parse_rpp
 from rpp.mapping.shared.dns_records import DNS_PARENTS
 from rpp.mapping.shared.needs_current_state import NeedsCurrentState
+from rpp.schema.request_schemas import profiles_apply
 from rpp.schema.validator import validate_request_schema, validate_schema
 
 ARRAY_PATHS = ("/nameservers", "/contacts")
@@ -162,7 +163,11 @@ def rpp_to_model(domain_name: str, rpp: list, *, profile: BackendProfile) -> Dom
     """Converts a partial update (JSON Patch, json draft §5.2) to a DomainUpdate.
 
     None when an operation needs the current domain, then `rpp_to_model_with_current` converts it.
+    Under a preset with applicable profiles it is always None: the profiles are checked on the
+    object the patch results in (core §Extensions and Profiles of a Request: every request), which needs the current one.
     """
+    if profiles_apply():     # the profiles are checked on the object the patch results in, which needs the current one
+        return None
     update = _PatchedUpdate(profile)
     try:
         for operation in _operations(rpp):

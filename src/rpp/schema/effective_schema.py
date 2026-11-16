@@ -3,15 +3,9 @@ extensions of the preset and of the Profile Schemas of its applicable profiles, 
 profiles constrain composed in place with `allOf` under the key of the base definition. What the Preset Schema publishes has
 no `unevaluatedProperties`; what the proxy validates with has it injected at every object-schema node (json §4.9.1)."""
 import copy
-import json
-import os
 
+from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.profile_constraints import ProfileConstraints
-
-SCHEMA_FILE = os.path.join(os.path.dirname(__file__), 'schemas', 'rpp.schema.normalized.json')
-
-with open(SCHEMA_FILE) as f:
-    _bundle = json.load(f)
 
 UNEVALUATED = "unevaluatedProperties"
 
@@ -26,11 +20,6 @@ _SCHEMA_MAPS = ("properties", "patternProperties", "$defs")
 _IN_PLACE = ("then", "else")
 _IN_PLACE_LISTS = ("allOf", "anyOf", "oneOf")
 _IN_PLACE_MAPS = ("dependentSchemas",)
-
-
-def bundle_definitions() -> dict:
-    """The definitions of the bundle, which the drafts generate; the extensions' are not among them."""
-    return _bundle["$defs"]
 
 
 def _inject(node, root: bool = True) -> None:
@@ -70,11 +59,19 @@ def _inject(node, root: bool = True) -> None:
                 _inject(value, root=False)
 
 
+def required_of(profile, required) -> frozenset:
+    """The extensions a profile requires, directly or through its base profiles (`required`, by profile id); a profile
+    constrains no definition of another extension."""
+    if required is not None and profile.id in required:
+        return frozenset(required[profile.id])
+    return frozenset(reference.id for reference in profile.required_extensions)
+
+
 def _refs(keys) -> list[dict]:
     return [{"$ref": f"#/$defs/{key}"} for key in keys]
 
 
-def compose(extensions, profiles, inject: bool) -> dict:
+def compose(extensions, profiles, inject: bool, required=None) -> dict:
     """The `$defs` of the effective schema of the extensions (`RppExtension`s) and the profiles (`RppProfile`s) of a preset.
 
     A definition an extension extends is the `allOf` of the base definition, in place, and the references to the extension's
@@ -90,7 +87,6 @@ def compose(extensions, profiles, inject: bool) -> dict:
         for base, ext in extension.extends.items():
             extended.setdefault(base, []).append(ext)
             branches.add(ext)
-    ids = [extension.id for extension in extensions]
     constrained: dict[str, list[str]] = {}
     for profile in profiles:
         if profile.schema is None:
@@ -98,7 +94,7 @@ def compose(extensions, profiles, inject: bool) -> dict:
         for name, schema in profile.schema.get("$defs", {}).items():
             definitions[name] = copy.deepcopy(schema)
             branches.add(name)
-        for target, (_, subs) in ProfileConstraints.of(profile, ids).targets.items():
+        for target, (_, subs) in ProfileConstraints.of(profile, required_of(profile, required)).targets.items():
             constrained.setdefault(target, []).extend(sub for sub in subs if sub not in constrained.get(target, []))
     holders = set(extended) | {target for target in constrained if target not in branches}
     if inject:

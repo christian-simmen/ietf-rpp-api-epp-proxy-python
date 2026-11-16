@@ -9,8 +9,10 @@ from core.session.session_pool import SessionPool
 from rpp.http.app import create_app
 from tests.helper.epp_backends import epp_backends
 from tests.helper.fake_epp_client import FakeEppClient
-from tests.helper.preset_fixtures import ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED, BASE, preset, registry_with
+from tests.helper.preset_fixtures import (
+    ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED, BASE, ONE_NAMESERVER, preset, registry_with)
 from tests.helper.profiles import EPP_PROFILE
+from tests.unit.test_domain_put_wire import DONE, info
 from tests.unit.test_rri_wire import DISCOVERY
 
 MEDIA_TYPE = "application/rpp+json"
@@ -19,8 +21,9 @@ AUTH = {"Authorization": "Basic " + base64.b64encode(b"user:pw").decode(), "Acce
 
 PLAIN = preset("plain", base_presets=[BASE["id"]])
 CONSTRAINED = preset("constrained", base_presets=[BASE["id"]], profiles=[ADMIN_ONLY[0]])
-PROFILES = [ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED]
-PRESETS = [PLAIN, CONSTRAINED]
+LIMITED = preset("limited", base_presets=[BASE["id"]], profiles=[ONE_NAMESERVER[0]])
+PROFILES = [ADMIN_ONLY, AT_MOST_ONE, AUTH_REQUIRED, ONE_NAMESERVER]
+PRESETS = [PLAIN, CONSTRAINED, LIMITED]
 
 
 def epp_reply(code=1000):
@@ -29,11 +32,12 @@ def epp_reply(code=1000):
 
 
 class App:
-    def __init__(self, bound=None, offered=("plain", "constrained"), default="plain", signalling="header"):
+    def __init__(self, bound=None, offered=("plain", "constrained", "limited"), default="plain", signalling="header",
+                 replies=()):
         self.clients = []
 
         def factory(username, password):
-            client = FakeEppClient(username, password, reply=epp_reply())
+            client = FakeEppClient(username, password, reply=epp_reply(), replies=list(replies))
             self.clients.append(client)
             return client
         profile = EPP_PROFILE.with_changes({"presets": list(offered), "default_preset": default,
@@ -112,13 +116,42 @@ def test_the_binding_is_the_servers_and_another_preset_of_it_is_not_constrained_
     assert app.create(domain("admin"), "constrained").status_code not in (400, 422)   # a preset without the binding
 
 
-def test_a_profile_is_enforced_on_a_full_update_and_on_the_patched_object():
-    app = App(bound={"plain": ["auth-required"]})
-    # authInfo is required by the profile for a create only (domainName.create): an update is not constrained by it
-    put = app.http.put("/domainNames/foo.example", json={"@type": "domainName"},
-                       headers={**AUTH, "RPP-Preset": "preset=org.example.rpp.preset.plain;version=1.0"})
+LIMITED_HEADERS = {**AUTH, "RPP-Preset": f"preset={LIMITED[0]};version=1.0"}
+TWO = [{"@type": "host", "hostName": "ns1.foo.example"}, {"@type": "host", "hostName": "ns2.foo.example"}]
 
-    assert put.status_code != 422
+
+def test_a_full_update_that_breaks_a_profile_constraint_is_422_and_one_that_keeps_it_goes_on():
+    refused = App()
+    refused_response = refused.http.put("/domainNames/foo.example", json={"@type": "domainName", "nameservers": TWO},
+                                        headers=LIMITED_HEADERS)
+    accepted = App(replies=[info("ns2.foo.example"), DONE, info("ns1.foo.example")])
+    accepted_response = accepted.http.put("/domainNames/foo.example", json={"@type": "domainName", "nameservers": TWO[:1]},
+                                          headers=LIMITED_HEADERS)
+
+    assert refused_response.status_code == 422 and refused_response.headers["RPP-Code"] == "02308"
+    assert refused_response.json()["errors"][0]["profile"] == ONE_NAMESERVER[0]
+    assert refused.sent() == []
+    assert accepted_response.status_code == 200
+
+
+def test_a_patch_is_checked_on_the_object_it_results_in_so_what_it_adds_to_what_is_there_is_422():
+    app = App(replies=[info("ns1.foo.example")])
+    add = [{"op": "add", "path": "/nameservers", "value": TWO[1]}]
+
+    response = app.http.patch("/domainNames/foo.example", json=add, headers=LIMITED_HEADERS)
+
+    assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
+    assert response.json()["errors"][0]["profile"] == ONE_NAMESERVER[0]
+    assert len(app.sent()) == 1 and "domain:info" in app.sent()[0]         # the read for it, and no update
+
+
+def test_the_same_patch_under_a_preset_without_the_profile_goes_on():
+    app = App(replies=[DONE, info("ns1.foo.example", "ns2.foo.example")])      # no profile: no read for the patch
+    add = [{"op": "add", "path": "/nameservers", "value": TWO[1]}]
+
+    response = app.http.patch("/domainNames/foo.example", json=add, headers=AUTH)       # the default preset has none
+
+    assert response.status_code == 200
 
 
 @pytest.mark.parametrize("signalling", ["header", "media-type"])
@@ -188,7 +221,7 @@ def test_the_profile_is_read_with_its_bases_and_required_extension_flattened():
     assert body["baseProfiles"] == [{"@type": "profile", "id": ADMIN_ONLY[0], "version": "1.0"}]
     plain = next(p for p in entry["presets"] if p["id"] == PLAIN[0])
     assert plain["boundProfiles"] == [{"@type": "profile", "id": AT_MOST_ONE[0], "version": "1.0"}]
-    assert {p["id"] for p in entry["profiles"]} == {AT_MOST_ONE[0], ADMIN_ONLY[0]}
+    assert {AT_MOST_ONE[0], ADMIN_ONLY[0]} <= {p["id"] for p in entry["profiles"]}
 
 
 @pytest.mark.parametrize("change, presets, message", [

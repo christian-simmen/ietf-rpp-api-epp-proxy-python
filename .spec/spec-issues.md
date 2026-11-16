@@ -595,10 +595,14 @@ they were. The proxy follows the proposals, with the following.
   is validated as, nor what a profile constraint on a data element the server manages (`provMetadata`, `processes`) means for an object a
   client patched or replaced, which carries the server's own members.
 - **Proxy:** a create, a PUT and the object a PATCH results in (the read representation, patched) go through both steps. For a patched or
-  replaced object a failure of step 2 that concerns a read-only member of the base definition is not the client's and is ignored. A PATCH
-  that needs no read (`/status`, `/authInfo`, a phone or the email of a contact, a data element of a domain or host with no state to
-  compare) has no object to validate: only its fragments are checked against the preset schema, so a profile constraint that needs the
-  whole object (a required member, a minimum number of items) is not enforced for it, and one on the value alone is not checked either.
+  replaced object a failure of step 2 that concerns a read-only member of the base definition or the extension, which the server manages,
+  is not the client's and is ignored. Under a preset with applicable profiles the patch of a contact, a domain or a host is always applied
+  to the object read for it, also where it needs no read without profiles (a status, the authInfo, a phone or the email), so that the
+  profiles are enforced on every request (core, Extensions and Profiles of a Request). The native patch of an extension that has no read
+  (the planets extension, D24) has no object: the value of each operation is checked against the profiles as the member it sets (a
+  constraint on that member), and the removal of a member that an applicable profile lists in `required` is refused with that profile.
+  What a profile requires of the members together (a `required` that another operation satisfies, a condition between two members) is not
+  enforced on a native patch.
 
 ## Telephone number in the contact examples of json
 

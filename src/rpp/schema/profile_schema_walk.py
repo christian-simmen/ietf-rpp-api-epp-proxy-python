@@ -69,6 +69,12 @@ def undeclared(profile_sub, profile_defs: dict, target, target_defs: dict, path:
             if isinstance(branch.get(keyword), dict):
                 children = [t[keyword] for t in targets if isinstance(t.get(keyword), dict)]
                 found += undeclared(branch[keyword], profile_defs, children, target_defs, f"{path}[]", visited)
+        for index, sub in enumerate(branch.get("prefixItems") or ()):
+            children = [t["prefixItems"][index] for t in targets if len(t.get("prefixItems") or ()) > index]
+            children += [t["items"] for t in targets if isinstance(t.get("items"), dict)]
+            found += undeclared(sub, profile_defs, children, target_defs, f"{path}[{index}]", visited)
+        for sub in (branch.get("dependentSchemas") or {}).values():
+            found += undeclared(sub, profile_defs, targets, target_defs, path, visited)
         for keyword in ("additionalProperties", "unevaluatedProperties"):
             if isinstance(branch.get(keyword), dict):
                 found += undeclared(branch[keyword], profile_defs, _all_members(targets), target_defs, f"{path}.*", visited)

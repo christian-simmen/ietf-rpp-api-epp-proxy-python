@@ -1,7 +1,7 @@
 from extensions.planets.core.model.satellite_changes import SatelliteChanges
 from rpp.dto.rpp_patch_operation import RPPPatchOperation
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import refuse_removal_by_profile, validate_request_schema
 
 TYPE = "@type"
 
@@ -27,12 +27,13 @@ def rpp_to_model(rpp: list, extensions: tuple[str, ...] = ()) -> SatelliteChange
     for operation in (parse_rpp(RPPPatchOperation, item) for item in rpp):
         member = _member(operation)
         if operation.op == "remove":
+            refuse_removal_by_profile("satellite.update", member, extensions)
             period = None
             cleared.add(member)
             continue
         if operation.value is None:
             raise ValueError(f"'{operation.op}' needs a 'value'")
-        validate_schema("satellite.update", {TYPE: "satellite", member: operation.value}, extensions)
+        validate_request_schema("satellite.update", {TYPE: "satellite", member: operation.value}, extensions, member=member)
         period = operation.value
         cleared.discard(member)
     return SatelliteChanges(orbitalPeriod=period, cleared=frozenset(cleared))

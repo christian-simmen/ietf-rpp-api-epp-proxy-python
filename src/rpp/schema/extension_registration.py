@@ -4,7 +4,7 @@ already is (`EXTENSIONS`); what is per app (the presets, their profiles, the sch
 builds. The per-app parts (paths, handlers, gateways) are not here."""
 from registration import ExtensionRegistry
 from rpp.schema.data_objects import register_data_objects
-from rpp.schema.effective_schema import bundle_definitions
+from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.extensions import EXTENSIONS, _from_schema, register_extension
 
 

@@ -30,8 +30,8 @@ differ, ask which revision applies.
 ## Kinds of specification
 
 **Extension specification.** An RPP extension the proxy implements is specified in a Markdown file under `docs/`
-(`de.denic.rpp.rri`: [rri-extension.md](../rri/rri-extension.md), `urn:ietf:params:rpp:extension:profile-schemas`:
-[profile-schemas-extension.md](../profile-schemas-extension.md)). It has the section list of guidelines §9, in that
+(`de.denic.rpp.rri`: [rri-extension.md](../rri/rri-extension.md), `org.example.rpp.extension.planets`:
+[planets-extension.md](../demo/planets-extension.md)). It has the section list of guidelines §9, in that
 order, with "None" in a section that does not apply. Each section takes the shape of the draft that defines the base
 concept: object sections that of data-objects, the JSON Schema and Examples sections that of json, and Result Codes,
 Problem Details, HTTP Headers and Endpoints that of core. How the extension is implemented is in

@@ -17,6 +17,7 @@ class OfferedPreset:
     bound_profiles: tuple[RppProfile, ...]
     applicable: tuple[RppProfile, ...]
     default: bool
+    required: dict[str, frozenset[str]]       # per applicable profile, its required extensions, flattened
 
     @property
     def id(self) -> str:

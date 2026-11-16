@@ -38,3 +38,9 @@ def release(token) -> None:
 
 def current() -> RequestSchemas | None:
     return _current.get()
+
+
+def profiles_apply() -> bool:
+    """Whether the request is under a preset with applicable profiles that have a Profile Schema."""
+    schemas = _current.get()
+    return bool(schemas and schemas.request.profile_ids)

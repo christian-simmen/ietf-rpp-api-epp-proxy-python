@@ -70,3 +70,50 @@ def test_a_satellite_patch_sets_or_clears_the_orbital_period():
     for operation in ({"op": "replace", "path": "/planet", "value": {}}, {"op": "replace", "path": "/orbitalPeriod", "value": 0}):
         with pytest.raises((ValueError, ValidationError)):
             satellite_patch.rpp_to_model([operation], EXTENSIONS)
+
+
+# A native patch has no read (D24), so a profile is checked on the value of each operation as the member it sets, and the
+# removal of a member a profile requires is refused. What a profile requires of the members together is not enforced.
+from rpp.schema import request_schemas  # noqa: E402
+from rpp.schema.extensions import EXTENSIONS as KNOWN  # noqa: E402
+from rpp.schema.offered_presets import OfferedPresets  # noqa: E402
+from rpp.schema.profile_constraint_violation import ProfileConstraintViolation  # noqa: E402
+from rpp.schema.schema_scope import SchemaScope  # noqa: E402
+from tests.helper.preset_fixtures import BASE, definitions_with, preset, profile  # noqa: E402
+
+PLANETS = SCHEMA["rpp:extension"]["id"]
+BIG = profile("big-planets", required=[(PLANETS, "1.0")], constraints={}, defs={
+    "profile.big": {"properties": {"radius": {"minimum": 1000}}, "required": ["mass"]}})
+BIG[1]["schema"]["rpp:constraints"] = {f"{KNOWN[PLANETS].url}#/$defs/planet.update": "#/$defs/profile.big"}
+
+
+@pytest.fixture
+def under_big_planets():
+    entry = preset("planets", base_presets=[BASE["id"]], extensions=[(PLANETS, "1.0")], profiles=[BIG[0]])
+    offered = OfferedPresets.build(definitions_with([entry], [BIG]), ["planets"], "planets", {}, (PLANETS,)).offered[0]
+    scope = SchemaScope(offered.extensions, offered.applicable, offered.required)
+    token = request_schemas.use(request_schemas.RequestSchemas(request=scope, response=scope, scopes=(scope,)))
+    yield
+    request_schemas.release(token)
+
+
+def test_the_value_of_an_operation_is_checked_against_the_profile_as_the_member_it_sets(under_big_planets):
+    with pytest.raises(ProfileConstraintViolation) as error:
+        planet({"op": "replace", "path": "/radius", "value": 10})
+
+    assert error.value.profile == BIG[0] and error.value.path == "$.radius"
+    assert planet({"op": "replace", "path": "/radius", "value": 5000}).radius == 5000
+
+
+def test_a_member_the_profile_requires_is_not_missing_from_a_single_operation(under_big_planets):
+    # `mass` is required by the profile, but a patch of the type alone does not make it absent: cross-member constraints are
+    # not enforced on a native patch
+    assert planet({"op": "replace", "path": "/type", "value": "rocky"}).type == "rocky"
+
+
+def test_the_removal_of_a_member_the_profile_requires_is_refused_naming_the_profile(under_big_planets):
+    with pytest.raises(ProfileConstraintViolation) as error:
+        planet({"op": "remove", "path": "/mass"})
+
+    assert error.value.profile == BIG[0] and error.value.path == "$.mass"
+    assert planet({"op": "remove", "path": "/radius"}).cleared == frozenset({"radius"})      # not required

@@ -41,6 +41,7 @@ def info(email="a@example.example", sponsor="user"):
     )))
 
 
+BASE_PRESET = "urn:ietf:params:rpp:preset:base"
 DONE = (True, "1000", epp_reply(1000))
 MISSING = (False, "2303", epp_reply(2303))
 NEW_EMAIL = put_body(card(emails={"email": {"address": "b@example.example"}}))
@@ -55,9 +56,10 @@ class Session:
         self.client = FakeEppClient(username, password, replies=self.replies)
         return self.client
 
-    def request(self, method, **kwargs):
+    def request(self, method, preset=None, **kwargs):
         http = create_app(SessionPool(epp_backends(self._factory)), EPP_PROFILE).test_client()
-        return getattr(http, method)("/contacts/JD-1234", headers=AUTH, **kwargs)
+        headers = {**AUTH, "RPP-Preset": f"preset={preset};version=1.0"} if preset else AUTH
+        return getattr(http, method)("/contacts/JD-1234", headers=headers, **kwargs)
 
 
 def put(*replies, body=NEW_EMAIL):
@@ -125,7 +127,7 @@ def test_patch_of_a_status_is_sent_without_a_read():
     session = Session(DONE, info())
     body = [{"op": "add", "path": "/status", "value": {"@type": "contactStatus", "label": "clientUpdateProhibited"}}]
 
-    response = session.request("patch", json=body)
+    response = session.request("patch", preset=BASE_PRESET, json=body)      # the base preset has no profile to check
 
     assert response.status_code == 200
     assert "contact:update" in session.client.sent[0]
@@ -135,7 +137,8 @@ def test_patch_of_the_email_updates_without_a_read():
     session = Session(DONE, info("b@example.example"))
 
     response = session.request(
-        "patch", json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "b@example.example"}],
+        "patch", preset=BASE_PRESET,
+        json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "b@example.example"}],
     )
 
     assert response.status_code == 200
@@ -171,3 +174,18 @@ def test_put_adding_a_localization_the_registry_ignores_is_a_500_with_02400():
 
     assert response.status_code == 500 and response.headers["RPP-Code"] == "02400"
     assert "loc" in response.json()["detail"]
+
+
+def test_patch_without_a_read_under_the_epp_compatible_preset_is_checked_on_the_patched_contact():
+    # replacing the email is one EPP value that needs no read, but the profile applies to every request (core): the contact
+    # is read, patched, and the Profile Schema refuses a non-ASCII address
+    session = Session(info())
+
+    response = session.request(
+        "patch", json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "jöhn@exämple.com"}])
+
+    assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
+    error = response.json()["errors"][0]
+    assert error["profile"] == "urn:ietf:params:rpp:profile:epp-compatibility"
+    assert error["paths"][0].startswith("$.contactInfo.emails")
+    assert len(session.client.sent) == 1 and "contact:info" in session.client.sent[0]       # the read, no update

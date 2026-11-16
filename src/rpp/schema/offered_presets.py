@@ -1,5 +1,5 @@
 from rpp.schema.definitions import Definitions
-from rpp.schema.effective_schema import bundle_definitions
+from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.extension_additivity import check_additive
 from rpp.schema.extensions import EXTENSIONS
 from rpp.schema.offered_preset import OfferedPreset
@@ -77,8 +77,11 @@ class OfferedPresets:
                 if next(e for e in extensions if e.id == reference.id).version != reference.version:
                     raise ValueError(f"The profile {profile.id} requires the extension {reference.id} in version "
                                      f"{reference.version}, which the preset {preset.id} does not contain")
+        applicable = flattening.applicable((*profiles, *bound))
+        required = {profile.id: frozenset(reference.id for reference in flattening.required_extensions(profile))
+                    for profile in applicable}
         return OfferedPreset(definition=preset, extensions=tuple(extensions), profiles=profiles, bound_profiles=bound,
-                             applicable=flattening.applicable((*profiles, *bound)), default=default)
+                             applicable=applicable, default=default, required=required)
 
     @classmethod
     def _check_schemas(cls, item: OfferedPreset) -> None:
@@ -87,9 +90,8 @@ class OfferedPresets:
         base = bundle_definitions()
         defs = {**base, **{name: schema for extension in item.extensions for name, schema in extension.defs.items()}}
         taken = {name: "RPP or an extension" for name in defs}
-        flattening_ids = {extension.id for extension in item.extensions}
         for profile in item.applicable:
-            constraints = ProfileConstraints.of(profile, flattening_ids)
+            constraints = ProfileConstraints.of(profile, item.required[profile.id])
             for name in (profile.schema or {}).get("$defs", {}):
                 if name in taken:
                     raise ValueError(f"The Profile Schema of {profile.id} defines {name}, which {taken[name]} defines "

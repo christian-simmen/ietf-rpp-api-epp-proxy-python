@@ -43,6 +43,12 @@ AT_MOST_ONE = profile("at-most-one", base_profiles=[ADMIN_ONLY[0]], constraints=
                       defs={"profile.atMostOne": {"properties": {"contacts": {"maxItems": 1}}}})
 
 
+# a profile that allows one name server, on what a client replaces or patches (domainName.update, and the read
+# representation a patch results in)
+ONE_NAMESERVER = profile("one-nameserver", constraints={"domainName.update": "profile.oneNs", "domainName.read": "profile.oneNs"},
+                         defs={"profile.oneNs": {"properties": {"nameservers": {"maxItems": 1}}}})
+
+
 def registry_with(presets=(), profiles=()) -> ExtensionRegistry:
     """A registry of one extension that brings only these presets and profiles (`{key: definition}` pairs)."""
     registry = ExtensionRegistry()
