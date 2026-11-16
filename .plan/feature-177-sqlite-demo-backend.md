@@ -36,7 +36,9 @@ work of T2 started before the freeze is not committed: it is in `git stash` ("17
       - DTOs, mappers, handlers
 - [ ] T6 Integration environment `sqlite-demo` (`config.demo.yaml`, an in-memory or temporary database, no
       credentials) and test cases `planet_*`, `satellite_*` and `planet_transfer`, the smoke ones marked
-- [ ] T7 Import contracts in `pyproject.toml`: `core.model.planet` among the independent object packages,
+- [ ] T7 A start check that no definition of an extension has the name of a base definition or of another
+      extension's, as unprefixed names (D10) could otherwise replace one in the combined schema
+- [ ] T7b Import contracts in `pyproject.toml`: `core.model.planet` among the independent object packages,
       `registry_adapter.sqlite` among the independent protocols, the layers of each `rpp.extensions.<name>`
       (`handlers` over `mapping` over `dto | schema`), and the base `rpp` packages not importing `rpp.extensions`.
       `sqlalchemy` in `requirements.txt`
@@ -74,7 +76,13 @@ work of T2 started before the freeze is not committed: it is in `git stash` ("17
 - D9 The transfer of a planet uses the base Transfer Process Object (`transferProcess.*`), as the contact's does. Its
   messages are the base Transfer Request and Transfer Outcome Messages with the object type `planet`.
 
+- D10 (maintainer) An extension that defines new object types names their definitions as the base definitions are
+  (`planet.create`, `planetType`), without the `ext.<name>.` prefix. The prefix stays for the sub-schemas an extension
+  composes with a base definition (`rpp:extends`). `own_definitions` maps both forms.
+
 ## Corrections
+
+- C1 The planets schema and specification of T1 used the prefix `ext.planets.`. Renamed after D10.
 
 ## Open questions
 

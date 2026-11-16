@@ -59,12 +59,14 @@ def check_known(extensions):
 
 def own_definitions() -> dict[str, str]:
     """The definitions of the objects and types the extensions define, by the name a mapper validates with
-    (`requestContact.create`), to the name of the extension's definition (`ext.rri.requestContact.create`). The
+    (`requestContact.create`), to the name of the extension's definition: with a prefix (`ext.rri.requestContact.create`),
+    or the same name where an extension of new objects names them as the base definitions are (`planet.create`). The
     definitions an extension composes with a base one are not among them."""
     names = {}
     for extension in EXTENSIONS.values():
         composed = set(extension.extends.values())
         for name in extension.defs:
-            if name not in composed and name.startswith("ext."):
-                names[name.split(".", 2)[2]] = name
+            if name in composed:
+                continue
+            names[name.split(".", 2)[2] if name.startswith("ext.") else name] = name
     return names

@@ -418,7 +418,7 @@ RPP-Code: 01001
 
 This section defines the JSON representation of the new objects, following the rules of [@!I-D.ietf-rpp-json, section 4] and the Extension Framework of [@!I-D.ietf-rpp-json, section 7].
 
-The extension defines one JSON Schema document, <https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json>. Its definitions are shown below. Every definition of the extension has the prefix `ext.planets.`.
+The extension defines one JSON Schema document, <https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json>. Its definitions are shown below. The extension defines new Data Objects and changes no base definition, so its definitions are named after their objects and views as the base definitions are (`planet.create`), without a prefix. A definition of the extension MUST NOT have the name of a base definition.
 
 ## Extension Mapping {#extension-mapping}
 
@@ -447,11 +447,11 @@ The schema document states the Name, Identifier, Version, and New Data Objects o
 
 The type of a planet:
 
-<!-- definition ext.planets.planetType -->
+<!-- definition planetType -->
 ```json
 {
   "$defs": {
-    "ext.planets.planetType": {
+    "planetType": {
       "type": "string",
       "enum": ["rocky", "gas-giant", "ice-giant"]
     }
@@ -463,11 +463,11 @@ The type of a planet:
 
 The response of the Availability operation is the Planet Availability Object:
 
-<!-- definition ext.planets.planetAvailability.read -->
+<!-- definition planetAvailability.read -->
 ```json
 {
   "$defs": {
-    "ext.planets.planetAvailability.read": {
+    "planetAvailability.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planetAvailability", "readOnly": true },
@@ -484,16 +484,16 @@ The response of the Availability operation is the Planet Availability Object:
 
 Create request schema (create-only and read-write properties):
 
-<!-- definition ext.planets.planet.create -->
+<!-- definition planet.create -->
 ```json
 {
   "$defs": {
-    "ext.planets.planet.create": {
+    "planet.create": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet" },
         "id": { "$ref": "#/$defs/identifier" },
-        "type": { "$ref": "#/$defs/ext.planets.planetType" },
+        "type": { "$ref": "#/$defs/planetType" },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "mass": { "type": "number", "exclusiveMinimum": 0 },
         "authInfo": { "$ref": "#/$defs/authInfo.create" }
@@ -508,23 +508,23 @@ Create request schema (create-only and read-write properties):
 
 Read response schema (read-write and read-only properties). The `satellite` property is shown when the request asks for it with `includeElements` [@!I-D.ietf-rpp-core]:
 
-<!-- definition ext.planets.planet.read -->
+<!-- definition planet.read -->
 ```json
 {
   "$defs": {
-    "ext.planets.planet.read": {
+    "planet.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet", "readOnly": true },
         "id": { "$ref": "#/$defs/identifier", "readOnly": true },
-        "type": { "$ref": "#/$defs/ext.planets.planetType" },
+        "type": { "$ref": "#/$defs/planetType" },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "mass": { "type": "number", "exclusiveMinimum": 0 },
         "provMetadata": { "$ref": "#/$defs/provMetadata.read", "readOnly": true },
         "authInfo": { "$ref": "#/$defs/authInfo.read" },
         "satellite": {
           "type": "array",
-          "items": { "$ref": "#/$defs/ext.planets.satellite.reference" },
+          "items": { "$ref": "#/$defs/satellite.reference" },
           "readOnly": true
         },
         "processes": { "$ref": "#/$defs/processes.read", "readOnly": true }
@@ -539,15 +539,15 @@ Read response schema (read-write and read-only properties). The `satellite` prop
 
 Update request schema (read-write properties):
 
-<!-- definition ext.planets.planet.update -->
+<!-- definition planet.update -->
 ```json
 {
   "$defs": {
-    "ext.planets.planet.update": {
+    "planet.update": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet" },
-        "type": { "$ref": "#/$defs/ext.planets.planetType" },
+        "type": { "$ref": "#/$defs/planetType" },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "mass": { "type": "number", "exclusiveMinimum": 0 },
         "authInfo": { "$ref": "#/$defs/authInfo.create" }
@@ -562,11 +562,11 @@ Update request schema (read-write properties):
 
 Reference schema (identifier only):
 
-<!-- definition ext.planets.planet.reference -->
+<!-- definition planet.reference -->
 ```json
 {
   "$defs": {
-    "ext.planets.planet.reference": {
+    "planet.reference": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet" },
@@ -588,11 +588,11 @@ The transfer of a planet uses the definitions `transferProcess.create`, `transfe
 
 The response of the Availability operation is the Satellite Availability Object:
 
-<!-- definition ext.planets.satelliteAvailability.read -->
+<!-- definition satelliteAvailability.read -->
 ```json
 {
   "$defs": {
-    "ext.planets.satelliteAvailability.read": {
+    "satelliteAvailability.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satelliteAvailability", "readOnly": true },
@@ -609,16 +609,16 @@ The response of the Availability operation is the Satellite Availability Object:
 
 Create request schema (create-only and read-write properties):
 
-<!-- definition ext.planets.satellite.create -->
+<!-- definition satellite.create -->
 ```json
 {
   "$defs": {
-    "ext.planets.satellite.create": {
+    "satellite.create": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite" },
         "id": { "$ref": "#/$defs/identifier" },
-        "planet": { "$ref": "#/$defs/ext.planets.planet.reference" },
+        "planet": { "$ref": "#/$defs/planet.reference" },
         "orbitalPeriod": { "type": "number", "exclusiveMinimum": 0 }
       },
       "required": ["@type", "id", "planet"]
@@ -631,16 +631,16 @@ Create request schema (create-only and read-write properties):
 
 Read response schema (read-write and read-only properties):
 
-<!-- definition ext.planets.satellite.read -->
+<!-- definition satellite.read -->
 ```json
 {
   "$defs": {
-    "ext.planets.satellite.read": {
+    "satellite.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite", "readOnly": true },
         "id": { "$ref": "#/$defs/identifier", "readOnly": true },
-        "planet": { "$ref": "#/$defs/ext.planets.planet.reference", "readOnly": true },
+        "planet": { "$ref": "#/$defs/planet.reference", "readOnly": true },
         "orbitalPeriod": { "type": "number", "exclusiveMinimum": 0 },
         "provMetadata": { "$ref": "#/$defs/provMetadata.read", "readOnly": true }
       },
@@ -654,11 +654,11 @@ Read response schema (read-write and read-only properties):
 
 Update request schema (read-write properties):
 
-<!-- definition ext.planets.satellite.update -->
+<!-- definition satellite.update -->
 ```json
 {
   "$defs": {
-    "ext.planets.satellite.update": {
+    "satellite.update": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite" },
@@ -674,11 +674,11 @@ Update request schema (read-write properties):
 
 Reference schema (identifier only):
 
-<!-- definition ext.planets.satellite.reference -->
+<!-- definition satellite.reference -->
 ```json
 {
   "$defs": {
-    "ext.planets.satellite.reference": {
+    "satellite.reference": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite" },

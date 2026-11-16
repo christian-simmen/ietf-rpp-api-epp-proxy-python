@@ -11,11 +11,11 @@
   },
   "rpp:extends": {},
   "$defs": {
-    "ext.planets.planetType": {
+    "planetType": {
       "type": "string",
       "enum": ["rocky", "gas-giant", "ice-giant"]
     },
-    "ext.planets.planet.reference": {
+    "planet.reference": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet" },
@@ -23,49 +23,49 @@
       },
       "required": ["@type", "id"]
     },
-    "ext.planets.planet.create": {
+    "planet.create": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet" },
         "id": { "$ref": "#/$defs/identifier" },
-        "type": { "$ref": "#/$defs/ext.planets.planetType" },
+        "type": { "$ref": "#/$defs/planetType" },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "mass": { "type": "number", "exclusiveMinimum": 0 },
         "authInfo": { "$ref": "#/$defs/authInfo.create" }
       },
       "required": ["@type", "id", "type", "authInfo"]
     },
-    "ext.planets.planet.read": {
+    "planet.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet", "readOnly": true },
         "id": { "$ref": "#/$defs/identifier", "readOnly": true },
-        "type": { "$ref": "#/$defs/ext.planets.planetType" },
+        "type": { "$ref": "#/$defs/planetType" },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "mass": { "type": "number", "exclusiveMinimum": 0 },
         "provMetadata": { "$ref": "#/$defs/provMetadata.read", "readOnly": true },
         "authInfo": { "$ref": "#/$defs/authInfo.read" },
         "satellite": {
           "type": "array",
-          "items": { "$ref": "#/$defs/ext.planets.satellite.reference" },
+          "items": { "$ref": "#/$defs/satellite.reference" },
           "readOnly": true
         },
         "processes": { "$ref": "#/$defs/processes.read", "readOnly": true }
       },
       "required": ["@type", "id", "type", "provMetadata"]
     },
-    "ext.planets.planet.update": {
+    "planet.update": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planet" },
-        "type": { "$ref": "#/$defs/ext.planets.planetType" },
+        "type": { "$ref": "#/$defs/planetType" },
         "radius": { "type": "number", "exclusiveMinimum": 0 },
         "mass": { "type": "number", "exclusiveMinimum": 0 },
         "authInfo": { "$ref": "#/$defs/authInfo.create" }
       },
       "required": ["@type", "type"]
     },
-    "ext.planets.planetAvailability.read": {
+    "planetAvailability.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "planetAvailability", "readOnly": true },
@@ -74,7 +74,7 @@
       },
       "required": ["@type", "available"]
     },
-    "ext.planets.satellite.reference": {
+    "satellite.reference": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite" },
@@ -82,28 +82,28 @@
       },
       "required": ["@type", "id"]
     },
-    "ext.planets.satellite.create": {
+    "satellite.create": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite" },
         "id": { "$ref": "#/$defs/identifier" },
-        "planet": { "$ref": "#/$defs/ext.planets.planet.reference" },
+        "planet": { "$ref": "#/$defs/planet.reference" },
         "orbitalPeriod": { "type": "number", "exclusiveMinimum": 0 }
       },
       "required": ["@type", "id", "planet"]
     },
-    "ext.planets.satellite.read": {
+    "satellite.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite", "readOnly": true },
         "id": { "$ref": "#/$defs/identifier", "readOnly": true },
-        "planet": { "$ref": "#/$defs/ext.planets.planet.reference", "readOnly": true },
+        "planet": { "$ref": "#/$defs/planet.reference", "readOnly": true },
         "orbitalPeriod": { "type": "number", "exclusiveMinimum": 0 },
         "provMetadata": { "$ref": "#/$defs/provMetadata.read", "readOnly": true }
       },
       "required": ["@type", "id", "planet", "provMetadata"]
     },
-    "ext.planets.satellite.update": {
+    "satellite.update": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satellite" },
@@ -111,7 +111,7 @@
       },
       "required": ["@type"]
     },
-    "ext.planets.satelliteAvailability.read": {
+    "satelliteAvailability.read": {
       "type": "object",
       "properties": {
         "@type": { "type": "string", "const": "satelliteAvailability", "readOnly": true },
