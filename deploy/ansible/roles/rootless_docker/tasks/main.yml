@@ -6,6 +6,24 @@
       - ansible_facts['distribution_major_version'] is version('22', '>=')
     fail_msg: The deployment is made for Ubuntu 22.04 or later.
 
+# A host with Docker (the root daemon of nginx) often has the repository already, in a file of its own with another
+# key file. apt refuses two definitions of one source with different keys, so the role then uses that one, and removes
+# its own definition if an earlier run added it (before any apt task, which would fail on the conflict).
+- name: Find other definitions of the Docker CE repository
+  ansible.builtin.find:
+    paths: [/etc/apt/sources.list.d]
+    patterns: ["*.list", "*.sources"]
+    contains: '.*download\.docker\.com.*'
+    excludes: [docker.sources]
+  register: rootless_docker_other_repos
+
+- name: Remove the role's definition where another exists
+  when: rootless_docker_other_repos.matched > 0
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: [/etc/apt/sources.list.d/docker.sources, /etc/apt/keyrings/docker.asc]
+
 - name: Install the prerequisites of rootless Docker
   ansible.builtin.apt:
     name: [ca-certificates, git, uidmap, dbus-user-session, slirp4netns, acl, iptables, iproute2, python3-debian]
@@ -14,7 +32,7 @@
     cache_valid_time: 3600
 
 - name: Add the Docker CE repository
-  when: rootless_docker_install_packages | bool
+  when: rootless_docker_install_packages | bool and rootless_docker_other_repos.matched == 0
   ansible.builtin.deb822_repository:
     name: docker
     types: [deb]
