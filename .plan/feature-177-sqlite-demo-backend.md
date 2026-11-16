@@ -5,12 +5,12 @@ Part of #174, Story 1 of 4. Built on today's profile model. #178 moves it to pre
 
 ## Tasks
 
-- [~] T0 Plan (this file), for approval
-- [ ] T1 Extension `org.example.rpp.extension.planets` 1.0: schema `.spec/planets-extension.schema.json` (copied by
+- [x] T0 Plan (this file), approved
+- [~] T1 Extension `org.example.rpp.extension.planets` 1.0: schema `.spec/planets-extension.schema.json` (copied by
       `copy_models.sh`), objects `planet` and `satellite`, and the specification `docs/demo/planets-extension.md` in
       the extension format of the guidelines, with examples checked by a unit test (as `test_rri_extension_doc.py`)
 - [ ] T2 Core: `core/model/planet/` (Planet, Satellite, transfer state), `core/ports/planet_gateway.py` and
-      `satellite_gateway.py`, `core/flows/planet/` (create, read, update, partial update, delete, transfer request,
+      `satellite_gateway.py`, `core/flows/planet/` (create, read, update, partial update, delete, availability, transfer request,
       query, cancel, approve, reject, satellites of a planet), a planet transfer event in `core/model/message/`,
       `planets` and `satellites` on `RegistryBackend`
 - [ ] T3 Adapter `registry_adapter/sqlite/`: SQLAlchemy 2.x models (planet, satellite, transfer, message, client),
@@ -50,10 +50,11 @@ Part of #174, Story 1 of 4. Built on today's profile model. #178 moves it to pre
 - D3 (maintainer) Basic auth against configured clients. The user is the sponsoring client.
 - D4 (maintainer) Planet transfer EPP style, no automatic approval. The satellites move with their planet.
 - D5 (maintainer) Transfer events queue messages for the other client.
+- D6 (maintainer) Planet and Satellite have the availability check (`/planets/{id}/availability`,
+  `/satellites/{id}/availability`), as the domain name and the host.
 
 ## Corrections
 
 ## Open questions
 
-- Availability (`/planets/{id}/availability`) is not in #177. Left out unless the maintainer wants it.
 - `.vscode/settings.json` and `config.rri-mtest.yaml.local` are the maintainer's local changes and stay unstaged.
