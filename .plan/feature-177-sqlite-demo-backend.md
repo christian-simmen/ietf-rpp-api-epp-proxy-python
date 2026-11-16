@@ -141,7 +141,8 @@ src/registry_adapter/sqlite/       the SQLite backend
   `password_hash.py` validates every client hash. It is called from `ClientDirectory` (so by `compose`), not from
   `SqliteSettings`, because `settings` may not import an adapter (contract `settings-standalone`). A unit test walks the
   SQLite common modules and asserts each is a source module of both contracts that name them.
-- MTEST run: see the result of the last check run below. for the maintainer (no machine on the allowlist).
+- MTEST run: done on `ba6ef32`, with the full smoke run of every environment (`rri-mtest` included): 94 passed, 113
+  skipped. for the maintainer (no machine on the allowlist).
 
 ## Findings (evidence)
 
