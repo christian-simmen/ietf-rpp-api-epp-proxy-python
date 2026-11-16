@@ -1,12 +1,6 @@
 {
   "test_id": "test22-thirteen_nameservers",
-  "when": {
-    "profile.objects": {
-      "contains": "host"
-    }
-  },
-  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
-  "description": "Thirteen nameservers, the most the EPP test server takes.",
+  "description": "Thirteen name servers, the most both servers take: host objects where the backend has them (the EPP test server), ns records where it has none (RRI).",
   "steps": [
     {
       "when": {
@@ -94,6 +88,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -130,6 +129,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -166,6 +170,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -202,6 +211,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -238,6 +252,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -274,6 +293,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -310,6 +334,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -346,6 +375,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -382,6 +416,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -418,6 +457,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -454,6 +498,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -490,6 +539,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -526,6 +580,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -562,6 +621,11 @@
       }
     },
     {
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      },
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -686,6 +750,191 @@
         "body": {
           "@type": "domainName"
         }
+      }
+    },
+    {
+      "when": {
+        "profile.objects": {
+          "not": {
+            "contains": "host"
+          }
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/domainNames",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "{rpp:content-type}"
+        },
+        "body_json": {
+          "@type": "domainName",
+          "name": "t22-{random_name}.{tld}",
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Abc2345678"
+          },
+          "registrant": {
+            "select": [
+              {
+                "when": {
+                  "profile.domainName.registrant.min_count": {
+                    "min": 1
+                  }
+                },
+                "then": {
+                  "@type": "contact",
+                  "id": "{handle:a:X22}"
+                }
+              },
+              {
+                "omit": true
+              }
+            ]
+          },
+          "dns": {
+            "@type": "dnsData",
+            "records": [
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns1.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns2.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns3.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns4.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns5.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns6.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns7.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns8.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns9.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns10.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns11.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns12.n27-{random_name}.net."
+                }
+              },
+              {
+                "@type": "dnsRecord",
+                "name": "@",
+                "type": "ns",
+                "rdata": {
+                  "nsdname": "ns13.n27-{random_name}.net."
+                }
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "@type": "domainName"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.objects": {
+          "not": {
+            "contains": "host"
+          }
+        }
+      },
+      "request": {
+        "method": "DELETE",
+        "url": "/domainNames/t22-{random_name}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200
       }
     }
   ]

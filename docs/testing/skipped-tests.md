@@ -1,12 +1,12 @@
 # Skipped integration tests
 
-Full run `pytest -n 4 tests/integration` on both environments, branch `chore/skip-reasons` (from `main` at f4f8ddc), 2026-11-16: 700 passed, 6 failed, 389 skipped (390 in the run; domain_restore/test3 has since been merged into test1, which runs on both).
+Full run `pytest -n 4 tests/integration` on both environments, branch `chore/skip-reasons` (from `main` at f4f8ddc), 2026-11-16: 700 passed, 6 failed, 390 skipped. Since the run, cases of the same subject were merged into one case whose steps depend on the backend (domain_restore/test3 and test4 into test1, domain_update/test35 into test30 and test36 into test31, limits_domain/test27 into test22), which leaves 384 skips.
 
 Failed (not skipped, not part of this review): rri-mtest limits_domain/test1-label_of_60, rri-mtest limits_domain/test2-label_of_61, rri-mtest limits_domain/test3-label_of_63, rri-mtest limits_domain/test5-leading_hyphen, rri-mtest limits_domain/test6-underscore, rri-mtest message/test6-read_head_then_ack.
 
 Verdict **ok**: the skip is right and within the intent of the case. **review**: the case is skipped where it should be, but the fact named is not its subject, or it leaves a gap on the other backend.
 
-## epp-docker (85 skipped)
+## epp-docker (84 skipped)
 
 | Case | `when` of | Skip reason (runner) | Why (`comment`) | Verdict |
 |---|---|---|---|---|
@@ -62,7 +62,6 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | limits_domain/test24-fourteenth_nameserver_by_update | case | Skipping test case: test24-fourteenth_nameserver_by_update - pawel-kow/epp#29 | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok: known defect pawel-kow/epp#29 |
 | limits_domain/test25-one_ns_record | case | profile.objects is ('domainName', 'host', 'contact'), not {'not': {'contains': 'host'}} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
 | limits_domain/test26-two_ns_records | case | profile.objects is ('domainName', 'host', 'contact'), not {'not': {'contains': 'host'}} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
-| limits_domain/test27-thirteen_ns_records | case | profile.objects is ('domainName', 'host', 'contact'), not {'not': {'contains': 'host'}} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
 | limits_domain/test28-fourteen_ns_records | case | profile.objects is ('domainName', 'host', 'contact'), not {'not': {'contains': 'host'}} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
 | limits_domain/test29-five_address_records | case | profile.domainName.dns.record_types is ('ns', 'ds', 'dnskey'), not {'contains': 'aaaa'} | Skipped on epp-docker: EPP has no address records of the domain itself, only ns, ds and dnskey. | ok |
 | limits_domain/test3-label_of_63 | case | env.bugs.over_max_length_cut is True, not False | Skipped on epp-docker: the EPP test server stores a value longer than its column cut instead of refusing it (pawel-kow/epp#21, pawel-kow/epp#31). Review: over_max_length_cut (pawel-kow/epp#21) stands in for the defect that breaks it, a label of 61 to 63 under .example (pawel-kow/epp#30). | review: over_max_length_cut (pawel-kow/epp#21) stands in for the defect that breaks it, a label of 61 to 63 under .example (pawel-kow/epp#30) |
@@ -96,7 +95,7 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | request_contact/test6-template_too_short | group | profile.objects is ('domainName', 'host', 'contact'), not {'contains': 'requestContact'} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
 | request_contact/test7-other_registrar_cannot_change | group | profile.objects is ('domainName', 'host', 'contact'), not {'contains': 'requestContact'} | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok |
 
-## rri-mtest (304 skipped)
+## rri-mtest (300 skipped)
 
 | Case | `when` of | Skip reason (runner) | Why (`comment`) | Verdict |
 |---|---|---|---|---|
@@ -192,7 +191,6 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | domain_renew/test9-list_not_supported | group | profile.domainName.processes.renew.supported is False, not True | Skipped on rri-mtest: RRI has no renew. | ok |
 | domain_restore/test12-restore_cycle_with_patch | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_restore/test13-pending_restore_without_report_ends | case | wait.domainName.processes.restore.pending_period: the server has no such transition; profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: it waits for domainName.processes.restore.pending_period, and the server has no such transition; RRI's RESTORE is one step, without a restore report. | ok |
-| domain_restore/test4-patch_report_on_active_domain | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_restore/test8-report_without_restore_time | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_restore/test9-report_with_one_statement | case | profile.domainName.processes.restore.report_supported is False, not True | Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report. | ok |
 | domain_transfer/test1-approve_moves_the_domain | group | profile.extensions is ('de.denic.rpp.rri',), not {'not': {'contains': 'de.denic.rpp.rri'}} | Skipped on rri-mtest: RRI's transfer is CHPROV with the de.denic.rpp.rri extension, immediate and without a pending process; domain_transfer_ext/ is its counterpart. | ok |
@@ -225,8 +223,6 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | domain_update/test27-put_ds_and_dnskey | case | profile.domainName.dns.record_types is ('ns', 'a', 'aaaa', 'mx', 'dnskey'), not {'contains': 'ds'} | Skipped on rri-mtest: RRI takes no DS records (DENIC computes the DS from the DNSKEY). | ok |
 | domain_update/test29-put_repeated_with_ns_records | case | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
 | domain_update/test3-add_remove_hostobj | case | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
-| domain_update/test30-put_without_change_by_another_client | case | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). Test35 is its counterpart without host objects. | ok |
-| domain_update/test31-patch_without_change_by_another_client | case | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). Test36 is its counterpart without host objects. | ok |
 | domain_update/test32-put_omitting_the_registrant | case | profile.domainName.status.client_supported is False, not True | Skipped on rri-mtest: RRI has no client statuses of a domain. Review: The status only forces the read path; registrant.min_count is the fact that keeps the case off RRI. | review: The status only forces the read path; registrant.min_count is the fact that keeps the case off RRI |
 | domain_update/test34-patch_on_the_read_path_keeps_the_idn | case | profile.domainName.status.client_supported is False, not True | Skipped on rri-mtest: RRI has no client statuses of a domain. Review: The status only forces the read path; no case covers keeping the IDN on the read path on RRI. | review: The status only forces the read path; no case covers keeping the IDN on the read path on RRI |
 | domain_update/test4-contacts_and_registrant | case | profile.domainName.contacts.labels is (), not {'contains': 'admin'} | Skipped on rri-mtest: RRI has no admin, tech or billing contacts. Test37 is the counterpart for RRI's request contacts. | ok |
@@ -368,7 +364,6 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | limits_domain/test17-five_tech_contacts | case | profile.domainName.contacts.labels is (), not {'contains': 'tech'} | Skipped on rri-mtest: RRI has no admin, tech or billing contacts. | ok |
 | limits_domain/test18-six_tech_contacts | case | profile.domainName.contacts.labels is (), not {'contains': 'tech'} | Skipped on rri-mtest: RRI has no admin, tech or billing contacts. | ok |
 | limits_domain/test19-sixth_tech_contact_by_update | case | profile.domainName.contacts.labels is (), not {'contains': 'tech'} | Skipped on rri-mtest: RRI has no admin, tech or billing contacts. | ok |
-| limits_domain/test22-thirteen_nameservers | case | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
 | limits_domain/test23-fourteen_nameservers | case | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
 | limits_domain/test24-fourteenth_nameserver_by_update | case | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
 | limits_domain/test25-one_ns_record | case | Skipping test case: test25-one_ns_record - #139 | Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33). | ok: known defect #139 |

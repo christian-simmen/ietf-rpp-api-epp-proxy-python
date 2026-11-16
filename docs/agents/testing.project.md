@@ -178,7 +178,9 @@ server; on MTEST `pendingCreate` while the predelegation check runs, `ok` once i
 passes the check (an `a` record DENIC serves itself), unless the check is its subject: name servers that do not serve
 the domain make it `inactive` (`env.domainName.processes.create.failed_dns_status`, `domain_create/test43`). Passwords
 are of the characters an RRI AuthInfo takes. Where a function exists on one backend only, a counterpart case covers
-the other (`domain_update/test35` to `test37`, `domain_lifecycle/`).
+the other (`domain_update/test37`, `domain_lifecycle/`). Where the cases would have the same subject and differ only in
+steps of a function one backend lacks, they are one case whose steps say where they run (`domain_restore/test1`,
+`domain_update/test30`, `limits_domain/test22`).
 
 Behaviour of MTEST the cases depend on: every reply carries info `13000000011`; a new domain is `pendingCreate`, or
 `failed` when its name servers do not pass the predelegation check (the create still succeeds, and the domain reads
