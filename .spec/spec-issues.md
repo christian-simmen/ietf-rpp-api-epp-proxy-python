@@ -574,5 +574,5 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 
 ## Localization entries of the JSContact Card
 
-- Json §6.2.9 declares `localizations` as `{ "type": "object" }`. With the enrichment of json §4.9.1 that rejects every localization, without it the entries are unchecked, and a profile cannot narrow an entry without declaring members the base does not declare. Filed as SIDN/ietf-rpp-jscontact-profile#36, which also asks to move the Card schema from json into the JSContact profile draft.
+- Json §6.2.9 declares `localizations` as `{ "type": "object" }`. With the enrichment of json §4.9.1 that rejects every localization, without it the entries are unchecked, and a profile cannot constrain an entry without declaring members the base does not declare. Filed as SIDN/ietf-rpp-jscontact-profile#36, which also asks to move the Card schema from json into the JSContact profile draft.
 - **Proxy:** `Localization` and `RecordLocalization` in `.spec/auto/json-schema/rpp.schema.json` declare the entry (`name`, `organizations`, `addresses`, `emails`, keyed by a language tag).

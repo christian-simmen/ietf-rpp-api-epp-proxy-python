@@ -35,7 +35,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 
 ## Decisions
 
-- D1 (maintainer) Extension adds only, profile narrows only (required, cardinality, enum subset, forbidden field), in
+- D1 (maintainer) Extension adds only, profile constrains only (required, cardinality, enum subset, forbidden field), in
   JSON Schema where possible and prose otherwise. Distinct identifiers even in one document.
 - D2 (maintainer) The client signals only the preset. Profiles reach a request through the preset definition and the
   server's binding, which is static and published.
@@ -61,12 +61,12 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 - D14 (maintainer) The json proposal is accepted with RJ1-RJ9 as drafted.
 - D15 (maintainer) The EPP Compatibility Profile gets its own draft. Its constraints, Profile Schema and registrations
   are copied into it and stay in data-objects, core and json for now.
-- D16 (maintainer) The Profile Schema of the EPP Compatibility Profile also narrows the JSContact Card of
+- D16 (maintainer) The Profile Schema of the EPP Compatibility Profile also constrains the JSContact Card of
   `contact.create`, `contact.read` and `contact.update`: name, address with locality and at most three street lines,
   email, US-ASCII internationalised form, one localisation, the telephone format, and `authInfo` on create. New
-  constraint: one email, at most one voice and one fax number (RFC 5733). Map entries are narrowed through
+  constraint: one email, at most one voice and one fax number (RFC 5733). Map entries are constrained through
   `additionalProperties`, `required` and `propertyNames`, so no property is declared that the Card does not declare.
-- D17 (maintainer) The EPP Compatibility Profile narrows a localization entry with JSContact patch semantics: no
+- D17 (maintainer) The EPP Compatibility Profile constrains a localization entry with JSContact patch semantics: no
   `emails`, a localized `name` with `full`, a localized organization with `name`, a localized address complete
   (`countryCode`, locality, at most three street lines). The base definition of the entry is requested upstream in
   SIDN/ietf-rpp-jscontact-profile#36, together with moving the Card schema from json to the JSContact profile draft.
@@ -76,7 +76,7 @@ Branch `feature/174-presets` from `main` (`f370121`). The requirements and accep
 ## Corrections
 
 - C1 The accepted json proposal did not say how the Preset Schema composes an extension sub-schema that a profile
-  narrows (the case of the Example Profile of the guidelines). Added as a bullet of its Preset Schema section.
+  constrains (the case of the Example Profile of the guidelines). Added as a bullet of its Preset Schema section.
 
 ## Open questions
 

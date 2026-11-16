@@ -36,7 +36,7 @@ organization = "SIDN Labs"
 
 .# Abstract
 
-This document defines the EPP Compatibility Profile of the RESTful Provisioning Protocol (RPP). The profile narrows RPP to what the Extensible Provisioning Protocol (EPP) can represent, so that a server can provision a repository through RPP and EPP concurrently. This document also defines the EPP compatible preset, which combines RPP without extensions with this profile.
+This document defines the EPP Compatibility Profile of the RESTful Provisioning Protocol (RPP). The profile constrains RPP to what the Extensible Provisioning Protocol (EPP) can represent, so that a server can provision a repository through RPP and EPP concurrently. This document also defines the EPP compatible preset, which combines RPP without extensions with this profile.
 
 {mainmatter}
 
@@ -44,7 +44,7 @@ This document defines the EPP Compatibility Profile of the RESTful Provisioning 
 
 RPP is designed to coexist with the Extensible Provisioning Protocol (EPP) [@!RFC5730], often operating in parallel against a common backend provisioning system. A server in such a mixed environment can only accept what both protocols can represent.
 
-This document defines the EPP Compatibility Profile, a profile as defined in [@!I-D.ietf-rpp-data-objects]. The profile narrows the data objects and operations of [@!I-D.ietf-rpp-data-objects], the endpoints of [@!I-D.ietf-rpp-core] and the JSON representation of [@!I-D.ietf-rpp-json]. It does not add functionality. It follows the profile specification format of [@!I-D.wullink-rpp-extension-guidelines].
+This document defines the EPP Compatibility Profile, a profile as defined in [@!I-D.ietf-rpp-data-objects]. The profile constrains the data objects and operations of [@!I-D.ietf-rpp-data-objects], the endpoints of [@!I-D.ietf-rpp-core] and the JSON representation of [@!I-D.ietf-rpp-json]. It does not add functionality. It follows the profile specification format of [@!I-D.wullink-rpp-extension-guidelines].
 
 A server that provisions a repository through RPP and EPP concurrently MUST include the EPP Compatibility Profile in the applicable profiles of every preset it offers, through the preset definition or through a profile binding [@!I-D.ietf-rpp-data-objects].
 
@@ -73,14 +73,14 @@ EPP Compatibility Profile
 | Base profiles | None |
 | Profile Schema `$id` | urn:ietf:params:rpp:schema:profile:epp-compatibility-1.0 |
 
-# Narrowed Primitive Data Types
+# Constrained Primitive Data Types
 
 ## Timestamp {#timestamp}
 
 * Constraints:
   * Upper case "T" and "Z" characters MUST be used. An example of a timestamp is `2025-10-27T09:42:51Z`.
 
-# Narrowed Data Objects
+# Constrained Data Objects
 
 ## Provisioning Metadata Object
 
@@ -216,7 +216,7 @@ The following limitations apply to the retrieval of messages, as defined in the 
 * When multiple readers are used, each reader independently receives the oldest message in the EPP poll queue. Consequently, multiple readers may receive the same message, possibly multiple times, until that message is acknowledged.
 * The messages remain in the `queued` state.
 
-# Narrowed Process Objects {#narrowed-process-objects}
+# Constrained Process Objects {#constrained-process-objects}
 
 ## Transfer Process Object {#transfer-process-object}
 
@@ -310,7 +310,7 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
     "id": "urn:ietf:params:rpp:profile:epp-compatibility",
     "version": "1.0"
   },
-  "rpp:narrows": {
+  "rpp:constraints": {
     "urn:ietf:params:rpp:schema:json-1.0#/$defs/restoreReport.create":
       "#/$defs/profile.restoreReport",
     "urn:ietf:params:rpp:schema:json-1.0#/$defs/provMetadata.read":
@@ -452,9 +452,9 @@ The following Profile Schema [@!I-D.ietf-rpp-json] expresses the constraints of 
 }
 ```
 
-The narrowings of the maps of the JSContact Card constrain every entry of a map through `additionalProperties`, and name the keys of a map only in `required` and `propertyNames`. The pattern `profile.ascii` restricts the internationalised form to printable US-ASCII characters. The localised form, in `localizations`, is not restricted to US-ASCII.
+The Profile Schema constrains every entry of a map of the JSContact Card through `additionalProperties`, and names the keys of a map only in `required` and `propertyNames`. The pattern `profile.ascii` restricts the internationalised form to printable US-ASCII characters. The localised form, in `localizations`, is not restricted to US-ASCII.
 
-A> The narrowing of a localization entry assumes that the base Card schema declares the members of a localization. Today [@!I-D.ietf-rpp-json] declares `localizations` as an object without members. The definition of the localization entry is requested in https://github.com/SIDN/ietf-rpp-jscontact-profile/issues/36.
+A> The constraints on a localization entry assume that the base Card schema declares the members of a localization. Today [@!I-D.ietf-rpp-json] declares `localizations` as an object without members. The definition of the localization entry is requested in https://github.com/SIDN/ietf-rpp-jscontact-profile/issues/36.
 
 # Constraints Not Expressed in JSON Schema
 
@@ -466,7 +466,7 @@ The following constraints are not expressed in the Profile Schema and MUST be en
 * The constraints on the DNS Data of the Host Data Object and the IP addresses of its Create operation, see (#host-data-object).
 * The limitations of the retrieval of messages, see (#message-data-object).
 * The forbidden `reason` of the Reject operation of the Transfer Process Object, see (#transfer-process-object).
-* The output restrictions of the Domain Transfer Process Object and the Restore Process Object, and the unavailable Read operation of the Restore Process Object, see (#narrowed-process-objects).
+* The output restrictions of the Domain Transfer Process Object and the Restore Process Object, and the unavailable Read operation of the Restore Process Object, see (#constrained-process-objects).
 * The Server Requirements, see (#server-requirements).
 
 # Examples
@@ -586,7 +586,7 @@ The EPP compatible preset is a preset as defined in [@!I-D.ietf-rpp-data-objects
 
 # Correspondence with EPP {#epp-mapping}
 
-This section is informative. It states how RPP constructs that the EPP Compatibility Profile narrows correspond to EPP constructs.
+This section is informative. It states how RPP constructs that the EPP Compatibility Profile constrains correspond to EPP constructs.
 
 * Restore Process Object, data element `restoreReport`: providing this element in the Create operation corresponds to `op="report"`, omitting it corresponds to `op="request"`, and providing it in the Update operation corresponds to `op="report"` as defined in [@!RFC3915].
 * Restore Process Object, Create operation (Restore Request): corresponds to `op="request"` (without report) or a combined `op="request"` followed immediately by `op="report"` as defined in [@!RFC3915].
@@ -605,7 +605,7 @@ The IANA is requested to register the following profile in the RPP Profiles regi
 - `requiredExtensions`: (None)
 - `baseProfiles`: (None)
 - `url`: This document, (#profile-overview)
-- `description`: Narrows RPP to what EPP can represent, for a server that provisions a repository through RPP and EPP concurrently.
+- `description`: Constrains RPP to what EPP can represent, for a server that provisions a repository through RPP and EPP concurrently.
 
 ## RPP JSON Schema Profiles Registry
 
@@ -629,13 +629,13 @@ The IANA is requested to register the following preset in the RPP Presets regist
 - `profiles`: urn:ietf:params:rpp:profile:epp-compatibility 1.0
 - `basePresets`: urn:ietf:params:rpp:preset:base 1.0
 - `url`: This document, (#epp-compatible-preset)
-- `description`: RPP without extensions, narrowed by the EPP Compatibility Profile.
+- `description`: RPP without extensions, constrained by the EPP Compatibility Profile.
 
 A> The registrations above are also requested by [@!I-D.ietf-rpp-data-objects] and [@!I-D.ietf-rpp-json] until the constraints are removed from them.
 
 # Security Considerations
 
-The EPP Compatibility Profile only narrows RPP. It does not weaken the authentication and authorisation that [@!I-D.ietf-rpp-core] and [@!I-D.ietf-rpp-data-objects] require. A server enforces the constraints of the profile on every request, whether or not the client has validated the request against the Preset Schema.
+The EPP Compatibility Profile only constrains RPP. It does not weaken the authentication and authorisation that [@!I-D.ietf-rpp-core] and [@!I-D.ietf-rpp-data-objects] require. A server enforces the constraints of the profile on every request, whether or not the client has validated the request against the Preset Schema.
 
 # Privacy Considerations
 

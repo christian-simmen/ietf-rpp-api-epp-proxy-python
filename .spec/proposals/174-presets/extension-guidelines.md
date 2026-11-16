@@ -7,7 +7,7 @@
 - Status: draft for review
 
 This proposal brings the guidelines in line with the separation of extensions, profiles and presets. Extensions only
-add, a requirement that only narrows becomes a profile, and the guidelines get a specification format for profiles and
+add, a requirement that only constrains becomes a profile, and the guidelines get a specification format for profiles and
 a short one for presets. Each change below names the section of the draft, the action, and the exact text. Section
 numbers are those of -00 and are given for orientation only: the title and the anchor identify the section.
 
@@ -18,8 +18,8 @@ Choices made while drafting that the requirements in #174 and the accepted propo
 - RG1. The Discovery extension point no longer answers the use of an unlisted extension with 02103 (Unimplemented
   extension). A request that uses an extension outside its signalled preset is a 400, as core RC4 decided. The
   restriction of an extension to specific clients becomes a restriction of a preset.
-- RG2. The Profile Specification Format lists the narrowed objects in the data element notation of data-objects, with
-  only the attributes the profile narrows, each of which MUST be narrower than the attribute it narrows. Each
+- RG2. The Profile Specification Format lists the constrained objects in the data element notation of data-objects, with
+  only the attributes the profile constrains, each of which MUST be stricter than the attribute it constrains. Each
   constraint needs an example that is valid under the preset without the profile and invalid with it.
 - RG3. A specification that defines an extension and a profile follows the extension format and adds a top-level
   section "Profile" with the sections of the profile format. IANA, Security, Privacy and Internationalization
@@ -28,7 +28,7 @@ Choices made while drafting that the requirements in #174 and the accepted propo
 - RG5. A profile defines no result codes, header fields, query parameters, Problem Detail fields, Discovery properties
   or registries. These add functionality and belong to an extension.
 - RG6. The "Composition and Validation" example of the Example Extension appendix shows the in-place composition of the
-  Preset Schema (json RJ2) instead of the `effective.` prefix. A new appendix "Example Profile" narrows the example
+  Preset Schema (json RJ2) instead of the `effective.` prefix. A new appendix "Example Profile" constrains the example
   extension.
 - RG7. The IANA Registrations table names data-objects as the home of the RPP Extensions registry, where the registry
   is now defined, instead of core.
@@ -38,7 +38,7 @@ Choices made while drafting that the requirements in #174 and the accepted propo
 Action: replace the Abstract with the following.
 
 ~~~~markdown
-The RESTful Provisioning Protocol (RPP) defines a base set of data objects, component objects, and operations for provisioning objects. This document defines guidelines and a normative mechanism for extension specifications that add data elements, associations, operations, result codes, or other functionality, without modifying the base specifications itself. It also defines the format of profile specifications, which narrow the base specifications and extensions, and of preset specifications, which name a set of extensions and profiles.
+The RESTful Provisioning Protocol (RPP) defines a base set of data objects, component objects, and operations for provisioning objects. This document defines guidelines and a normative mechanism for extension specifications that add data elements, associations, operations, result codes, or other functionality, without modifying the base specifications itself. It also defines the format of profile specifications, which constrain the base specifications and extensions, and of preset specifications, which name a set of extensions and profiles.
 ~~~~
 
 ## C2. Introduction (section 1)
@@ -51,7 +51,7 @@ Action: add the following paragraph after the third paragraph ("This document id
 points ...").
 
 ~~~~markdown
-An extension adds functionality and does not narrow the base specifications or other extensions [@!I-D.ietf-rpp-data-objects]. A requirement that only narrows, for example the policy of a registry, is specified as a profile, see (#profiles). A client uses extensions and is subject to profiles through a preset that it signals with each request, see (#presets). This document defines the format of profile and preset specifications alongside the format of extension specifications.
+An extension adds functionality and does not constrain the base specifications or other extensions [@!I-D.ietf-rpp-data-objects]. A requirement that only constrains, for example the policy of a registry, is specified as a profile, see (#profiles). A client uses extensions and is subject to profiles through a preset that it signals with each request, see (#presets). This document defines the format of profile and preset specifications alongside the format of extension specifications.
 ~~~~
 
 ## C3. Terminology (section 2)
@@ -67,7 +67,7 @@ Extension, Profile, Preset, Profile Binding, Applicable Profiles - As defined in
 
 Extension Schema, Profile Schema, Preset Schema - As defined in [@!I-D.ietf-rpp-json].
 
-Narrowing Mapper (`rpp:narrows`) - The property of a Profile Schema that maps the reference of a definition to the local definition in the Profile Schema that narrows it, as defined in [@!I-D.ietf-rpp-json].
+Constraints Mapper (`rpp:constraints`) - The property of a Profile Schema that maps the reference of a definition to the local definition in the Profile Schema that constrains it, as defined in [@!I-D.ietf-rpp-json].
 ~~~~
 
 ## C4. Restrictions on Extensions (section 4)
@@ -75,7 +75,7 @@ Narrowing Mapper (`rpp:narrows`) - The property of a Profile Schema that maps th
 Action: add the following paragraph.
 
 ~~~~markdown
-An extension MUST NOT narrow the base specifications or another extension, as defined in [@!I-D.ietf-rpp-data-objects]. A requirement to narrow is specified as a profile, see (#profiles).
+An extension MUST NOT constrain the base specifications or another extension, as defined in [@!I-D.ietf-rpp-data-objects]. A requirement to constrain is specified as a profile, see (#profiles).
 ~~~~
 
 ## C5. RPP Extension Points: Discovery (section 5.13)
@@ -93,7 +93,7 @@ A client uses an extension by signalling a preset that contains it, as defined i
 Action: add the following paragraph before the first paragraph.
 
 ~~~~markdown
-Before choosing an extension point, a designer determines whether the requirement adds functionality or only narrows what the base specifications and extensions permit. A requirement that only narrows is specified as a profile and not as an extension, see (#profiles). A requirement that has both parts is specified as an extension and a profile, with distinct identifiers.
+Before choosing an extension point, a designer determines whether the requirement adds functionality or only constrains what the base specifications and extensions permit. A requirement that only constrains is specified as a profile and not as an extension, see (#profiles). A requirement that has both parts is specified as an extension and a profile, with distinct identifiers.
 ~~~~
 
 Action: in the paragraph starting with "Before defining an extension", replace "the IANA RPP Extensions registry, the
@@ -120,7 +120,7 @@ A consumer learns at runtime which presets a given server offers, and which exte
 Action: replace the first paragraph of "Validation" with the following.
 
 ~~~~markdown
-A deployment that offers a preset MUST build its Preset Schema, as defined in [@!I-D.ietf-rpp-json]: for every definition that an extension of the preset extends or an applicable profile narrows, the effective schema composes the base definition, the `allOf` branch contributed by every extension of the preset, and the `allOf` branch contributed by every applicable profile. A server validates a request in the two steps defined in [@!I-D.ietf-rpp-json], so that it can tell a request that does not conform to the preset from a request that breaks a constraint of an applicable profile.
+A deployment that offers a preset MUST build its Preset Schema, as defined in [@!I-D.ietf-rpp-json]: for every definition that an extension of the preset extends or an applicable profile constrains, the effective schema composes the base definition, the `allOf` branch contributed by every extension of the preset, and the `allOf` branch contributed by every applicable profile. A server validates a request in the two steps defined in [@!I-D.ietf-rpp-json], so that it can tell a request that does not conform to the preset from a request that breaks a constraint of an applicable profile.
 ~~~~
 
 Action: in the second paragraph of "Validation", replace "the combined, per-deployment schema" with "the Preset
@@ -143,15 +143,15 @@ Action: add the following sections after "Extension Specification Format".
 ~~~~markdown
 # Profiles {#profiles}
 
-A profile narrows the base specifications and the extensions it requires, as defined in [@!I-D.ietf-rpp-data-objects], and does not add functionality. This section gives guidelines for profile specifications.
+A profile constrains the base specifications and the extensions it requires, as defined in [@!I-D.ietf-rpp-data-objects], and does not add functionality. This section gives guidelines for profile specifications.
 
 A profile is the right mechanism for a requirement that limits what a client can send or what a server returns, without adding anything to it, for example the policy of a registry or the requirements of an environment such as the EPP Compatibility Profile [@!I-D.ietf-rpp-data-objects]. A profile does not define result codes, HTTP header fields, query parameters, Problem Detail fields, Discovery document properties or registries. These add functionality and are defined by an extension.
 
 A profile is identified as an extension is, see (#identifying-extensions), with the URN form `urn:ietf:params:rpp:profile:<name>` for a standardised profile and the RPP Profiles registry. The identifier of a profile MUST NOT be used as the identifier of an extension or a preset.
 
-A profile that narrows a definition of an extension MUST require that extension. A profile MAY build on other profiles. Before defining a profile, a designer SHOULD check the IANA RPP Profiles registry for a profile that states the same constraints, and SHOULD build on it instead of restating its constraints, so that the constraints are stated once.
+A profile that constrains a definition of an extension MUST require that extension. A profile MAY build on other profiles. Before defining a profile, a designer SHOULD check the IANA RPP Profiles registry for a profile that states the same constraints, and SHOULD build on it instead of restating its constraints, so that the constraints are stated once.
 
-A profile expresses the constraints that JSON Schema can express in a Profile Schema, using the Narrowing Mapper (`rpp:narrows`), as defined in [@!I-D.ietf-rpp-json]. A Profile Schema MUST have a top-level `$id`, MUST NOT contain `unevaluatedProperties` or `additionalProperties` set to `false`, see (#validation), and MUST NOT be split over multiple documents.
+A profile expresses the constraints that JSON Schema can express in a Profile Schema, using the Constraints Mapper (`rpp:constraints`), as defined in [@!I-D.ietf-rpp-json]. A Profile Schema MUST have a top-level `$id`, MUST NOT contain `unevaluatedProperties` or `additionalProperties` set to `false`, see (#validation), and MUST NOT be split over multiple documents.
 
 ## Profile Specification Format {#profile-format}
 
@@ -159,14 +159,14 @@ A profile specification SHOULD follow the structure defined in this section, so 
 
 A profile specification contains the following sections, in this order:
 
-1. Introduction: the purpose of the profile, the base specifications and extensions that it narrows, and its motivation.
-2. Profile Overview: the name, the identifier, the version, the minimum RPP version that the profile narrows, the required extensions with their versions, the base profiles with their versions, and the `$id` of the Profile Schema.
-3. Narrowed Data Objects: the data objects and component objects of the base specifications and of the required extensions that the profile narrows.
-   1. Data Elements: the data elements that the profile narrows in each object.
-   2. Operations: the operations of each object that the profile makes unavailable, and the input data elements, parameters and outputs that it narrows.
-4. Narrowed Process Objects: the process objects that the profile narrows.
-   1. Data Elements: the data elements that the profile narrows in each process object.
-   2. Operations: the operations of each process object that the profile makes unavailable, and the input data elements, parameters and outputs that it narrows.
+1. Introduction: the purpose of the profile, the base specifications and extensions that it constrains, and its motivation.
+2. Profile Overview: the name, the identifier, the version, the minimum RPP version that the profile constrains, the required extensions with their versions, the base profiles with their versions, and the `$id` of the Profile Schema.
+3. Constrained Data Objects: the data objects and component objects of the base specifications and of the required extensions that the profile constrains.
+   1. Data Elements: the data elements that the profile constrains in each object.
+   2. Operations: the operations of each object that the profile makes unavailable, and the input data elements, parameters and outputs that it constrains.
+4. Constrained Process Objects: the process objects that the profile constrains.
+   1. Data Elements: the data elements that the profile constrains in each process object.
+   2. Operations: the operations of each process object that the profile makes unavailable, and the input data elements, parameters and outputs that it constrains.
 5. Server Requirements: the values and behaviours that RPP or an extension permits, but does not require, and that the profile requires a server to support.
 6. JSON Schema: the Profile Schema.
 7. Constraints Not Expressed in JSON Schema: every constraint of the profile that the Profile Schema does not express, with a reference to the section that states it.
@@ -175,7 +175,7 @@ A profile specification contains the following sections, in this order:
 10. Security Considerations.
 11. Privacy Considerations (optional).
 
-A data element that is listed in a Data Elements section is identified by its name and identifier, and lists only the attributes defined in [@!I-D.ietf-rpp-data-objects] that the profile narrows, with their narrowed values. A narrowed attribute MUST be narrower than the attribute of the base specification or extension. For example, a Cardinality of `0-1` can be narrowed to `1` or to `0`, and a Constraints attribute adds constraints to the existing ones.
+A data element that is listed in a Data Elements section is identified by its name and identifier, and lists only the attributes defined in [@!I-D.ietf-rpp-data-objects] that the profile constrains, with their constrained values. A constrained attribute MUST be stricter than the attribute of the base specification or extension. For example, a Cardinality of `0-1` can be constrained to `1` or to `0`, and a Constraints attribute adds constraints to the existing ones.
 
 A profile specification that follows this structure MUST include every section that is not marked as optional. A section that does not apply to the profile MUST contain the text "None".
 
@@ -224,7 +224,7 @@ A server MUST apply authentication and authorisation to the data elements, opera
 ~~~~
 
 ~~~~markdown
-A profile narrows, and cannot remove a security service or relax a constraint of the specifications it narrows. A profile can add constraints that serve security, for example a stricter pattern for a value. A server enforces the constraints of the applicable profiles on every request, whether or not the client validated the request against the Preset Schema [@!I-D.ietf-rpp-data-objects].
+A profile constrains, and cannot remove a security service or relax a constraint of the specifications it constrains. A profile can add constraints that serve security, for example a stricter pattern for a value. A server enforces the constraints of the applicable profiles on every request, whether or not the client validated the request against the Preset Schema [@!I-D.ietf-rpp-data-objects].
 ~~~~
 
 ## C13. Example Extension (Appendix A): Composition and Validation
@@ -275,11 +275,11 @@ Action: add the following appendix after "Example Extension".
 ~~~~markdown
 # Example Profile {#profile-example}
 
-This appendix is informative. It shows a profile specification that follows the structure defined in "Profile Specification Format". The example profile narrows the property `extProperty1` of the example extension (#extension-example) to at most 16 lower-case letters, and is therefore a profile that requires an extension.
+This appendix is informative. It shows a profile specification that follows the structure defined in "Profile Specification Format". The example profile constrains the property `extProperty1` of the example extension (#extension-example) to at most 16 lower-case letters, and is therefore a profile that requires an extension.
 
 ## Introduction
 
-This document provides an example of a profile specification, following the guidelines defined in [@I-D.wullink-rpp-extension-guidelines]. The example narrows a data element that an extension defines.
+This document provides an example of a profile specification, following the guidelines defined in [@I-D.wullink-rpp-extension-guidelines]. The example constrains a data element that an extension defines.
 
 ## Profile Overview
 
@@ -293,7 +293,7 @@ This document provides an example of a profile specification, following the guid
 | Base profiles | None |
 | Profile Schema `$id` | https://rpp.example/schemas/profile-example.json |
 
-## Narrowed Data Objects
+## Constrained Data Objects
 
 ### Domain Name Data Object
 
@@ -310,7 +310,7 @@ This document provides an example of a profile specification, following the guid
 
 None.
 
-## Narrowed Process Objects
+## Constrained Process Objects
 
 None.
 
@@ -328,7 +328,7 @@ None.
     "id": "urn:ietf:params:rpp:profile:example-profile",
     "version": "1.0"
   },
-  "rpp:narrows": {
+  "rpp:constraints": {
     "https://rpp.example/schemas/ext-domain-extproperty1.json#/$defs/ext.domainName.create":
       "#/$defs/profile.extProperty1"
   },
@@ -382,7 +382,7 @@ The following instance is valid under a preset with the example extension and wi
 Action: replace "**TODO**" with the following.
 
 ~~~~markdown
-* added profiles and presets: extensions do not narrow, a narrowing requirement is a profile, and a client uses extensions through a preset
+* added profiles and presets: extensions do not constrain, a constraining requirement is a profile, and a client uses extensions through a preset
 * replaced the rejection with 02103 of an unlisted extension by the rejection of an extension outside the signalled preset, as defined in rpp-core
 * added the Profile Specification Format and a Preset Specification Format
 * aligned Validation and the Example Extension with the Preset Schema of rpp-json

@@ -8,7 +8,7 @@
   [draft-kowalik-rpp-epp-compatibility.md](draft-kowalik-rpp-epp-compatibility.md). They stay here until that draft is adopted
 
 This proposal separates the current notion of a profile into three concepts: the extension, which adds functionality,
-the profile, which narrows, and the preset, which a client signals and which names a set of extensions and profiles.
+the profile, which constrains, and the preset, which a client signals and which names a set of extensions and profiles.
 A server binds further profiles to a preset as its own policy. Each change below names the section of the draft, the
 action, and the exact text, in the notation of the draft. Section numbers are those of -02 and are given for
 orientation only: the title and the anchor identify the section.
@@ -23,7 +23,7 @@ Choices made while drafting that the requirements in #174 do not settle:
 - R1. The Preset and Profile Data Objects use `id` (the URN) as their Unique Identifier and `name` as a short
   human-readable name, as the Extension Object and the IANA registries already do. Today the Profile Data Object uses
   `name` for the URN.
-- R2. The permitted narrowings include making an operation unavailable, restricting the output of an operation, and
+- R2. The permitted constraints include making an operation unavailable, restricting the output of an operation, and
   requiring the server to support a value that RPP permits but does not require. Without these, several existing
   EPP Compatibility Profile constraints (the Read operation of the Restore Process Object is "not supported", the write-only restore
   report, the record types a server MUST support) would not fit a profile. The statements that map RPP to EPP
@@ -62,7 +62,7 @@ Extension
 : A specification that adds functionality to RPP, as defined in (#extensions).
 
 Profile
-: A specification that narrows what RPP and a set of extensions permit, as defined in (#profiles).
+: A specification that constrains what RPP and a set of extensions permit, as defined in (#profiles).
 
 Preset
 : A named and versioned set of extensions and profiles that a client signals with a request, as defined in (#presets).
@@ -81,13 +81,13 @@ extension adds data elements, input data elements, or parameters to a core objec
 NOT alter the semantics or constraints of existing core data elements.") with the following.
 
 ~~~~markdown
-Extensions are additive. An extension MUST NOT narrow RPP or another extension. In particular, for a data element, input data element or parameter that the extension does not define, an extension MUST NOT:
+Extensions are additive. An extension MUST NOT constrain RPP or another extension. In particular, for a data element, input data element or parameter that the extension does not define, an extension MUST NOT:
 
 * raise the lower bound or lower the upper bound of its cardinality,
 * restrict its permitted values, or
 * alter its semantics.
 
-An extension MAY define any cardinality and constraints for the data elements, input data elements and parameters it defines itself, including making them required. Narrowing is the purpose of a profile, see (#profiles).
+An extension MAY define any cardinality and constraints for the data elements, input data elements and parameters it defines itself, including making them required. Constraining is the purpose of a profile, see (#profiles).
 ~~~~
 
 ## C3a. Data Element Semantics (section 2.4)
@@ -128,7 +128,7 @@ This document defines the EPP Compatibility Profile, a profile as defined in (#p
 * Required Extensions: (None)
 * Base Profiles: (None)
 
-The constraints of the profile are the constraints marked "In EPP Compatibility Profile" throughout this document. Each of them narrows RPP in one of the ways listed in (#profiles). Text marked "In EPP Compatibility Profile" that maps an RPP construct to an EPP construct is informative. [@!I-D.ietf-rpp-json] defines how the constraints are expressed in JSON Schema.
+The constraints of the profile are the constraints marked "In EPP Compatibility Profile" throughout this document. Each of them constrains RPP in one of the ways listed in (#profiles). Text marked "In EPP Compatibility Profile" that maps an RPP construct to an EPP construct is informative. [@!I-D.ietf-rpp-json] defines how the constraints are expressed in JSON Schema.
 
 A server that provisions a repository through RPP and EPP concurrently MUST include the EPP Compatibility Profile in the applicable profiles (#applicable-profiles) of every preset it offers, through the preset definition or through a profile binding.
 ~~~~
@@ -142,19 +142,19 @@ Action: replace the section "Profiles", including its subsection "Inheritance", 
 
 This section defines how extensions, profiles and presets describe the functionality and the constraints that apply to an RPP request.
 
-An extension adds functionality. A profile narrows what RPP and its extensions permit. A preset names a set of extensions and profiles, so that a client and a server agree on both with a single identifier. Because a client signals a preset and not a list of extensions, the number of combinations of extensions that a server serves, and therefore the number of schemas that describe its messages, is bounded by the number of presets it offers.
+An extension adds functionality. A profile constrains what RPP and its extensions permit. A preset names a set of extensions and profiles, so that a client and a server agree on both with a single identifier. Because a client signals a preset and not a list of extensions, the number of combinations of extensions that a server serves, and therefore the number of schemas that describe its messages, is bounded by the number of presets it offers.
 
 ## Extensions {#extensions}
 
-An extension adds functionality to RPP using the extension points defined in (#extensibility), and does not narrow RPP or another extension. An extension is identified by a unique identifier. The identifier of a standardised extension is registered in the RPP Extension Registry (#iana-extension-registry).
+An extension adds functionality to RPP using the extension points defined in (#extensibility), and does not constrain RPP or another extension. An extension is identified by a unique identifier. The identifier of a standardised extension is registered in the RPP Extension Registry (#iana-extension-registry).
 
 A client does not select an extension on its own. A client uses an extension by signalling a preset that contains it, see (#presets).
 
 ## Profiles {#profiles}
 
-A profile narrows the set of requests, responses and server behaviours that RPP and a set of extensions permit. A profile expresses the policy of a server, or the requirements of the environment in which a server operates, such as the EPP Compatibility Profile (#epp-compatibility-profile).
+A profile constrains the set of requests, responses and server behaviours that RPP and a set of extensions permit. A profile expresses the policy of a server, or the requirements of the environment in which a server operates, such as the EPP Compatibility Profile (#epp-compatibility-profile).
 
-A profile narrows only in the following ways:
+A profile constrains only in the following ways:
 
 1. Raising the lower bound of the cardinality of a data element, input data element or parameter, which makes an optional element required.
 2. Lowering the upper bound of the cardinality of a data element, input data element or parameter. An upper bound of zero forbids the element.
@@ -167,7 +167,7 @@ A profile MUST NOT add functionality. In particular, a profile MUST NOT define a
 
 A profile specification states each constraint normatively. Where a representation can express a constraint in its schema language, the representation specification defines how a profile expresses it, see [@!I-D.ietf-rpp-json]. A constraint that the schema language cannot express is stated in prose, or by reference to the normative text that defines it.
 
-A profile MAY require extensions. A profile that narrows a data element, operation or value that an extension defines MUST require that extension. A required extension is identified by its identifier and version.
+A profile MAY require extensions. A profile that constrains a data element, operation or value that an extension defines MUST require that extension. A required extension is identified by its identifier and version.
 
 A profile MAY build on one or more base profiles, see (#preset-profile-inheritance).
 
@@ -218,7 +218,7 @@ The applicable profiles of a preset at a server are the profiles of the preset, 
 
 A server MUST enforce the constraints of the applicable profiles on every request, whether or not the client validated the request in advance. A server that refuses a request because it breaks a constraint of an applicable profile uses the result code that [@!I-D.ietf-rpp-core] defines for this case.
 
-A profile only narrows. Every request that a server accepts under a preset is therefore valid under RPP and the extensions of the preset without any profile, and a client that implements a preset can be used with every server that offers it. The servers differ only in the constraints of their applicable profiles, which each server publishes. The representation specification defines how the schema of a preset at a server combines the schemas of RPP, of the extensions and of the applicable profiles, see [@!I-D.ietf-rpp-json].
+A profile only constrains. Every request that a server accepts under a preset is therefore valid under RPP and the extensions of the preset without any profile, and a client that implements a preset can be used with every server that offers it. The servers differ only in the constraints of their applicable profiles, which each server publishes. The representation specification defines how the schema of a preset at a server combines the schemas of RPP, of the extensions and of the applicable profiles, see [@!I-D.ietf-rpp-json].
 ~~~~
 
 ## C6. Extension Object (section 8.x, Discovery)
@@ -393,7 +393,7 @@ The following data elements are defined for the Preset Data Object. All data ele
   * Data Type: Representation Schema
   * Visibility: onDemand
   * Direct Access: true
-  * Description: The schema of the preset at the server, which combines the schemas of RPP and of the extensions of the preset, narrowed by its applicable profiles (#applicable-profiles), see (#representation-schema).
+  * Description: The schema of the preset at the server, which combines the schemas of RPP and of the extensions of the preset, constrained by its applicable profiles (#applicable-profiles), see (#representation-schema).
   * Constraints: The schema MUST reflect the profiles that the Profiles (`profiles`) and Bound Profiles (`boundProfiles`) data elements state.
 
 ## Operations
@@ -462,7 +462,7 @@ The following data elements are defined for the Profile Data Object. All data el
   * Cardinality: 1
   * Mutability: read-only
   * Data Type: String
-  * Description: The minimum version of RPP that the profile narrows.
+  * Description: The minimum version of RPP that the profile constrains.
   * Constraints: (None)
 
 * URL
@@ -558,7 +558,7 @@ Object Name: Profile Data Object
 
 Object Type: Resource
 
-Description: Represents a profile, which narrows what RPP and a set of extensions permit, applicable to at least one preset offered by the server.
+Description: Represents a profile, which constrains what RPP and a set of extensions permit, applicable to at least one preset offered by the server.
 
 Reference: [This-ID]
 
@@ -569,7 +569,7 @@ Data Elements
 | name               | Name                | 1     | read-only  | String                            | A short human-readable name of the profile.                                 |
 | description        | Description         | 1     | read-only  | String                            | A human-readable description of the profile and its intended use.           |
 | version            | Version             | 1     | read-only  | String                            | The version of the profile.                                                 |
-| rppVersion         | RPP Version         | 1     | read-only  | String                            | The minimum version of RPP that the profile narrows.                        |
+| rppVersion         | RPP Version         | 1     | read-only  | String                            | The minimum version of RPP that the profile constrains.                        |
 | url                | URL                 | 1     | read-only  | URL                               | The location of the profile specification.                                  |
 | baseProfiles       | Base Profiles       | 0+    | read-only  | Aggregation [Profile Data Object] | The profiles this profile builds on.                                        |
 | requiredExtensions | Required Extensions | 0+    | read-only  | Extension Object                  | The extensions the profile requires, including those of its base profiles.  |
@@ -615,7 +615,7 @@ Action: add the anchor `{#iana-extension-registry}` to the heading, replace the 
 `id` and the final paragraph below.
 
 ~~~~markdown
-The IANA is requested to create a new registry for RPP extensions. This registry will be used to register standardised extensions to the RPP protocol. An extension adds functionality to RPP, for example additional resource types, additional operations or additional authentication methods, and does not narrow RPP or another extension, see (#extensions).
+The IANA is requested to create a new registry for RPP extensions. This registry will be used to register standardised extensions to the RPP protocol. An extension adds functionality to RPP, for example additional resource types, additional operations or additional authentication methods, and does not constrain RPP or another extension, see (#extensions).
 ~~~~
 
 ~~~~markdown
@@ -623,7 +623,7 @@ The IANA is requested to create a new registry for RPP extensions. This registry
 ~~~~
 
 ~~~~markdown
-The designated expert verifies that the extension does not narrow RPP or another extension, and that its identifier is not registered in the RPP Profile Registry or the RPP Preset Registry.
+The designated expert verifies that the extension does not constrain RPP or another extension, and that its identifier is not registered in the RPP Profile Registry or the RPP Preset Registry.
 ~~~~
 
 ## C12. IANA Considerations: RPP Profile Registry and RPP Preset Registry
@@ -633,7 +633,7 @@ Action: replace the section "RPP Profile Registry" with the two sections below.
 ~~~~markdown
 ## RPP Profile Registry {#iana-profile-registry}
 
-The IANA is requested to create a new registry for RPP profiles. This registry will be used to register standardised profiles, which narrow what RPP and a set of extensions permit, see (#profiles). An example is the EPP Compatibility Profile, which narrows RPP to what the Extensible Provisioning Protocol (EPP) [@!RFC5730] can represent.
+The IANA is requested to create a new registry for RPP profiles. This registry will be used to register standardised profiles, which constrain what RPP and a set of extensions permit, see (#profiles). An example is the EPP Compatibility Profile, which constrains RPP to what the Extensible Provisioning Protocol (EPP) [@!RFC5730] can represent.
 
 ```text
 Name of the registry: RPP Profiles
@@ -651,7 +651,7 @@ Fields to be registered:
 - `url`: The URL for the profile specification.
 - `description`: A human-readable description of the profile and its intended use.
 
-The designated expert verifies that the profile only narrows, in the ways listed in (#profiles), that every extension it narrows is a required extension, that it does not build on itself directly or indirectly, and that its identifier is not registered in the RPP Extension Registry or the RPP Preset Registry.
+The designated expert verifies that the profile only constrains, in the ways listed in (#profiles), that every extension it constrains is a required extension, that it does not build on itself directly or indirectly, and that its identifier is not registered in the RPP Extension Registry or the RPP Preset Registry.
 
 Initial registrations:
 
@@ -661,7 +661,7 @@ Initial registrations:
 - `requiredExtensions`: (None)
 - `baseProfiles`: (None)
 - `url`: This document, (#epp-compatibility-profile)
-- `description`: Narrows RPP to what EPP can represent, for a server that provisions a repository through RPP and EPP concurrently.
+- `description`: Constrains RPP to what EPP can represent, for a server that provisions a repository through RPP and EPP concurrently.
 
 ## RPP Preset Registry {#iana-preset-registry}
 
@@ -704,7 +704,7 @@ Initial registrations:
 - `profiles`: urn:ietf:params:rpp:profile:epp-compatibility 1.0
 - `basePresets`: urn:ietf:params:rpp:preset:base 1.0
 - `url`: This document, (#presets)
-- `description`: RPP without extensions, narrowed by the EPP Compatibility Profile.
+- `description`: RPP without extensions, constrained by the EPP Compatibility Profile.
 ~~~~
 
 ## C13. Changes History
@@ -712,7 +712,7 @@ Initial registrations:
 Action: add the following entries to the subsection of the next revision.
 
 ~~~~markdown
-* separated extensions, which add functionality, from profiles, which narrow, and added presets, which a client signals and which name a set of extensions and profiles
+* separated extensions, which add functionality, from profiles, which constrain, and added presets, which a client signals and which name a set of extensions and profiles
 * added profile binding by the server and multiple inheritance of presets and profiles
 * added the Preset Data Object, redefined the Profile Data Object, and replaced the profiles of the Discovery Data Object by presets and profiles
 * added the Representation Schema common data type and the schema of a preset, and allowed Direct Access on data elements of cardinality 0-1 or 1 of any data type

@@ -4,12 +4,12 @@
 - Base: draft-ietf-rpp-json-01, upstream `src/draft-ietf-rpp-json.md` at commit `07068fc`
 - Builds on: [data-objects.md](data-objects.md) and [core.md](core.md) (accepted)
 - Status: accepted by the maintainer. Corrected while drafting the guidelines proposal: the Preset Schema also composes
-  in place an extension sub-schema that a profile narrows (C6, Preset Schema)
+  in place an extension sub-schema that a profile constrains (C6, Preset Schema)
 - Copied: the EPP Compatibility Profile elements of this proposal are also in the new draft proposed in
   [draft-kowalik-rpp-epp-compatibility.md](draft-kowalik-rpp-epp-compatibility.md). They stay here until that draft is adopted
 
 This proposal defines the JSON side of the separation of extensions, profiles and presets. An extension schema only
-adds, a profile schema only narrows, and the schema of a preset at a server composes both in one self-contained JSON
+adds, a profile schema only constrains, and the schema of a preset at a server composes both in one self-contained JSON
 Schema document, served as the Representation Schema of the Preset Data Object. The EPP Compatibility Profile gets a
 profile schema for the constraints that JSON Schema can express. Each change below names the section of the draft, the
 action, and the exact text. Section numbers are those of -01 and are given for orientation only: the title and the
@@ -22,14 +22,14 @@ Choices made while drafting that the requirements in #174 and the accepted propo
 - RJ1. The Representation Schema in JSON is one self-contained JSON Schema 2020-12 document, media type
   `application/schema+json`, whose `$id` is the URL of the `schema` sub-resource of the preset, with an `rpp:preset`
   member naming the preset and its version.
-- RJ2. In the preset schema, a definition that extensions extend or profiles narrow keeps the key of the base
+- RJ2. In the preset schema, a definition that extensions extend or profiles constrain keeps the key of the base
   definition, and its value is the `allOf` of the base definition and the sub-schemas. Only this makes a nested `$ref`
   (for example from `restoreProcess.create` to `restoreReport.create`) reach the composed definition. This replaces
   the current recommendation to give effective sub-schemas the prefix `effective.` and their own keys.
 - RJ3. A profile has its own JSON Schema document, with the member `rpp:profile` (identifier and version) and the
-  mapping `rpp:narrows`, analogous to `rpp:extends`. A schema document never contains both `rpp:extends` and
-  `rpp:narrows`, so a specification that defines an extension and a profile defines two schema documents.
-- RJ4. The narrowing rule in JSON terms: composition with `allOf` can only shrink the set of valid instances, except
+  mapping `rpp:constraints`, analogous to `rpp:extends`. A schema document never contains both `rpp:extends` and
+  `rpp:constraints`, so a specification that defines an extension and a profile defines two schema documents.
+- RJ4. The constraining rule in JSON terms: composition with `allOf` can only shrink the set of valid instances, except
   that a property declared in any branch counts as evaluated (#undeclared-properties). A profile sub-schema therefore
   MUST NOT declare a property that its target definition does not declare. An extension sub-schema MUST NOT declare a
   property of its base definition and MUST NOT list in `required` a property it does not declare.
@@ -67,7 +67,7 @@ Action: replace the subsection with the following.
 ~~~~markdown
 ### Profiles and Validation {#profiles-validation}
 
-A profile narrows RPP and its required extensions [@!I-D.ietf-rpp-data-objects]. The constraints of a profile that JSON Schema can express are expressed in its Profile Schema (#profile-schema). The other constraints are stated in the profile specification, and implementations enforce them in addition to the Preset Schema.
+A profile constrains RPP and its required extensions [@!I-D.ietf-rpp-data-objects]. The constraints of a profile that JSON Schema can express are expressed in its Profile Schema (#profile-schema). The other constraints are stated in the profile specification, and implementations enforce them in addition to the Preset Schema.
 
 A server validates a request under a preset in two steps, so that it can tell a request that does not conform to the preset from a request that breaks a constraint of an applicable profile:
 
@@ -297,13 +297,13 @@ Action: replace the first paragraph ("Extensions MUST employ an additive schema 
 following. The TODO about extending enumerations that follows it stays.
 
 ~~~~markdown
-An extension adds functionality and does not narrow RPP or another extension [@!I-D.ietf-rpp-data-objects]. Extension Schemas therefore employ an additive schema composition method, allowing new optional or required properties to be added to an existing base object schema. A sub-schema of an Extension Schema MUST NOT:
+An extension adds functionality and does not constrain RPP or another extension [@!I-D.ietf-rpp-data-objects]. Extension Schemas therefore employ an additive schema composition method, allowing new optional or required properties to be added to an existing base object schema. A sub-schema of an Extension Schema MUST NOT:
 
 - declare under `properties` a property that the base definition declares,
 - list under `required` a property that the sub-schema does not declare, or
 - use a keyword that constrains the base object as a whole, such as `maxProperties`, `not`, `if`, `dependentRequired` or `dependentSchemas`, other than for properties the sub-schema declares.
 
-An Extension Schema MUST NOT contain the `rpp:narrows` member (#profile-schema).
+An Extension Schema MUST NOT contain the `rpp:constraints` member (#profile-schema).
 ~~~~
 
 Action: replace the section "Effective Schema" with the following.
@@ -311,9 +311,9 @@ Action: replace the section "Effective Schema" with the following.
 ~~~~markdown
 ## Effective Schema
 
-The effective schema of a base definition under a preset at a server is the composition, using the `allOf` keyword, of the base definition, the sub-schemas that the Extension Schemas of the extensions of the preset map to it with `rpp:extends`, and the sub-schemas that the Profile Schemas of the applicable profiles map to it with `rpp:narrows` (#profile-schema). A validator uses it to determine whether an object conforms to the combined constraints. The server uses the `rpp:extends` and `rpp:narrows` members to resolve the mapping between the base definition and the sub-schemas.
+The effective schema of a base definition under a preset at a server is the composition, using the `allOf` keyword, of the base definition, the sub-schemas that the Extension Schemas of the extensions of the preset map to it with `rpp:extends`, and the sub-schemas that the Profile Schemas of the applicable profiles map to it with `rpp:constraints` (#profile-schema). A validator uses it to determine whether an object conforms to the combined constraints. The server uses the `rpp:extends` and `rpp:constraints` members to resolve the mapping between the base definition and the sub-schemas.
 
-Extension sub-schemas only add properties, and profile sub-schemas only narrow the properties that the base definition and the extension sub-schemas declare. The composition with `allOf` therefore keeps every property of the base definition and of the extensions, and narrows the set of valid instances by the constraints of the profiles.
+Extension sub-schemas only add properties, and profile sub-schemas only constrain the properties that the base definition and the extension sub-schemas declare. The composition with `allOf` therefore keeps every property of the base definition and of the extensions, and constrains the set of valid instances by the constraints of the profiles.
 
 The following is an example of an Extension Schema, which adds new properties to both the domain and contact base objects:
 
@@ -359,13 +359,13 @@ Action: add the following sections at the end of the section "Extension Framewor
 ~~~~markdown
 ## Profile Schema {#profile-schema}
 
-A profile expresses the constraints that JSON Schema can express in a Profile Schema, a JSON Schema document whose sub-schemas narrow definitions of RPP and of the extensions that the profile requires. A profile has at most one Profile Schema.
+A profile expresses the constraints that JSON Schema can express in a Profile Schema, a JSON Schema document whose sub-schemas constrain definitions of RPP and of the extensions that the profile requires. A profile has at most one Profile Schema.
 
 A Profile Schema MUST have a top-level `$id`, and MUST contain the member `rpp:profile`, whose value is an object with the members `id` and `version`, holding the identifier and the version of the profile. A Profile Schema MUST NOT contain the member `rpp:extends`. A specification that defines an extension and a profile defines an Extension Schema and a Profile Schema.
 
-A Profile Schema MUST map every sub-schema to the definitions it narrows, using the member `rpp:narrows`. Its keys are the absolute URIs of the narrowed definitions, of RPP or of an Extension Schema of a required extension. Its values are the JSON Pointers of the sub-schemas in the Profile Schema. More than one key MAY map to the same sub-schema.
+A Profile Schema MUST map every sub-schema to the definitions it constrains, using the member `rpp:constraints`. Its keys are the absolute URIs of the constrained definitions, of RPP or of an Extension Schema of a required extension. Its values are the JSON Pointers of the sub-schemas in the Profile Schema. More than one key MAY map to the same sub-schema.
 
-A sub-schema of a Profile Schema only narrows. It MAY use any JSON Schema keyword that constrains the properties that the narrowed definition declares, for example `required`, `minItems`, `maxItems`, `enum`, `const`, `pattern`, `maxLength`, or the schema `false` for a property that the profile forbids. A sub-schema of a Profile Schema MUST NOT declare under `properties`, at any depth, a property that the narrowed definition does not declare at that depth. A property declared in any branch of an `allOf` is evaluated (#undeclared-properties), so such a property would be accepted and add functionality.
+A sub-schema of a Profile Schema only constrains. It MAY use any JSON Schema keyword that constrains the properties that the constrained definition declares, for example `required`, `minItems`, `maxItems`, `enum`, `const`, `pattern`, `maxLength`, or the schema `false` for a property that the profile forbids. A sub-schema of a Profile Schema MUST NOT declare under `properties`, at any depth, a property that the constrained definition does not declare at that depth. A property declared in any branch of an `allOf` is evaluated (#undeclared-properties), so such a property would be accepted and add functionality.
 
 It is RECOMMENDED to use the prefix "profile." for every sub-schema of a Profile Schema, for example `#/$defs/profile.restoreReport`.
 
@@ -373,16 +373,16 @@ A profile whose base profiles have Profile Schemas does not repeat their sub-sch
 
 ## Preset Schema {#preset-schema}
 
-The Representation Schema [@!I-D.ietf-rpp-data-objects] in JSON is the Preset Schema: a JSON Schema 2020-12 document that describes the messages of RPP and of the extensions of a preset, narrowed by the applicable profiles of the preset at the server. Its media type is `application/schema+json`. The server serves it as the Direct Access sub-resource `schema` of the Preset Data Object.
+The Representation Schema [@!I-D.ietf-rpp-data-objects] in JSON is the Preset Schema: a JSON Schema 2020-12 document that describes the messages of RPP and of the extensions of a preset, constrained by the applicable profiles of the preset at the server. Its media type is `application/schema+json`. The server serves it as the Direct Access sub-resource `schema` of the Preset Data Object.
 
 The Preset Schema MUST be self-contained: it MUST NOT reference a schema outside the document. It is constructed as follows:
 
 - Its `$id` is the URL of the `schema` sub-resource of the preset at the server.
 - It contains the member `rpp:preset`, whose value is an object with the members `id` and `version`, holding the identifier and the version of the preset.
 - Its `$defs` contains every definition of RPP under the key of the definition.
-- The value of a definition that an extension extends or a profile narrows is its effective schema: an `allOf` of the base definition, embedded in place, and the references to the extension and profile sub-schemas, in that order.
+- The value of a definition that an extension extends or a profile constrains is its effective schema: an `allOf` of the base definition, embedded in place, and the references to the extension and profile sub-schemas, in that order.
 - Its `$defs` contains the sub-schemas of the Extension Schemas of the extensions of the preset and of the Profile Schemas of the applicable profiles, under their keys.
-- The value of a sub-schema of an Extension Schema that a profile narrows is the `allOf` of the sub-schema, embedded in place, and the references to the profile sub-schemas.
+- The value of a sub-schema of an Extension Schema that a profile constrains is the `allOf` of the sub-schema, embedded in place, and the references to the profile sub-schemas.
 
 A nested reference to a definition, for example from the `create` view of a Process Object to the `create` view of a Component Object, therefore resolves to its effective schema.
 
@@ -445,7 +445,7 @@ The following Profile Schema expresses constraints of the EPP Compatibility Prof
     "id": "urn:ietf:params:rpp:profile:epp-compatibility",
     "version": "1.0"
   },
-  "rpp:narrows": {
+  "rpp:constraints": {
     "urn:ietf:params:rpp:schema:json-1.0#/$defs/restoreReport.create":
       "#/$defs/profile.restoreReport",
     "urn:ietf:params:rpp:schema:json-1.0#/$defs/provMetadata.read":
@@ -491,7 +491,7 @@ Action: in the example discovery read response, replace the member `profiles` wi
             "@type": "preset",
             "id": "urn:ietf:params:rpp:preset:epp-compatible",
             "name": "EPP compatible preset",
-            "description": "RPP without extensions, narrowed by the EPP Compatibility Profile",
+            "description": "RPP without extensions, constrained by the EPP Compatibility Profile",
             "version": "1.0",
             "rppVersion": "1.0",
             "basePresets": [
@@ -549,7 +549,7 @@ Example preset read response:
     "@type": "preset",
     "id": "urn:ietf:params:rpp:preset:epp-compatible",
     "name": "EPP compatible preset",
-    "description": "RPP without extensions, narrowed by the EPP Compatibility Profile",
+    "description": "RPP without extensions, constrained by the EPP Compatibility Profile",
     "version": "1.0",
     "rppVersion": "1.0",
     "url": "https://www.iana.org/assignments/rpp-presets/epp-compatible",
@@ -658,7 +658,7 @@ Initial registrations:
 Action: add the following entries to the subsection of the next revision.
 
 ~~~~markdown
-- Restricted Extension Schemas to additions, and added Profile Schemas with `rpp:profile` and `rpp:narrows` in (#profile-schema)
+- Restricted Extension Schemas to additions, and added Profile Schemas with `rpp:profile` and `rpp:constraints` in (#profile-schema)
 - Added the Preset Schema in (#preset-schema), composing effective schemas in place under the keys of the base definitions
 - Added the two-step validation of (#profiles-validation) that separates non-conforming requests from broken profile constraints
 - Added the EPP Compatibility Profile Schema in (#epp-compatibility-profile-schema)
