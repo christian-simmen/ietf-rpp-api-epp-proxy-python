@@ -119,7 +119,7 @@
       }
     },
     {
-      "comment": "Creates contact X3; expects 201 01000. Setup: the registrant of the domain below.",
+      "comment": "Creates contact XT3; expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -132,7 +132,7 @@
         },
         "body_json": {
           "@type": "contact",
-          "id": "{handle:a:X3}",
+          "id": "{handle:a:XT3}",
           "contactInfo": {
             "@type": "Card",
             "version": "2.0",
@@ -182,12 +182,12 @@
         },
         "body": {
           "@type": "contact",
-          "id": "{handle:a:X3}"
+          "id": "{handle:a:XT3}"
         }
       }
     },
     {
-      "comment": "Creates domain x3 with registrant X3, generalRequest, abuse, dns records a, authInfo; expects 201 01000. Setup: the domain the steps below work on.",
+      "comment": "Creates domain x3 with registrant XT3, generalRequest, abuse, dns records a, authInfo; expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -203,7 +203,7 @@
           "name": "x3-{random_name}.{tld}",
           "registrant": {
             "@type": "contact",
-            "id": "{handle:a:X3}"
+            "id": "{handle:a:XT3}"
           },
           "generalRequest": {
             "@type": "requestContact",
@@ -245,7 +245,7 @@
       }
     },
     {
-      "comment": "Creates contact X3 of registrar b as registrar b; expects 201 01000. Setup: the registrant of the domain below.",
+      "comment": "Creates contact XT3 of registrar b as registrar b; expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -258,7 +258,7 @@
         },
         "body_json": {
           "@type": "contact",
-          "id": "{handle:b:X3}",
+          "id": "{handle:b:XT3}",
           "contactInfo": {
             "@type": "Card",
             "version": "2.0",
@@ -308,7 +308,7 @@
         },
         "body": {
           "@type": "contact",
-          "id": "{handle:b:X3}"
+          "id": "{handle:b:XT3}"
         }
       }
     },
@@ -328,7 +328,7 @@
           "@type": "domainTransferProcess",
           "registrant": {
             "@type": "contact",
-            "id": "{handle:b:X3}"
+            "id": "{handle:b:XT3}"
           },
           "generalRequest": {
             "@type": "requestContact",

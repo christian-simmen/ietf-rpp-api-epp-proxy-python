@@ -120,7 +120,7 @@
       }
     },
     {
-      "comment": "Creates contact X1; expects 201 01000. Setup: the registrant of the domain below.",
+      "comment": "Creates contact XT1; expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -133,7 +133,7 @@
         },
         "body_json": {
           "@type": "contact",
-          "id": "{handle:a:X1}",
+          "id": "{handle:a:XT1}",
           "contactInfo": {
             "@type": "Card",
             "version": "2.0",
@@ -183,12 +183,12 @@
         },
         "body": {
           "@type": "contact",
-          "id": "{handle:a:X1}"
+          "id": "{handle:a:XT1}"
         }
       }
     },
     {
-      "comment": "Creates domain x1 with registrant X1, generalRequest, abuse, dns records a, authInfo; expects 201 01000. Setup: the domain the steps below work on.",
+      "comment": "Creates domain x1 with registrant XT1, generalRequest, abuse, dns records a, authInfo; expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -204,7 +204,7 @@
           "name": "x1-{random_name}.{tld}",
           "registrant": {
             "@type": "contact",
-            "id": "{handle:a:X1}"
+            "id": "{handle:a:XT1}"
           },
           "generalRequest": {
             "@type": "requestContact",
@@ -246,7 +246,7 @@
       }
     },
     {
-      "comment": "Creates contact X1 of registrar b as registrar b; expects 201 01000. Setup: the registrant of the domain below.",
+      "comment": "Creates contact XT1 of registrar b as registrar b; expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -259,7 +259,7 @@
         },
         "body_json": {
           "@type": "contact",
-          "id": "{handle:b:X1}",
+          "id": "{handle:b:XT1}",
           "contactInfo": {
             "@type": "Card",
             "version": "2.0",
@@ -309,7 +309,7 @@
         },
         "body": {
           "@type": "contact",
-          "id": "{handle:b:X1}"
+          "id": "{handle:b:XT1}"
         }
       }
     },
@@ -331,7 +331,7 @@
           "transferDir": "pull",
           "registrant": {
             "@type": "contact",
-            "id": "{handle:b:X1}"
+            "id": "{handle:b:XT1}"
           },
           "generalRequest": {
             "@type": "requestContact",
@@ -398,7 +398,7 @@
           "@type": "domainName",
           "name": "x1-{random_name}.{tld}",
           "registrant": {
-            "id": "{handle:b:X1}"
+            "id": "{handle:b:XT1}"
           },
           "provMetadata": {
             "spClientId": "{regacc:b}"

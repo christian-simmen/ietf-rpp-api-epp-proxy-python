@@ -2,12 +2,18 @@
   "when": {
     "profile.domainName.processes.transfer.operations": {
       "contains": "request"
+    },
+    "profile.extensions": {
+      "not": {
+        "contains": "de.denic.rpp.rri"
+      }
     }
   },
+  "comment": "Skipped on rri-mtest: the case needs a pending transfer request to queue a message for the sponsoring registrar; RRI's transfer is CHPROV with the de.denic.rpp.rri extension, immediate and without a pending process (#190).",
   "test_id": "test6-read_head_then_ack",
   "steps": [
     {
-      "comment": "Creates contact HM6; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
+      "comment": "Creates contact HM6; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant.",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1

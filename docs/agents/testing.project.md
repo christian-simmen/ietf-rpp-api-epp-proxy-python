@@ -159,7 +159,7 @@ sessions out when the run ends (`pytest_sessionfinish`, `SessionPool.close`); a 
 within 5 minutes may be refused. Two runs at once (a terminal and VS Code) share the 4 sessions. 10 failed LOGINs lock a user for an hour,
 so the failed logins are of an unknown user. A RESTORE is one step and needs no wait; the RGP and the purge after it
 take up to two days, which a run waits for only with `RPP_TEST_MAX_WAIT` of `P2DT6H` or more. MTEST keeps what the cases create: they delete their domains, and the contacts stay (RRI cannot delete
-one), which the random part of the handle keeps apart. Every case runs on both backends unless it needs a function one of them lacks, which its `when`
+one), which the random part of the handle keeps apart from other runs. The random part is the same for the whole run, so a handle's suffix is unique across all cases (#188). Every case runs on both backends unless it needs a function one of them lacks, which its `when`
 names: host objects, client statuses, `ds` records, registration periods, renew, a transfer process (`domain_transfer/`, which RRI's
 immediate CHPROV has not; `domain_transfer_ext/` is its counterpart with the `rri` extension, run on MTEST only), the
 request contact object (`request_contact/`, `profile.objects` contains `requestContact`) or a domain's request contacts

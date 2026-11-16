@@ -1,8 +1,8 @@
 # Skipped integration tests
 
-Full run `pytest -n 4 tests/integration` on both environments, branch `chore/skip-reasons` (from `main` at f4f8ddc), 2026-11-16: 700 passed, 6 failed, 390 skipped. Since the run, cases of the same subject were merged into one case whose steps depend on the backend (domain_restore/test3 and test4 into test1, domain_update/test35 into test30 and test36 into test31, limits_domain/test27 into test22), which leaves 384 skips.
+Full run `pytest -n 4 tests/integration` on both environments, branch `chore/skip-reasons` (from `main` at f4f8ddc), 2026-11-16: 700 passed, 6 failed, 390 skipped. Since the run, cases of the same subject were merged into one case whose steps depend on the backend (domain_restore/test3 and test4 into test1, domain_update/test35 into test30 and test36 into test31, limits_domain/test27 into test22), which leaves 384 skips. The six failures are fixed since: limits_domain and domain_transfer_ext shared contact handles (#188), and message/test6 sent an EPP transfer request on RRI and is now skipped there (#190), which makes 385 skips.
 
-Failed (not skipped, not part of this review): rri-mtest limits_domain/test1-label_of_60, rri-mtest limits_domain/test2-label_of_61, rri-mtest limits_domain/test3-label_of_63, rri-mtest limits_domain/test5-leading_hyphen, rri-mtest limits_domain/test6-underscore, rri-mtest message/test6-read_head_then_ack.
+Failed in the run (fixed since, see above): rri-mtest limits_domain/test1-label_of_60, rri-mtest limits_domain/test2-label_of_61, rri-mtest limits_domain/test3-label_of_63, rri-mtest limits_domain/test5-leading_hyphen, rri-mtest limits_domain/test6-underscore, rri-mtest message/test6-read_head_then_ack.
 
 Verdict **ok**: the skip is right and within the intent of the case. **review**: the case is skipped where it should be, but the fact named is not its subject, or it leaves a gap on the other backend.
 
@@ -95,7 +95,7 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | request_contact/test6-template_too_short | group | profile.objects is ('domainName', 'host', 'contact'), not {'contains': 'requestContact'} | Skipped on epp-docker: the request contact object (the General Request and Abuse contacts of RRI) is RRI's; EPP has none. | ok |
 | request_contact/test7-other_registrar_cannot_change | group | profile.objects is ('domainName', 'host', 'contact'), not {'contains': 'requestContact'} | Skipped on epp-docker: the request contact object (the General Request and Abuse contacts of RRI) is RRI's; EPP has none. | ok |
 
-## rri-mtest (300 skipped)
+## rri-mtest (301 skipped)
 
 | Case | `when` of | Skip reason (runner) | Why (`comment`) | Verdict |
 |---|---|---|---|---|
@@ -396,6 +396,7 @@ Verdict **ok**: the skip is right and within the intent of the case. **review**:
 | limits_host/test7-fourteenth_address_by_update | group | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
 | limits_host/test8-address_256 | group | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
 | limits_host/test9-private_address | group | profile.objects is ('domainName', 'contact', 'requestContact'), not {'contains': 'host'} | Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain). | ok |
+| message/test6-read_head_then_ack | case | profile.extensions contains de.denic.rpp.rri | Skipped on rri-mtest: the case needs a pending transfer request to queue a message for the sponsoring registrar; RRI's transfer is CHPROV with the de.denic.rpp.rri extension, immediate and without a pending process (#190). | review |
 | profile_signalling_header/test1-base_create_read_delete | case | env.profile_signalling is 'media-type', not 'header' | Skipped on rri-mtest: MTEST's config signals the profile by media type; the twin in profile_signalling_media_type/ covers it. | ok |
 | profile_signalling_header/test3-the_profile_of_the_other_server_is_refused | case | env.profile_signalling is 'media-type', not 'header' | Skipped on rri-mtest: MTEST's config signals the profile by media type; the twin in profile_signalling_media_type/ covers it. | ok |
 | profile_signalling_header/test4-both_signalling_methods_are_refused | case | env.profile_signalling is 'media-type', not 'header' | Skipped on rri-mtest: MTEST's config signals the profile by media type; the twin in profile_signalling_media_type/ covers it. | ok |

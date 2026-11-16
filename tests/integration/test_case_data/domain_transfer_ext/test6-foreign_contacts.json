@@ -119,7 +119,7 @@
       }
     },
     {
-      "comment": "Creates contact X6; expects 201 01000. Setup: the registrant of the domain below.",
+      "comment": "Creates contact XT6; expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -132,7 +132,7 @@
         },
         "body_json": {
           "@type": "contact",
-          "id": "{handle:a:X6}",
+          "id": "{handle:a:XT6}",
           "contactInfo": {
             "@type": "Card",
             "version": "2.0",
@@ -182,12 +182,12 @@
         },
         "body": {
           "@type": "contact",
-          "id": "{handle:a:X6}"
+          "id": "{handle:a:XT6}"
         }
       }
     },
     {
-      "comment": "Creates domain x6 with registrant X6, generalRequest, abuse, dns records a, authInfo; expects 201 01000. Setup: the domain the steps below work on.",
+      "comment": "Creates domain x6 with registrant XT6, generalRequest, abuse, dns records a, authInfo; expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -203,7 +203,7 @@
           "name": "x6-{random_name}.{tld}",
           "registrant": {
             "@type": "contact",
-            "id": "{handle:a:X6}"
+            "id": "{handle:a:XT6}"
           },
           "generalRequest": {
             "@type": "requestContact",
@@ -261,7 +261,7 @@
           "@type": "domainTransferProcess",
           "registrant": {
             "@type": "contact",
-            "id": "{handle:a:X6}"
+            "id": "{handle:a:XT6}"
           },
           "generalRequest": {
             "@type": "requestContact",
