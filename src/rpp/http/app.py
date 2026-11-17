@@ -21,6 +21,7 @@ from rpp.http.profile_signalling import HEADER_SIGNALLING, profile_signalling
 from rpp.http.request_profiles import RequestProfiles
 from rpp.http.middleware.line_feed_path_middleware import LineFeedPathMiddleware
 from rpp.http.middleware.spec_snapshot_swagger_ui_middleware import SpecSnapshotSwaggerUIMiddleware
+from rpp.http.security.bearer_refusing_security_handler import BearerRefusingSecurityHandler
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
@@ -81,7 +82,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
     profile_schemas = ProfileSchemas(profiles, public_base_url(discovery_settings))
     app = FlaskApp(
         __name__,
-        security_map={"basic": lambda: SessionSecurityHandler(sessions)},
+        security_map={"basic": lambda: SessionSecurityHandler(sessions), "bearer": BearerRefusingSecurityHandler},
         # The spec is served from a copy taken at start, which response validation does not change (#193).
         middlewares=[SpecSnapshotSwaggerUIMiddleware if middleware is SwaggerUIMiddleware else middleware
                      for middleware in ConnexionMiddleware.default_middlewares],
