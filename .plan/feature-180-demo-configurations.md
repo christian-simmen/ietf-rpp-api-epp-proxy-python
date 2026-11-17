@@ -18,8 +18,8 @@ Worktree `/home/vscode/worktrees/rpp-presets`, mutex taken there. Clean-main ste
 - [x] T3 Configs `config.demo-extended.yaml`, `config.demo-bound.yaml`, `config.demo-inherit.yaml`
 - [x] T4 Environments `sqlite-demo-extended`, `sqlite-demo-bound`, `sqlite-demo-inherit`
 - [x] T5 Integration cases (groups `demo_discovery`, `demo_preset_read`, `demo_binding`) and `when` on the generic cases a binding refuses
-- [~] T6 Docs: testing.project.md, architecture.project.md, README.md, deploy README mention if needed
-- [ ] T7 Checks on the final commit (lint-imports, unit, smoke incl. rri-mtest), draft PR
+- [x] T6 Docs: testing.project.md, architecture.project.md, README.md, deploy README mention if needed
+- [~] T7 Checks on the final commit (lint-imports, unit, smoke incl. rri-mtest), draft PR
 
 ## Configurations (all: `rpp_backend: sqlite`, same clients and passwords as config.demo.yaml, in-memory database)
 
@@ -147,3 +147,10 @@ where the real text differs the test pins the real text and the plan is correcte
 - A list in an expected body must have the length of the actual one (`recusive_compare_existing`), so the integration cases assert "each once" too.
   Mutations (a wrong profile, an extra bound profile) fail the cases.
 - sqlite-demo-bound skips six generic cases (types other than rocky), see the `when`/`comment` in them. `sqlite_drafts_objects/test5` and the planets step of `preset_read/test1` got a `when` for the bare configuration.
+
+## Check results (commit of the code: see `git log`, no code edit after the runs)
+
+- `PYTHONPATH=src lint-imports`: 28 kept, 0 broken.
+- `pytest -n 4 tests/unit`: 2811 passed.
+- `pytest -n 4 -m smoke tests/integration` (all six environments, credentials of `.env`, including rri-mtest): 202 passed, 338 skipped, 0 failed.
+  A second smoke run of rri-mtest and epp-docker was started by mistake while checking the credentials and stopped at once; it is no result.
