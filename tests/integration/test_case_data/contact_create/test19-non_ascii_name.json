@@ -2,7 +2,6 @@
   "test_id": "test19-non_ascii_name",
   "steps": [
     {
-      "comment": "Creates contact 19 with authInfo (by backend); expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -14,7 +13,7 @@
             "version": "2.0",
             "kind": "individual",
             "name": {
-              "full": "J\u00f6rg M\u00fcller"
+              "full": "Jörg Müller"
             },
             "addresses": {
               "addr": {
@@ -76,44 +75,14 @@
         }
       },
       "response": {
-        "select": [
-          {
-            "when": {
-              "profile.default_preset": "epp-compatible"
-            },
-            "then": {
-              "status": 422,
-              "headers": {
-                "RPP-Code": "02308"
-              },
-              "content_type": "application/problem+json",
-              "body": {
-                "type": "urn:ietf:params:rpp:error",
-                "errors": [
-                  {
-                    "result": "02308",
-                    "profile": "urn:ietf:params:rpp:profile:epp-compatibility",
-                    "paths": [
-                      "$.contactInfo.name.full"
-                    ]
-                  }
-                ]
-              }
-            }
-          },
-          {
-            "then": {
-              "status": 400,
-              "content_type": "application/problem+json",
-              "body": {
-                "type": "urn:ietf:params:rpp:error"
-              },
-              "headers": {
-                "RPP-Code": "02001"
-              }
-            }
-          }
-        ]
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02001"
+        }
       }
     }
   ]

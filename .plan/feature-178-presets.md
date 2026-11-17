@@ -178,3 +178,16 @@ Plan approved by the orchestrator for the maintainer (2026-11-16). Answers:
   raises `NeedsCurrentState`, or succeeds under a profile, `rpp_to_model` returns None and the patched object is checked in step 2
   after the read. The separate pre-read checks of round 2 are gone. Consequence: a value the no-read conversion refuses (a non-ASCII
   email address) is the same 400 under both presets, and a constraint only the profile has is checked after the read.
+
+## Review round 4 (orchestrator decisions)
+
+- Core RC4 text governs an overlap: what RPP or an extension defines is answered as defined (core.md:235), before step 2. For contacts,
+  `contacts.check_rpp_rules` (JSContact profile §4.1.10, §4.1.11) runs on create, PUT and the patched read, after step 1.
+- The 13 cases, re-classified. Back to the old 400 `02001`: contact_create test19 (non-ASCII name; JSContact profile §4.1.11,
+  `.spec/draft-wullink-rpp-jscontact-profile.clean.txt:296-306`). Stay 422 because only a profile states the constraint
+  (data-objects "In EPP Compatibility Profile": name, address and email required, around line 5063 of the clean text; json "In the EPP
+  Compatibility Profile, restoreTime MUST be present", json clean text 2445; core's own 02308 example for one statement): contact_create
+  test23, test25; domain_restore test8, test9. The old 501 cases (backend limits) stay 422: contact_create test18; limits_contact
+  test10, test21, test23; contact_update test5, test20, test21; draft_contact test5.
+- `rpp:constraints` in an Extension Schema is refused at the document root (`extensions._from_schema`) and in any sub-schema the
+  whitelist walks.

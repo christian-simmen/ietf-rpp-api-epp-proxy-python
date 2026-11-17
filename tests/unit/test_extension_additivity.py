@@ -51,6 +51,8 @@ A = {"properties": {"a": {}}}
     ({"properties": {"name": {}}}, "declares name"),
     ({**A, "contains": {}}, "contains"),
     ({**A, "$ref": "#/$defs/x"}, r"\$ref"),
+    ({**A, "rpp:constraints": {"x": "y"}}, "rpp:constraints"),
+    ({**A, "allOf": [{"rpp:constraints": {"x": "y"}}]}, "rpp:constraints"),
 ])
 def test_an_extension_schema_that_could_constrain_the_base_stops_the_server(sub, keyword):
     with pytest.raises(ValueError, match=f"The extension x, definition ext.x .*({keyword})"):
@@ -75,3 +77,11 @@ def test_the_extensions_of_the_proxy_are_additive():
         check_additive(known)
     for path in [*Path("src/rpp/schema/schemas/extensions").glob("*.json"), *Path("src/extensions").rglob("*.schema.json")]:
         check_additive(_from_schema(json.loads(path.read_text(encoding="utf-8"))))
+
+
+def test_the_document_of_an_extension_schema_has_no_rpp_constraints():
+    document = {"$id": "https://x", "rpp:extension": {"id": "x", "name": "x", "version": "1.0"}, "rpp:extends": {},
+                "$defs": {}, "rpp:constraints": {"x": "y"}}
+
+    with pytest.raises(ValueError, match="The Extension Schema of x contains rpp:constraints"):
+        _from_schema(document)

@@ -56,10 +56,10 @@ class Session:
         self.client = FakeEppClient(username, password, replies=self.replies)
         return self.client
 
-    def request(self, method, preset=None, **kwargs):
+    def request(self, method, preset=None, url="/contacts/JD-1234", **kwargs):
         http = create_app(SessionPool(epp_backends(self._factory)), EPP_PROFILE).test_client()
         headers = {**AUTH, "RPP-Preset": f"preset={preset};version=1.0"} if preset else AUTH
-        return getattr(http, method)("/contacts/JD-1234", headers=headers, **kwargs)
+        return getattr(http, method)(url, headers=headers, **kwargs)
 
 
 def put(*replies, body=NEW_EMAIL):
@@ -174,3 +174,38 @@ def test_put_adding_a_localization_the_registry_ignores_is_a_500_with_02400():
 
     assert response.status_code == 500 and response.headers["RPP-Code"] == "02400"
     assert "loc" in response.json()["detail"]
+
+
+def test_a_rule_of_rpp_is_answered_as_rpp_defines_it_under_the_epp_compatible_preset_and_nothing_is_sent():
+    # core §Extensions and Profiles of a Request: what RPP defines (the JSContact profile: the internationalized form is
+    # US-ASCII) is "rejected as defined for that constraint, and not with 02308", also where a profile states it too
+    patch = Session(MISSING)
+    created = Session(MISSING)
+    body = {**put_body(card(name={"full": "Jörg Müller"})), "id": "JD-1234"}
+
+    refused_patch = patch.request(
+        "patch", json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "jöhn@exämple.com"}])
+    refused_post = created.request("post", url="/contacts", json=body)
+
+    for response in (refused_patch, refused_post):
+        assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
+        assert "US-ASCII" in response.json()["detail"]
+    assert patch.client.sent == [] and created.client.sent == []
+
+
+def test_a_rule_of_rpp_on_the_patched_contact_is_answered_as_rpp_defines_it_after_the_read():
+    session = Session(info())
+
+    response = session.request("patch", json=[{"op": "replace", "path": "/contactInfo/name/full", "value": "Jörg"}])
+
+    assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
+    assert "US-ASCII" in response.json()["detail"]
+
+
+def test_a_rule_of_rpp_on_a_full_update_is_answered_as_rpp_defines_it():
+    session = Session(MISSING)
+
+    response = session.request("put", json=put_body(card(name={"full": "Jörg Müller"})))
+
+    assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
+    assert session.client.sent == []

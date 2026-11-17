@@ -586,6 +586,15 @@ they were. The proxy follows the proposals, with the following.
   `https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/` for the presets `base` and `epp-compatible`. A private preset has none.
 - **An attribution.** A request that breaks the constraints of several profiles names the first profile (bases first) whose Profile Schema
   alone refuses it, and none where only their conjunction does (core: "a server can omit the field").
+- **A constraint stated by RPP and by a profile.** Core §Extensions and Profiles of a Request says a request that conforms to the preset
+  but breaks a constraint that RPP or an extension defines "is rejected as defined for that constraint, and not with 02308". Json §Profiles
+  and Validation, read literally, makes every failure of step 2 a broken profile constraint, so a request that breaks both a rule of RPP
+  that the schema cannot express (the JSContact profile: US-ASCII, the key sequence, the keys and features of a phone) and the Profile
+  Schema of the EPP Compatibility Profile (which repeats it as a pattern) would be 422. **Proxy:** follows core: the checks that RPP or
+  an extension defines and the schema cannot express run before step 2, on create, PUT and the patched object, and answer 400 `02001`
+  under every preset. Json should say that step 2 excludes what RPP or an extension of the preset already states. A constraint only
+  a profile states stays 422, also where an EPP mapper would have refused it before presets (a missing `name` or `emails`, a restore
+  report without `restoreTime` or with one statement, core's own example for the last).
 - **Extension Schemas, a whitelist.** Json §Extension Framework (json.md:300-304) forbids three things and leaves the rest open. **Proxy:**
   the check at start is stricter, a whitelist applied to the sub-schema and, recursively, to what `allOf`, `anyOf`, `if`, `then`, `else` and
   the values of `dependentSchemas` reach: metadata, `type` `object`, `properties` (not of a member the base declares), `required`,

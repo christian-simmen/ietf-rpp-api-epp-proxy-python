@@ -203,6 +203,8 @@ def rpp_to_model_with_current(contact_id: str, rpp: list, current: Contact, *, k
         ignored_paths=include_elements.on_demand_paths(OBJECT), absent_parents=ABSENT_PARENTS,
     )
     patched = patch_statuses.with_server_statuses(patched, read, "contactStatus")
+    validate_schema("contact.read", patched)
+    contacts.check_rpp_rules(patched["contactInfo"])
     validate_request_schema("contact.read", patched, patched=True)
     patched = patched if kind_held else _with_derived_kind(patched, operations)
     requested = {member: value for member, value in patched.items() if member not in READ_ONLY_MEMBERS}

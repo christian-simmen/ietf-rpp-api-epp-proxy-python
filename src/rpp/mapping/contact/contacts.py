@@ -74,6 +74,14 @@ def _check_profile(card: RPPCard):
     _check_phone_kinds(card)
 
 
+def check_rpp_rules(card: dict) -> None:
+    """What RPP itself states of a Card and the schema cannot express (the JSContact profile: key sequence, US-ASCII, the key and
+    the features of a phone). A request that breaks one is refused as RPP defines it (a 400), under every preset and before the
+    profiles are asked: core §Extensions and Profiles of a Request, a request that conforms to the preset but breaks a constraint
+    that RPP defines "is rejected as defined for that constraint, and not with 02308"."""
+    _check_profile(parse_rpp(RPPCard, card))
+
+
 def _reject_additional(entries: dict | None, member: str):
     """EPP holds only the entry under the predefined key."""
     if any("-" in key for key in entries or {}):
@@ -159,6 +167,8 @@ def contact_from_rpp(contact_rpp: RPPContact) -> Contact:
 
 def rpp_to_model(rpp: dict) -> Contact:
     """Converts a create request to a Contact."""
+    validate_schema("contact.create", rpp)
+    check_rpp_rules(rpp["contactInfo"])
     validate_request_schema("contact.create", rpp)
     contact_rpp = parse_rpp(RPPContact, rpp)
     contact = contact_from_rpp(contact_rpp)

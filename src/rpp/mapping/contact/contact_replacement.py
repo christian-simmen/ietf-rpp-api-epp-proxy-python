@@ -5,7 +5,7 @@ from rpp.dto.rpp_contact import RPPContact
 from rpp.mapping.contact import contacts
 from rpp.mapping.shared import auth_info, include_elements
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_request_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 TYPE = "@type"
 
@@ -43,6 +43,8 @@ def rpp_to_model(contact_id: str, rpp: dict, requested: frozenset[str] = frozens
 
     A member outside `contact.update` is rejected, also a create-only or a read-only one (json §4.4, core §16.8).
     """
+    validate_schema("contact.update", rpp)
+    contacts.check_rpp_rules(rpp["contactInfo"])
     validate_request_schema("contact.update", rpp)
     for member in rpp.keys() - {TYPE, *CHANGEABLE}:
         raise ValueError(f"'{member}' cannot be sent in a full update")

@@ -56,6 +56,8 @@ class _Check:
             self.fail("the schema false" if node is False else "a schema that is not an object",
                       f"which constrains {self.base_name}")
         for keyword, value in node.items():
+            if keyword == "rpp:constraints":
+                self.fail(keyword, "which only a Profile Schema has (json §Extension Framework)")
             if keyword in _METADATA or keyword.startswith("rpp:"):
                 continue
             if keyword == "type":

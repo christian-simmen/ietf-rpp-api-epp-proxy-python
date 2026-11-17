@@ -19,6 +19,8 @@ def _name(ref: str) -> str:
 
 def _from_schema(schema: dict) -> RppExtension:
     about = schema["rpp:extension"]
+    if "rpp:constraints" in schema:
+        raise ValueError(f"The Extension Schema of {about.get('id')} contains rpp:constraints, which only a Profile Schema has")
     return RppExtension(
         id=about["id"], name=about["name"], version=about["version"], url=schema["$id"],
         extends={_name(base): _name(ext) for base, ext in schema["rpp:extends"].items()},
