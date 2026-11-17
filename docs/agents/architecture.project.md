@@ -359,7 +359,7 @@ with `profile` and `paths` in the error (`profile_constraint_problem` in `rpp/ht
 the request). A patch or a replacement is validated as the object it results in (`patched=True`) and a failure that concerns a
 read-only member of the base definition, which the server manages, is not the client's; under a preset with applicable profiles a patch of a contact, domain or host runs the same conversion that needs no read as without profiles (so it is refused alike), and is then applied to the object read for it; the native patch
 of an extension (no read) checks the value of each operation as the member it sets and refuses the removal of a member a profile requires, see [spec-issues.md](../../.spec/spec-issues.md#two-step-validation-of-a-patch).
-A response is validated with the preset schema without profiles, never with them. The prose constraints of a profile keep
+A mapper runs the checks that RPP or an extension states in prose and the schema cannot express after step 1 and before `validate_request_schema` (as `contacts.check_rpp_rules` does for the JSContact profile), so that a request that breaks one is refused as RPP defines it, under every preset, and not with 02308 (core §Extensions and Profiles of a Request, core.md:235); the profiles of an extension (the demo presets on planets, #179 and #180) follow this too. A response is validated with the preset schema without profiles, never with them. The prose constraints of a profile keep
 today's behaviour (the mapper's 501 or the backend's error), as does a request under a preset without the profile.
 
 `PresetMiddleware` (after the authentication) stores the selection in the request context (`preset_selection()`) and refuses a
