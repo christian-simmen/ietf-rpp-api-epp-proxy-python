@@ -41,16 +41,20 @@ ENV PATH=/opt/venv/bin:$PATH \
     UVICORN_HOST=0.0.0.0 \
     UVICORN_PORT=8000 \
     WEB_CONCURRENCY=3 \
-    FORWARDED_ALLOW_IPS=127.0.0.1
+    FORWARDED_ALLOW_IPS=127.0.0.1 \
+    UVICORN_TIMEOUT_WORKER_HEALTHCHECK=60
 
 USER 10001:10001
 EXPOSE 8000
 
 # The discovery document needs no authentication, but an RPP-Cltrid; it answers 500 when the configuration lacks its
-# keys. Starting takes a while: every worker builds the app from openapi.yaml.
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+# keys. Starting takes a while: every worker builds the app from openapi.yaml, which on a busy host of two CPUs took
+# minutes (#195). During the start period a check runs every 5 s, so a container is healthy soon after it is up.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --start-interval=5s --retries=3 \
     CMD ["python", "-c", "import os, urllib.request as u; u.urlopen(u.Request('http://127.0.0.1:%s/.well-known/rpp' % os.environ['UVICORN_PORT'], headers={'RPP-Cltrid': 'healthcheck', 'Accept': 'application/rpp+json'}), timeout=4)"]
 
 # uvicorn takes its host, port, workers (WEB_CONCURRENCY) and the proxies it trusts for X-Forwarded-* from the
-# environment, so a deployment sets them without another command line.
+# environment, so a deployment sets them without another command line. A worker that does not answer the parent's ping
+# within UVICORN_TIMEOUT_WORKER_HEALTHCHECK seconds is restarted; uvicorn's 5 s killed workers still building the app
+# on a busy host, over and over (#195).
 CMD ["uvicorn", "--proxy-headers", "--no-server-header", "main:app"]
