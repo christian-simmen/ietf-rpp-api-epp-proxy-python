@@ -6,9 +6,13 @@ The definitions of the Preset Schema go under `components/schemas` by their keys
 there. A body marked with the definition it stands for (`body_definitions`) points at the preset's definition, an extension's own
 object at the key the extension gives it (`own_definitions`); a body of no definition, or of one the preset does not have (an
 object of an extension of another preset), keeps its schema. A schema of the routing spec that nothing refers to
-any more is left out; the definitions of the Preset Schema all stay, as it publishes them."""
+any more is left out; the definitions of the Preset Schema all stay, as it publishes them.
+
+`omit` leaves operations out (`rpp_openapi_omit_*`, a deviation from the drafts' API contract): a path without an operation
+goes, and the document then shows only what it serves, so a definition of the Preset Schema nothing refers to goes too."""
 import copy
 import json
+from typing import Callable
 
 from rpp.http.body_definitions import MARKER, body_schemas
 from rpp.schema.extensions import own_definitions
@@ -16,6 +20,7 @@ from rpp.schema.extensions import own_definitions
 OPENAPI_VERSION = "3.1.0"
 SCHEMAS = "#/components/schemas/"
 _DEFS = '"#/$defs/'
+METHODS = ("get", "put", "post", "delete", "options", "head", "patch", "trace")
 
 
 def _in_components(defs: dict) -> dict:
@@ -50,11 +55,30 @@ def _referenced_schemas(document: dict) -> set:
     return found
 
 
-def served_document(spec: dict, preset_document: dict, extension_ids) -> dict:
+def _omit(document: dict, omit: Callable[[str, dict], bool]) -> bool:
+    """Leaves out each operation `omit` names, a path left without one and a tag no operation has; whether it left out any."""
+    omitted = False
+    for path, item in list(document["paths"].items()):
+        for method in METHODS:
+            if isinstance(item.get(method), dict) and omit(path, item[method]):
+                del item[method]
+                omitted = True
+        if not any(method in item for method in METHODS):
+            del document["paths"][path]
+    if omitted and "tags" in document:
+        used = {tag for item in document["paths"].values() for method in METHODS
+                for tag in (item.get(method) or {}).get("tags", ())}
+        document["tags"] = [tag for tag in document["tags"] if tag.get("name") in used]
+    return omitted
+
+
+def served_document(spec: dict, preset_document: dict, extension_ids,
+                    omit: Callable[[str, dict], bool] | None = None) -> dict:
     """The document to serve, from the routing spec (with its bodies marked) and the default preset's Preset Schema; the
     extensions are those of the preset. A component the routing spec has under a key of the Preset Schema with other content
     is a defect of the app, not of a request: it stops the app."""
     document = copy.deepcopy(spec)
+    omitted = _omit(document, omit) if omit is not None else False
     defs = preset_document["$defs"]
     own = own_definitions(extension_ids)
     for schema in body_schemas(document):
@@ -70,7 +94,7 @@ def served_document(spec: dict, preset_document: dict, extension_ids) -> dict:
         schemas[key] = schema
     referenced = _referenced_schemas(document)
     for name in list(schemas):
-        if name not in referenced and name not in defs:
+        if name not in referenced and (omitted or name not in defs):
             del schemas[name]
     document["openapi"] = OPENAPI_VERSION
     document["info"]["x-rpp-preset"] = dict(preset_document["rpp:preset"])

@@ -29,7 +29,7 @@ from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidat
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
 from registration import ExtensionRegistry
 from rpp.http.body_definitions import mark_body_definitions
-from rpp.http.extension_paths import add_extension_paths, add_registered_paths
+from rpp.http.extension_paths import add_extension_paths, add_registered_paths, collections
 from rpp.http.served_document import served_document
 from rpp.http.extension_resolver import ExtensionResolver
 from rpp.schema.bundle_definitions import bundle_definitions
@@ -66,8 +66,25 @@ def public_base_url(discovery_settings) -> str | None:
     return url if https_url(url) else None
 
 
+def omitted_operations(openapi_settings, held_objects, extension_ids, resolver: ExtensionResolver):
+    """What the document served leaves out (`rpp_openapi_omit_*`, nothing without settings): the operations on a data object
+    the backend does not hold, and those no handler serves. None where it leaves out nothing."""
+    unheld = bool(getattr(openapi_settings, "rpp_openapi_omit_unheld_objects", False))
+    unimplemented = bool(getattr(openapi_settings, "rpp_openapi_omit_unimplemented", False))
+    if not (unheld or unimplemented):
+        return None
+    segments = collections(extension_ids)
+
+    def omit(path: str, operation: dict) -> bool:
+        obj = segments.get(path.lstrip("/").split("/", 1)[0])
+        if unheld and obj is not None and obj not in held_objects:
+            return True
+        return unimplemented and not resolver.implements(operation.get("operationId", ""))
+    return omit
+
+
 def create_app(sessions, profile: BackendProfile, discovery_settings=None, signalling=HEADER_SIGNALLING,
-               registry: ExtensionRegistry | None = None):
+               registry: ExtensionRegistry | None = None, openapi_settings=None):
     """
     Builds the application.
 
@@ -80,6 +97,8 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
         signalling: How a client names the preset of a request (`rpp_preset_signalling`): `header` or `media-type`.
         registry: The extensions this app registered (`rpp_extensions`): their paths and handlers are the app's, and
             only its. Without it the app is the drafts' and the extensions of the proxy's own.
+        openapi_settings: Has rpp_openapi_omit_unheld_objects and rpp_openapi_omit_unimplemented, what the OpenAPI document
+            served leaves out. None leaves out nothing, as the drafts' API contract has it.
     """
     registry = registry or ExtensionRegistry()
     check_known(profile.extensions)
@@ -95,7 +114,10 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
     # the definitions of the default preset (#204).
     spec = add_registered_paths(add_extension_paths(copy.deepcopy(parsed_spec()), presets.extension_ids()), registry)
     spec = mark_body_definitions(spec, {*bundle_definitions(), *own_definitions(presets.extension_ids())})
-    served = served_document(spec, preset_schemas.document_of(presets.default), presets.default.extension_ids)
+    resolver = ExtensionResolver('rpp.handlers', registry.handler_packages())
+    omit = omitted_operations(openapi_settings, request_presets.profile_of(presets.default).objects, presets.extension_ids(),
+                              resolver)
+    served = served_document(spec, preset_schemas.document_of(presets.default), presets.default.extension_ids, omit)
     app = FlaskApp(
         __name__,
         security_map={"basic": lambda: SessionSecurityHandler(sessions), "bearer": BearerRefusingSecurityHandler},
@@ -115,7 +137,7 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.add_api(spec, resolver=ExtensionResolver('rpp.handlers', registry.handler_packages()), resolver_error=501,
+    app.add_api(spec, resolver=resolver, resolver_error=501,
                 validate_responses=True, swagger_ui_options=SwaggerUIOptions(swagger_ui_template_dir=str(SWAGGER_UI)),
                 validator_map={
                     "body": MediaTypeDict({**VALIDATOR_MAP["body"], "*/*json": RppRequestBodyValidator}),

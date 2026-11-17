@@ -190,8 +190,13 @@ def test_a_bound_profile_of_the_default_preset_is_in_the_document(servers):
     bound = servers["bound"]
     doc = document(bound.client)
 
+    defs = preset_defs(bound.client, p("planets"))
+
+    # The demo leaves out the drafts' objects (`rpp_openapi_omit_*`), and with them the definitions only they refer to: what
+    # the document has of the Preset Schema is as published.
     assert "profile.rocky.type" in doc["components"]["schemas"]
-    assert_holds_the_preset_schema(doc, preset_defs(bound.client, p("planets")))
+    assert_holds_the_preset_schema(doc, {key: schema for key, schema in defs.items() if key in doc["components"]["schemas"]})
+    assert definition(doc, request_ref(doc, "/planets")) == in_components(defs["planet.create"])
 
 
 def test_an_extension_path_has_the_definitions_of_the_extension_not_plain_objects(servers):

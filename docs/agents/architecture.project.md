@@ -427,6 +427,12 @@ rewritten from `#/$defs/`), each body that stands for a definition pointing at t
 own object at its key: `ext.rri.requestContact.create`), the schemas nothing refers to any more left out, and `info.x-rpp-preset`
 naming the preset. It is the same as `GET /presets/{id}/schema` publishes, profile constraints included. A body of no
 definition (`protocol.PartialUpdate`) or of one the default preset lacks keeps its generated schema. Other presets are #205.
+Two switches (`OpenApiSettings`, off by default, a deviation from the drafts' API contract) leave operations out of it:
+`rpp_openapi_omit_unheld_objects` those on a data object the backend does not hold under the default preset (by the first path
+segment, `collections` in `extension_paths`), `rpp_openapi_omit_unimplemented` those no handler serves
+(`ExtensionResolver.implements`). A path left without an operation goes, a tag no operation has, and every schema nothing refers to,
+the Preset Schema's definitions too (`omitted_operations` in `app.py`, `served_document(omit=...)`). Routing does not change: those
+requests answer 501 as before. The demo configurations turn both on.
 `ServedDocumentSwaggerUIMiddleware` in `rpp/http/middleware/` takes the place of Connexion's `SwaggerUIMiddleware` in the
 middleware list `create_app` gives `FlaskApp` (a `functools.partial` with the document, as Connexion builds a middleware with the
 app alone), and serves it as a `ServedSpecification` (`rpp/http/served_specification.py`: not checked against Connexion's 3.0
@@ -629,7 +635,9 @@ turns both checks off, for test backends only, and `main.py` warns when it is on
 `rpp_epp_objects`, `rpp_epp_extensions` and `rpp_epp_connection_cache` are read into `EppSettings`, but nothing uses
 them.
 
-`rpp_extensions` lists the extension modules to register, see [Registered extensions](#registered-extensions).
+`rpp_extensions` lists the extension modules to register, see [Registered extensions](#registered-extensions). `OpenApiSettings` holds
+`rpp_openapi_omit_unheld_objects` and `rpp_openapi_omit_unimplemented` (both `false` by default, a value that is not a boolean
+stops the configuration), see [The OpenAPI document served](#request-lifecycle).
 `SqliteSettings` holds `rpp_sqlite_url` and `rpp_sqlite_clients`. `rpp_backend` names the protocol (`Settings.backend`). `RriSettings` holds `rpp_rri_host`, `rpp_rri_port` (51131),
 `rpp_rri_use_tls`, `rpp_rri_tls_insecure_skip_verify` (test backends only, main warns), `rpp_rri_timeout` (unused,
 like the EPP one) and `rpp_rri_lgr`, the one LGR a client may name for DENIC's repertoire (gap Q11). There is no

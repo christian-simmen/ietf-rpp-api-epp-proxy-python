@@ -514,7 +514,9 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 - **Proxy:** the specification lists every operation; Delete answers 501 on RRI. The paths are made when the app is
   built, from those of the Contact Data Object. The OpenAPI document served is OpenAPI 3.1 with the body schemas of the
   default preset's Preset Schema (#204): the drafts' OpenAPI is 3.0, which cannot hold a 2020-12 Preset Schema, and the
-  schema of a body differs per preset; whether OpenAPI can express that per signalling method is #205.
+  schema of a body differs per preset; whether OpenAPI can express that per signalling method is #205. Two switches,
+  off by default, leave out of it the operations on objects the backend does not hold and those no handler serves
+  (`rpp_openapi_omit_*`), against the API contract, which lists them; the demo turns them on.
 
 ### Members of two extensions with the same name
 

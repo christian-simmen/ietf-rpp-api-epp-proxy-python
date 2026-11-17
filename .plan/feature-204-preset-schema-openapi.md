@@ -57,11 +57,19 @@ is retargeted to `main` once #201 is merged. Clean-main step skipped (maintainer
 - [x] T3 Served document and its middleware
 - [x] T4 Swagger UI 5 vendored
 - [x] T5 Docs: architecture.project.md, README.md, spec-issues.md (OpenAPI of a deployment)
-- [~] T6 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
+- [x] T6 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
+- [x] T7 Switches `rpp_openapi_omit_unheld_objects` and `rpp_openapi_omit_unimplemented` (maintainer, 2026-11-17: both, apart,
+  in #204, on in the demo configurations), tests, docs, checks
+
+- D5 Two switches (`OpenApiSettings`, off by default, against the drafts' API contract) leave operations out of the document
+  served: on data objects the backend does not hold under the default preset (501 `02307`), and no handler serves (501
+  `02101`). Routing unchanged. With an operation left out, every schema nothing refers to goes, the Preset Schema's definitions
+  too (so the demo shows no domain, contact or host schema), and the tags no operation has.
 
 ## Open questions
 
 - Q1 D4: a dev dependency `openapi-spec-validator` for the 3.1 check, or the OAS 3.1 meta-schema committed under `tests/`?
+  (Taken as the dependency; open for the maintainer.)
 
 ## Corrections
 
@@ -72,6 +80,6 @@ is retargeted to `main` once #201 is merged. Clean-main step skipped (maintainer
 ## Check results (on the final code)
 
 - `lint-imports`: 28 kept, 0 broken.
-- Unit: 2844 passed.
+- Unit: 2844 passed; with T7 2860 passed. Smoke with T7: see the commit of T7.
 - Smoke (`pytest -n 4 -m smoke tests/integration`): 190 passed, 350 skipped (selectors), 0 failed. Whether the MTEST cases ran
   could not be confirmed from here: MTEST run pending for the maintainer (`rpp` changed).

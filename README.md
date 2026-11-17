@@ -28,7 +28,16 @@ DENIC RRI.
 
 Swagger UI shall be available at http://127.0.0.1:8000/ui/. The OpenAPI document it shows (`/openapi.json`,
 `/openapi.yaml`) is OpenAPI 3.1, with the body schemas of the default preset: the members of its extensions and the
-constraints of its profiles, as `GET /presets/{id}/schema` publishes them.
+constraints of its profiles, as `GET /presets/{id}/schema` publishes them. It lists every operation of the drafts' API
+contract, also those the server answers with 501. Two switches leave those out, against the contract, so each is off by
+default; the demo configurations turn both on, so their document shows the planets and satellites only:
+
+```yaml
+rpp_openapi_omit_unheld_objects: true   # the operations on a data object the backend does not hold (501 02307)
+rpp_openapi_omit_unimplemented: true    # the operations no handler serves (501 02101)
+```
+
+Requests to what they leave out still answer 501.
 
 The username and password of HTTP Basic are the EPP login (`clID`/`pw`), and every request needs an `RPP-Cltrid`
 header with a new value.
