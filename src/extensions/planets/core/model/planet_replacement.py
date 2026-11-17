@@ -13,4 +13,7 @@ class PlanetReplacement:
     radius: Optional[float] = None
     mass: Optional[float] = None
     authInfo: Optional[AuthInfo] = None
-    extensions: Mapping[str, object] = field(default_factory=dict)  # a member of an extension not given is removed
+    extensions: Mapping[str, object] = field(default_factory=dict)
+    # The extensions whose members this update replaces (those of the preset the request is under): one of them not given is
+    # removed, the members of the others stay. None: every extension the backend holds.
+    scope: Optional[frozenset[str]] = None

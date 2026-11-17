@@ -78,7 +78,7 @@ def backends():
     """The backends of two clients over one database with the planets part and the dummy extension's."""
     parts = load_extension_parts({EXTENSION_ID: "registry_adapter.sqlite.extensions.planets"})
     parts.append(ExtensionPart(extension_id=DUMMY, part=SqlitePart("dummy", 1, dummy_metadata),
-                               hooks={"planet": PressureHook()}))
+                               hooks={"planet": PressureHook(), "satellite": PressureHook()}))
     database = SqliteDatabase("sqlite://", [COMMON_PART, *(part.part for part in parts)])
     clients = ClientDirectory({"a": hash_password("pw", n=1024), "b": hash_password("pw", n=1024)})
     profile = generic_profile("sqlite")
@@ -214,6 +214,29 @@ def test_an_extension_adds_members_to_a_planet_end_to_end(backends):
 
     ok(planets.replace(PlanetReplacement(id="mars", type="rocky")))  # a full update without the member removes it
     assert ok(planets.info("mars")).payload.extensions == {}
+
+
+def test_a_full_update_replaces_the_members_of_the_extensions_in_its_scope_only(backends):
+    planets = backends["a"].planets
+    ok(planets.create(planet(extensions={DUMMY: Pressure(pressure=90)})))
+
+    ok(planets.replace(PlanetReplacement(id="mars", type="rocky", scope=frozenset())))  # the preset lacks the extension
+    assert ok(planets.info("mars")).payload.extensions == {DUMMY: Pressure(pressure=90)}
+
+    ok(planets.replace(PlanetReplacement(id="mars", type="rocky", scope=frozenset({DUMMY}))))  # the preset has it
+    assert ok(planets.info("mars")).payload.extensions == {}
+
+
+def test_a_full_update_of_a_satellite_replaces_the_members_of_the_extensions_in_its_scope_only(backends):
+    ok(backends["a"].planets.create(planet()))
+    ok(backends["a"].satellites.create(Satellite(id="phobos", planet="mars", orbitalPeriod=0.3,
+                                                 extensions={DUMMY: Pressure(pressure=3)})))
+
+    ok(backends["a"].satellites.replace(SatelliteReplacement(id="phobos", orbitalPeriod=0.3, scope=frozenset())))
+    assert ok(backends["a"].satellites.info("phobos")).payload.extensions == {DUMMY: Pressure(pressure=3)}
+
+    ok(backends["a"].satellites.replace(SatelliteReplacement(id="phobos", scope=frozenset({DUMMY}))))
+    assert ok(backends["a"].satellites.info("phobos")).payload.extensions == {}
 
 
 def test_a_planet_without_the_members_of_an_extension_has_none(backends):

@@ -75,7 +75,7 @@ def test_an_extension_schema_that_only_adds_is_accepted(sub):
 def test_the_extensions_of_the_proxy_are_additive():
     for known in EXTENSIONS.values():
         check_additive(known)
-    for path in [*Path("src/rpp/schema/schemas/extensions").glob("*.json"), *Path("src/extensions").rglob("*.schema.json")]:
+    for path in [*Path("src/rpp/schema/schemas/extensions").glob("*.json"), *Path("src/extensions").rglob("*-extension.schema.json")]:
         check_additive(_from_schema(json.loads(path.read_text(encoding="utf-8"))))
 
 
@@ -85,3 +85,34 @@ def test_the_document_of_an_extension_schema_has_no_rpp_constraints():
 
     with pytest.raises(ValueError, match="The Extension Schema of x contains rpp:constraints"):
         _from_schema(document)
+
+
+OWNER = "https://example.org/owner.schema.json"
+
+
+def owned(**sub):
+    """An extension that extends `thing.create` of the extension `owner`."""
+    return RppExtension(id="x", name="x", version="1.0", url="https://x", extends={"thing.create": "ext.x"},
+                        owners={"thing.create": OWNER}, defs={"ext.x": {"type": "object", **sub}})
+
+
+OWNER_DEFS = {"thing.create": {"type": "object", "properties": {"id": {}, "kind": {}}}}
+
+
+def test_an_extension_of_another_extension_is_checked_against_the_definition_of_the_owner():
+    check_additive(owned(properties={"a": {}}), OWNER_DEFS)
+    with pytest.raises(ValueError, match="declares kind, which thing.create declares"):
+        check_additive(owned(properties={"kind": {}}), OWNER_DEFS)
+    with pytest.raises(ValueError, match="required, naming id"):
+        check_additive(owned(properties={"a": {}}, required=["id"]), OWNER_DEFS)
+
+
+def test_the_key_of_a_definition_of_another_extension_is_its_schema_and_the_definition():
+    document = {"$id": "https://x", "rpp:extension": {"id": "x", "name": "x", "version": "1.0"},
+                "rpp:extends": {f"{OWNER}#/$defs/thing.create": "#/$defs/ext.x", "#/$defs/domainName.create": "#/$defs/ext.y"},
+                "$defs": {"ext.x": {}, "ext.y": {}}}
+
+    loaded = _from_schema(document)
+
+    assert loaded.extends == {"thing.create": "ext.x", "domainName.create": "ext.y"}
+    assert loaded.owners == {"thing.create": OWNER}

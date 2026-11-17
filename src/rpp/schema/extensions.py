@@ -17,13 +17,21 @@ def _name(ref: str) -> str:
     return ref[len(_DEF):]
 
 
+def _target(key: str) -> tuple[str, str | None]:
+    """The definition an `rpp:extends` key names, and the `$id` of the extension that defines it (None for the bundle of RPP)."""
+    uri, _, pointer = key.partition("#")
+    return _name("#" + pointer), (uri or None)
+
+
 def _from_schema(schema: dict) -> RppExtension:
     about = schema["rpp:extension"]
     if "rpp:constraints" in schema:
         raise ValueError(f"The Extension Schema of {about.get('id')} contains rpp:constraints, which only a Profile Schema has")
+    targets = {key: _target(key) for key in schema["rpp:extends"]}
     return RppExtension(
         id=about["id"], name=about["name"], version=about["version"], url=schema["$id"],
-        extends={_name(base): _name(ext) for base, ext in schema["rpp:extends"].items()},
+        extends={targets[key][0]: _name(ext) for key, ext in schema["rpp:extends"].items()},
+        owners={name: uri for name, uri in targets.values() if uri},
         defs=schema["$defs"],
         objects=tuple(about.get("objects", ())),
     )

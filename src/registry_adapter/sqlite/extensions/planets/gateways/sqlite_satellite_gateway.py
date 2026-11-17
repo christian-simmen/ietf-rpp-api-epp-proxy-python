@@ -84,7 +84,7 @@ class SqliteSatelliteGateway(SqliteGateway):
             with self._context.database.transaction() as session:
                 row = self._owned(session, replacement.id, "update")
                 row.orbital_period = replacement.orbitalPeriod
-                self._replace_members(session, "satellite", row.id, replacement.extensions)
+                self._replace_members(session, "satellite", row.id, replacement.extensions, replacement.scope)
                 self._check(row.orbital_period)
                 row.updater, row.updated = self.sponsor_id, now()
             return self._ok(None, client_transaction_id)

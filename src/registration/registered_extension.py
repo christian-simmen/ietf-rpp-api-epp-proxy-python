@@ -13,8 +13,8 @@ class RegisteredExtension:
       (`{object: {element: visibility}}`), which `includeElements` reads.
     - `objects`: the identifiers of the objects it defines.
     - `openapi`: a function that builds its OpenAPI fragment (`{"paths": ..., "components": {"schemas": ...}}`).
-      Every operationId of it is a fully qualified function name in `handlers`.
-    - `handlers`: the package of its handler modules.
+      Every operationId of it is a fully qualified function name in `handlers`. None for an extension without paths.
+    - `handlers`: the package of its handler modules (None for an extension without paths).
     - `backend_parts`: the module of its part in each backend that can hold it (`{"sqlite": "registry_adapter..."}`).
     - `profile_layer`: the leaves it adds to the backend profile, with `objects` and `extensions` to add to those the
       generic profile lists; `profile_leaves` the type of each leaf of it that the profile does not have.
@@ -26,8 +26,8 @@ class RegisteredExtension:
     schema: dict
     data_objects: dict[str, dict[str, str]]
     objects: tuple[str, ...]
-    openapi: Callable[[], dict]
-    handlers: str
+    openapi: Callable[[], dict] | None = None
+    handlers: str | None = None
     backend_parts: dict[str, str] = field(default_factory=dict)
     profile_layer: dict[str, Any] = field(default_factory=dict)
     profile_leaves: dict[str, type] = field(default_factory=dict)

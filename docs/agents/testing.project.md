@@ -414,6 +414,11 @@ The proxy criteria of #174 are unit tests over the wire and without an app:
 and the same request without it), [test_presets_wire.py](../../tests/unit/test_presets_wire.py) (Preset and Profile Data
 Objects, discovery) and the signalling tests (`test_preset_header_wire.py`, `test_preset_media_type_wire.py`). The presets and
 profiles of the tests are registered as an extension brings them, with
+[test_demo_profiles_wire.py](../../tests/unit/test_demo_profiles_wire.py) (the demo profiles on the SQLite demo backend: each constraint
+refused with 422 `02308` and the same request accepted without the profile, 400 for a member outside the preset, built with
+[demo_app.py](../../tests/helper/demo_app.py)), [test_demo_presets_wire.py](../../tests/unit/test_demo_presets_wire.py) and
+[test_demo_docs.py](../../tests/unit/test_demo_docs.py) (the specifications under docs/demo/: marked examples, `violates` for a
+profile, the Preset Overview), and with
 [preset_fixtures.py](../../tests/helper/preset_fixtures.py) (`registry_with(presets, profiles)`), so the multiple inheritance
 and the bindings of #180 are covered without its configurations. A mapper called without an app takes its schemas from
 `SchemaScope.of(extensions)`, built on first use and without profiles; an app gives a request the schemas of its preset.

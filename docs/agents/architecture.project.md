@@ -16,7 +16,7 @@ src/
 ├── settings/                loads config.yaml once into typed sections, which main.py passes on
 │   └── profiles/            epp.yaml, rri.yaml, sqlite.yaml: the generic backend profile of each protocol (not the RPP presets and profiles)
 ├── registration/            the registry of the extensions a configuration names: stdlib only, knows no other package
-├── extensions/<name>/       one extension (today `planets`): register_<name>.py, core/{model,ports,flows}/ and
+├── extensions/<name>/       one extension (today `planets`, `planet_atmosphere`, `satellite_orbit`): register_<name>.py, core/{model,ports,flows}/ and
 │                            rpp/{dto,mapping,handlers,schema}/, see Registered extensions below
 ├── core/                    pure Python: no I/O, no framework, no protocol
 │   ├── model/{shared,domain,contact,host,message,request_contact}/
@@ -291,7 +291,7 @@ preset, a profile or a schema, and no JSON reaches `core`.
 `rpp/schema/schemas/presets/<key>.yaml` (`base`, `epp-compatible`, `rri`) and `profiles/<key>.yaml` (`epp-compatibility`,
 with its Profile Schema `epp-compatibility.schema.json`, copied from `.spec/` by `copy_models.sh`), and what the registered
 extensions bring (`RegisteredExtension.presets` and `.profiles`, as the same files state them; the planets extension brings
-the preset `planets`). A definition is the same on every server. A reference to a base preset, a base profile, an extension
+the preset `planets` and the demo profiles and presets that need it, and `planet_atmosphere` and `satellite_orbit` those that need them, each specified under [docs/demo/](../demo/), #179). A definition is the same on every server. A definition that refers to an extension that is not registered is read only where a configuration offers it: an app that registers `planets` and `planet_atmosphere` does not know the presets of `satellite_orbit`. A reference to a base preset, a base profile, an extension
 or a required extension is an identifier and an exact version; an identifier denotes one definition, whatever its kind.
 `GET /presets/{id}` and `GET /profiles/{id}` publish them (`handlers/presets.py`, `handlers/profiles.py`,
 `mapping/preset/`, `mapping/profile/`), flattened.
@@ -471,8 +471,16 @@ A full and a partial update are native in the gateways of the planets extension 
 schema: no JSON Patch, JSON pointer, `@type` or JSON dict reaches `core` or a backend. Another extension adds members to a
 planet or a satellite without editing these classes: `extensions` of the replacement, the change set and the read model
 maps its extension id to a typed object of its own `core`, and its SQLite part gives a `MemberHook` (`HOOKS` of its module,
-`{object: hook}`) that the planets gateways call in the same unit of work. The rpp side of such members (mapping their JSON)
-is not built yet.
+`{object: hook}`) that the planets gateways call in the same unit of work. The rpp side is a `MemberMapper` (JSON members to the
+typed object, to the typed changes of a patch, and back) that the extension adds in its `register` to `PLANET_MEMBERS` or
+`SATELLITE_MEMBERS` (`extensions/planets/rpp/mapping/object_members.py`, process-global and idempotent as the schema registry): the
+planets mappers take the members of the extensions of the request's preset out of the body after step 1, so a member of another
+extension is undeclared (400), and put them back on a read. A patch changes such a member as a whole (`/atmosphere`, `/orbit`),
+a deeper path is 400. A full update carries `scope`, the extensions of the request's preset: the gateway replaces the members of
+those, and removes one the request omits, and keeps the members of the others (`planet-atmosphere` and `satellite-orbit`, the
+demo extensions that use it, are in [docs/demo/](../demo/)). An Extension Schema may extend a definition of another extension,
+keyed `<$id of the owner>#/$defs/<definition>`: the owner must be in the preset (checked at start, naming both), and the
+additivity check reads the owner's definition. An extension without data objects registers no `handlers` and no `openapi`.
 
 The SQLite backend (`rpp_backend: sqlite`, [config.demo.yaml](../../config.demo.yaml)) is made as a test bed: the clients
 are `rpp_sqlite_clients` (user to a `scrypt$...` hash, made by `python -m registry_adapter.sqlite.hash_password`, compared

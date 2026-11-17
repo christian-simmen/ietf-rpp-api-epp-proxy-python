@@ -5,23 +5,23 @@ Merge order: #176, #192, this PR. #180 stacks on this one. Worktree `/home/vscod
 
 ## Status
 
-Checkpoint 1 (plan) reported, waiting for approval. Nothing is implemented.
+Plan approved. Implemented; checks pending on the final commit.
 
 ## Tasks
 
-- [~] T0 Plan approved
-- [ ] T1 Generic: an Extension Schema may extend a definition of another extension (see D1), checked at start; the handler
+- [x] T0 Plan approved
+- [x] T1 Generic: an Extension Schema may extend a definition of another extension (see D1), checked at start; the handler
       package and the OpenAPI fragment of an extension are optional (D5). Unit tests first.
-- [ ] T2 Planets: the seam for members of other extensions on the RPP side (`MemberMapper`, D2) in create, read, PUT and PATCH of
+- [x] T2 Planets: the seam for members of other extensions on the RPP side (`MemberMapper`, D2) in create, read, PUT and PATCH of
       planets and satellites, and the scope of a PUT (D3). Unit tests first.
-- [ ] T3 `planet-atmosphere`: package, schema, core model, RPP mapping, SQLite part with its `MemberHook`.
-- [ ] T4 `satellite-orbit`: the same for the satellite.
-- [ ] T5 Profile Schemas and definitions of the four profiles, the six presets, registered by the extensions that bring them (D4).
-- [ ] T6 Specifications under `docs/demo/` (2 extensions, 4 profiles, 6 presets) and `tests/unit/test_demo_docs.py`.
-- [ ] T7 Wire tests of the demo backend: one 422 `02308` case per constraint, the same request accepted without the profile, 400
+- [x] T3 `planet-atmosphere`: package, schema, core model, RPP mapping, SQLite part with its `MemberHook`.
+- [x] T4 `satellite-orbit`: the same for the satellite.
+- [x] T5 Profile Schemas and definitions of the four profiles, the six presets, registered by the extensions that bring them (D4).
+- [x] T6 Specifications under `docs/demo/` (2 extensions, 4 profiles, 6 presets) and `tests/unit/test_demo_docs.py`.
+- [x] T7 Wire tests of the demo backend: one 422 `02308` case per constraint, the same request accepted without the profile, 400
       for members outside the preset, round trips of the members (create, read, PUT, PATCH, delete).
-- [ ] T8 Docs: `architecture.project.md`, `testing.project.md`, `.spec/spec-issues.md`, `copy_models.sh`, `README.md` if it lists the demo.
-- [ ] T9 Checks on the final commit (`lint-imports`, unit, smoke with rri-mtest), draft PR, report.
+- [x] T8 Docs: `architecture.project.md`, `testing.project.md`, `.spec/spec-issues.md`, `copy_models.sh`, `README.md` if it lists the demo.
+- [~] T9 Checks on the final commit (`lint-imports`, unit, smoke with rri-mtest), draft PR, report.
 
 ## What is built
 
@@ -120,7 +120,24 @@ create, read, PUT and PATCH mappers of planet and satellite call them. `pyprojec
 
 ## Decisions
 
-None yet. Open questions Q1 to Q7 are in the report of checkpoint 1; answers are recorded here.
+Approved by the orchestrator for the maintainer (D1 and D5 included):
+
+- D1 (Q1) An Extension Schema may extend a definition of another extension, key `<owner $id>#/$defs/<def>`. The proposals speak of base
+  definitions only (json.md:300-314, extension-guidelines.md:125): gap recorded in `.spec/spec-issues.md`. The extending extension implicitly
+  requires the owner (a preset that has it without the owner does not start, naming both). The additivity whitelist checks against the
+  owner's definition.
+- D2 (Q2) `MemberMappers` registry in planets `rpp/mapping`, process-global and idempotent, used for the ids in the request's preset only.
+- D3 (Q3) `PlanetReplacement` and `SatelliteReplacement` carry `scope` (the extension ids of the request preset); the gateway replaces, and
+  so removes when absent, only those extensions' members and keeps the others. Deliberate change to #177 code: say so in the PR description.
+  `scope=None` (the gateway level default) means every extension, as before.
+- D4 (Q4) Each definition is brought by the extension that needs the others. An app whose configuration lacks `satellite_orbit` still
+  starts and does not know `planets-orbits` and `planets-complete` (test).
+- D5 (Q5) `handlers` and `openapi` of `RegisteredExtension` are optional.
+- D6 (Q6) PATCH changes `/atmosphere` and `/orbit` as a whole, a deeper path is 400; documented in each extension specification.
+- D7 (Q7) All six presets stay (#180 needs `planets-complete` and `habitable-worlds`).
+- Checks (a) the walker and the additivity check accept `required: [atmosphere]` on `planet.create` and `planet.update` (no check was
+  weakened); (b) `refuse_removal` refuses PATCH `remove /atmosphere` under `habitable-atmospheres` (wire test
+  `test_habitable_atmospheres_refuses_the_removal_of_the_atmosphere_that_it_requires`).
 
 ## Open questions with recommendation
 

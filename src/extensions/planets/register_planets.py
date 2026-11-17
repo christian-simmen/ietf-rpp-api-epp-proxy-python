@@ -3,6 +3,7 @@ from pathlib import Path
 
 from extensions.planets.core.ports.planets_gateways import EXTENSION_ID
 from extensions.planets.rpp.schema.openapi_fragment import HANDLERS, openapi_fragment
+from extensions.planets.rpp.schema.definition_builders import preset, preset_id, profile, profile_id
 from registration import ExtensionRegistry, RegisteredExtension
 
 SCHEMA = Path(__file__).parent / "rpp" / "schema" / "planets-extension.schema.json"
@@ -17,6 +18,30 @@ DATA_OBJECTS = {
 TRANSFER_OPERATIONS = ["request", "query", "cancel", "approve", "reject"]
 
 PRESET_KEY = "planets"
+
+BASE_PRESET = "urn:ietf:params:rpp:preset:base"
+
+SCHEMAS = Path(__file__).parent / "rpp" / "schema"
+
+# The profiles of the extension (docs/demo/<key>-profile.md) and the presets that offer it: the extension alone, and with the
+# profiles that constrain it. The presets that add other extensions are brought by those extensions.
+PROFILES = {
+    "rocky-planets": profile(
+        "rocky-planets", "Rocky planets profile", "Constrains the type of a planet to rocky.",
+        SCHEMAS / "rocky-planets-profile.schema.json", required=[EXTENSION_ID]),
+    "catalogued-satellites": profile(
+        "catalogued-satellites", "Catalogued satellites profile",
+        "Constrains the identifier of a satellite to a catalogue designation, a name and a roman numeral.",
+        SCHEMAS / "catalogued-satellites-profile.schema.json", required=[EXTENSION_ID]),
+}
+
+PRESETS = {
+    PRESET_KEY: preset(PRESET_KEY, "Planets preset", "The planets and satellites of the SQLite backend, with no constraint.",
+                       base_presets=[BASE_PRESET], extensions=[EXTENSION_ID]),
+    "catalogued-planets": preset(
+        "catalogued-planets", "Catalogued planets preset", "The planets preset, constrained to rocky planets and catalogued satellites.",
+        base_presets=[preset_id(PRESET_KEY)], profiles=[profile_id("rocky-planets"), profile_id("catalogued-satellites")]),
+}
 
 
 def register(registry: ExtensionRegistry) -> None:
@@ -37,14 +62,6 @@ def register(registry: ExtensionRegistry) -> None:
             "planet": {"processes": {"transfer": {"operations": TRANSFER_OPERATIONS}}},
         },
         profile_leaves={"planet.processes.transfer.operations": tuple},
-        presets={PRESET_KEY: {
-            "id": "org.example.rpp.preset.planets",
-            "name": "Planets preset",
-            "description": "Demo preset of the planets extension: the planets and satellites of the SQLite backend",
-            "version": "1.0",
-            "rppVersion": "1.0",
-            "basePresets": [{"id": "urn:ietf:params:rpp:preset:base", "version": "1.0"}],
-            "extensions": [{"id": EXTENSION_ID, "version": "1.0"}],
-            "profiles": [],
-        }},
+        presets=PRESETS,
+        profiles=PROFILES,
     ))

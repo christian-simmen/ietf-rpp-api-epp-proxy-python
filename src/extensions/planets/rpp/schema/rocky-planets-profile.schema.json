@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rocky-planets-profile.schema.json",
+  "rpp:profile": {
+    "id": "org.example.rpp.profile.rocky-planets",
+    "version": "1.0"
+  },
+  "rpp:constraints": {
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.create": "#/$defs/profile.rocky.type",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.update": "#/$defs/profile.rocky.type"
+  },
+  "$defs": {
+    "profile.rocky.type": {
+      "properties": {
+        "type": {
+          "enum": [
+            "rocky"
+          ]
+        }
+      }
+    }
+  }
+}

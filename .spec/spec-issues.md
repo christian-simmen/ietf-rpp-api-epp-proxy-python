@@ -606,6 +606,11 @@ they were. The proxy follows the proposals, with the following.
 - **Responses.** The proposals do not say whether a response is validated against the profiles. **Proxy:** never; a response is validated
   against the preset schema without profiles.
 
+## An extension that adds members to the data object of another extension
+
+- Json §Extension Framework (json.md:300-314) maps `rpp:extends` to a base definition, and the guidelines (extension-guidelines.md C10) only say that a profile that constrains a definition of an extension requires it. Neither says how an Extension Schema adds members to a data object that another extension defines (the planet atmosphere extension to the Planet of the planets extension).
+- **Proxy:** the key of `rpp:extends` may be `<$id of the owner extension>#/$defs/<definition>`, as `rpp:constraints` names a definition of an extension. The extending extension implicitly requires the owner: a preset that contains it without the owner does not start, and both are named. The additivity check reads the definition of the owner, so "a property the base declares" is one the owner's definition declares. There is no new member of `rpp:extension`. A specification should state the dependency in its Extension Overview ("Changed base objects"). Json should say that an Extension Schema may extend the definitions of another extension, and that this requires it.
+
 ## Two-step validation of a patch
 
 - Json §Profiles and Validation defines the two steps for a request. It does not say what a JSON Patch, which is not a message of the schema,

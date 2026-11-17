@@ -39,14 +39,15 @@ class SqliteGateway:
             raise Refusal(ResultCode.UNIMPLEMENTED_EXTENSION, f"The backend holds no members of {extension_id}")
         return hook
 
-    def _replace_members(self, session, target: str, object_id: str, members) -> None:
-        """A full update of the members the extensions add: one a hook holds and `members` lacks is removed, and members of
-        an extension without a hook are refused."""
+    def _replace_members(self, session, target: str, object_id: str, members, scope=None) -> None:
+        """A full update of the members the extensions add: one a hook holds that is in `scope` (None: every one) and that
+        `members` lacks is removed, the members of the others stay, and members of an extension without a hook are refused."""
         hooks = self._hooks_for(target)
         for extension_id in members.keys() - hooks.keys():
             self._hook(target, extension_id)
         for extension_id, hook in hooks.items():
-            hook.replace(session, object_id, members.get(extension_id))
+            if scope is None or extension_id in scope or extension_id in members:
+                hook.replace(session, object_id, members.get(extension_id))
 
     def _guarded(self, client_transaction_id, work):
         """Runs `work`, a unit of work that answers or raises `Refusal` (or `MemberRefused` for a hook): a refusal has rolled

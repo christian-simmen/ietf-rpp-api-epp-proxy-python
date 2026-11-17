@@ -8,3 +8,6 @@ class SatelliteReplacement:
     id: str
     orbitalPeriod: Optional[float] = None
     extensions: Mapping[str, object] = field(default_factory=dict)
+    # The extensions whose members this update replaces (those of the preset the request is under): one of them not given is
+    # removed, the members of the others stay. None: every extension the backend holds.
+    scope: Optional[frozenset[str]] = None

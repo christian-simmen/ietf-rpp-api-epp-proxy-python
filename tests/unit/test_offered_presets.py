@@ -246,3 +246,25 @@ def test_an_extension_uri_that_names_a_definition_of_the_base_stops_the_server()
         build(definitions_with([having], [wrong]), ["r3"], held=(RRI,))
 
 
+
+
+def _owned_pair(owner_url="https://example.org/owner.schema.json"):
+    owner = RppExtension(id="org.example.owner", name="o", version="1.0", url=owner_url, extends={}, defs={"thing.create": {
+        "type": "object", "properties": {"id": {}}}})
+    adding = RppExtension(id="org.example.adding", name="a", version="1.0", url="https://example.org/adding.schema.json",
+                          extends={"thing.create": "ext.adding"}, owners={"thing.create": owner_url},
+                          defs={"ext.adding": {"type": "object", "properties": {"more": {}}}})
+    return owner, adding
+
+
+def test_an_extension_that_extends_another_extension_needs_it_in_the_preset(monkeypatch):
+    owner, adding = _owned_pair()
+    monkeypatch.setitem(EXTENSIONS, owner.id, owner)
+    monkeypatch.setitem(EXTENSIONS, adding.id, adding)
+    held = (owner.id, adding.id)
+    both = preset("both", base_presets=[BASE["id"]], extensions=[(owner.id, "1.0"), (adding.id, "1.0")])
+    alone = preset("alone", base_presets=[BASE["id"]], extensions=[(adding.id, "1.0")])
+
+    assert build(definitions_with([both, alone]), ["both"], held=held).offered[0].extension_ids == (owner.id, adding.id)
+    with pytest.raises(ValueError, match="org.example.adding.*extends.*thing.create.*org.example.owner.*alone"):
+        build(definitions_with([both, alone]), ["alone"], held=held)

@@ -1,5 +1,6 @@
 from extensions.planets.core.model.planet_changes import PlanetChanges
 from extensions.planets.rpp.dto.rpp_planet_update import RPPPlanetUpdate
+from extensions.planets.rpp.mapping.object_members import PLANET_MEMBERS
 from rpp.dto.rpp_patch_operation import RPPPatchOperation
 from rpp.mapping.shared import auth_info
 from rpp.mapping.shared.common import parse_rpp
@@ -15,15 +16,16 @@ REMOVABLE = ("radius", "mass")
 BASE = {TYPE: "planet", "type": "rocky"}
 
 
-def _member(operation: RPPPatchOperation) -> str:
+def _member(operation: RPPPatchOperation, extensions) -> str:
     if operation.op not in ("add", "remove", "replace"):
         raise ValueError(f"Operation '{operation.op}' is not allowed")
     if operation.match is not None:
         raise ValueError("'match' selects an element of an array, and no member of a planet is one")
     member = operation.path[1:] if operation.path.startswith("/") else operation.path
-    if member not in CHANGEABLE:
+    added = PLANET_MEMBERS.members(extensions)    # the members of the extensions of the preset, changed as a whole
+    if member not in (*CHANGEABLE, *added):
         raise ValueError(f"Path '{operation.path}' cannot be changed")
-    if operation.op == "remove" and member not in REMOVABLE:
+    if operation.op == "remove" and member not in (*REMOVABLE, *added):
         raise ValueError(f"'{member}' cannot be removed")
     return member
 
@@ -37,7 +39,7 @@ def rpp_to_model(rpp: list, extensions: tuple[str, ...] = ()) -> PlanetChanges:
     values: dict = {}
     cleared: set[str] = set()
     for operation in (parse_rpp(RPPPatchOperation, item) for item in rpp):
-        member = _member(operation)
+        member = _member(operation, extensions)
         if operation.op == "remove":
             refuse_removal_by_profile("planet.update", member, extensions)
             values.pop(member, None)
@@ -48,9 +50,12 @@ def rpp_to_model(rpp: list, extensions: tuple[str, ...] = ()) -> PlanetChanges:
         validate_request_schema("planet.update", {**BASE, member: operation.value}, extensions, member=member)
         values[member] = operation.value
         cleared.discard(member)
-    update = parse_rpp(RPPPlanetUpdate, {**BASE, **values}) if values else None
+    added = PLANET_MEMBERS.members(extensions)
+    own = {member: value for member, value in values.items() if member not in added}
+    update = parse_rpp(RPPPlanetUpdate, {**BASE, **own}) if own else None
     return PlanetChanges(
         type=update.type if "type" in values else None, radius=update.radius if "radius" in values else None,
         mass=update.mass if "mass" in values else None,
         authInfo=auth_info.rpp_to_model(update.authInfo) if "authInfo" in values else None,
-        cleared=frozenset(cleared))
+        cleared=frozenset(cleared & {*REMOVABLE}),
+        extensions=PLANET_MEMBERS.changes(values, cleared, extensions))

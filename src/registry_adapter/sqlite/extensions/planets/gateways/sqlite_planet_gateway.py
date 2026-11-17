@@ -105,7 +105,7 @@ class SqlitePlanetGateway(SqliteGateway):
                 row.type, row.radius, row.mass = replacement.type, replacement.radius, replacement.mass
                 if replacement.authInfo is not None:
                     row.auth_pw = replacement.authInfo.pw or ""
-                self._replace_members(session, "planet", row.id, replacement.extensions)
+                self._replace_members(session, "planet", row.id, replacement.extensions, replacement.scope)
                 self._check(row)
                 row.updater, row.updated = self.sponsor_id, now()
             return self._ok(None, client_transaction_id)

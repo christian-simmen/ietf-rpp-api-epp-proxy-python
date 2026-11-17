@@ -69,6 +69,8 @@ def add_registered_paths(spec: dict, registry: ExtensionRegistry) -> dict:
     has paths: an app built without it has none, and no operationId that points at its handlers. A path or schema two
     fragments, or a fragment and the document, both define is a configuration error."""
     for extension in registry:
+        if extension.openapi is None:
+            continue
         fragment = json.loads(json.dumps(extension.openapi()))  # a copy of its own, nothing of it shared
         for path, item in fragment["paths"].items():
             if path in spec["paths"]:

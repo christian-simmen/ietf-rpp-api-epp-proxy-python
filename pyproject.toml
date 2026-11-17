@@ -179,6 +179,27 @@ containers = ["extensions.planets"]
 layers = ["register_planets", "rpp", "core"]
 
 [[tool.importlinter.contracts]]
+id = "extension-layers-members"
+name = "Inside an extension that adds members: the registration -> rpp -> core"
+type = "layers"
+containers = ["extensions.planet_atmosphere"]
+layers = ["register_planet_atmosphere", "rpp", "core"]
+
+[[tool.importlinter.contracts]]
+id = "extension-layers-members-orbit"
+name = "Inside the satellite orbit extension: the registration -> rpp -> core"
+type = "layers"
+containers = ["extensions.satellite_orbit"]
+layers = ["register_satellite_orbit", "rpp", "core"]
+
+[[tool.importlinter.contracts]]
+id = "extension-rpp-layers-members"
+name = "Inside the rpp of an extension that adds members: mapping -> dto, schema"
+type = "layers"
+containers = ["extensions.planet_atmosphere.rpp", "extensions.satellite_orbit.rpp"]
+layers = ["mapping", "dto | schema"]
+
+[[tool.importlinter.contracts]]
 id = "extension-rpp-layers"
 name = "Inside the rpp of an extension: handlers -> mapping -> dto, schema"
 type = "layers"
@@ -196,9 +217,10 @@ layers = ["flows", "ports", "model"]
 id = "extension-core-pure"
 name = "The core of an extension imports the core of the proxy and the standard library only"
 type = "forbidden"
-source_modules = ["extensions.planets.core"]
+source_modules = ["extensions.planets.core", "extensions.planet_atmosphere.core", "extensions.satellite_orbit.core"]
 forbidden_modules = [
-    "main", "registration", "registry_adapter", "rpp", "settings", "extensions.planets.rpp", "sqlalchemy",
+    "main", "registration", "registry_adapter", "rpp", "settings", "extensions.planets.rpp",
+    "extensions.planet_atmosphere.rpp", "extensions.satellite_orbit.rpp", "sqlalchemy",
     "connexion", "dataclasses_json", "flask", "jsonschema", "lxml", "starlette", "werkzeug", "xsdata", "yaml",
 ]
 
@@ -215,7 +237,8 @@ name = "The SQLite part of an extension imports the core of an extension only, o
 type = "forbidden"
 source_modules = ["registry_adapter.sqlite.extensions"]
 forbidden_modules = [
-    "extensions.*.rpp", "extensions.*.core.flows", "extensions.planets.register_planets", "rpp", "core.flows",
+    "extensions.*.rpp", "extensions.*.core.flows", "extensions.planets.register_planets",
+    "extensions.planet_atmosphere.register_planet_atmosphere", "extensions.satellite_orbit.register_satellite_orbit", "rpp", "core.flows",
     "core.session", "registration", "settings",
 ]
 

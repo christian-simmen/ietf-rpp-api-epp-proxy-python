@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/habitable-rocky-planets-profile.schema.json",
+  "rpp:profile": {
+    "id": "org.example.rpp.profile.habitable-rocky-planets",
+    "version": "1.0"
+  },
+  "rpp:constraints": {
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.create": "#/$defs/profile.habitableRocky.radius",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.update": "#/$defs/profile.habitableRocky.radius"
+  },
+  "$defs": {
+    "profile.habitableRocky.radius": {
+      "required": [
+        "radius"
+      ]
+    }
+  }
+}
