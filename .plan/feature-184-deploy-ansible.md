@@ -59,7 +59,9 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
       the conflicting docker.list + docker.sources, another user's running rootless daemon, an `rpp` with its own
       daemon.json, another rootlesskit profile; a port of another user (uid 1001 reported); a port of `rpp` itself
       (passes); the guide's docker.sources alone, and two definitions with the same key (both left alone).
-- [~] 9. Maintainer: a run on a real Ubuntu host, with the AppArmor profile and nginx; then out of draft.
+- [x] 9. Maintainer: a run on a real Ubuntu 24.04 host (existing root and rootless Docker, nginx on the host network,
+      ports on 127.0.0.1): works (2026-11-17). Found there: /openapi.json 500 after a discovery request, a Connexion
+      defect in the code, not the deployment (#193).
 - [x] 8. Checks: `ansible-lint`, `ansible-playbook --syntax-check`, image build and a local run of the three instances,
       then the project checks (lint-imports, unit tests, smoke).
 
@@ -96,6 +98,9 @@ Deploy the proxy as containers on an Ubuntu host with Ansible:
 - Checks: lint-imports 25 kept; unit 2687 passed; smoke 94 passed, 113 skipped; ansible-lint production profile, 0
   failures; syntax-check ok.
 - Not fixed: requirements.txt holds the test packages next to the runtime ones (#191); the image uninstalls them.
+
+- Final checks (2026-11-17): lint-imports 25 kept; unit 2687 passed; smoke 94 passed, 113 skipped; ansible-lint
+  production profile, 0 failures.
 
 ## Open questions
 
