@@ -17,6 +17,8 @@ rpp_proxy_mem_limit: 1g
 rpp_proxy_cpus: 2
 rpp_proxy_pids_limit: 256
 rpp_proxy_tmpfs_size: 64m
+# How long the playbook waits for each instance to be healthy, in seconds. The instances start one after the other.
+rpp_proxy_wait_timeout: 300
 # Which peers uvicorn takes X-Forwarded-* from. Behind the rootless daemon's port forwarding every connection comes
 # from inside its network namespace, never from nginx's address, so the address cannot tell nginx apart: the published
 # port is reachable from the host and the root daemon's containers only. The proxy uses the headers in its access log.
