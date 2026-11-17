@@ -21,7 +21,8 @@ Plan approved. Implemented; checks pending on the final commit.
 - [x] T7 Wire tests of the demo backend: one 422 `02308` case per constraint, the same request accepted without the profile, 400
       for members outside the preset, round trips of the members (create, read, PUT, PATCH, delete).
 - [x] T8 Docs: `architecture.project.md`, `testing.project.md`, `.spec/spec-issues.md`, `copy_models.sh`, `README.md` if it lists the demo.
-- [x] T9 Checks on commit 8a81a6d: `lint-imports` 28 contracts kept; `pytest -n 4 tests/unit` 2777 passed; `pytest -n 4 -m smoke tests/integration` 107 passed, 112 skipped (epp-docker, rri-mtest and sqlite-demo collected, no failure). Draft PR open, waiting for the review.
+- [x] T9 Checks on commit 8a81a6d: `lint-imports` 28 contracts kept; `pytest -n 4 tests/unit` 2777 passed; `pytest -n 4 -m smoke tests/integration` 107 passed, 112 skipped (epp-docker, rri-mtest and sqlite-demo collected, no failure). Draft PR #199.
+- Review round 1 (commit 0ad9c77): responses use `response_profile()`; an `rpp:extends` key without a schema must name an RPP definition; D1 wire test reaches the D1 message; unit test for an owner lacking the definition; doc tests compare Name, Version and RPP version and assert the profile of the document refuses a `violates` example; PUT without radius case; broken `#profiles` links. Checks on 0ad9c77: lint-imports 28 kept; unit 2782 passed; smoke 107 passed, 112 skipped (epp-docker, rri-mtest, sqlite-demo).
 
 ## What is built
 
