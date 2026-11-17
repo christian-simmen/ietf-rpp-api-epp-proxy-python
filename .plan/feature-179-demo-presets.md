@@ -21,7 +21,7 @@ Plan approved. Implemented; checks pending on the final commit.
 - [x] T7 Wire tests of the demo backend: one 422 `02308` case per constraint, the same request accepted without the profile, 400
       for members outside the preset, round trips of the members (create, read, PUT, PATCH, delete).
 - [x] T8 Docs: `architecture.project.md`, `testing.project.md`, `.spec/spec-issues.md`, `copy_models.sh`, `README.md` if it lists the demo.
-- [~] T9 Checks on the final commit (`lint-imports`, unit, smoke with rri-mtest), draft PR, report.
+- [x] T9 Checks on commit 8a81a6d: `lint-imports` 28 contracts kept; `pytest -n 4 tests/unit` 2777 passed; `pytest -n 4 -m smoke tests/integration` 107 passed, 112 skipped (epp-docker, rri-mtest and sqlite-demo collected, no failure). Draft PR open, waiting for the review.
 
 ## What is built
 
