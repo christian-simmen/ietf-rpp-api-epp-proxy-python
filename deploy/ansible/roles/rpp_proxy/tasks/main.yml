@@ -134,7 +134,26 @@
     dest: "{{ rpp_proxy_dir }}/docker-compose.yml"
     mode: "0644"
 
-- name: Run the instances
+# One instance at a time: every worker builds the app at start, which takes most of the CPU. Started together, the
+# instances of a small host start slower than uvicorn waits for a worker (#195). An instance whose container is current
+# is left as it is, and passes at once.
+- name: Run the instances, one after the other
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ rpp_proxy_dir }}"
+    docker_host: "{{ rootless_docker_host }}"
+    services: ["{{ instance.name }}"]
+    state: present
+    wait: true
+    wait_timeout: "{{ rpp_proxy_wait_timeout }}"
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name }}"
+
+# Every instance runs now: this removes the containers of the instances no longer listed, and changes nothing else.
+- name: Remove the instances no longer listed
   become: true
   become_user: "{{ rootless_docker_user }}"
   community.docker.docker_compose_v2:
@@ -143,7 +162,7 @@
     remove_orphans: true
     state: present
     wait: true
-    wait_timeout: 300
+    wait_timeout: "{{ rpp_proxy_wait_timeout }}"
 
 - name: Check whether ufw is active
   ansible.builtin.command: ufw status

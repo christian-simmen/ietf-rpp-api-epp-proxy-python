@@ -418,6 +418,13 @@ used to fall through to Flask as a 500, so the middleware raises a 404, which `h
 404 Problem with 02001, as for an unknown path (detail `Not Found`) (#98). Only the line feed is refused. Swagger UI
 paths are matched before the guard, so `/ui/` or `/openapi.json` followed by a trailing line feed still serves them.
 
+`SpecSnapshotSwaggerUIMiddleware` in `rpp/http/middleware/` takes the place of Connexion's `SwaggerUIMiddleware` in the
+middleware list `create_app` gives `FlaskApp`. It serves `/openapi.json`, `/openapi.yaml` and `/ui/` with Connexion's
+own code, from a copy of the spec taken when the app starts. Connexion's response validation writes `components` into
+the response schemas of the spec its middlewares share, which then no longer validates, so the shared spec answered
+500 after the first validated response with an inline schema (#193). `MiddlewarePosition.BEFORE_SWAGGER` names
+Connexion's class and cannot be used with this list.
+
 The restore handlers are `domainNameRestoreProcesses_create`, `_update`, `_updatePartial` and `_read` in
 `rpp/handlers/domain/domain_handlers.py`. A request and a report are a domain update with the RFC 3915 `rgp:restore`
 extension, sent by `epp_domains_Restore`, and answer 200 without `Location`. `read_domain_restore` in
@@ -621,7 +628,8 @@ on a `TCPClient` with payload-only framing. The chosen one is `new_backend`, the
 `DiscoverySettings`, which the handlers read through [context.py](../../src/rpp/http/context.py). `create_app` hands
 `SessionSecurityHandler` to Connexion through `security_map`, because Connexion would otherwise resolve the function
 by name and it could not receive dependencies; the handler puts the user's backend into the token info (key
-`backend`).
+`backend`). The spec's `BearerAuth` gets `BearerRefusingSecurityHandler`, which skips the scheme as Connexion does
+for one without a function, without its warning per operation (#189): a Bearer token is unauthenticated, 401.
 
 ## Known debt
 
