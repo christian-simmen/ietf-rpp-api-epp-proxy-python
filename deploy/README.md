@@ -98,6 +98,13 @@ Running the playbook again does nothing unless something changed. The changes it
 - **A changed configuration** recreates its instance only, because the config's checksum is a label of the container.
 - **A removed instance** has its container removed, but keeps its directory and data.
 
+The playbook starts the instances one after the other, and waits for each to be healthy (`rpp_proxy_wait_timeout`,
+300 s) before the next: every worker builds the app at start, which takes most of a CPU for a while. A host with few
+CPUs or little free memory should run fewer workers (`rpp_proxy_workers`, or `workers` of an instance): three instances
+of three workers on two CPUs took minutes to start (#195). After a reboot the daemon starts every instance at once;
+uvicorn then waits up to 60 s for a worker to answer (`UVICORN_TIMEOUT_WORKER_HEALTHCHECK`), and the healthcheck allows
+180 s to start.
+
 Pin `rpp_proxy_version` and `epp_server_version` to commits for repeatable deployments.
 
 A SQLite client hash comes from the repository's own tool, which reads the password from standard input:
