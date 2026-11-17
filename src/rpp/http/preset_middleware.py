@@ -6,9 +6,11 @@ from rpp.http.headers import problem_headers
 from rpp.http.request_presets import RequestPresets
 from rpp.schema.extensions import EXTENSIONS
 
-# The keys of the request context that hold the `PresetSelection` of the request and the signalling method that made it.
+# The keys of the request context that hold the `PresetSelection` of the request, the signalling method that made it and the
+# `RequestSchemas` of the selection (what the body validators and the mappers validate with).
 SELECTED_PRESET = "rpp_preset"
 SIGNALLING = "rpp_preset_signalling"
+REQUEST_SCHEMAS = "rpp_request_schemas"
 
 # The operation that reads the schema of a preset: a document in its native media type, outside preset signalling.
 SCHEMA_OPERATION = "presets_schemaRead"
@@ -54,6 +56,7 @@ class PresetMiddleware:
             context = scope.setdefault("extensions", {}).setdefault("connexion_context", {})
             context[SELECTED_PRESET] = selection
             context[SIGNALLING] = self.signalling
+            context[REQUEST_SCHEMAS] = self.request_presets.schemas(selection)
             send = self.signalling.announce(send, selection)
             segment = scope["path"].lstrip("/").split("/", 1)[0]
             obj = self.collections.get(segment)

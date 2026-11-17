@@ -26,7 +26,9 @@ keys it has, for one machine's settings.
 The proxy speaks EPP to the registry by default; see [EPP or RRI behind the API](#epp-or-rri-behind-the-api) for
 DENIC RRI.
 
-Swagger UI shall be available at http://127.0.0.1:8000/ui/
+Swagger UI shall be available at http://127.0.0.1:8000/ui/. The OpenAPI document it shows (`/openapi.json`,
+`/openapi.yaml`) is OpenAPI 3.1, with the body schemas of the default preset: the members of its extensions and the
+constraints of its profiles, as `GET /presets/{id}/schema` publishes them.
 
 The username and password of HTTP Basic are the EPP login (`clID`/`pw`), and every request needs an `RPP-Cltrid`
 header with a new value.

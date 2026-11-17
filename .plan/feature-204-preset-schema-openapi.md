@@ -31,7 +31,9 @@ is retargeted to `main` once #201 is merged. Clean-main step skipped (maintainer
   without profiles: a failure is 400 as today); responses with the response preset's. The profile step (422 `02308`) stays in the
   mappers. A body without a definition in the Preset Schema (`protocol.PartialUpdate`) keeps Connexion's validation.
 - D3 Swagger UI 5 committed to the repository (`swagger-ui-dist`), Connexion's `swagger_ui_template_dir` pointing at it.
-- D4 Dev dependency `openapi-spec-validator` to test that the served document is valid OpenAPI 3.1 (my choice, see open questions).
+- D4 Dev dependency `openapi-spec-validator==0.7.1` (no change to the pinned jsonschema/referencing) to test that the served
+  document is valid OpenAPI 3.1. Its `ExtraParametersError` is a check of its own, not of the specification (a `required` naming a
+  member another `allOf` branch declares, as `profile.address` does), and is left out of the assertion.
 
 ## Design
 
@@ -49,14 +51,27 @@ is retargeted to `main` once #201 is merged. Clean-main step skipped (maintainer
 ## Tasks
 
 - [x] T0 Plan
-- [~] T1 Tests first (unit): served document (base, extension, profile, defaults per demo config, valid 3.1), validation by
+- [x] T1 Tests first (unit): served document (base, extension, profile, defaults per demo config, valid 3.1), validation by
   the signalled preset, 400 / 422 unchanged, Swagger UI 5 served
-- [ ] T2 Body markers and validators by preset
-- [ ] T3 Served document and its middleware
-- [ ] T4 Swagger UI 5 vendored
-- [ ] T5 Docs: architecture.project.md, README.md, spec-issues.md (OpenAPI of a deployment)
-- [ ] T6 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
+- [x] T2 Body markers and validators by preset
+- [x] T3 Served document and its middleware
+- [x] T4 Swagger UI 5 vendored
+- [x] T5 Docs: architecture.project.md, README.md, spec-issues.md (OpenAPI of a deployment)
+- [~] T6 Checks: lint-imports, unit, smoke (MTEST pending for the maintainer: `rpp` changes)
 
 ## Open questions
 
 - Q1 D4: a dev dependency `openapi-spec-validator` for the 3.1 check, or the OAS 3.1 meta-schema committed under `tests/`?
+
+## Corrections
+
+- C1 A response of an object only the request preset has (a request contact read under media-type signalling with a base
+  response preset) is rendered under the request preset: the response validator uses the request preset's definition there
+  (`SchemaScope.has`), as `test_preset_media_type_wire.py` requires.
+
+## Check results (on the final code)
+
+- `lint-imports`: 28 kept, 0 broken.
+- Unit: 2844 passed.
+- Smoke (`pytest -n 4 -m smoke tests/integration`): 190 passed, 350 skipped (selectors), 0 failed. Whether the MTEST cases ran
+  could not be confirmed from here: MTEST run pending for the maintainer (`rpp` changed).

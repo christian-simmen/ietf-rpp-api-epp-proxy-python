@@ -1,4 +1,5 @@
 import copy
+from functools import partial
 from functools import cache
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from connexion.datastructures import MediaTypeDict
 from connexion.exceptions import ProblemException
 from connexion.middleware import ConnexionMiddleware, MiddlewarePosition
 from connexion.middleware.swagger_ui import SwaggerUIMiddleware
+from connexion.options import SwaggerUIOptions
 from connexion.validators import VALIDATOR_MAP
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -20,21 +22,27 @@ from rpp.http.preset_middleware import PresetMiddleware
 from rpp.http.preset_signalling import HEADER_SIGNALLING, preset_signalling
 from rpp.http.request_presets import RequestPresets
 from rpp.http.middleware.line_feed_path_middleware import LineFeedPathMiddleware
-from rpp.http.middleware.spec_snapshot_swagger_ui_middleware import SpecSnapshotSwaggerUIMiddleware
+from rpp.http.middleware.served_document_swagger_ui_middleware import ServedDocumentSwaggerUIMiddleware
 from rpp.http.security.bearer_refusing_security_handler import BearerRefusingSecurityHandler
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
 from registration import ExtensionRegistry
+from rpp.http.body_definitions import mark_body_definitions
 from rpp.http.extension_paths import add_extension_paths, add_registered_paths
+from rpp.http.served_document import served_document
 from rpp.http.extension_resolver import ExtensionResolver
-from rpp.schema.extensions import EXTENSIONS, check_known
+from rpp.schema.bundle_definitions import bundle_definitions
+from rpp.schema.extensions import EXTENSIONS, check_known, own_definitions
 from rpp.schema.https_url import https_url
 from rpp.schema.definitions import Definitions
 from rpp.schema.offered_presets import OfferedPresets
 from rpp.schema.preset_schemas import PresetSchemas
 
 OPENAPI_SPEC = Path(__file__).parent.parent / "openapi.yaml"
+
+# Swagger UI 5, which renders OpenAPI 3.1 (#204): the files of swagger-ui-dist, see its README.md.
+SWAGGER_UI = Path(__file__).parent / "swagger_ui"
 
 
 @cache
@@ -82,12 +90,17 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
     # discovery would refuse is no public URL: the documents then have no `$id`.
     preset_schemas = PresetSchemas(presets, public_base_url(discovery_settings))
     request_presets = RequestPresets(profile, presets, preset_schemas)
+    # connexion changes the spec it is given, so each app gets its own copy. Each body that stands for a definition is marked
+    # with it, which the body validators validate with under the request's preset; the document served is OpenAPI 3.1 with
+    # the definitions of the default preset (#204).
+    spec = add_registered_paths(add_extension_paths(copy.deepcopy(parsed_spec()), presets.extension_ids()), registry)
+    spec = mark_body_definitions(spec, {*bundle_definitions(), *own_definitions(presets.extension_ids())})
+    served = served_document(spec, preset_schemas.document_of(presets.default), presets.default.extension_ids)
     app = FlaskApp(
         __name__,
         security_map={"basic": lambda: SessionSecurityHandler(sessions), "bearer": BearerRefusingSecurityHandler},
-        # The spec is served from a copy taken at start, which response validation does not change (#193).
-        middlewares=[SpecSnapshotSwaggerUIMiddleware if middleware is SwaggerUIMiddleware else middleware
-                     for middleware in ConnexionMiddleware.default_middlewares],
+        middlewares=[partial(ServedDocumentSwaggerUIMiddleware, document=served) if middleware is SwaggerUIMiddleware
+                     else middleware for middleware in ConnexionMiddleware.default_middlewares],
     )
     app.add_middleware(LineFeedPathMiddleware, position=MiddlewarePosition.BEFORE_ROUTING)
     app.add_middleware(BodyBufferingMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION)
@@ -102,10 +115,8 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    # connexion changes the spec it is given, so each app gets its own copy.
-    spec = add_registered_paths(add_extension_paths(copy.deepcopy(parsed_spec()), presets.extension_ids()), registry)
     app.add_api(spec, resolver=ExtensionResolver('rpp.handlers', registry.handler_packages()), resolver_error=501,
-                validate_responses=True, options={"swagger_ui": True, "serve_spec": True},
+                validate_responses=True, swagger_ui_options=SwaggerUIOptions(swagger_ui_template_dir=str(SWAGGER_UI)),
                 validator_map={
                     "body": MediaTypeDict({**VALIDATOR_MAP["body"], "*/*json": RppRequestBodyValidator}),
                     "response": MediaTypeDict({"*/*json": RppResponseBodyValidator}),
