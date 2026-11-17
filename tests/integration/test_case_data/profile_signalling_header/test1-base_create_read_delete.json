@@ -7,8 +7,10 @@
   "when": {
     "env.profile_signalling": "header"
   },
+  "comment": "Skipped on rri-mtest: MTEST's config signals the profile by media type; the twin in profile_signalling_media_type/ covers it.",
   "steps": [
     {
+      "comment": "Creates contact PB1 with authInfo, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=urn:ietf:params:rpp:profile:base;version=1.0 (the request differs by backend); expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -137,6 +139,7 @@
       }
     },
     {
+      "comment": "Creates domain b1 with registrant PB1, dns records a, authInfo, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=urn:ietf:params:rpp:profile:base;version=1.0 (the request differs by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -221,6 +224,7 @@
       }
     },
     {
+      "comment": "Reads domain b1, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=urn:ietf:params:rpp:profile:base;version=1.0; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/domainNames/b1-{random_id_10}.{tld}",
@@ -247,6 +251,7 @@
       }
     },
     {
+      "comment": "Deletes domain b1, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=urn:ietf:params:rpp:profile:base;version=1.0; expects 200. The operation this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/b1-{random_id_10}.{tld}",
@@ -266,6 +271,7 @@
       }
     },
     {
+      "comment": "Reads domain b1, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=urn:ietf:params:rpp:profile:base;version=1.0; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/b1-{random_id_10}.{tld}",

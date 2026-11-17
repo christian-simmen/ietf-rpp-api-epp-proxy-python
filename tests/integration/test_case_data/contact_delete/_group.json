@@ -1,1 +1,1 @@
-{"when": {"profile.contact.processes.delete.supported": true}}
+{"when": {"profile.contact.processes.delete.supported": true}, "comment": "Skipped on rri-mtest: RRI cannot delete a contact."}

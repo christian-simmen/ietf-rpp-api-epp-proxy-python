@@ -7,8 +7,10 @@
   "when": {
     "env.profile_signalling": "media-type"
   },
+  "comment": "Skipped on epp-docker: the EPP config signals the profile by the RPP-Profile header; profile_signalling_header/ covers the header method.",
   "steps": [
     {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept application/rpp+json; profile=\"urn:ietf:params:rpp:profile:epp-compatibility\"; profile-version=\"1.0\"; expects 406 02004. An error answer this case checks. Only where the server offers no epp profile (rri-mtest).",
       "when": {
         "profile.profiles": {
           "not": {
@@ -40,6 +42,7 @@
       }
     },
     {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept application/rpp+json; profile=\"de.denic.rpp.profile.rri\"; profile-version=\"1.0\"; expects 406 02004. The error answer this case checks. Only where the server offers no rri profile (epp-docker).",
       "when": {
         "profile.profiles": {
           "not": {

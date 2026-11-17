@@ -2,6 +2,7 @@
   "test_id": "test15-put_no_change",
   "steps": [
     {
+      "comment": "Creates host t15.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Replaces host t15.….net by a full update with dns records ns; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/t15.{random_name}.net",

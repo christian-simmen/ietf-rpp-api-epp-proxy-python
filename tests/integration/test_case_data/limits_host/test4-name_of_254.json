@@ -3,6 +3,7 @@
   "description": "A name of 254 characters is over the 255 octets of DNS.",
   "steps": [
     {
+      "comment": "Creates host h4 (a label of 63).a (a label of 63).b (a label of 63).c (a label of 58).net with dns records ns; expects one of 400 02001 or 400 02005. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",

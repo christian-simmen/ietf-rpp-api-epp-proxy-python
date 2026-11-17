@@ -159,7 +159,7 @@ sessions out when the run ends (`pytest_sessionfinish`, `SessionPool.close`); a 
 within 5 minutes may be refused. Two runs at once (a terminal and VS Code) share the 4 sessions. 10 failed LOGINs lock a user for an hour,
 so the failed logins are of an unknown user. A RESTORE is one step and needs no wait; the RGP and the purge after it
 take up to two days, which a run waits for only with `RPP_TEST_MAX_WAIT` of `P2DT6H` or more. MTEST keeps what the cases create: they delete their domains, and the contacts stay (RRI cannot delete
-one), which the random part of the handle keeps apart. Every case runs on both backends unless it needs a function one of them lacks, which its `when`
+one), which the random part of the handle keeps apart from other runs. The random part is the same for the whole run, so a handle's suffix is unique across all cases (#188). Every case runs on both backends unless it needs a function one of them lacks, which its `when`
 names: host objects, client statuses, `ds` records, registration periods, renew, a transfer process (`domain_transfer/`, which RRI's
 immediate CHPROV has not; `domain_transfer_ext/` is its counterpart with the `rri` extension, run on MTEST only), the
 request contact object (`request_contact/`, `profile.objects` contains `requestContact`) or a domain's request contacts
@@ -176,9 +176,12 @@ show (`profile.domainName.metadata`) and a domain's authInfo are left out where 
 reads with right after its create is one of `env.domainName.processes.create.success_status` (`ok` on the EPP test
 server; on MTEST `pendingCreate` while the predelegation check runs, `ok` once it passed). A case gives DNS data that
 passes the check (an `a` record DENIC serves itself), unless the check is its subject: name servers that do not serve
-the domain make it `inactive` (`env.domainName.processes.create.failed_dns_status`, `domain_create/test43`). Passwords
+the domain make it `inactive` (`env.domainName.processes.create.failed_dns_status`, `domain_create/test43`), and an
+update with them is refused where `env.domainName.processes.update.dns_checked` (`domain_update/test48`). Passwords
 are of the characters an RRI AuthInfo takes. Where a function exists on one backend only, a counterpart case covers
-the other (`domain_update/test35` to `test37`, `domain_lifecycle/`).
+the other (`domain_update/test37`, `domain_lifecycle/`). Where the cases would have the same subject and differ only in
+steps of a function one backend lacks, they are one case whose steps say where they run (`domain_restore/test1`,
+`domain_update/test30`, `limits_domain/test22`, `message/test6`).
 
 Behaviour of MTEST the cases depend on: every reply carries info `13000000011`; a new domain is `pendingCreate`, or
 `failed` when its name servers do not pass the predelegation check (the create still succeeds, and the domain reads
@@ -218,7 +221,8 @@ an object. A leaf means the same wherever it is:
 | `changeable`, `removable` | whether an update can change or clear the field |
 
 `null` says the field is not there or the limit is not known. A defect of a server that breaks cases is a fact under
-`bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`).
+`bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`). A `when` names the fact the case depends on,
+not another that happens to go with it on today's backends (`aaaa` records do not stand in for "no host objects").
 Facts are in block style, without `{}`.
 
 | Where | Form | Effect |
@@ -227,6 +231,11 @@ Facts are in block style, without `{}`.
 | A case | `"when"` at the top level | the case is skipped where it does not hold |
 | A step | `"when"` in the step | the step is left out. A step with `when` cannot `capture` |
 | Any value of a step | `{"select": [{"when": …, "then": …}, …, {"then": …}]}` | the `then` of the first entry that holds; the last entry is the default. An entry `{"omit": true}` instead of `then` leaves the member or list element out |
+
+A group or case `when` that skips it somewhere has a `"comment"` next to it, which says in which environment it is
+skipped and why, in terms of the backend; the runner ignores it. Every step starts with a `"comment"` too: what it
+sends, what it expects, and why it is there (setup, the check of the case, a read back, cleanup), and where it runs
+when it has a `when`. A comment holds no `{` or `}`, since the runner replaces placeholders in every string.
 
 Selectors are resolved first, then the placeholders, then the captures. A selector key that names no fact, in any
 known environment, fails the case at load. A skip names the facts that did not hold. A case whose selectors skip it
@@ -352,7 +361,9 @@ What the drafts define is the oracle; a limit they leave to the server is expect
 `02004`, `02005`) or 422 (`02306`), never 500 or 501. A limit that differs by server is a fact of the environment
 (`contact.city.max_length`), and `bugs.over_max_length_cut` marks a server that stores a value cut instead of refusing
 it, where the cases over a column do not run. The EPP test server cuts strings (pawel-kow/epp#21) and phone extensions (pawel-kow/epp#31),
-breaks on a label of 61 to 63 characters under `.example` (pawel-kow/epp#30), and counts nameservers, contacts a role
+breaks on a label of 61 to 63 characters under `.example` (pawel-kow/epp#30, `bugs.long_label_cut`), refuses a
+`hostAttr` without addresses, which is what `ns` records become on a backend with host objects (pawel-kow/epp#33,
+`bugs.host_attr_without_address_refused`), and counts nameservers, contacts a role
 and host addresses per command, so an update can pass its limits (pawel-kow/epp#29). It sends no reply to a domain
 create that names one contact twice in a role (pawel-kow/epp#32), and refuses a `hostAttr` without addresses, also of
 an external host (pawel-kow/epp#33), so `ns` records cannot be added to a domain there. A duplicate the drafts leave

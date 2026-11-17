@@ -2,9 +2,11 @@
   "when": {
     "profile.contact.localization.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI holds no localized form of a contact.",
   "test_id": "test8-put_changes_the_localization",
   "steps": [
     {
+      "comment": "Creates contact 08A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -104,6 +106,7 @@
       }
     },
     {
+      "comment": "Creates contact 08B with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -226,6 +229,7 @@
       }
     },
     {
+      "comment": "Patches contact 08B: remove /contactInfo/localizations/und/addresses; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:08B}",
@@ -256,6 +260,7 @@
       }
     },
     {
+      "comment": "Replaces contact 08A by a full update; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:08A}",
@@ -349,6 +354,7 @@
       }
     },
     {
+      "comment": "Patches contact 08A: remove /contactInfo/localizations/und/addresses; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:08A}",

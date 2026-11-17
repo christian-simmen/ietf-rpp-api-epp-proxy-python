@@ -2,6 +2,7 @@
   "test_id": "test1-availability",
   "steps": [
     {
+      "comment": "Checks whether host ns1.d1 is available; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/hosts/ns1.d1-{random_name}.{tld}/availability",

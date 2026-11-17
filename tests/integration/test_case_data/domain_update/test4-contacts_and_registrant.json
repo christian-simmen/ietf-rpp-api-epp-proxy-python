@@ -4,9 +4,11 @@
       "contains": "admin"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts. Test37 is the counterpart for RRI's request contacts.",
   "test_id": "test4-contacts_and_registrant",
   "steps": [
     {
+      "comment": "Creates contact uf1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -89,6 +91,7 @@
       }
     },
     {
+      "comment": "Creates contact uf2 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -171,6 +174,7 @@
       }
     },
     {
+      "comment": "Creates domain up-test4 with authInfo, registrant uf1, contacts admin, tech, billing (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -316,6 +320,7 @@
       }
     },
     {
+      "comment": "Patches domain up-test4: remove /contacts with a match; add /contacts tech; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test4-{random_name}.{tld}",
@@ -408,6 +413,7 @@
       }
     },
     {
+      "comment": "Patches domain up-test4: replace /registrant; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test4-{random_name}.{tld}",

@@ -2,6 +2,7 @@
   "test_id": "test3-ack_unknown_id",
   "steps": [
     {
+      "comment": "Acknowledges message MSG37-nosuch; expects 404 02303. An error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/messages/MSG37-nosuch-{random_id_10}",
@@ -25,6 +26,7 @@
       }
     },
     {
+      "comment": "Acknowledges message MSG37-nosuch as registrar b; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/messages/MSG37-nosuch-{random_id_10}",

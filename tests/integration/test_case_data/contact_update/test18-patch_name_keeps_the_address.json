@@ -2,6 +2,7 @@
   "test_id": "test18-patch_name_keeps_the_address",
   "steps": [
     {
+      "comment": "Creates contact 18A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -118,6 +119,7 @@
       }
     },
     {
+      "comment": "Patches contact 18A: replace /contactInfo/name/full; expects 422 02306. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:18A}",

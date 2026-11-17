@@ -2,6 +2,7 @@
   "test_id": "test4-a_label_head",
   "steps": [
     {
+      "comment": "Checks whether domain IDN bücher-a1 is available with HEAD (uName=b%C3%BCcher.example); expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "HEAD",
         "url": "/domainNames/{alabel:bücher-a1}.{tld}/availability?uName=b%C3%BCcher.example",

@@ -7,9 +7,11 @@
       "contains": "reject"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no contact transfer.",
   "test_id": "test11-transfer_reject",
   "steps": [
     {
+      "comment": "Creates contact D11 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -92,6 +94,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of contact D11 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:D11}/processes/transferProcesses",
@@ -124,6 +127,7 @@
       }
     },
     {
+      "comment": "Rejects the pending transfer of contact D11; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:D11}/processes/transferProcesses/latest/transferReject",

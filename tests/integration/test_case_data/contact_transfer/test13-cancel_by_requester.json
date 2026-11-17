@@ -2,6 +2,7 @@
   "test_id": "test13-cancel_by_requester",
   "steps": [
     {
+      "comment": "Creates contact C13 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -56,6 +57,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of contact C13 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C13}/processes/transferProcesses",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Cancels the pending transfer of contact C13 as registrar b; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/contacts/{handle:a:C13}/processes/transferProcesses/latest",
@@ -112,6 +115,7 @@
       }
     },
     {
+      "comment": "Reads contact C13; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:C13}",

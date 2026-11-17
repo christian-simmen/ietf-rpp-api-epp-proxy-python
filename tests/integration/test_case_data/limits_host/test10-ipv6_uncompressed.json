@@ -4,6 +4,7 @@
   "description": "An uncompressed IPv6 address is read back in the form of RFC 5952.",
   "steps": [
     {
+      "comment": "Creates contact Y10 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -89,6 +90,7 @@
       }
     },
     {
+      "comment": "Creates domain h10 with authInfo, registrant Y10 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -162,6 +164,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.h10 with dns records ns, aaaa; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -206,6 +209,7 @@
       }
     },
     {
+      "comment": "Reads host ns1.h10; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/ns1.h10-{random_name}.{tld}",

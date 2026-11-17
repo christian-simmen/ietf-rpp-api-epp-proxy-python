@@ -12,6 +12,7 @@
   "test_id": "test20-patch_remove_name",
   "steps": [
     {
+      "comment": "Creates contact 20A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -128,6 +129,7 @@
       }
     },
     {
+      "comment": "Patches contact 20A: remove /contactInfo/name; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:20A}",

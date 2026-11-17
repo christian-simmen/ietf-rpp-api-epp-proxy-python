@@ -2,9 +2,11 @@
   "when": {
     "profile.contact.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a contact.",
   "test_id": "test6-put_client_status_set_and_cleared",
   "steps": [
     {
+      "comment": "Creates contact 06A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -121,6 +123,7 @@
       }
     },
     {
+      "comment": "Creates contact 06B with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -237,6 +240,7 @@
       }
     },
     {
+      "comment": "Patches contact 06B: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:06B}",
@@ -271,6 +275,7 @@
       }
     },
     {
+      "comment": "Patches contact 06B: remove /status with a match; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:06B}",
@@ -305,6 +310,7 @@
       }
     },
     {
+      "comment": "Replaces contact 06A by a full update with status clientDeleteProhibited (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:06A}",
@@ -414,6 +420,7 @@
       }
     },
     {
+      "comment": "Replaces contact 06A by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:06A}",
@@ -517,6 +524,7 @@
       }
     },
     {
+      "comment": "Patches contact 06A: remove /status with a match; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:06A}",
@@ -550,6 +558,7 @@
       }
     },
     {
+      "comment": "Patches contact 06A: remove /status with a match; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:06A}",

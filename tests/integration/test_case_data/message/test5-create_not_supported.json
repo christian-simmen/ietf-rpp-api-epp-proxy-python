@@ -2,6 +2,7 @@
   "test_id": "test5-create_not_supported",
   "steps": [
     {
+      "comment": "Sends POST to the message queue; expects 501 02101. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/messages",

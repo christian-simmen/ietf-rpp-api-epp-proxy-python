@@ -6,10 +6,12 @@
     },
     "profile.domainName.registrant.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts; RRI requires a holder, so a domain cannot be without a registrant.",
   "skip": "pawel-kow/epp#32",
   "description": "The same contact twice in one role: the drafts leave it open; refused as the same server refuses a nameserver twice (limits_domain/test56).",
   "steps": [
     {
+      "comment": "Creates contact V55 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -92,6 +94,7 @@
       }
     },
     {
+      "comment": "Creates domain t55 with authInfo, dns records a (by backend), contacts tech, tech; expects 409 02302. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

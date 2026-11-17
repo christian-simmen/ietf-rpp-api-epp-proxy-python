@@ -2,6 +2,7 @@
   "test_id": "test6-patch_missing",
   "steps": [
     {
+      "comment": "Patches host t6.….net: add /status clientDeleteProhibited; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t6.{random_name}.net",

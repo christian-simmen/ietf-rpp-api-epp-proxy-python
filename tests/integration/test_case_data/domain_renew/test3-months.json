@@ -2,6 +2,7 @@
   "test_id": "test3-months",
   "steps": [
     {
+      "comment": "Creates domain rn3 with authInfo; expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -31,6 +32,7 @@
       }
     },
     {
+      "comment": "Renews domain rn3 with renewalPeriod; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/rn3-{random_name}.{tld}/processes/renewProcesses",

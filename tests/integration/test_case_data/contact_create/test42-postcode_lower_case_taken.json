@@ -3,9 +3,11 @@
   "when": {
     "env.contact.postcode.lower_case_supported": true
   },
+  "comment": "Skipped on epp-docker: the EPP test server refuses a postcode in lower case; test29 is its twin.",
   "description": "A British postcode in lower case: the drafts put no case on it, and the server takes it.",
   "steps": [
     {
+      "comment": "Creates contact K42 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Reads contact K42; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:K42}",

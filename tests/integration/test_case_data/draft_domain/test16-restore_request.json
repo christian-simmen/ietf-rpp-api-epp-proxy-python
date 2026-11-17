@@ -5,6 +5,7 @@
   "test_id": "test16-restore_request",
   "steps": [
     {
+      "comment": "Creates contact HR16; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -73,6 +74,7 @@
       }
     },
     {
+      "comment": "Creates domain ex16 with authInfo, registrant HR16 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -147,6 +149,7 @@
       }
     },
     {
+      "comment": "Deletes domain ex16; expects 200. The operation this case checks. Waits first for domainName.processes.create.add_grace_period.",
       "wait": "domainName.processes.create.add_grace_period",
       "request": {
         "method": "DELETE",
@@ -164,6 +167,7 @@
       }
     },
     {
+      "comment": "Requests a restore of domain ex16; expects 200. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/ex16-{random_name}.{tld}/processes/restoreProcesses",

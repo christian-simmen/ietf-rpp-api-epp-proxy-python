@@ -2,6 +2,7 @@
   "test_id": "test29-patch_with_undeclared_nested_member",
   "steps": [
     {
+      "comment": "Creates contact 29A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -118,6 +119,7 @@
       }
     },
     {
+      "comment": "Patches contact 29A: replace /contactInfo/name; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:29A}",

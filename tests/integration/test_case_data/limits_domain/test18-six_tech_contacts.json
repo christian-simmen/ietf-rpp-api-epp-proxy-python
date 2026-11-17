@@ -5,9 +5,11 @@
       "contains": "tech"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts.",
   "description": "Six tech contacts at create.",
   "steps": [
     {
+      "comment": "Creates contact Qa1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Creates contact Qb1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -168,6 +171,7 @@
       }
     },
     {
+      "comment": "Creates contact Qc1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -248,6 +252,7 @@
       }
     },
     {
+      "comment": "Creates contact Qd1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -328,6 +333,7 @@
       }
     },
     {
+      "comment": "Creates contact Qe1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -408,6 +414,7 @@
       }
     },
     {
+      "comment": "Creates contact Qf1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -488,6 +495,7 @@
       }
     },
     {
+      "comment": "Creates domain t18 with authInfo, registrant Qa1 (by backend), dns records a (by backend), contacts tech, tech, tech, tech, tech, tech; expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

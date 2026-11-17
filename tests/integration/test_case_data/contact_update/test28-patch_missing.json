@@ -1,10 +1,11 @@
 {
-  "when": {
-    "profile.contact.status.client_supported": true
-  },
   "test_id": "test28-patch_missing",
   "steps": [
     {
+      "comment": "Patches contact 28Z: add /status clientDeleteProhibited; expects 404 02303. The error answer this case checks. Only where a contact has client statuses.",
+      "when": {
+        "profile.contact.status.client_supported": true
+      },
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:28Z}",
@@ -22,6 +23,39 @@
             "value": {
               "@type": "contactStatus",
               "label": "clientDeleteProhibited"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "RPP-Code": "02303"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "comment": "Patches contact 28Z: replace /contactInfo/emails/email; expects 404 02303. The error answer this case checks, on every backend.",
+      "request": {
+        "method": "PATCH",
+        "url": "/contacts/{handle:a:28Z}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "{rpp:content-type}"
+        },
+        "body_json": [
+          {
+            "op": "replace",
+            "path": "/contactInfo/emails/email",
+            "value": {
+              "address": "erika@example.org"
             }
           }
         ]

@@ -2,6 +2,7 @@
   "test_id": "test29-patch_set_server_status",
   "steps": [
     {
+      "comment": "Creates host t29.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t29.….net: replace /status linked; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t29.{random_name}.net",

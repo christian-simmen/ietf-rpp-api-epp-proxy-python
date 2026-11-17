@@ -3,6 +3,7 @@
   "test_id": "test3-a_label",
   "steps": [
     {
+      "comment": "Checks whether domain IDN bücher-a1 is available; expects 200. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/domainNames/{alabel:bücher-a1}.{tld}/availability",

@@ -3,9 +3,11 @@
   "when": {
     "env.contact.postcode.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: MTEST requires a postcode in an address.",
   "description": "A PATCH adds a postcode to an address without one.",
   "steps": [
     {
+      "comment": "Creates contact P43 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -84,6 +86,7 @@
       }
     },
     {
+      "comment": "Patches contact P43: add /contactInfo/addresses/addr/components; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P43}",

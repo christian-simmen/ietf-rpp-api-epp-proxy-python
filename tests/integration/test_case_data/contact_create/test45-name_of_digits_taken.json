@@ -3,9 +3,11 @@
   "when": {
     "env.contact.name.digits_only_supported": true
   },
+  "comment": "Skipped on rri-mtest: MTEST refuses a name of digits only; test32 is its twin.",
   "description": "A name of digits only: the server does not check a name for completeness.",
   "steps": [
     {
+      "comment": "Creates contact K45 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

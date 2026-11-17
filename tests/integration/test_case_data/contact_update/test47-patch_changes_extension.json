@@ -3,6 +3,7 @@
   "description": "A PATCH changes the extension.",
   "steps": [
     {
+      "comment": "Creates contact P47 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -85,6 +86,7 @@
       }
     },
     {
+      "comment": "Patches contact P47: replace /contactInfo/phones/voice/number; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P47}",

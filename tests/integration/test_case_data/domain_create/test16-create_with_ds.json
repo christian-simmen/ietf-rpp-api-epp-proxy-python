@@ -4,9 +4,11 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "test_id": "test16-create_with_ds",
   "steps": [
     {
+      "comment": "Creates contact HC16; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -75,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates domain t16 with authInfo, dns records ds, registrant HC16 (by backend); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

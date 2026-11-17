@@ -3,9 +3,11 @@
   "when": {
     "env.contact.name.charset_restricted": false
   },
+  "comment": "Skipped on epp-docker: the EPP test server restricts the characters of a contact name; test31 is its twin.",
   "description": "An apostrophe in a name, which US-ASCII allows, read back.",
   "steps": [
     {
+      "comment": "Creates contact K44 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

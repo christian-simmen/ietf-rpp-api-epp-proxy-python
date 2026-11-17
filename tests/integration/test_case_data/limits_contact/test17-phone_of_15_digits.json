@@ -3,6 +3,7 @@
   "description": "15 digits, the most of E.164 and the JSContact profile.",
   "steps": [
     {
+      "comment": "Creates contact Z17 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -80,6 +81,7 @@
       }
     },
     {
+      "comment": "Reads contact Z17; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:Z17}",

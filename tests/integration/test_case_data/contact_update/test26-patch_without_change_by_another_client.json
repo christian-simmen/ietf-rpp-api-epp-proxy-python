@@ -2,6 +2,7 @@
   "test_id": "test26-patch_without_change_by_another_client",
   "steps": [
     {
+      "comment": "Creates contact 26A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -118,6 +119,7 @@
       }
     },
     {
+      "comment": "Patches contact 26A: replace /contactInfo/emails/email/address as registrar b; expects 403 02201. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:26A}",

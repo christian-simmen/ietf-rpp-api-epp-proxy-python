@@ -2,6 +2,7 @@
   "description": "A handle nobody has is available, by GET and by HEAD.",
   "steps": [
     {
+      "comment": "Checks whether request contact RQ2 is available; expects 200. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/requestContacts/{handle:a:RQ2}/availability",
@@ -22,6 +23,7 @@
       }
     },
     {
+      "comment": "Checks whether request contact RQ2 is available with HEAD; expects 200. Reads what the steps above created.",
       "request": {
         "method": "HEAD",
         "url": "/requestContacts/{handle:a:RQ2}/availability",

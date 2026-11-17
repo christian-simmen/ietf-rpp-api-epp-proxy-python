@@ -3,9 +3,11 @@
   "when": {
     "profile.contact.phone.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI requires a phone number.",
   "description": "A PATCH adds a voice number to a contact without one.",
   "steps": [
     {
+      "comment": "Creates contact P51 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -80,6 +82,7 @@
       }
     },
     {
+      "comment": "Patches contact P51: add /contactInfo/phones; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P51}",

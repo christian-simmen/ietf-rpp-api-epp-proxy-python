@@ -3,6 +3,7 @@
   "test_id": "test1-free",
   "steps": [
     {
+      "comment": "Checks whether host t1.….net is available; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/hosts/t1.{random_name}.net/availability",

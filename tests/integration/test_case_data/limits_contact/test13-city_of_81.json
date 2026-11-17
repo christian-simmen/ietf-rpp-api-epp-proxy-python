@@ -4,9 +4,11 @@
   "when": {
     "env.contact.city.max_length": 80
   },
+  "comment": "Skipped on epp-docker: the EPP test server takes a city of up to 255 characters, so 81 is no limit there.",
   "description": "A city of 81 characters, over the most RRI holds.",
   "steps": [
     {
+      "comment": "Creates contact Z13 with authInfo (by backend); expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

@@ -2,6 +2,7 @@
   "test_id": "test4-internal_without_domain",
   "steps": [
     {
+      "comment": "Creates host ns1.t4 with dns records ns; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",

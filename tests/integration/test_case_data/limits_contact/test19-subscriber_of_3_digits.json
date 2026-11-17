@@ -3,9 +3,11 @@
   "when": {
     "env.contact.phone.subscriber.min_length": 4
   },
+  "comment": "Skipped on epp-docker: the EPP test server takes a subscriber number of fewer than 4 digits.",
   "description": "RRI needs at least 4 digits after the country code.",
   "steps": [
     {
+      "comment": "Creates contact Z19 with authInfo (by backend); expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

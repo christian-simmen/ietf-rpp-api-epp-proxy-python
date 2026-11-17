@@ -2,6 +2,7 @@
   "test_id": "test30-patch_no_change",
   "steps": [
     {
+      "comment": "Creates host t30.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t30.….net: replace /status []; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t30.{random_name}.net",

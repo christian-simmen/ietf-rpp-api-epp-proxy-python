@@ -3,6 +3,7 @@
   "description": "An email address without @ is no RFC 5322 address.",
   "steps": [
     {
+      "comment": "Creates contact Z16 with authInfo (by backend); expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

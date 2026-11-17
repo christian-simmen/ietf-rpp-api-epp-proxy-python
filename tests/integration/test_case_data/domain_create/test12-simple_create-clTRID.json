@@ -3,6 +3,7 @@
   "test_id": "test12-simple_create-clTRID",
   "steps": [
     {
+      "comment": "Creates contact HC12; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -71,6 +72,7 @@
       }
     },
     {
+      "comment": "Creates domain test12 with authInfo, registrant HC12 (by backend), dns records a (by backend) (includeElements=authInfo), with a fixed RPP-Cltrid; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": {

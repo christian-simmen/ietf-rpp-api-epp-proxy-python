@@ -2,6 +2,7 @@
   "test_id": "test5-glue_without_nameserver_is_unsupported",
   "steps": [
     {
+      "comment": "Creates contact HC5; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain test5 with authInfo, dns records A, registrant HC5 (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -152,6 +154,7 @@
       }
     },
     {
+      "comment": "Deletes domain test5; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it. Only where a domain holds a records (rri-mtest).",
       "when": {
         "profile.domainName.dns.record_types": {
           "contains": "a"
