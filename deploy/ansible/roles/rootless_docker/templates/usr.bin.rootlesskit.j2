@@ -1,0 +1,10 @@
+# {{ rootless_docker_profile_marker }}
+# Ubuntu 23.10 and later restrict unprivileged user namespaces with AppArmor; rootlesskit needs one.
+abi <abi/4.0>,
+include <tunables/global>
+
+"/usr/bin/rootlesskit" flags=(unconfined) {
+  userns,
+
+  include if exists <local/usr.bin.rootlesskit>
+}

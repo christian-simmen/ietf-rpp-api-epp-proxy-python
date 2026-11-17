@@ -78,3 +78,7 @@ target/
 
 # import-linter cache
 .import_linter_cache/
+
+# Ansible inventories of real hosts (deploy/README.md): only the example is tracked
+deploy/ansible/inventory/*
+!deploy/ansible/inventory/example/

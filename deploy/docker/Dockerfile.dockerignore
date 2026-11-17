@@ -1,0 +1,5 @@
+# The build context is the repository root; the image needs requirements.txt and src/ only.
+*
+!requirements.txt
+!src/
+src/**/__pycache__

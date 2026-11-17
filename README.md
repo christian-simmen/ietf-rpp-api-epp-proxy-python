@@ -144,6 +144,11 @@ curl -I -u foo:bar -H 'Accept: application/rpp+json' -H "RPP-Cltrid: $(uuidgen)"
 For the integration tests, copy [.env.example](.env.example) to `.env` and fill in the `TEST_EPP_*` variables with
 these registrars; see [docs/agents/testing.project.md](docs/agents/testing.project.md#backend).
 
+## Deployment
+
+To deploy on an Ubuntu host with Ansible (rootless Docker, a hardened image, one instance per configuration, the EPP
+test server, TLS terminated by nginx), see [deploy/README.md](deploy/README.md).
+
 ## Building docker
 ```
 docker build . -f ./.docker/Dockerfile -t pawelk/rpp_server_epp_proxy

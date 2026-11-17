@@ -1,0 +1,66 @@
+---
+# Checks of the settings and of the host, which change nothing: `--tags preflight` runs them (with those of
+# rootless_docker) alone.
+
+- name: Check the instances
+  ansible.builtin.assert:
+    that:
+      - rpp_proxy_instances | map(attribute='name') | unique | length == rpp_proxy_instances | length
+      - rpp_proxy_instances | map(attribute='port') | unique | length == rpp_proxy_instances | length
+    fail_msg: Every instance needs a name and a port of its own.
+    quiet: true
+
+- name: Check the address the ports are published on
+  ansible.builtin.assert:
+    that:
+      - rpp_proxy_bind_address is match('^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$')
+    fail_msg: >-
+      rpp_proxy_bind_address is not set and docker0 has no address: start the root Docker daemon (of nginx) before the
+      playbook, or set the address.
+    quiet: true
+
+- name: Check each instance
+  ansible.builtin.assert:
+    that:
+      - instance.name is match('^[a-z0-9][a-z0-9-]*$')
+      - instance.port | int >= 1024 and instance.port | int <= 65535
+      - (instance.config_template is defined) != (instance.config is defined)
+    fail_msg: >-
+      Instance {{ instance.name | default('?') }}: a name of [a-z0-9-], a port of 1024 or more, exactly one of
+      config_template and config.
+    quiet: true
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name | default('?') }}"
+
+# A port of an instance may be in use only by the deployment user's daemon (an earlier run): another program, or
+# another user's rootless Docker, on it would be a clash.
+- name: Find who listens on the ports of the instances
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      for port in {{ rpp_proxy_instances | map(attribute='port') | join(' ') }}; do
+        line=$(ss -ltnpH "sport = :$port" | head -n 1)
+        [ -n "$line" ] || continue
+        pid=$(printf '%s\n' "$line" | { grep -o 'pid=[0-9]*' || true; } | head -n 1 | cut -d= -f2)
+        uid=""
+        [ -z "$pid" ] || uid=$(ps -o uid= -p "$pid" | tr -d ' ')
+        echo "$port ${uid:-unknown}"
+      done
+    executable: /bin/bash
+  register: rpp_proxy_listeners
+  changed_when: false
+
+- name: Check that the ports are free, or the deployment's
+  vars:
+    deploy_uid: "{{ ansible_facts['getent_passwd'][rootless_docker_user][1] if rootless_docker_user in ansible_facts['getent_passwd'] else 'none' }}"
+    taken: "{{ rpp_proxy_listeners.stdout_lines | reject('search', ' ' ~ deploy_uid ~ '$') | list }}"
+  ansible.builtin.assert:
+    that: taken | length == 0
+    fail_msg: >-
+      Ports of instances are in use by another program (port and uid of its owner): {{ taken | join(', ') }}.
+      Choose other ports in rpp_proxy_instances.
+    success_msg: >-
+      The ports {{ rpp_proxy_instances | map(attribute='port') | join(', ') }} are free
+      {{- ' or ' ~ rootless_docker_user ~ "'s" if rpp_proxy_listeners.stdout_lines else '' }}.

@@ -468,8 +468,11 @@ are `rpp_sqlite_clients` (user to a `scrypt$...` hash, made by `python -m regist
 in constant time; the user is the sponsoring client; `ClientDirectory` checks each hash with `check_hash` at start, and a
 hash that cannot be used stops the app with a `ValueError` naming the client and never the hash, as `settings` may not
 import an adapter), the database is `rpp_sqlite_url` (a file, or `sqlite://` in
-memory), and every unit of work holds one lock. The tables of each part are created at start with their schema version
-(`schema_versions`), and a version that differs stops the app: there is no migration yet. Its generic profile
+memory), and every unit of work holds one lock. A file may be shared by the worker processes of one instance (#184): it
+is in WAL mode, every unit of work begins `IMMEDIATE` (pysqlite's own transaction handling is off, as it would let a read
+go stale before the first write), and waits for the lock of another process up to a busy timeout. The tables of each
+part are created at start with their schema version (`schema_versions`), in one such transaction, so workers starting
+together on a new file create them once; a version that differs stops the app: there is no migration yet. Its generic profile
 (`settings/profiles/sqlite.yaml`) holds none of the drafts' objects, so their paths answer 501 `02307` from
 `ProfileMiddleware`; the stub gateways of those objects (`UnsupportedGateway`) are never what answers. The message queue
 holds the events of a transfer (`TransferEvent`, object type `planet`). The planets extension

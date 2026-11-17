@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+# Over docker-compose.yml of EPP-server-docker: no published port (the server is internal, and ports under 1024
+# cannot be published by a rootless daemon anyway), and epp-server on the network it shares with the proxy.
+services:
+  mariadb:
+    ports: !reset []
+  epp-server:
+    ports: !reset []
+    networks:
+      epp_net: {}
+      {{ epp_server_network }}:
+        aliases: [epp-server]
+  nameserver:
+    ports: !reset []
+
+networks:
+  {{ epp_server_network }}:
+    name: {{ epp_server_network }}
