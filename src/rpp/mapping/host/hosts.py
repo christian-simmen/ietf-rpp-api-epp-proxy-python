@@ -9,7 +9,7 @@ from rpp.mapping.host import host_dns
 from rpp.mapping.shared import prov_metadata
 from rpp.mapping.shared.common import parse_rpp, reject_set
 from rpp.mapping.shared.dns_records import nameserver_records, reject_ttl
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 
 def add_rpp_status(status: RPPStatus, target: Host | HostUpdateChanges):
@@ -66,7 +66,7 @@ def replacement_from_rpp(host_name: str, host_rpp: RPPHost) -> HostReplacement:
 
 def rpp_to_model(rpp: dict) -> Host:
     """Converts a create request to a Host."""
-    validate_schema("host.create", rpp)
+    validate_request_schema("host.create", rpp)
     host_rpp = parse_rpp(RPPHost, rpp)
     reject_set(status=host_rpp.status)
     host = rpp_host_to_model(host_rpp)

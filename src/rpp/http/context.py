@@ -2,11 +2,12 @@ from connexion import request
 from flask import current_app
 
 from core.capabilities.backend_profile import BackendProfile
-from rpp.http.profile_middleware import SELECTED_PROFILE
-from rpp.http.request_profiles import RequestProfiles
-from rpp.http.profile_selection import ProfileSelection
-from rpp.schema.profile_schemas import ProfileSchemas
-from rpp.schema.rpp_profiles import RppProfiles
+from rpp.http.preset_middleware import SELECTED_PRESET
+from rpp.http.preset_selection import PresetSelection
+from rpp.http.request_presets import RequestPresets
+from rpp.schema.offered_presets import OfferedPresets
+from rpp.schema.preset_schemas import PresetSchemas
+from rpp.schema.request_schemas import RequestSchemas
 
 # The key of the token info that holds the request's backend.
 TOKEN_BACKEND = "backend"
@@ -16,11 +17,11 @@ BACKEND_PROFILE = "RPP_BACKEND_PROFILE"
 
 DISCOVERY_SETTINGS = "RPP_DISCOVERY_SETTINGS"
 
-RPP_PROFILES = "RPP_PROFILES"
+OFFERED_PRESETS = "RPP_OFFERED_PRESETS"
 
-PROFILE_SCHEMAS = "RPP_PROFILE_SCHEMAS"
+PRESET_SCHEMAS = "RPP_PRESET_SCHEMAS"
 
-REQUEST_PROFILES = "RPP_REQUEST_PROFILES"
+REQUEST_PRESETS = "RPP_REQUEST_PRESETS"
 
 
 def get_backend():
@@ -37,34 +38,44 @@ def backend_profile() -> BackendProfile:
     return current_app.config[BACKEND_PROFILE]
 
 
-def rpp_profiles() -> RppProfiles:
-    """The RPP profiles this application offers."""
-    return current_app.config[RPP_PROFILES]
+def offered_presets() -> OfferedPresets:
+    """The RPP presets this application offers."""
+    return current_app.config[OFFERED_PRESETS]
 
 
-def profile_schemas() -> ProfileSchemas:
-    """The effective schemas of the offered profiles, built with the app."""
-    return current_app.config[PROFILE_SCHEMAS]
+def preset_schemas() -> PresetSchemas:
+    """The Preset Schemas of the offered presets, built with the app."""
+    return current_app.config[PRESET_SCHEMAS]
 
 
-def profile_selection() -> ProfileSelection:
-    """The RPP profiles of the request, which the profile middleware selected."""
-    return request.context[SELECTED_PROFILE]
+def preset_selection() -> PresetSelection:
+    """The RPP presets of the request, which the preset middleware selected."""
+    return request.context[SELECTED_PRESET]
 
 
 def request_profile() -> BackendProfile:
-    """What the backend can hold as the profile the request is read under allows (that of its Content-Type): its
-    extensions and its data objects. Handlers pass this, not `backend_profile()`, to
-    what parses or checks the request (the combined schema, the objects)."""
-    requests: RequestProfiles = current_app.config[REQUEST_PROFILES]
-    return requests.of(profile_selection().request)
+    """What the backend can hold as the preset the request is read under allows (that of its Content-Type): its
+    extensions. Handlers pass this, not `backend_profile()`, to what parses or checks the request (the combined schema,
+    the objects)."""
+    requests: RequestPresets = current_app.config[REQUEST_PRESETS]
+    return requests.profile_of(preset_selection().request)
 
 
 def response_profile() -> BackendProfile:
-    """The same as the profile of the response allows: what a response shows (the extensions of the profile it is
-    under)."""
-    requests: RequestProfiles = current_app.config[REQUEST_PROFILES]
-    return requests.of(profile_selection().response)
+    """The same as the preset of the response allows: what a response shows (the extensions of the preset it is under)."""
+    requests: RequestPresets = current_app.config[REQUEST_PRESETS]
+    return requests.profile_of(preset_selection().response)
+
+
+def request_schemas() -> RequestSchemas | None:
+    """The schemas the request is validated with: those of the preset it is read under, which `rpp_operation` makes the
+    mappers' own for the handler. None for an operation without a preset (a document, the router's 404)."""
+    selection = request.context.get(SELECTED_PRESET)
+    if selection is None:
+        return None
+    requests: RequestPresets = current_app.config[REQUEST_PRESETS]
+    return RequestSchemas(request=requests.scope_of(selection.request), response=requests.scope_of(selection.response),
+                          scopes=requests.scopes())
 
 
 def discovery_settings():

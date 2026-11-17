@@ -102,7 +102,7 @@ def compose(settings: Settings) -> Composition:
     new_backend = backends[settings.backend]()
     sessions = SessionPool(new_backend)
     app = create_app(sessions, profile, discovery_settings=settings.discovery,
-                     signalling=settings.profile_signalling, registry=registry)
+                     signalling=settings.preset_signalling, registry=registry)
     return Composition(settings=settings, profile=profile, tls_context=tls_context, idn_tables=idn_tables,
                        new_epp_client=new_epp_client, new_backend=new_backend, sessions=sessions, app=app,
                        registry=registry)

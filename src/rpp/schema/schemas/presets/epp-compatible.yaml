@@ -1,0 +1,12 @@
+# The EPP compatible preset: RPP without extensions, constrained by the EPP Compatibility Profile.
+id: urn:ietf:params:rpp:preset:epp-compatible
+name: EPP compatible preset
+description: RPP without extensions, constrained by the EPP Compatibility Profile.
+version: "1.0"
+rppVersion: "1.0"
+url: https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/
+basePresets:
+  - {id: "urn:ietf:params:rpp:preset:base", version: "1.0"}
+extensions: []
+profiles:
+  - {id: "urn:ietf:params:rpp:profile:epp-compatibility", version: "1.0"}

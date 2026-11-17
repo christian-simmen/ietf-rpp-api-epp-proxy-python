@@ -172,7 +172,9 @@ def test_unimplemented_operation_is_a_501_unimplemented_command(method, url):
 def test_mapper_validation_error_does_not_echo_the_request():
     operation = {"op": "replace", "path": "/authInfo", "value": {"pw": "Secret1!"}}
 
-    response = client_with().patch("/domainNames/foo.example", json=[operation], headers=BODY_HEADERS)
+    base = {**BODY_HEADERS, "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"}    # no read is needed
+
+    response = client_with().patch("/domainNames/foo.example", json=[operation], headers=base)
 
     assert response.status_code == 400
     assert "Secret1!" not in response.text

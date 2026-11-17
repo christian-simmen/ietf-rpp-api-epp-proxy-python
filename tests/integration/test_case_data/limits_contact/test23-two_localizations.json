@@ -7,14 +7,14 @@
   "description": "Two localizations, more than the backend holds: 501 (spec-issues.md).",
   "steps": [
     {
-      "comment": "Creates contact Z23 with authInfo (by backend); expects 501 02102. The error answer this case checks.",
+      "comment": "Creates contact Z23 with authInfo (by backend); expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -64,12 +64,12 @@
             "localizations": {
               "de": {
                 "name": {
-                  "full": "Erika Müller"
+                  "full": "Erika M\u00fcller"
                 }
               },
               "fr": {
                 "name": {
-                  "full": "Érika Müller"
+                  "full": "\u00c9rika M\u00fcller"
                 }
               }
             }
@@ -94,14 +94,44 @@
         }
       },
       "response": {
-        "status": 501,
-        "content_type": "application/problem+json",
-        "headers": {
-          "RPP-Code": "02102"
-        },
-        "body": {
-          "type": "urn:ietf:params:rpp:error"
-        }
+        "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible"
+            },
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error",
+                "errors": [
+                  {
+                    "result": "02308",
+                    "profile": "urn:ietf:params:rpp:profile:epp-compatibility",
+                    "paths": [
+                      "$.contactInfo.localizations"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 501,
+              "content_type": "application/problem+json",
+              "headers": {
+                "RPP-Code": "02102"
+              },
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          }
+        ]
       }
     }
   ]

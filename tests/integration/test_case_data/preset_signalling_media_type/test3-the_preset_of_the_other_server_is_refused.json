@@ -1,0 +1,77 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-the_preset_of_the_other_server_is_refused",
+  "description": "A preset the server does not offer in the Accept of a request whose Content-Type is offered (base): the Accept lists no preset the server offers, 406 with RPP-Code 02004 (core 14.3).",
+  "when": {
+    "env.preset_signalling": "media-type"
+  },
+  "comment": "Skipped on epp-docker: the EPP config signals the preset by the RPP-Preset header; preset_signalling_header/ covers the header method.",
+  "steps": [
+    {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\"; expects 406 02004. An error answer this case checks. Only where the server offers no epp-compatible preset (rri-mtest).",
+      "when": {
+        "profile.presets": {
+          "not": {
+            "contains": "epp-compatible"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\"; expects 406 02004. The error answer this case checks. Only where the server offers no rri preset (epp-docker).",
+      "when": {
+        "profile.presets": {
+          "not": {
+            "contains": "rri"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 406,
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

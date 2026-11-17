@@ -11,7 +11,7 @@
         "url": "/.well-known/rpp",
         "headers": {
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -38,102 +38,174 @@
           "tlds": [
             "{tld}"
           ],
-          "profiles": {
-            "select": [
-              {
-                "when": {
-                  "profile.objects": {
-                    "contains": "host"
-                  }
-                },
-                "then": [
-                  "urn:ietf:params:rpp:profile:base",
-                  "urn:ietf:params:rpp:profile:epp-compatibility"
-                ]
-              },
-              {
-                "then": [
-                  "urn:ietf:params:rpp:profile:base",
-                  "de.denic.rpp.profile.rri"
-                ]
-              }
-            ]
-          },
-          "objects": {
-            "select": [
-              {
-                "when": {
-                  "profile.objects": {
-                    "contains": "host"
-                  }
-                },
-                "then": [
-                  "domainName",
-                  "host",
-                  "contact"
-                ]
-              },
-              {
-                "then": [
-                  "domainName",
-                  "contact",
-                  "requestContact"
-                ]
-              }
-            ]
-          },
-          "extensions": {
-            "select": [
-              {
-                "when": {
-                  "profile.objects": {
-                    "contains": "host"
-                  }
-                },
-                "then": [
-                  {
-                    "@type": "extension",
-                    "name": "RPP EPP Compatibility",
-                    "id": "urn:ietf:params:rpp:extension:epp-compatibility",
-                    "version": "1.0",
-                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/epp-compatibility.schema.json"
-                  },
-                  {
-                    "@type": "extension",
-                    "name": "RPP Profile Schemas",
-                    "id": "urn:ietf:params:rpp:extension:profile-schemas",
-                    "version": "1.0",
-                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/profile-schemas.schema.json"
-                  }
-                ]
-              },
-              {
-                "then": [
-                  {
-                    "@type": "extension",
-                    "name": "DENIC RRI",
-                    "id": "de.denic.rpp.rri",
-                    "version": "0.2.0",
-                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json"
-                  },
-                  {
-                    "@type": "extension",
-                    "name": "RPP Profile Schemas",
-                    "id": "urn:ietf:params:rpp:extension:profile-schemas",
-                    "version": "1.0",
-                    "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/profile-schemas.schema.json"
-                  }
-                ]
-              }
-            ]
-          }
+          "presets": [
+            {
+              "@type": "preset",
+              "id": "urn:ietf:params:rpp:preset:base",
+              "name": "Base preset",
+              "description": "RPP without extensions and without profiles.",
+              "version": "1.0",
+              "rppVersion": "1.0",
+              "url": "https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/",
+              "extensions": [],
+              "profiles": [],
+              "boundProfiles": [],
+              "defaultPreset": false
+            },
+            {
+              "@type": "preset",
+              "id": "urn:ietf:params:rpp:preset:epp-compatible",
+              "name": "EPP compatible preset",
+              "description": "RPP without extensions, constrained by the EPP Compatibility Profile.",
+              "version": "1.0",
+              "rppVersion": "1.0",
+              "url": "https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/",
+              "basePresets": [
+                {
+                  "@type": "preset",
+                  "id": "urn:ietf:params:rpp:preset:base",
+                  "version": "1.0"
+                }
+              ],
+              "extensions": [],
+              "profiles": [
+                {
+                  "@type": "profile",
+                  "id": "urn:ietf:params:rpp:profile:epp-compatibility",
+                  "version": "1.0"
+                }
+              ],
+              "boundProfiles": [],
+              "defaultPreset": true
+            }
+          ],
+          "profiles": [
+            {
+              "@type": "profile",
+              "id": "urn:ietf:params:rpp:profile:epp-compatibility",
+              "version": "1.0"
+            }
+          ],
+          "objects": [
+            "domainName",
+            "host",
+            "contact"
+          ]
         },
         "fields": {
           "datetime": {
             "type": "not_empty_string"
           }
         }
+      },
+      "when": {
+        "profile.objects": {
+          "contains": "host"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "discovery",
+          "versions": [
+            {
+              "@type": "discoveryVersion",
+              "version": "1.0",
+              "baseUrl": "https://localhost:8000"
+            }
+          ],
+          "environment": {
+            "@type": "discoveryEnvironment",
+            "name": "{env:environment_name}",
+            "status": "test"
+          },
+          "tlds": [
+            "{tld}"
+          ],
+          "presets": [
+            {
+              "@type": "preset",
+              "id": "urn:ietf:params:rpp:preset:base",
+              "name": "Base preset",
+              "description": "RPP without extensions and without profiles.",
+              "version": "1.0",
+              "rppVersion": "1.0",
+              "url": "https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/",
+              "extensions": [],
+              "profiles": [],
+              "boundProfiles": [],
+              "defaultPreset": false
+            },
+            {
+              "@type": "preset",
+              "id": "de.denic.rpp.preset.rri",
+              "name": "DENIC RRI preset",
+              "description": "RPP with the extension de.denic.rpp.rri for DENIC RRI behind RPP.",
+              "version": "1.0",
+              "rppVersion": "1.0",
+              "basePresets": [
+                {
+                  "@type": "preset",
+                  "id": "urn:ietf:params:rpp:preset:base",
+                  "version": "1.0"
+                }
+              ],
+              "extensions": [
+                {
+                  "@type": "extension",
+                  "name": "DENIC RRI",
+                  "id": "de.denic.rpp.rri",
+                  "version": "0.2.0",
+                  "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json"
+                }
+              ],
+              "profiles": [],
+              "boundProfiles": [],
+              "defaultPreset": true
+            }
+          ],
+          "objects": [
+            "domainName",
+            "contact",
+            "requestContact"
+          ],
+          "extensions": [
+            {
+              "@type": "extension",
+              "name": "DENIC RRI",
+              "id": "de.denic.rpp.rri",
+              "version": "0.2.0",
+              "url": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/rri-extension.schema.json"
+            }
+          ]
+        },
+        "fields": {
+          "datetime": {
+            "type": "not_empty_string"
+          }
+        }
+      },
+      "when": {
+        "profile.objects": {
+          "contains": "requestContact"
+        }
       }
     }
-  ]
+  ],
+  "description": "Discovery lists the presets with their extensions, profiles and bound profiles, the profiles that apply to them, and the extensions of the presets."
 }

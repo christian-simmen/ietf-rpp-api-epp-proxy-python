@@ -41,6 +41,7 @@ def info(email="a@example.example", sponsor="user"):
     )))
 
 
+BASE_PRESET = "urn:ietf:params:rpp:preset:base"
 DONE = (True, "1000", epp_reply(1000))
 MISSING = (False, "2303", epp_reply(2303))
 NEW_EMAIL = put_body(card(emails={"email": {"address": "b@example.example"}}))
@@ -55,9 +56,10 @@ class Session:
         self.client = FakeEppClient(username, password, replies=self.replies)
         return self.client
 
-    def request(self, method, **kwargs):
+    def request(self, method, preset=None, url="/contacts/JD-1234", **kwargs):
         http = create_app(SessionPool(epp_backends(self._factory)), EPP_PROFILE).test_client()
-        return getattr(http, method)("/contacts/JD-1234", headers=AUTH, **kwargs)
+        headers = {**AUTH, "RPP-Preset": f"preset={preset};version=1.0"} if preset else AUTH
+        return getattr(http, method)(url, headers=headers, **kwargs)
 
 
 def put(*replies, body=NEW_EMAIL):
@@ -125,7 +127,7 @@ def test_patch_of_a_status_is_sent_without_a_read():
     session = Session(DONE, info())
     body = [{"op": "add", "path": "/status", "value": {"@type": "contactStatus", "label": "clientUpdateProhibited"}}]
 
-    response = session.request("patch", json=body)
+    response = session.request("patch", preset=BASE_PRESET, json=body)      # the base preset has no profile to check
 
     assert response.status_code == 200
     assert "contact:update" in session.client.sent[0]
@@ -135,7 +137,8 @@ def test_patch_of_the_email_updates_without_a_read():
     session = Session(DONE, info("b@example.example"))
 
     response = session.request(
-        "patch", json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "b@example.example"}],
+        "patch", preset=BASE_PRESET,
+        json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "b@example.example"}],
     )
 
     assert response.status_code == 200
@@ -155,10 +158,13 @@ def test_patch_that_removes_the_organisation_that_is_not_there_is_a_422():
     assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
 
 
-def test_patch_that_removes_the_name_is_a_501():
+def test_patch_that_removes_the_name_is_a_422_under_the_epp_compatibility_profile():
+    # the profile requires the name (draft-kowalik-rpp-epp-compatibility, profile.card); before presets this was the 501 of
+    # the mapper, which a preset without the profile still answers
     response = patch(info(), body=[{"op": "remove", "path": "/contactInfo/name"}])
 
-    assert response.status_code == 501 and response.headers["RPP-Code"] == "02102"
+    assert response.status_code == 422 and response.headers["RPP-Code"] == "02308"
+    assert response.json()["errors"][0]["profile"] == "urn:ietf:params:rpp:profile:epp-compatibility"
 
 
 def test_put_adding_a_localization_the_registry_ignores_is_a_500_with_02400():
@@ -168,3 +174,38 @@ def test_put_adding_a_localization_the_registry_ignores_is_a_500_with_02400():
 
     assert response.status_code == 500 and response.headers["RPP-Code"] == "02400"
     assert "loc" in response.json()["detail"]
+
+
+def test_a_rule_of_rpp_is_answered_as_rpp_defines_it_under_the_epp_compatible_preset_and_nothing_is_sent():
+    # core §Extensions and Profiles of a Request: what RPP defines (the JSContact profile: the internationalized form is
+    # US-ASCII) is "rejected as defined for that constraint, and not with 02308", also where a profile states it too
+    patch = Session(MISSING)
+    created = Session(MISSING)
+    body = {**put_body(card(name={"full": "Jörg Müller"})), "id": "JD-1234"}
+
+    refused_patch = patch.request(
+        "patch", json=[{"op": "replace", "path": "/contactInfo/emails/email/address", "value": "jöhn@exämple.com"}])
+    refused_post = created.request("post", url="/contacts", json=body)
+
+    for response in (refused_patch, refused_post):
+        assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
+        assert "US-ASCII" in response.json()["detail"]
+    assert patch.client.sent == [] and created.client.sent == []
+
+
+def test_a_rule_of_rpp_on_the_patched_contact_is_answered_as_rpp_defines_it_after_the_read():
+    session = Session(info())
+
+    response = session.request("patch", json=[{"op": "replace", "path": "/contactInfo/name/full", "value": "Jörg"}])
+
+    assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
+    assert "US-ASCII" in response.json()["detail"]
+
+
+def test_a_rule_of_rpp_on_a_full_update_is_answered_as_rpp_defines_it():
+    session = Session(MISSING)
+
+    response = session.request("put", json=put_body(card(name={"full": "Jörg Müller"})))
+
+    assert response.status_code == 400 and response.headers["RPP-Code"] == "02001"
+    assert session.client.sent == []

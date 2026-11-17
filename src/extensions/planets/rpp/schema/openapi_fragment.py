@@ -13,7 +13,7 @@ PROBLEM = "#/components/schemas/protocol.ProblemDetail"
 RPP_JSON = "application/rpp+json"
 
 _HEADER_REFS = [f"#/components/parameters/protocol.RequestHeaders.{name}"
-                for name in ("rppCltrid", "accept", "acceptLanguage", "rppAuthorization", "rppProfile")]
+                for name in ("rppCltrid", "accept", "acceptLanguage", "rppAuthorization", "rppPreset")]
 INCLUDE_ELEMENTS = "#/components/parameters/gen.IncludeElements"
 IDENTIFIER = {"$ref": "#/components/schemas/gen.common.identifier"}
 
@@ -42,7 +42,7 @@ def _headers(location: bool = False) -> dict:
         "RPP-Code": {"required": True, "description": "RPP result code, §18.", "schema": {"type": "string"}},
         "RPP-Queue-Size": {"required": False, "description": "Number of unacknowledged messages in the client's queue.",
                            "schema": {"type": "integer", "minimum": 0}},
-        "RPP-Profile": {"required": False, "schema": {"type": "string"}},
+        "RPP-Preset": {"required": False, "schema": {"type": "string"}},
         "Link": {"required": False, "description": "One `rel=\"rpp-process\"` link per process created as a side effect (§15).",
                  "schema": {"type": "array", "items": {"type": "string"}}},
     }

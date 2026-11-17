@@ -18,7 +18,9 @@ class RegisteredExtension:
     - `backend_parts`: the module of its part in each backend that can hold it (`{"sqlite": "registry_adapter..."}`).
     - `profile_layer`: the leaves it adds to the backend profile, with `objects` and `extensions` to add to those the
       generic profile lists; `profile_leaves` the type of each leaf of it that the profile does not have.
-    - `rpp_profiles`: the definitions of the RPP profiles it brings (`{key: definition}`, as a profile file states it).
+    - `presets`: the presets it brings (`{key: definition}`, as a preset file of `rpp/schema/schemas/presets` states it).
+    - `profiles`: the profiles it brings (`{key: definition}`, as a profile file states it, with its Profile Schema, if
+      any, as `schema`).
     """
     id: str
     schema: dict
@@ -29,4 +31,5 @@ class RegisteredExtension:
     backend_parts: dict[str, str] = field(default_factory=dict)
     profile_layer: dict[str, Any] = field(default_factory=dict)
     profile_leaves: dict[str, type] = field(default_factory=dict)
-    rpp_profiles: dict[str, dict] = field(default_factory=dict)
+    presets: dict[str, dict] = field(default_factory=dict)
+    profiles: dict[str, dict] = field(default_factory=dict)

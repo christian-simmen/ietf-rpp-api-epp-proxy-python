@@ -19,7 +19,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -129,14 +129,14 @@
       }
     },
     {
-      "comment": "Patches contact 20A: remove /contactInfo/name; expects 501 02102. The error answer this case checks.",
+      "comment": "Patches contact 20A: remove /contactInfo/name; expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:20A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -154,13 +154,22 @@
               "profile.contact.name.removable": false
             },
             "then": {
-              "status": 501,
+              "status": 422,
               "headers": {
-                "RPP-Code": "02102"
+                "RPP-Code": "02308"
               },
               "content_type": "application/problem+json",
               "body": {
-                "type": "urn:ietf:params:rpp:error"
+                "type": "urn:ietf:params:rpp:error",
+                "errors": [
+                  {
+                    "result": "02308",
+                    "profile": "urn:ietf:params:rpp:profile:epp-compatibility",
+                    "paths": [
+                      "$.contactInfo"
+                    ]
+                  }
+                ]
               }
             }
           },

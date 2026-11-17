@@ -60,8 +60,13 @@ def client_with(replies):
     return create_app(SessionPool(epp_backends(factory)), EPP_PROFILE).test_client()
 
 
+# Under the EPP compatible preset a patch is applied to the domain read for it (its profile is checked on the result): the
+# tests of a patch sent without a read signal the base preset, which has no profile.
+BASE_PRESET = {"RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"}
+
+
 def patch(http):
-    return http.patch("/domainNames/foo.example", json=UPDATE_BODY, headers=AUTH)
+    return http.patch("/domainNames/foo.example", json=UPDATE_BODY, headers={**AUTH, **BASE_PRESET})
 
 
 def post(http):
@@ -113,7 +118,7 @@ CREATED_DATA = (
 def test_202_carries_the_same_rpp_headers_as_a_success(method, url, body, res_data, readback):
     applied = (True, "1000", epp_reply(1000, "Command completed successfully", res_data, cl_trid="cl-1"))
     def send(replies):
-        return getattr(client_with(replies), method)(url, json=body, headers=AUTH)
+        return getattr(client_with(replies), method)(url, json=body, headers={**AUTH, **BASE_PRESET})
 
     regular = send([applied, INFO])
     accepted = send([applied, readback])
@@ -124,5 +129,5 @@ def test_202_carries_the_same_rpp_headers_as_a_success(method, url, body, res_da
         "rpp-cltrid": "cl-1",
         "rpp-svtrid": "sv-1",
         "rpp-code": "01000",
-        "rpp-profile": "profile=urn:ietf:params:rpp:profile:epp-compatibility;version=1.0",
+        "rpp-preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0",
     }

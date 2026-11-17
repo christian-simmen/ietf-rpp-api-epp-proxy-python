@@ -72,7 +72,7 @@
           "RPP-Cltrid": "test14-{random_name}-clTRID",
           "Authorization": "{auth:unknown_user}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

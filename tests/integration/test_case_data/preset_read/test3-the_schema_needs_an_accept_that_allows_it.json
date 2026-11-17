@@ -1,0 +1,75 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-the_schema_needs_an_accept_that_allows_it",
+  "description": "An Accept that does not allow application/schema+json is refused with 406.",
+  "steps": [
+    {
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/urn:ietf:params:rpp:preset:epp-compatible/schema",
+        "headers": {
+          "Accept": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 406,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02004"
+        },
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.default_preset": "rri"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/de.denic.rpp.preset.rri/schema",
+        "headers": {
+          "Accept": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 406,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02004"
+        },
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.default_preset": "planets"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets/schema",
+        "headers": {
+          "Accept": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 406,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02004"
+        },
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

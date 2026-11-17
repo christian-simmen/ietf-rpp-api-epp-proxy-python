@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ietf:params:rpp:schema:profile:epp-compatibility-1.0",
+  "rpp:profile": {
+    "id": "urn:ietf:params:rpp:profile:epp-compatibility",
+    "version": "1.0"
+  },
+  "rpp:constraints": {
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/restoreReport.create": "#/$defs/profile.restoreReport",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/provMetadata.read": "#/$defs/profile.provMetadata",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/domainName.create": "#/$defs/profile.domainNameContacts",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/domainName.read": "#/$defs/profile.domainNameContacts",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/contact.create": "#/$defs/profile.contactCreate",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/contact.read": "#/$defs/profile.contact",
+    "urn:ietf:params:rpp:schema:json-1.0#/$defs/contact.update": "#/$defs/profile.contact"
+  },
+  "$defs": {
+    "profile.restoreReport": {
+      "properties": {
+        "statements": {
+          "minItems": 2
+        }
+      },
+      "required": [
+        "restoreTime"
+      ]
+    },
+    "profile.provMetadata": {
+      "required": [
+        "repositoryId"
+      ]
+    },
+    "profile.domainNameContacts": {
+      "properties": {
+        "contacts": {
+          "items": {
+            "properties": {
+              "label": {
+                "enum": [
+                  "admin",
+                  "billing",
+                  "tech"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "profile.contactCreate": {
+      "$ref": "#/$defs/profile.contact",
+      "required": [
+        "authInfo"
+      ]
+    },
+    "profile.contact": {
+      "properties": {
+        "contactInfo": {
+          "$ref": "#/$defs/profile.card"
+        }
+      }
+    },
+    "profile.card": {
+      "required": [
+        "name",
+        "addresses",
+        "emails"
+      ],
+      "properties": {
+        "name": {
+          "required": [
+            "full"
+          ],
+          "properties": {
+            "full": {
+              "$ref": "#/$defs/profile.ascii"
+            }
+          }
+        },
+        "organizations": {
+          "additionalProperties": {
+            "properties": {
+              "name": {
+                "$ref": "#/$defs/profile.ascii"
+              }
+            }
+          }
+        },
+        "addresses": {
+          "required": [
+            "addr"
+          ],
+          "additionalProperties": {
+            "$ref": "#/$defs/profile.address",
+            "properties": {
+              "components": {
+                "items": {
+                  "properties": {
+                    "value": {
+                      "$ref": "#/$defs/profile.ascii"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "emails": {
+          "required": [
+            "email"
+          ],
+          "propertyNames": {
+            "const": "email"
+          },
+          "additionalProperties": {
+            "properties": {
+              "address": {
+                "$ref": "#/$defs/profile.ascii"
+              }
+            }
+          }
+        },
+        "phones": {
+          "propertyNames": {
+            "enum": [
+              "voice",
+              "fax"
+            ]
+          },
+          "additionalProperties": {
+            "properties": {
+              "number": {
+                "pattern": "^tel:\\+[0-9]{1,3}\\.[0-9]{1,14}(;ext=[0-9]+)?$"
+              }
+            }
+          }
+        },
+        "localizations": {
+          "maxProperties": 1,
+          "additionalProperties": {
+            "properties": {
+              "name": {
+                "required": [
+                  "full"
+                ]
+              },
+              "organizations": {
+                "additionalProperties": {
+                  "required": [
+                    "name"
+                  ]
+                }
+              },
+              "addresses": {
+                "additionalProperties": {
+                  "$ref": "#/$defs/profile.address"
+                }
+              },
+              "emails": false
+            }
+          }
+        }
+      }
+    },
+    "profile.address": {
+      "required": [
+        "countryCode",
+        "components"
+      ],
+      "properties": {
+        "components": {
+          "allOf": [
+            {
+              "contains": {
+                "properties": {
+                  "kind": {
+                    "const": "locality"
+                  }
+                }
+              },
+              "minContains": 1
+            },
+            {
+              "contains": {
+                "properties": {
+                  "kind": {
+                    "const": "name"
+                  }
+                }
+              },
+              "minContains": 0,
+              "maxContains": 3
+            }
+          ]
+        }
+      }
+    },
+    "profile.ascii": {
+      "pattern": "^[\\x20-\\x7E]*$"
+    }
+  }
+}

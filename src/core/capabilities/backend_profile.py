@@ -11,10 +11,11 @@ object: `min_count` and `max_count` how many a field holds, `<what>_supported` w
 LEAVES: dict[str, type] = {
     "name": str,                                         # names the backend in a refusal (`… cannot be expressed in`)
     "objects": tuple,                                    # the data objects discovery states; hosts are objects if there
-    "profiles": tuple,                                   # the keys of the RPP profiles this server offers (rpp/schema)
-    "default_profile": str,                              # the key of the one it applies when a request names none
+    "presets": tuple,                                    # the keys of the RPP presets this server offers (rpp/schema)
+    "default_preset": str,                               # the key of the one it applies when a request names none
+    "bound_profiles": dict,                              # per preset key, the keys of the profiles the server binds to it
     "extensions": tuple,                                 # the RPP extensions (ids) the backend can hold: the ceiling of
-                                                         # the extensions of the offered profiles
+                                                         # the extensions of the offered presets
     "lgrs": tuple,                                       # the LGRs offered for IDNs, from the config, none without IDN
     "domainName.registrant.min_count": int,              # left to the registry to refuse; the test selectors read it
     "domainName.registrant.max_count": int,              # further registrants are contacts labelled `registrant`
@@ -63,10 +64,14 @@ def _merged(base: dict, layer: dict) -> dict:
     return merged
 
 
+# The leaves that are a map as a whole: `{preset key: [profile keys]}`, whose keys are not parts of a path.
+MAP_LEAVES = ("bound_profiles",)
+
+
 def _leaves(tree: dict, prefix: str = "") -> dict:
     leaves = {}
     for key, value in tree.items():
-        if isinstance(value, dict):
+        if isinstance(value, dict) and f"{prefix}{key}" not in MAP_LEAVES:
             leaves.update(_leaves(value, f"{prefix}{key}."))
         else:
             leaves[f"{prefix}{key}"] = value
@@ -74,6 +79,12 @@ def _leaves(tree: dict, prefix: str = "") -> dict:
 
 
 def _checked(value, kind: type, path: str):
+    if kind is dict:
+        if not isinstance(value, dict) or not all(
+                isinstance(key, str) and isinstance(items, (list, tuple)) and all(isinstance(item, str) for item in items)
+                for key, items in value.items()):
+            raise ValueError(f"backend profile: {path} must map a key to a list of strings")
+        return {key: tuple(items) for key, items in value.items()}
     if kind is tuple:
         if not isinstance(value, (list, tuple)) or not all(isinstance(item, str) for item in value):
             raise ValueError(f"backend profile: {path} must be a list of strings")
@@ -132,7 +143,7 @@ class BackendProfile:
             if not isinstance(node, dict) or key not in node:
                 raise KeyError(path)
             node = node[key]
-        if isinstance(node, dict):
+        if isinstance(node, dict) and path not in MAP_LEAVES:
             raise KeyError(path)
         return node
 
@@ -142,6 +153,8 @@ class BackendProfile:
         if name not in self._tree:
             raise AttributeError(f"the backend profile has no {self._path}{name}")
         value = self._tree[name]
+        if f"{self._path}{name}" in MAP_LEAVES:
+            return value
         return BackendProfile(value, f"{self._path}{name}.", self._extra_leaves) if isinstance(value, dict) else value
 
     def __eq__(self, other) -> bool:

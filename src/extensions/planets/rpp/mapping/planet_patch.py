@@ -3,7 +3,7 @@ from extensions.planets.rpp.dto.rpp_planet_update import RPPPlanetUpdate
 from rpp.dto.rpp_patch_operation import RPPPatchOperation
 from rpp.mapping.shared import auth_info
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import refuse_removal_by_profile, validate_request_schema
 
 TYPE = "@type"
 
@@ -31,18 +31,21 @@ def _member(operation: RPPPatchOperation) -> str:
 def rpp_to_model(rpp: list, extensions: tuple[str, ...] = ()) -> PlanetChanges:
     """Translates a partial update (json §5.2) into the changes it asks for, in order, the last on a member winning. The
     value of each operation is checked against the update schema. Nothing of the JSON Patch goes on: a `PlanetChanges`
-    holds the members to set and those to remove."""
+    holds the members to set and those to remove. There is no object to validate, as there is no read (D24): the value of an
+    operation is checked against the profiles as the member it sets, and the removal of a member a profile requires is
+    refused; what a profile requires of the members together is not enforced."""
     values: dict = {}
     cleared: set[str] = set()
     for operation in (parse_rpp(RPPPatchOperation, item) for item in rpp):
         member = _member(operation)
         if operation.op == "remove":
+            refuse_removal_by_profile("planet.update", member, extensions)
             values.pop(member, None)
             cleared.add(member)
             continue
         if operation.value is None:
             raise ValueError(f"'{operation.op}' needs a 'value'")
-        validate_schema("planet.update", {**BASE, member: operation.value}, extensions)
+        validate_request_schema("planet.update", {**BASE, member: operation.value}, extensions, member=member)
         values[member] = operation.value
         cleared.discard(member)
     update = parse_rpp(RPPPlanetUpdate, {**BASE, **values}) if values else None

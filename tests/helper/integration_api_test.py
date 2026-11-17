@@ -61,7 +61,7 @@ def assert_response(expected, response, test_name, signalling="header"):
 
     if "content_type" in expected:
         # Check the Content-Type header
-        # With the media type signalling (core §14.3) the profile is in the parameters: an expected type without
+        # With the media type signalling (core, Media Type Signalling) the preset is in the parameters: an expected type without
         # parameters is then the media type of the response, whatever its parameters. Otherwise, and for an expected
         # type with parameters, the whole value is compared.
         actual = response.headers["Content-Type"].lower()
@@ -168,7 +168,7 @@ def endpoint_test(client, case_sequence, sleep=time.sleep, credentials=None, pac
     if "skip" in case_sequence:
         pytest.skip(reason=f"Skipping test case: {case_sequence['test_id']} - {case_sequence['skip']}")
     captures = {}
-    signalling = credentials.env.profile_signalling if credentials is not None else "header"
+    signalling = credentials.env.preset_signalling if credentials is not None else "header"
     for i, case in enumerate(case_sequence["steps"]):
         case = substitute_captures(case, captures)
         if case.get("delay_seconds"):

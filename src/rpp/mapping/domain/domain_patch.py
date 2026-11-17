@@ -15,7 +15,8 @@ from rpp.mapping.shared import auth_info, include_elements, json_patch, patch_st
 from rpp.mapping.shared.common import parse_rpp
 from rpp.mapping.shared.dns_records import DNS_PARENTS
 from rpp.mapping.shared.needs_current_state import NeedsCurrentState
-from rpp.schema.validator import validate_schema
+from rpp.schema.request_schemas import profiles_apply
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 ARRAY_PATHS = ("/nameservers", "/contacts")
 
@@ -162,6 +163,8 @@ def rpp_to_model(domain_name: str, rpp: list, *, profile: BackendProfile) -> Dom
     """Converts a partial update (JSON Patch, json draft §5.2) to a DomainUpdate.
 
     None when an operation needs the current domain, then `rpp_to_model_with_current` converts it.
+    Under a preset with applicable profiles it is None too, after the same conversion (so what that refuses is refused alike): the profiles are checked on the
+    object the patch results in (core §Extensions and Profiles of a Request: every request), which needs the current one.
     """
     update = _PatchedUpdate(profile)
     try:
@@ -169,6 +172,8 @@ def rpp_to_model(domain_name: str, rpp: list, *, profile: BackendProfile) -> Dom
             update.apply(operation)
     except NeedsCurrentState:
         return None
+    if profiles_apply():     # the profiles are checked on the object the patch results in, which needs the current one
+        return None     # the conversion above is the same as without profiles: what it refuses is refused alike
     return update.to_domain_update(domain_name)
 
 
@@ -184,7 +189,7 @@ def rpp_to_model_with_current(domain_name: str, rpp: list, current: dict, *, pro
         ignored_paths=include_elements.on_demand_paths(OBJECT), absent_parents=DNS_PARENTS,
     )
     patched = patch_statuses.with_server_statuses(patched, current, "domainStatus")
-    validate_schema("domainName.read", patched, extensions=profile.extensions)
+    validate_request_schema("domainName.read", patched, extensions=profile.extensions, patched=True)
     domain_wanted.reject_other_changes(current, patched, profile)
     auth_info_update = _PatchedUpdate(profile)
     for operation in operations:

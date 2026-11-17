@@ -31,8 +31,8 @@ def test_building_an_app_leaves_the_shared_spec_as_parsed():
 def test_the_app_serves_the_spec():
     response = build_app().test_client().get("/openapi.json")
     assert response.status_code == 200
-    # the generated paths, and the one that publishes the effective schema of a profile (made when the app is built)
-    assert response.json()["paths"].keys() == {*parsed_spec()["paths"].keys(), "/profiles/{name}/schema"}
+    assert response.json()["paths"].keys() == parsed_spec()["paths"].keys()
+    assert {"/presets/{id}", "/presets/{id}/schema", "/profiles/{id}"} <= response.json()["paths"].keys()
 
 
 def test_the_spec_served_stays_the_same_after_a_validated_response():

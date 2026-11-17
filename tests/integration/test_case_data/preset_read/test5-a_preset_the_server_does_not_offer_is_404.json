@@ -1,0 +1,31 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test5-a_preset_the_server_does_not_offer_is_404",
+  "description": "A preset of another server is not found.",
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/presets/urn:ietf:params:rpp:preset:nope",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "RPP-Code": "02303"
+        },
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

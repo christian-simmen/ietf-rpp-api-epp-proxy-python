@@ -1,0 +1,38 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test4-the_epp_compatibility_profile_is_read",
+  "description": "The profile of the EPP compatible preset is read.",
+  "steps": [
+    {
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/profiles/urn:ietf:params:rpp:profile:epp-compatibility",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "profile",
+          "id": "urn:ietf:params:rpp:profile:epp-compatibility",
+          "version": "1.0",
+          "name": "EPP Compatibility Profile",
+          "url": "https://datatracker.ietf.org/doc/draft-kowalik-rpp-epp-compatibility/"
+        }
+      }
+    }
+  ]
+}

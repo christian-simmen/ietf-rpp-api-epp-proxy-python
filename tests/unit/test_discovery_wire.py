@@ -70,16 +70,15 @@ def test_discovery_states_what_the_proxy_is_configured_and_built_for(client):
     assert body["environment"] == {"@type": "discoveryEnvironment", "name": "rpp.example", "status": "test"}
     assert body["tlds"] == ["example", "test"]
     assert body["objects"] == ["domainName", "host", "contact"]
-    assert body["profiles"] == ["urn:ietf:params:rpp:profile:base", "urn:ietf:params:rpp:profile:epp-compatibility"]
+    assert [p["id"] for p in body["presets"]] == ["urn:ietf:params:rpp:preset:base", "urn:ietf:params:rpp:preset:epp-compatible"]
+    assert body["profiles"] == [{"@type": "profile", "id": "urn:ietf:params:rpp:profile:epp-compatibility", "version": "1.0"}]
 
 
 def test_discovery_advertises_nothing_the_proxy_does_not_do(client):
     body = client.get("/.well-known/rpp", headers=HEADERS).json()
 
-    # The extensions are those of the offered profiles, here the constraints of the EPP profile (see test_profiles_wire),
-    # and the server's own, which lists the schemas of the profiles.
-    assert [e["id"] for e in body["extensions"]] == ["urn:ietf:params:rpp:extension:epp-compatibility", "urn:ietf:params:rpp:extension:profile-schemas"]
-    for member in ("links", "idnLgr", "notices"):
+    # The extensions are those of the offered presets: none here, EPP Compatibility is a profile (see test_presets_wire).
+    for member in ("extensions", "profileSchemas", "links", "idnLgr", "notices"):
         assert member not in body
 
 
@@ -222,12 +221,12 @@ def test_an_unexpected_failure_is_still_a_problem_detail_with_an_rpp_code():
     assert response.headers["Content-Type"].startswith("application/problem+json")
 
 
-def test_the_objects_are_the_backends_and_the_profiles_those_it_offers():
-    profile = EPP_PROFILE.with_changes({"objects": ["domainName", "contact"], "profiles": ["base"], "default_profile": "base"})
+def test_the_objects_are_the_backends_and_the_presets_those_it_offers():
+    profile = EPP_PROFILE.with_changes({"objects": ["domainName", "contact"], "presets": ["base"], "default_preset": "base"})
     http = create_app(NoSessions(), profile, discovery_settings=SETTINGS).test_client()
 
     body = http.get("/.well-known/rpp", headers=HEADERS).json()
 
     assert body["objects"] == ["domainName", "contact"]
-    assert body["profiles"] == ["urn:ietf:params:rpp:profile:base"]
-    assert [e["id"] for e in body["extensions"]] == ["urn:ietf:params:rpp:extension:profile-schemas"]      # no profile has an extension: the server's own is left
+    assert [p["id"] for p in body["presets"]] == ["urn:ietf:params:rpp:preset:base"]
+    assert "profiles" not in body and "extensions" not in body      # the base preset has none

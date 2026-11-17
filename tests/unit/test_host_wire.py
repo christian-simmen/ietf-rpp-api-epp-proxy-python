@@ -72,8 +72,13 @@ def post(http, body=CREATE_BODY):
     return http.post("/hosts", json=body, headers=AUTH)
 
 
+# Under the EPP compatible preset a patch is applied to the host read for it (its profile is checked on the result): the
+# tests of a patch sent without a read signal the base preset, which has no profile.
+BASE_PRESET = {"RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"}
+
+
 def patch(http, body=PATCH_BODY):
-    return http.patch(f"/hosts/{NAME}", json=body, headers=AUTH)
+    return http.patch(f"/hosts/{NAME}", json=body, headers={**AUTH, **BASE_PRESET})
 
 
 def put(http, body=CREATE_BODY):

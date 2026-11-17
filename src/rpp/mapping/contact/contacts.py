@@ -15,7 +15,7 @@ from rpp.dto.rpp_contact import RPPContact
 from rpp.mapping.contact import phones
 from rpp.mapping.shared import auth_info, prov_metadata, statuses
 from rpp.mapping.shared.common import parse_rpp, reject_set
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 KIND_INDIVIDUAL = "individual"
 
@@ -72,6 +72,14 @@ def _check_profile(card: RPPCard):
     _check_key_sequence(card.phones, PHONE_FAX)
     _check_ascii(card)
     _check_phone_kinds(card)
+
+
+def check_rpp_rules(card: dict) -> None:
+    """What RPP itself states of a Card and the schema cannot express (the JSContact profile: key sequence, US-ASCII, the key and
+    the features of a phone). A request that breaks one is refused as RPP defines it (a 400), under every preset and before the
+    profiles are asked: core §Extensions and Profiles of a Request, a request that conforms to the preset but breaks a constraint
+    that RPP defines "is rejected as defined for that constraint, and not with 02308"."""
+    _check_profile(parse_rpp(RPPCard, card))
 
 
 def _reject_additional(entries: dict | None, member: str):
@@ -160,6 +168,8 @@ def contact_from_rpp(contact_rpp: RPPContact) -> Contact:
 def rpp_to_model(rpp: dict) -> Contact:
     """Converts a create request to a Contact."""
     validate_schema("contact.create", rpp)
+    check_rpp_rules(rpp["contactInfo"])
+    validate_request_schema("contact.create", rpp)
     contact_rpp = parse_rpp(RPPContact, rpp)
     contact = contact_from_rpp(contact_rpp)
     reject_set(status=contact_rpp.status)

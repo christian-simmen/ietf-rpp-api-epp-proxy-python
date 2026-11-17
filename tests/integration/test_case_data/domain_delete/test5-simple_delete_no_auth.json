@@ -10,7 +10,7 @@
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "test5-{random_name}-clTRID",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

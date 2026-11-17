@@ -30,8 +30,8 @@ differ, ask which revision applies.
 ## Kinds of specification
 
 **Extension specification.** An RPP extension the proxy implements is specified in a Markdown file under `docs/`
-(`de.denic.rpp.rri`: [rri-extension.md](../rri/rri-extension.md), `urn:ietf:params:rpp:extension:profile-schemas`:
-[profile-schemas-extension.md](../profile-schemas-extension.md)). It has the section list of guidelines §9, in that
+(`de.denic.rpp.rri`: [rri-extension.md](../rri/rri-extension.md), `org.example.rpp.extension.planets`:
+[planets-extension.md](../demo/planets-extension.md)). It has the section list of guidelines §9, in that
 order, with "None" in a section that does not apply. Each section takes the shape of the draft that defines the base
 concept: object sections that of data-objects, the JSON Schema and Examples sections that of json, and Result Codes,
 Problem Details, HTTP Headers and Endpoints that of core. How the extension is implemented is in
@@ -41,7 +41,8 @@ Problem Details, HTTP Headers and Endpoints that of core. How the extension is i
 proposal per affected draft: the draft, its revision, and for each change the section (title and anchor), whether
 text is added, replaced or removed, and the exact text in that draft's shape and notation, including its IANA
 Considerations and Changes History entries. Each proposal is a file per draft under `.spec/proposals/<issue>-<topic>/`
-(`data-objects.md`, `core.md`, `json.md`, `extension-guidelines.md`), written on the branch of the issue for the
+(`data-objects.md`, `core.md`, `json.md`, `extension-guidelines.md`). A proposal for a new draft is a file named
+after its topic, with the whole draft text in the shape of the profile, extension or base draft it is. Both are written on the branch of the issue for the
 experimental implementation (see [requirements.md](requirements.md)) and linked from that issue. A problem with the drafts that is not a proposal goes to
 [.spec/spec-issues.md](../../.spec/spec-issues.md).
 

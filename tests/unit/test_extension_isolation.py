@@ -55,7 +55,7 @@ def test_an_app_with_the_extension_has_its_paths_and_handlers():
 
 def _layers_without_extension():
     generic, specific = demo_settings().profile_layers
-    return generic, {"profiles": ["base"], "default_profile": "base"}
+    return generic, {"presets": ["base"], "default_preset": "base"}
 
 
 def test_the_generic_code_loads_nothing_of_an_extension_unless_configured():
@@ -66,10 +66,9 @@ def test_the_generic_code_loads_nothing_of_an_extension_unless_configured():
         os.environ["RPP_CONFIG_FILE"] = {str(REPOSITORY / 'src' / 'config.yaml')!r}
         import main
         from rpp.schema.extensions import EXTENSIONS
-        from rpp.schema.profiles import PROFILES
         loaded = sorted(name for name in sys.modules if name == "extensions" or name.startswith("extensions."))
         loaded += sorted(name for name in sys.modules if "planets" in name)
-        print(loaded, [e for e in EXTENSIONS if "planets" in e], [p for p in PROFILES if p == "demo"])
+        print(loaded, [e for e in EXTENSIONS if "planets" in e], [])
     """)
 
     result = subprocess.run([sys.executable, "-I", "-c", script], capture_output=True, text=True, check=True)

@@ -9,7 +9,7 @@
         "headers": {
           "RPP-Cltrid": "up-test7-{random_name}-clTRID",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}"
         },
         "body_json": [

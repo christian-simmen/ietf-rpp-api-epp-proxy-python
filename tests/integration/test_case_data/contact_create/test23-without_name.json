@@ -3,14 +3,14 @@
   "description": "A contact without a name is refused: the name is required (JSContact profile).",
   "steps": [
     {
-      "comment": "Creates contact K23 with authInfo (by backend); expects one of 400 02001 or 400 02003 or 422 02306. The error answer this case checks.",
+      "comment": "Creates contact K23 with authInfo (by backend); expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else one of 400 02001 or 400 02003 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -74,35 +74,65 @@
         }
       },
       "response": {
-        "any_of": [
+        "select": [
           {
-            "status": 400,
-            "headers": {
-              "RPP-Code": "02001"
+            "when": {
+              "profile.default_preset": "epp-compatible"
             },
-            "content_type": "application/problem+json",
-            "body": {
-              "type": "urn:ietf:params:rpp:error"
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error",
+                "errors": [
+                  {
+                    "result": "02308",
+                    "profile": "urn:ietf:params:rpp:profile:epp-compatibility",
+                    "paths": [
+                      "$.contactInfo"
+                    ]
+                  }
+                ]
+              }
             }
           },
           {
-            "status": 400,
-            "headers": {
-              "RPP-Code": "02003"
-            },
-            "content_type": "application/problem+json",
-            "body": {
-              "type": "urn:ietf:params:rpp:error"
-            }
-          },
-          {
-            "status": 422,
-            "headers": {
-              "RPP-Code": "02306"
-            },
-            "content_type": "application/problem+json",
-            "body": {
-              "type": "urn:ietf:params:rpp:error"
+            "then": {
+              "any_of": [
+                {
+                  "status": 400,
+                  "headers": {
+                    "RPP-Code": "02001"
+                  },
+                  "content_type": "application/problem+json",
+                  "body": {
+                    "type": "urn:ietf:params:rpp:error"
+                  }
+                },
+                {
+                  "status": 400,
+                  "headers": {
+                    "RPP-Code": "02003"
+                  },
+                  "content_type": "application/problem+json",
+                  "body": {
+                    "type": "urn:ietf:params:rpp:error"
+                  }
+                },
+                {
+                  "status": 422,
+                  "headers": {
+                    "RPP-Code": "02306"
+                  },
+                  "content_type": "application/problem+json",
+                  "body": {
+                    "type": "urn:ietf:params:rpp:error"
+                  }
+                }
+              ]
             }
           }
         ]

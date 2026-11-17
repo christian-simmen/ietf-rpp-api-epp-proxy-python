@@ -3,11 +3,11 @@ from core.model.domain.domain_restore import DomainRestore
 from core.model.domain.domain_restore_process import DomainRestoreProcess, PENDING_DELETE, PENDING_RESTORE
 from rpp.dto.rpp_restore_process import RPPRestoreProcess
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 def parse_request(schema: str, rpp: dict) -> RPPRestoreProcess:
     """A restore process sent by the client, which has no read-only members (json §6.3.5)."""
-    validate_schema(schema, rpp)
+    validate_request_schema(schema, rpp)
     process_rpp = parse_rpp(RPPRestoreProcess, rpp)
     if process_rpp.restoreStatus is not None:
         raise ValueError("'restoreStatus' is read-only")

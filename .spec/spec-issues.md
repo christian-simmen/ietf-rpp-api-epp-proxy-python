@@ -526,16 +526,6 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 - Json -01 §6.1.1 gives the Identifier the pattern `^(\w|_){1,8}-\w{1,}$` (one hyphen, after one to eight word characters), from the EPP `roidType`. EPP contact ids are `clIDType` (RFC 5730 §2.8 gives `roidType` to repository ids only), and DENIC handles have several hyphens (`DENIC-1000022-GR`), so neither fits.
 - **Proxy:** the bundle in `src/` predates json -01 and has no pattern for `identifier`; the examples of [docs/rri/rri-extension.md](../docs/rri/rri-extension.md) use DENIC handles.
 
-## Profiles
-
-- Core §12.4 and json §6.11 do not say whether a profile inherits the objects and extensions of its `baseProfile`, nor
-  what a request may do with a data object the selected profile lacks. Neither gives the profile of the EPP constraints
-  (data-objects §2.8, json §8.7.1) an extension of its own.
-- **Proxy:** every profile definition is complete, `baseProfile` is informational and checked at start. The EPP
-  constraints are the extension `urn:ietf:params:rpp:extension:epp-compatibility`, which adds no schema member. A path of
-  a data object outside the selected profile, or that the backend does not hold, is 501 `02307` (core §16.1.6 allows
-  404 or 501 for an endpoint a server does not implement). The Profile Data Object is the same on every server, whatever
-  the backend holds.
 ## Result code of an HTTP-level error
 
 - Core has no result code for a 404 on an unknown path, a 405, a 406 or a 415. Core §18.1 maps a code missing from Table 9 by Table 10, which would make `02001` (x20zz) a 400, so a 404 or 405 with `02001` goes against it.
@@ -548,7 +538,7 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 - §14.2 names no status or RPP result code for a profile or version the server does not support ("an HTTP error response"); §12.4 asks for "an RPP Client error code". It also says nothing about a malformed value, a Dictionary without the `profile` member or its `version` parameter, or members and parameters it does not define.
 - §14.2 does not say what a request without the header gets. §14.3 says the default profile of the Discovery document; §14.2 is silent.
 - §14 says the two methods "MUST NOT be used simultaneously", without saying what a server that supports one does with the parameters of the other.
-- **Proxy:** `rpp_profile_signalling: header` (the default). A request without the header gets the default profile. Every refusal is a 400 with a Problem Detail: `02005` for a value that is not an SF Dictionary (the field lines of a repeated header are combined with a comma first, RFC 9651 §4.2, and a repeated key is the last), a `profile` that is not a Token or a `version` that is not a Decimal (`version=1` is an Integer); `02003` for a missing `profile` member or `version`; `02004` for a profile or version the server does not offer (the version compared as a decimal); `02001` for `profile` or `profile-version` parameters on an `application/rpp+*` media range of `Accept` or `Content-Type` (another media type, such as `application/ld+json;profile=…`, keeps its own `profile` parameter). Other members and parameters are ignored. Only a routed operation selects a profile, so an unrouted path is a 404 and a 401 is before the profile; `/.well-known/rpp` and `/profiles/*` are refused like any other. `RPP-Profile` in the response names the applied profile on every response after the selection (core §6.2), also a 5xx Problem Detail of a handler, and `Vary` lists it (RFC 9110 §12.5.5). It is absent on the refusal of the profile itself, on a 401, on an unrouted path and on a 500 that is not a Problem Detail (a framework-level one, #98).
+- **Proxy:** `rpp_preset_signalling: header` (the default). A request without the header gets the default preset. Every refusal is a 400 with a Problem Detail: `02005` for a value that is not an SF Dictionary (the field lines of a repeated header are combined with a comma first, RFC 9651 §4.2, and a repeated key is the last), a `preset` that is not a Token or a `version` that is not a Decimal (`version=1` is an Integer); `02003` for a missing `preset` member or `version`; `02004` for a preset or version the server does not offer (the version compared as a decimal); `02001` for `preset` or `preset-version` parameters on an `application/rpp+*` media range of `Accept` or `Content-Type` (another media type, such as `application/ld+json;preset=…`, keeps its own `preset` parameter). Other members and parameters are ignored. Only a routed operation selects a preset, so an unrouted path is a 404 and a 401 is before the preset; `/.well-known/rpp` and `/presets/*` are refused like any other. `RPP-Preset` in the response names the applied preset on every response after the selection (core §6.2), also a 5xx Problem Detail of a handler, and `Vary` lists it (RFC 9110 §12.5.5). It is absent on the refusal of the preset itself, on a 401, on an unrouted path and on a 500 that is not a Problem Detail (a framework-level one, #98).
 
 ## Profile signalling with media type parameters
 
@@ -559,11 +549,84 @@ unclear, found while writing [docs/rri/rri-extension.md](../docs/rri/rri-extensi
 - §14.3 speaks of the profile of "request content" and asks for the parameters in the `Content-Type` of a request with content, while §13 requires a `Content-Type` even without content. The proxy takes the request profile from the `Content-Type` of every request, so the profile of a request without content is not inferred from the `Accept`.
 - The request profile and the response profile can differ (the request's must be listed in `Accept`, the response's is the preferred one), and the profile is said to define URL paths, query parameters and header fields (§14.1). What a request under two profiles means for those is open.
 - §14.3 says nothing about a response profile that lacks an object or extension member that the request profile has.
-- **Proxy:** `rpp_profile_signalling: media-type`. The request profile is that of the `Content-Type` of every request (absent or without parameters: the default profile); it alone governs routing, validation, the mappers and the backend command. The response profile is chosen from `Accept` by weight (RFC 9110 §12.5.1): a range with the parameters stands for that profile, `application/rpp+json` without them for the default profile, `application/*` and `*/*` for every offered one; the most specific range gives the weight, 0 excludes, the request profile wins a tie, else the first range (a wildcard: the default). No `Accept` is the default profile. The request profile must be listed in the `Accept` of every request. Values are a token or a quoted string, versions compare as decimals, as for the header. A data object must be in the request profile; the response is rendered with the extensions of the response profile. A profile or version of the `Content-Type` that is not offered is 415, an `Accept` without an offered profile is 406, both with `02004` (as the header method's `02004`); a request profile the `Accept` does not list is 400 `02001`; a missing `profile` or `profile-version` is 400 `02003`, a value that does not parse 400 `02005`. The `RPP-Profile` request header on this server is 400 `02001`, as the media type parameters are in header mode. A successful RPP response has the parameters of the response profile in its `Content-Type`, a Problem Detail none, `Vary` lists `Accept` on every response of a routed operation, and there is no `RPP-Profile` response header (§14 over §6.2). The refusals are before the selection and name no profile. Where the response profile lacks something the request profile has, a response is rendered with the extensions of the response profile, leaving out the extension members of the request profile. An empty `Accept` is an absent one (the default profile): RFC 9110 gives "nothing acceptable" no clear reading for it.
+- **Proxy:** `rpp_preset_signalling: media-type`. The request preset is that of the `Content-Type` of every request (absent or without parameters: the default preset); it alone governs routing, validation, the mappers and the backend command. The response preset is chosen from `Accept` by weight (RFC 9110 §12.5.1): a range with the parameters stands for that preset, `application/rpp+json` without them for the default preset, `application/*` and `*/*` for every offered one; the most specific range gives the weight, 0 excludes, the request preset wins a tie, else the first range (a wildcard: the default). No `Accept` is the default preset. The request preset must be listed in the `Accept` of every request. Values are a token or a quoted string, versions compare as decimals, as for the header. A data object must be in the request preset; the response is rendered with the extensions of the response preset. A preset or version of the `Content-Type` that is not offered is 415, an `Accept` without an offered preset is 406, both with `02004` (as the header method's `02004`); a request preset the `Accept` does not list is 400 `02001`; a missing `preset` or `preset-version` is 400 `02003`, a value that does not parse 400 `02005`. The `RPP-Preset` request header on this server is 400 `02001`, as the media type parameters are in header mode. A successful RPP response has the parameters of the response preset in its `Content-Type`, a Problem Detail none, `Vary` lists `Accept` on every response of a routed operation, and there is no `RPP-Preset` response header (§14 over §6.2). The refusals are before the selection and name no preset. Where the response preset lacks something the request preset has, a response is rendered with the extensions of the response preset, leaving out the extension members of the request preset. An empty `Accept` is an absent one (the default preset): RFC 9110 gives "nothing acceptable" no clear reading for it.
 
-## Effective schemas of a profile
+## Presets, profiles and extensions
 
-- Json §7.2 says an extension's schema composes with the base object's (`allOf`) into an effective schema, json §4.9.1 and guidelines §8.6 say `"unevaluatedProperties": false` is injected into the combined schema before validation, and core §14 and json §6.11 name profiles. No draft says how a client obtains that combined schema for a profile, or how Discovery says where it is, so a client cannot validate a request against what a server enforces without repeating the composition and the injection.
-- Guidelines §8.6 says the injection is at "every object-schema node" and json §4.9.1 on "every property level", but give no algorithm for a node that holds an `allOf` (the keyword must be on the node that holds it, not in its branches, or the members an extension adds are unevaluated), for the conditions `if` and `not`, or for a node that has `additionalProperties`.
-- **Proxy:** the extension `urn:ietf:params:rpp:extension:profile-schemas` 1.0 (guidelines §5.13: a new discovery property comes from an extension; server-wide, in no profile) adds `profileSchemas` to Discovery, `[{profile, version, url}]` per offered profile. `GET /profiles/{name}/schema` (public, `application/schema+json`, 404 `02303` for a name not offered) answers a JSON Schema 2020-12 with `$id` that URL, whose `$defs` are the combined schema of the profile: the bundle and the profile's extensions' definitions, each extended definition the `allOf` of the base and the extension's, and `"unevaluatedProperties": false` at every `type: object` node (not under `if` or `not`; nodes with `additionalProperties` or `unevaluatedProperties` stay; on the node that holds an `allOf`, not in its branches). It is built once at startup and is the very schema the proxy validates with, so a member no schema of the profile declares is refused as an undeclared property (400 `02001`), and a well-formed rri member is refused under base and accepted under rri. The schema endpoint is a document fetch, not an RPP operation, and is outside profile signalling in both methods (no selection, no `RPP-Profile`, no profile negotiation of the `Accept`): it answers `application/schema+json` when the `Accept` is absent or allows `application/schema+json`, `application/json`, `application/*` or `*/*`, else 406. Core §6.1 requires `RPP-Cltrid` on every request; this endpoint deliberately relaxes that (and the required `Accept` of §13), so a generic JSON Schema client that resolves the `$id` can fetch it.
-- A consequence: json §6.2.3 declares `due` on the domain status only, so a `due` on a contact or host status is an undeclared property (400 `02001`), not the 501 the proxy gave while its schemas did not forbid undeclared members.
+The accepted proposals of #174 (`.spec/proposals/174-presets/`) replace the profile model of the drafts (core §12.4, §14,
+json §6.11, §7.2, data-objects §2.8, §15) and the two sections about profile signalling above, which describe the drafts as
+they were. The proxy follows the proposals, with the following.
+
+- **Preset Schema and the injection.** Json C5 declares `schema` of the Preset Data Object as `{ "type": "object", "readOnly": true }`.
+  The injection of `unevaluatedProperties: false` (json §4.9.1) at every object-schema node makes that object accept no member, so
+  the embedded schema (`includeElements=schema`) would be refused. **Proxy:** `.spec/auto` has `"additionalProperties": true` there.
+- **Published schema.** The proposals say the Preset Schema has no `unevaluatedProperties` and a validator adds them (json C6).
+  **Proxy:** follows that. The effective schema of an earlier proxy (the `profile-schemas` extension) published them, and is removed.
+- **An extension used outside the preset.** Core RC4 says 400 as for any non-conforming content, and no result code. **Proxy:** a path of
+  a data object of an extension that the preset does not contain is 400 `02001`, the code the proxy gives to content that fails the schema
+  (`_default_result` in `problem.py`), where the profile model gave 501 `02307`. A data object the backend does not hold stays 501 `02307`.
+- **The native media type.** Core C5 says the client lists `application/schema+json` or a range that includes it. **Proxy:** that, or no
+  `Accept`, else 406 `02004`; `application/json` does not include it, so it is a 406, where the profile schema endpoint of the proxy accepted
+  it. The most specific range decides (`application/schema+json;q=0, */*` is a 406). The request is outside preset signalling in both
+  methods (core RC7), and public (RC3: server policy).
+- **Operations a profile makes unavailable.** Core RC6 says 02308. **Proxy:** not implemented: no Profile Schema of the proxy makes an
+  operation unavailable. The prose constraints of the EPP Compatibility Profile (the Read of a Restore Process, the transfer operations)
+  keep 501 or the backend's error, as the issue decided.
+- **The EPP Compatibility Profile Schema** is the one of draft-kowalik-rpp-epp-compatibility, in full: the check at start (json C6: a
+  profile sub-schema declares no property its target does not) found no violation against the bundle, because `Localization` declares the
+  members of an entry. The draft's own note about that (SIDN/ietf-rpp-jscontact-profile#36) applies to the draft's text of json, not to
+  the bundle of the proxy. Under the EPP compatible preset what the schema refuses is 422 `02308`, where the mapper answered 501 or 400
+  before: a contact PATCH that removes `name` (501 `02102` to 422), a restore report without `restoreTime` or with one statement (400
+  to 422). A preset without the profile keeps the mapper's answer.
+- **Result code and `type` of the error.** The proposals' example uses `type` `https://rpp.example/problems/profile-constraint`. **Proxy:**
+  the error `type` stays `urn:ietf:params:rpp:error`, as for every error, with `result` `02308`, `paths` and `profile`. The reason holds no
+  value of the request.
+- **`url`.** The Profile Data Object requires `url` (data-objects C8), and the IANA registries do not exist. **Proxy:** the documents the
+  proposals name as the specification: `https://datatracker.ietf.org/doc/draft-kowalik-rpp-epp-compatibility/` for the profile, and
+  `https://datatracker.ietf.org/doc/draft-ietf-rpp-data-objects/` for the presets `base` and `epp-compatible`. A private preset has none.
+- **An attribution.** A request that breaks the constraints of several profiles names the first profile (bases first) whose Profile Schema
+  alone refuses it, and none where only their conjunction does (core: "a server can omit the field").
+- **A constraint stated by RPP and by a profile.** Core §Extensions and Profiles of a Request says a request that conforms to the preset
+  but breaks a constraint that RPP or an extension defines "is rejected as defined for that constraint, and not with 02308". Json §Profiles
+  and Validation, read literally, makes every failure of step 2 a broken profile constraint, so a request that breaks both a rule of RPP
+  that the schema cannot express (the JSContact profile: US-ASCII, the key sequence, the keys and features of a phone) and the Profile
+  Schema of the EPP Compatibility Profile (which repeats it as a pattern) would be 422. **Proxy:** follows core: the checks that RPP or
+  an extension defines and the schema cannot express run before step 2, on create, PUT and the patched object, and answer 400 `02001`
+  under every preset. Json should say that step 2 excludes what RPP or an extension of the preset already states. A constraint only
+  a profile states stays 422, also where an EPP mapper would have refused it before presets (a missing `name` or `emails`, a restore
+  report without `restoreTime` or with one statement, core's own example for the last).
+- **Extension Schemas, a whitelist.** Json §Extension Framework (json.md:300-304) forbids three things and leaves the rest open. **Proxy:**
+  the check at start is stricter, a whitelist applied to the sub-schema and, recursively, to what `allOf`, `anyOf`, `if`, `then`, `else` and
+  the values of `dependentSchemas` reach: metadata, `type` `object`, `properties` (not of a member the base declares), `required`,
+  `dependentRequired` and `dependentSchemas` over the extension's own members, `patternProperties` that match no member of the base, open
+  `additionalProperties` and `unevaluatedProperties`, and the schema `true`. It refuses the rest, among it `not` (also over the extension's
+  own members, which would be additive), `oneOf` (branches that are each allowed can exclude each other, so that no base object matches),
+  an empty `allOf` or `anyOf`, `const`, `enum`, `propertyNames`, `minProperties`, `maxProperties`, `type` other than `object`, and the
+  schema `false`. A whitelist cannot let a schema that constrains the base slip through by a keyword the check did not think of.
+- **Responses.** The proposals do not say whether a response is validated against the profiles. **Proxy:** never; a response is validated
+  against the preset schema without profiles.
+
+## Two-step validation of a patch
+
+- Json §Profiles and Validation defines the two steps for a request. It does not say what a JSON Patch, which is not a message of the schema,
+  is validated as, nor what a profile constraint on a data element the server manages (`provMetadata`, `processes`) means for an object a
+  client patched or replaced, which carries the server's own members.
+- **Proxy:** a create, a PUT and the object a PATCH results in (the read representation, patched) go through both steps. For a patched or
+  replaced object a failure of step 2 that concerns a read-only member of the base definition or the extension, which the server manages,
+  is not the client's and is ignored. Under a preset with applicable profiles the patch of a contact, a domain or a host is always applied
+  to the object read for it, also where it needs no read without profiles (a status, the authInfo, a phone or the email), so that the
+  profiles are enforced on every request (core, Extensions and Profiles of a Request). The native patch of an extension that has no read
+  (the planets extension, D24) has no object: the value of each operation is checked against the profiles as the member it sets (a
+  error reported at the member's own path or below it counts), and the removal of a member that an applicable profile lists in an
+  unconditional `required` (its top level and its `allOf` branches, not `if`, `then`, `else`, `anyOf`, `oneOf` or `not`) is refused with that
+  profile. A constraint reported at the root of the object (`not` that forbids a member, `if` and `then`, `dependentRequired` and
+  other constraints between members) is not enforced on a native patch.
+
+## Telephone number in the contact examples of json
+
+- The contact examples of json (for example the Create request of the Contact Data Object) use `tel:+1-703-555-5555`. The RPP JSContact profile (draft-wullink-rpp-jscontact-profile §4.1.8) requires `tel:+<cc>.<digits>`, for example `tel:+1.7035555555`, and an RPP server MUST reject other values. The `Card` schema of json has no `pattern` for `number`, so the examples validate against it. Filed as SIDN/ietf-rpp-jscontact-profile#29.
+
+## Localization entries of the JSContact Card
+
+- Json §6.2.9 declares `localizations` as `{ "type": "object" }`. With the enrichment of json §4.9.1 that rejects every localization, without it the entries are unchecked, and a profile cannot constrain an entry without declaring members the base does not declare. Filed as SIDN/ietf-rpp-jscontact-profile#36, which also asks to move the Card schema from json into the JSContact profile draft.
+- **Proxy:** `Localization` and `RecordLocalization` in `.spec/auto/json-schema/rpp.schema.json` declare the entry (`name`, `organizations`, `addresses`, `emails`, keyed by a language tag).
