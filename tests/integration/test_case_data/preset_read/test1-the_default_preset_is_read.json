@@ -4,6 +4,23 @@
   ],
   "test_id": "test1-the_default_preset_is_read",
   "description": "The default preset of the server is read: its extensions, and the profiles of its definition, and none bound.",
+  "when": [
+    {
+      "profile.default_preset": "epp-compatible"
+    },
+    {
+      "profile.default_preset": "rri"
+    },
+    {
+      "profile.default_preset": "planets",
+      "profile.bound_profiles": {
+        "not": {
+          "contains": "planets"
+        }
+      }
+    }
+  ],
+  "comment": "Skipped where no step of the case names the default preset of the environment: sqlite-demo-extended and sqlite-demo-inherit (default planets-complete, read by demo_preset_read/), and for the planets step also sqlite-demo-bound (planets is bound there, see demo_preset_read/).",
   "steps": [
     {
       "when": {
@@ -127,7 +144,8 @@
           "profiles": [],
           "boundProfiles": []
         }
-      }
+      },
+      "comment": "Reads the preset planets. Expects its extension, no profile and none bound. Only where planets is the default and nothing is bound to it: sqlite-demo."
     }
   ]
 }

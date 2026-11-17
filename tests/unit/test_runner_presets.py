@@ -94,6 +94,8 @@ def test_a_placeholder_without_a_key_is_the_preset_of_the_descriptor():
         "RPP-Preset": "preset=org.example.rpp.preset.planets;version=1.0"}
 
 
-def test_a_key_the_config_does_not_offer_a_definition_of_is_an_error():
-    with pytest.raises(EnvironmentError, match="no preset 'nope'"):
-        headers_of({"Accept": "{rpp:accept:nope}"}, DEMO)
+@pytest.mark.parametrize("key", ["nope", "habitable-worlds"])
+def test_a_key_the_config_does_not_offer_is_an_error_also_where_the_preset_is_registered(key):
+    # habitable-worlds is defined by the extensions of the bound config, which does not offer it
+    with pytest.raises(EnvironmentError, match=f"no preset '{key}' among the offered presets"):
+        headers_of({"Accept": "{rpp:accept:%s}" % key}, DEMO)

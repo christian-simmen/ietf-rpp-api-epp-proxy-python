@@ -214,8 +214,8 @@ def rpp_headers(env: TestEnvironment, key: str | None = None) -> dict:
     """
     presets = Definitions.load(load_registry(load_settings(str(REPOSITORY / env.config))), EXTENSIONS).presets
     key = key or env.rpp_preset
-    if key not in presets:
-        raise EnvironmentError(f"{env.name}: no preset {key!r} in {env.config}")
+    if key not in env.profile.fact("presets"):
+        raise EnvironmentError(f"{env.name}: no preset {key!r} among the offered presets of {env.config}")
     preset = presets[key]
     if env.preset_signalling == "header":
         return {"{rpp:preset}": preset_header.format_preset(preset), "{rpp:accept}": RPP_MEDIA_TYPE,

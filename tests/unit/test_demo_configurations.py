@@ -250,3 +250,68 @@ def test_the_preset_of_the_definition_applies_to_every_server_that_offers_it(ser
 
     refusal(worlds.post("/planets", planet("c1", type="gas-giant", atmosphere={"@type": "atmosphere", "pressure": 1.0}),
                         "habitable-worlds"), "rocky-planets")
+
+
+# --- the profiles of each offered preset, exactly: the ones of its definition and the ones the server binds
+
+ROCKY, CATALOGUED, HABITABLE_ATMOSPHERES, HABITABLE_ROCKY = (
+    q("rocky-planets"), q("catalogued-satellites"), q("habitable-atmospheres"), q("habitable-rocky-planets"))
+BASE = "urn:ietf:params:rpp:preset:base"
+
+# {preset: (profiles of the definition, bound profiles)}
+PROFILES_OF_PRESETS = {
+    "bare": {BASE: ([], []), p("planets"): ([], [])},
+    "extended": {BASE: ([], []), **{p(key): ([], []) for key in OFFERED["extended"][1:]}},
+    "bound": {BASE: ([], []), p("planets"): ([], [ROCKY]), p("planets-atmosphere"): ([], [HABITABLE_ATMOSPHERES]),
+              p("planets-complete"): ([], [HABITABLE_ROCKY]), p("catalogued-planets"): ([ROCKY, CATALOGUED], [])},
+    "inherit": {BASE: ([], []), p("planets"): ([], []), p("planets-atmosphere"): ([], []), p("planets-orbits"): ([], []),
+                p("planets-complete"): ([], []), p("catalogued-planets"): ([ROCKY, CATALOGUED], []),
+                p("habitable-worlds"): ([ROCKY, CATALOGUED, HABITABLE_ROCKY], [])},
+}
+
+
+@pytest.mark.parametrize("name", CONFIGS)
+def test_discovery_shows_for_each_offered_preset_its_profiles_and_the_bound_ones_apart(servers, name):
+    shown = {entry["id"]: (ids(entry.get("profiles", [])), ids(entry.get("boundProfiles", [])))
+             for entry in servers[name].read("/.well-known/rpp")["presets"]}
+
+    assert shown == {key: (sorted(profiles), sorted(bound)) for key, (profiles, bound) in PROFILES_OF_PRESETS[name].items()}
+
+
+def test_a_preset_with_a_bound_profile_and_none_in_its_definition_shows_only_the_bound_one(servers):
+    body = servers["bound"].read(f"/presets/{p('planets-atmosphere')}")
+
+    assert ids(body["boundProfiles"]) == [HABITABLE_ATMOSPHERES]
+    assert body.get("profiles", []) == []
+
+
+# --- the Preset Schema of each offered preset, exactly: the sub-schemas of its extensions and of the profiles that apply to it
+
+ATMOSPHERE_DEFS = ["ext.atmosphere.planet.create", "ext.atmosphere.planet.read", "ext.atmosphere.planet.update"]
+ORBIT_DEFS = ["ext.orbit.satellite.create", "ext.orbit.satellite.read", "ext.orbit.satellite.update"]
+HABITABLE_DEFS = ["profile.habitable.atmosphere", "profile.habitable.pressure"]
+ROCKY_DEFS = ["profile.rocky.type"]
+CATALOGUED_DEFS = ["profile.catalogued.id"]
+HABITABLE_ROCKY_DEFS = ["profile.habitableRocky.radius"]
+
+# {preset: (sub-schemas of the extensions, sub-schemas of the profiles)}
+SCHEMAS_OF_PRESETS = {
+    "bare": {"planets": ([], [])},
+    "extended": {"planets": ([], []), "planets-atmosphere": (ATMOSPHERE_DEFS, []), "planets-orbits": (ORBIT_DEFS, []),
+                 "planets-complete": (ATMOSPHERE_DEFS + ORBIT_DEFS, [])},
+    "bound": {"planets": ([], ROCKY_DEFS), "planets-atmosphere": (ATMOSPHERE_DEFS, HABITABLE_DEFS),
+              "planets-complete": (ATMOSPHERE_DEFS + ORBIT_DEFS, HABITABLE_DEFS + HABITABLE_ROCKY_DEFS + ROCKY_DEFS),
+              "catalogued-planets": ([], CATALOGUED_DEFS + ROCKY_DEFS)},
+    "inherit": {"planets": ([], []), "planets-atmosphere": (ATMOSPHERE_DEFS, []), "planets-orbits": (ORBIT_DEFS, []),
+                "planets-complete": (ATMOSPHERE_DEFS + ORBIT_DEFS, []), "catalogued-planets": ([], CATALOGUED_DEFS + ROCKY_DEFS),
+                "habitable-worlds": (ATMOSPHERE_DEFS, CATALOGUED_DEFS + HABITABLE_DEFS + HABITABLE_ROCKY_DEFS + ROCKY_DEFS)},
+}
+
+
+@pytest.mark.parametrize("name", CONFIGS)
+def test_the_schema_of_each_offered_preset_has_the_sub_schemas_of_its_own_extensions_and_profiles_only(servers, name):
+    for key, (extensions, profiles) in SCHEMAS_OF_PRESETS[name].items():
+        defs = servers[name].schema(key)["$defs"]
+
+        assert sorted(item for item in defs if item.startswith("ext.")) == sorted(extensions), (name, key)
+        assert profile_defs({"$defs": defs}) == sorted(profiles), (name, key)

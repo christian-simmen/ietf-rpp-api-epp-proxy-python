@@ -4,6 +4,10 @@
   ],
   "test_id": "test4-the_epp_compatibility_profile_is_read",
   "description": "The profile of the EPP compatible preset is read.",
+  "when": {
+    "profile.default_preset": "epp-compatible"
+  },
+  "comment": "Skipped where the default preset is not epp-compatible: rri-mtest and the sqlite demo environments, whose presets have no EPP Compatibility Profile.",
   "steps": [
     {
       "when": {

@@ -4,6 +4,18 @@
   ],
   "test_id": "test3-the_schema_needs_an_accept_that_allows_it",
   "description": "An Accept that does not allow application/schema+json is refused with 406.",
+  "when": [
+    {
+      "profile.default_preset": "epp-compatible"
+    },
+    {
+      "profile.default_preset": "rri"
+    },
+    {
+      "profile.default_preset": "planets"
+    }
+  ],
+  "comment": "Skipped where no step names the default preset of the environment: sqlite-demo-extended and sqlite-demo-inherit (default planets-complete).",
   "steps": [
     {
       "when": {

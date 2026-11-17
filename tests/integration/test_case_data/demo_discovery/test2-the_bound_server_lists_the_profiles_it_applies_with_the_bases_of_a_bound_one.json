@@ -12,7 +12,7 @@
   "comment": "Runs on sqlite-demo-bound only: it is the one that binds profiles.",
   "steps": [
     {
-      "comment": "Reads discovery without authentication. Expects the five offered presets, three extensions and four profiles, each once.",
+      "comment": "Reads discovery without authentication. Expects the five offered presets, each with the profiles of its definition and the bound ones apart, three extensions and four profiles, each once.",
       "request": {
         "method": "GET",
         "url": "/.well-known/rpp",
@@ -34,23 +34,57 @@
           "presets": [
             {
               "@type": "preset",
-              "id": "urn:ietf:params:rpp:preset:base"
+              "id": "urn:ietf:params:rpp:preset:base",
+              "profiles": [],
+              "boundProfiles": []
             },
             {
               "@type": "preset",
-              "id": "org.example.rpp.preset.planets"
+              "id": "org.example.rpp.preset.planets",
+              "profiles": [],
+              "boundProfiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.rocky-planets"
+                }
+              ]
             },
             {
               "@type": "preset",
-              "id": "org.example.rpp.preset.planets-atmosphere"
+              "id": "org.example.rpp.preset.planets-atmosphere",
+              "profiles": [],
+              "boundProfiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.habitable-atmospheres"
+                }
+              ]
             },
             {
               "@type": "preset",
-              "id": "org.example.rpp.preset.planets-complete"
+              "id": "org.example.rpp.preset.planets-complete",
+              "profiles": [],
+              "boundProfiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.habitable-rocky-planets"
+                }
+              ]
             },
             {
               "@type": "preset",
-              "id": "org.example.rpp.preset.catalogued-planets"
+              "id": "org.example.rpp.preset.catalogued-planets",
+              "profiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.rocky-planets"
+                },
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.catalogued-satellites"
+                }
+              ],
+              "boundProfiles": []
             }
           ],
           "extensions": [

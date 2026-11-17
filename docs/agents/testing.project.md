@@ -170,15 +170,15 @@ there is no second file. Three more compose the demo extensions, profiles and pr
 
 | Config / environment | Presets (default first) | Bound profiles | Signalling |
 |---|---|---|---|
-| `config.demo-extended.yaml` / `sqlite-demo-extended` | planets-complete, planets, planets-atmosphere, planets-orbits | none | header |
-| `config.demo-bound.yaml` / `sqlite-demo-bound` | planets, planets-atmosphere, planets-complete, catalogued-planets | planets: rocky-planets, planets-atmosphere: habitable-atmospheres, planets-complete: habitable-rocky-planets | media-type |
-| `config.demo-inherit.yaml` / `sqlite-demo-inherit` | planets-complete, planets, planets-atmosphere, planets-orbits, catalogued-planets, habitable-worlds | none | header |
+| `config.demo-extended.yaml` / `sqlite-demo-extended` | base, planets-complete, planets, planets-atmosphere, planets-orbits | none | header |
+| `config.demo-bound.yaml` / `sqlite-demo-bound` | base, planets, planets-atmosphere, planets-complete, catalogued-planets | planets: rocky-planets, planets-atmosphere: habitable-atmospheres, planets-complete: habitable-rocky-planets | media-type |
+| `config.demo-inherit.yaml` / `sqlite-demo-inherit` | base, planets-complete, planets, planets-atmosphere, planets-orbits, catalogued-planets, habitable-worlds | none | header |
 
 The groups of the plain objects run in every one of them. `demo_discovery/`, `demo_preset_read/` and `demo_binding/` show the
 composition of each (a case is selected by `profile.presets`, `profile.default_preset` and `profile.bound_profiles`, whose map
 `contains` tests a preset key), and the criterion pair: the same planet of the type gas-giant is accepted under `planets` on `sqlite-demo` and
-refused with 422 `02308` and the profile rocky-planets on `sqlite-demo-bound`. The generic cases that create other types than rocky are
-skipped on `sqlite-demo-bound`. A list in an expected body must have the length of the actual one, so a profile or extension listed twice fails.
+refused with 422 `02308` and the profile rocky-planets on `sqlite-demo-bound`. Five generic cases that create other types than rocky are
+skipped on `sqlite-demo-bound`, and `sqlite_drafts_objects/test5` (the discovery of the bare server) where more presets are offered. A list in an expected body must have the length of the actual one, so a profile or extension listed twice fails.
 Exact assertions over each real config file are in [test_demo_configurations.py](../../tests/unit/test_demo_configurations.py).
 
 The configurations that must not start are in [tests/refused_configs/](../../tests/refused_configs/), not in an environment: a binding that lacks

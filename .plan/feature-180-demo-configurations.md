@@ -17,7 +17,7 @@ Worktree `/home/vscode/worktrees/rpp-presets`, mutex taken there. Clean-main ste
 - [x] T2 Test-only definitions `tests/refused_configs/` and the refused configs
 - [x] T3 Configs `config.demo-extended.yaml`, `config.demo-bound.yaml`, `config.demo-inherit.yaml`
 - [x] T4 Environments `sqlite-demo-extended`, `sqlite-demo-bound`, `sqlite-demo-inherit`
-- [x] T5 Integration cases (groups `demo_discovery`, `demo_preset_read`, `demo_binding`) and `when` on the generic cases a binding refuses
+- [x] T5 Integration cases (groups `demo_discovery`, `demo_preset_read`, `demo_binding`) and `when` on the generic cases a binding refuses (five)
 - [x] T6 Docs: testing.project.md, architecture.project.md, README.md, deploy README mention if needed
 - [~] T7 Checks on the final commit (lint-imports, unit, smoke incl. rri-mtest), draft PR
 
@@ -146,7 +146,12 @@ where the real text differs the test pins the real text and the plan is correcte
 - Placeholders with a key (`{rpp:preset:KEY}` ...) work for both signalling methods, so the extra pairs of `demo_binding/` are integration cases. Unit test in `test_runner_presets.py`.
 - A list in an expected body must have the length of the actual one (`recusive_compare_existing`), so the integration cases assert "each once" too.
   Mutations (a wrong profile, an extra bound profile) fail the cases.
-- sqlite-demo-bound skips six generic cases (types other than rocky), see the `when`/`comment` in them. `sqlite_drafts_objects/test5` and the planets step of `preset_read/test1` got a `when` for the bare configuration.
+- sqlite-demo-bound skips five generic cases (types other than rocky), see the `when`/`comment` in them. `sqlite_drafts_objects/test5` is skipped where more presets are offered, and `preset_read/test1` to `test4` have a case-level `when` (they read the default preset of epp-docker, rri-mtest and the bare config, so they showed zero steps elsewhere).
+
+## Review round 1 (PR #201)
+
+- Verified, left alone: list-length claim, expected lists, skipped cases, refused configurations, placeholders, `contains` selector.
+- Fixed: bound profiles per preset (exact map from discovery in `test_demo_configurations.py`, `demo_discovery/test2` entries, `/presets/planets-atmosphere` on bound); Preset Schema exact per offered preset (extension and profile `$defs`); case-level `when` and `comment` on `preset_read/test1-test4`, step comment in test1; `{rpp:*:KEY}` checks the offered presets (`env.profile.fact("presets")`) with a test for registered but not offered `habitable-worlds`; `base` in the table of testing.project.md; five (not six) type cases in docs and PR.
 
 ## Check results (commit of the code: see `git log`, no code edit after the runs)
 
