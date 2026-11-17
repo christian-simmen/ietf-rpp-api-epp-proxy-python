@@ -97,6 +97,21 @@ def test_every_environment_has_the_profile_tld_and_lgrs_of_its_config():
         assert env.profile.lgrs == (("latn-1.0",) if "domainName" in env.profile.objects else ())
 
 
+def _fact_paths(facts: dict, prefix: str = "") -> set[str]:
+    paths = set()
+    for key, value in facts.items():
+        paths |= _fact_paths(value, f"{prefix}{key}.") if isinstance(value, dict) else {f"{prefix}{key}"}
+    return paths
+
+
+def test_every_environment_states_the_same_facts():
+    # A case's selectors are checked against every environment when it loads, so a fact one environment lacks fails
+    # the cases that name it everywhere. An environment states a fact it does not know as null.
+    paths = {name: _fact_paths(load(name, with_credentials=False).facts) for name in environment_names()}
+    every = set().union(*paths.values())
+    assert {name: sorted(every - own) for name, own in paths.items() if every - own} == {}
+
+
 def test_a_missing_variable_is_named_and_refused():
     with pytest.raises(EnvironmentError, match="TEST_EPP_REGACC2_PASSWORD"):
         load("epp-docker", environ={k: v for k, v in EPP_ENV.items() if k != "TEST_EPP_REGACC2_PASSWORD"})

@@ -7,10 +7,10 @@
   "when": {
     "env.preset_signalling": "header"
   },
-  "comment": "Skipped on rri-mtest: MTEST's config signals the profile by media type; the twin in profile_signalling_media_type/ covers it.",
+  "comment": "Skipped on rri-mtest: MTEST's config signals the preset by media type; the twin in preset_signalling_media_type/ covers it.",
   "steps": [
     {
-      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=urn:ietf:params:rpp:profile:epp-compatibility;version=1.0; expects 400 02004. An error answer this case checks. Only where the server offers no epp profile (rri-mtest).",
+      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=urn:ietf:params:rpp:preset:epp-compatible;version=1.0; expects 400 02004. An error answer this case checks. Only where the server offers no epp-compatible preset (rri-mtest).",
       "when": {
         "profile.presets": {
           "not": {
@@ -42,7 +42,7 @@
       }
     },
     {
-      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Profile profile=de.denic.rpp.profile.rri;version=1.0; expects 400 02004. The error answer this case checks. Only where the server offers no rri profile (epp-docker).",
+      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=de.denic.rpp.preset.rri;version=1.0; expects 400 02004. The error answer this case checks. Only where the server offers no rri preset (epp-docker).",
       "when": {
         "profile.presets": {
           "not": {

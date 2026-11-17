@@ -233,7 +233,8 @@ an object. A leaf means the same wherever it is:
 | `<what>_required` | whether a value must have it, such as `upper_and_digit_required` |
 | `changeable`, `removable` | whether an update can change or clear the field |
 
-`null` says the field is not there or the limit is not known. A defect of a server that breaks cases is a fact under
+`null` says the field is not there or the limit is not known. Every environment states the same facts, with `null` for one it does not know: a
+case's selectors are checked against every environment when it loads (`test_every_environment_states_the_same_facts`). A defect of a server that breaks cases is a fact under
 `bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`). A `when` names the fact the case depends on,
 not another that happens to go with it on today's backends (`aaaa` records do not stand in for "no host objects").
 Facts are in block style, without `{}`.
