@@ -268,3 +268,14 @@ def test_an_extension_that_extends_another_extension_needs_it_in_the_preset(monk
     assert build(definitions_with([both, alone]), ["both"], held=held).offered[0].extension_ids == (owner.id, adding.id)
     with pytest.raises(ValueError, match="org.example.adding.*extends.*thing.create.*org.example.owner.*alone"):
         build(definitions_with([both, alone]), ["alone"], held=held)
+
+
+def test_an_extension_that_extends_a_definition_its_owner_lacks_stops_the_server(monkeypatch):
+    owner, adding = _owned_pair()
+    owner = RppExtension(id=owner.id, name="o", version="1.0", url=owner.url, extends={}, defs={})
+    monkeypatch.setitem(EXTENSIONS, owner.id, owner)
+    monkeypatch.setitem(EXTENSIONS, adding.id, adding)
+    both = preset("both", base_presets=[BASE["id"]], extensions=[(owner.id, "1.0"), (adding.id, "1.0")])
+
+    with pytest.raises(ValueError, match="org.example.adding extends thing.create, which the extension org.example.owner does not define"):
+        build(definitions_with([both]), ["both"], held=(owner.id, adding.id))

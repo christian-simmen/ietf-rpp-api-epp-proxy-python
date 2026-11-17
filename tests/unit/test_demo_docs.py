@@ -115,6 +115,7 @@ def test_a_profile_specification_shows_its_profile_schema_and_its_overview(key):
 
     assert shown == definition.schema == json.loads((SPEC / f"{key}-profile.schema.json").read_text(encoding="utf-8"))
     overview = table(text)
+    assert (overview["Name"], overview["Version"], overview["RPP version"]) == (definition.name, definition.version, definition.rpp_version)
     assert overview["Identifier"] == f"`{definition.id}`"
     assert overview["Profile Schema `$id`"] == f"<{definition.schema['$id']}>"
     assert overview["Specification"] == f"<{definition.url}>"
@@ -141,8 +142,9 @@ def test_a_valid_example_passes_with_and_without_the_profile_and_a_violating_one
         if kind == "valid":
             with_.validate_request(name, example)
         else:
-            with pytest.raises(ProfileConstraintViolation):
+            with pytest.raises(ProfileConstraintViolation) as refused:
                 with_.validate_request(name, example)
+            assert refused.value.profile == DEFINITIONS.profiles[key].id      # the profile of the document refuses it
 
 
 # --- presets
@@ -160,7 +162,8 @@ def test_a_preset_specification_states_the_definition_the_proxy_registers(key):
     definition = DEFINITIONS.presets[key]
     overview = table(text)
 
-    assert overview["Identifier"] == f"`{definition.id}`" and overview["Version"] == definition.version
+    assert (overview["Name"], overview["Version"], overview["RPP version"]) == (definition.name, definition.version, definition.rpp_version)
+    assert overview["Identifier"] == f"`{definition.id}`"
     assert overview["Specification"] == f"<{definition.url}>"
     assert listed(overview["Extensions"]) == [(r.id, r.version) for r in definition.extensions]
     assert listed(overview["Profiles"]) == [(r.id, r.version) for r in definition.profiles]

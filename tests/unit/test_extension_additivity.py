@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.extension_additivity import check_additive
 from rpp.schema.extensions import EXTENSIONS, _from_schema
 from rpp.schema.rpp_extension import RppExtension
@@ -75,8 +76,11 @@ def test_an_extension_schema_that_only_adds_is_accepted(sub):
 def test_the_extensions_of_the_proxy_are_additive():
     for known in EXTENSIONS.values():
         check_additive(known)
-    for path in [*Path("src/rpp/schema/schemas/extensions").glob("*.json"), *Path("src/extensions").rglob("*-extension.schema.json")]:
-        check_additive(_from_schema(json.loads(path.read_text(encoding="utf-8"))))
+    paths = [*Path("src/rpp/schema/schemas/extensions").glob("*.json"), *Path("src/extensions").rglob("*-extension.schema.json")]
+    loaded = [_from_schema(json.loads(path.read_text(encoding="utf-8"))) for path in paths]
+    definitions = {**bundle_definitions(), **{name: schema for item in loaded for name, schema in item.defs.items()}}
+    for item in loaded:
+        check_additive(item, definitions)
 
 
 def test_the_document_of_an_extension_schema_has_no_rpp_constraints():
@@ -116,3 +120,11 @@ def test_the_key_of_a_definition_of_another_extension_is_its_schema_and_the_defi
 
     assert loaded.extends == {"thing.create": "ext.x", "domainName.create": "ext.y"}
     assert loaded.owners == {"thing.create": OWNER}
+
+
+def test_a_key_without_a_schema_must_name_a_definition_of_rpp():
+    document = {"$id": "https://x", "rpp:extension": {"id": "x", "name": "x", "version": "1.0"},
+                "rpp:extends": {"#/$defs/thing.create": "#/$defs/ext.x"}, "$defs": {"ext.x": {}}}
+
+    with pytest.raises(ValueError, match=r"The extension x extends thing.create, which RPP does not define.*<\$id of the owner>#/\$defs/thing.create"):
+        _from_schema(document)

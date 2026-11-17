@@ -4,8 +4,16 @@ import base64
 
 import pytest
 
+from registration import load_extensions
+from rpp.schema.definitions import Definitions
+from rpp.schema.extension_registration import register_all
+from rpp.schema.extensions import EXTENSIONS
+from rpp.schema.offered_presets import OfferedPresets
 from tests.helper.demo_app import ATMOSPHERE, PLANETS, demo_composition
+from tests.helper.preset_fixtures import BASE, preset as fixture_preset, registry_with
 
+ATMOSPHERE_ID = "org.example.rpp.extension.planet-atmosphere"
+PLANETS_ID = "org.example.rpp.extension.planets"
 MEDIA_TYPE = "application/rpp+json"
 HEADERS = {"Authorization": "Basic " + base64.b64encode(b"demo-a:demo-a-password").decode(), "Accept": MEDIA_TYPE,
            "RPP-Cltrid": "t-1"}
@@ -100,6 +108,12 @@ def test_a_configuration_that_offers_a_preset_of_an_extension_it_does_not_name_d
         demo_composition(tmp_path / "demo.db", extensions=(PLANETS, ATMOSPHERE), presets=("planets", "planets-orbits"))
 
 
-def test_a_configuration_that_names_the_atmosphere_without_the_planets_does_not_start(tmp_path):
-    with pytest.raises(ValueError):
-        demo_composition(tmp_path / "demo.db", extensions=(ATMOSPHERE,), presets=("planets-atmosphere",))
+def test_a_preset_that_has_the_atmosphere_extension_without_the_planets_extension_does_not_start():
+    registry = load_extensions([PLANETS, ATMOSPHERE])
+    register_all(registry)
+    atmosphere_only = fixture_preset("atmosphere-only", base_presets=[BASE["id"]], extensions=[(ATMOSPHERE_ID, "1.0")])
+    definitions = Definitions.load(registry, EXTENSIONS)
+    definitions.presets["atmosphere-only"] = Definitions.load(registry_with([atmosphere_only]), EXTENSIONS).presets["atmosphere-only"]
+
+    with pytest.raises(ValueError, match=f"{ATMOSPHERE_ID} extends planet.create of the extension {PLANETS_ID}.*atmosphere-only"):
+        OfferedPresets.build(definitions, ["atmosphere-only"], "atmosphere-only", {}, (ATMOSPHERE_ID, PLANETS_ID))

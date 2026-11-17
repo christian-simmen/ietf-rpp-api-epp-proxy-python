@@ -162,6 +162,7 @@ def test_habitable_rocky_planets_requires_the_radius_and_names_itself(app):
 
     refused_by(app.send("PUT", "/planets/mars", "habitable-worlds", update(radius=None, atmosphere=atmosphere(1.0))),
                "habitable-rocky-planets")
+    assert app.send("PUT", "/planets/mars", "planets-atmosphere", update(radius=None, atmosphere=atmosphere(1.0))).status_code == 200
 
 
 def test_habitable_rocky_planets_refuses_the_removal_of_the_radius(app):
@@ -275,3 +276,55 @@ def test_the_members_are_deleted_with_the_planet_and_a_planet_deleted_leaves_non
     assert app.send("DELETE", "/planets/mars", "planets-complete").status_code == 200
 
     assert app.planet("planets-complete").json().get("atmosphere") is None
+
+
+# --- a response shows the members of the extensions of the response's preset (media-type signalling)
+
+def typed(key):
+    return f"{MEDIA_TYPE};preset=org.example.rpp.preset.{key};preset-version=1.0"
+
+
+@pytest.fixture(scope="module")
+def media_type_app(tmp_path_factory):
+    composition = demo_composition(tmp_path_factory.mktemp("demo") / "demo.db", signalling="media-type")
+    yield composition.app.test_client()
+    composition.sessions.close()
+
+
+def media(client, method, url, request_preset, response_preset, body=None):
+    # the Accept lists the request preset too (else 400), with a lower weight, and the response preset the client prefers
+    accept = typed(response_preset) if response_preset == request_preset else f"{typed(request_preset)};q=0.1, {typed(response_preset)}"
+    headers = {**AUTH, "Content-Type": typed(request_preset), "Accept": accept}
+    return client.request(method, url, headers=headers, content=json.dumps(body) if body is not None else None)
+
+
+def test_a_response_shows_the_members_of_the_response_preset_and_not_those_of_the_request_preset(media_type_app):
+    created = media(media_type_app, "POST", "/planets", "planets-complete", "planets", planet("venus", atmosphere=atmosphere()))
+    assert created.status_code == 201 and "atmosphere" not in created.json()
+
+    assert "atmosphere" not in media(media_type_app, "GET", "/planets/venus", "planets-complete", "planets").json()
+    assert "atmosphere" not in media(media_type_app, "PUT", "/planets/venus", "planets-complete", "planets",
+                                     update(atmosphere=atmosphere())).json()
+    assert "atmosphere" not in media(media_type_app, "PATCH", "/planets/venus", "planets-complete", "planets",
+                                     replace("/atmosphere", atmosphere())).json()
+
+
+def test_a_response_shows_the_members_of_the_response_preset_also_where_the_request_preset_lacks_them(media_type_app):
+    assert media(media_type_app, "POST", "/planets", "planets-complete", "planets-complete",
+                 planet("mars", atmosphere=atmosphere(2.0))).status_code == 201
+
+    read = media(media_type_app, "GET", "/planets/mars", "planets", "planets-complete")
+    assert read.status_code == 200 and read.json()["atmosphere"] == atmosphere(2.0)
+    kept = media(media_type_app, "PUT", "/planets/mars", "planets", "planets-complete", update(radius=1.0))
+    assert kept.json()["atmosphere"] == atmosphere(2.0)
+
+
+def test_the_same_holds_for_the_orbit_of_a_satellite(media_type_app):
+    assert media(media_type_app, "POST", "/planets", "planets-complete", "planets-complete", planet("earth")).status_code == 201
+    orbit = {"@type": "orbit", "semiMajorAxis": 384400}
+    created = media(media_type_app, "POST", "/satellites", "planets-complete", "planets", satellite("moon-i", "earth", orbit=orbit))
+    assert created.status_code == 201 and "orbit" not in created.json()
+
+    assert "orbit" not in media(media_type_app, "GET", "/satellites/moon-i", "planets-complete", "planets").json()
+    assert media(media_type_app, "GET", "/satellites/moon-i", "planets", "planets-complete").json()["orbit"] == orbit
+    assert "orbit" not in media(media_type_app, "GET", "/planets/earth/satellites/moon-i", "planets-complete", "planets").json()

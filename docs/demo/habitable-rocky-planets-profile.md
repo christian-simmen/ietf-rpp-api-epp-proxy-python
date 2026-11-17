@@ -161,26 +161,7 @@ Example planet create request without a radius:
 }
 ```
 
-Example planet create request of a gas giant, which the base profile `rocky-planets` refuses:
-
-<!-- example violates planet.create -->
-```json
-{
-    "@type": "planet",
-    "id": "kepler-22b",
-    "type": "gas-giant",
-    "radius": 15290,
-    "authInfo": {
-        "@type": "authInfo",
-        "method": "authinfo",
-        "authdata": "s3cr3t"
-    },
-    "atmosphere": {
-        "@type": "atmosphere",
-        "pressure": 1.0
-    }
-}
-```
+A request that a base profile refuses, such as a gas giant that `rocky-planets` refuses, is refused with the base profile named in `profile`.
 
 Example planet update request without a radius:
 

@@ -4,6 +4,7 @@ Which of them a deployment holds is the `extensions` of its backend profile, and
 import json
 from pathlib import Path
 
+from rpp.schema.bundle_definitions import bundle_definitions
 from rpp.schema.rpp_extension import RppExtension
 
 FOLDER = Path(__file__).parent / "schemas" / "extensions"
@@ -28,6 +29,10 @@ def _from_schema(schema: dict) -> RppExtension:
     if "rpp:constraints" in schema:
         raise ValueError(f"The Extension Schema of {about.get('id')} contains rpp:constraints, which only a Profile Schema has")
     targets = {key: _target(key) for key in schema["rpp:extends"]}
+    for name, uri in targets.values():
+        if uri is None and name not in bundle_definitions():
+            raise ValueError(f"The extension {about.get('id')} extends {name}, which RPP does not define: a definition of another "
+                             f"extension is named <$id of the owner>#/$defs/{name}")
     return RppExtension(
         id=about["id"], name=about["name"], version=about["version"], url=schema["$id"],
         extends={targets[key][0]: _name(ext) for key, ext in schema["rpp:extends"].items()},

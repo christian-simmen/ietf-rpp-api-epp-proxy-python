@@ -44,7 +44,7 @@ Terms of the RPP data model, such as Data Object, Component Object, data element
 
 This section is non-normative.
 
-The extension adds a data element to the Satellite Data Object of the planets extension, as [@!I-D.wullink-rpp-extension-guidelines, section 5.1] describes for a change of an existing Data Object. It defines no Data Object, operation, result code, header field, or endpoint of its own. It adds no constraint to the Satellite: the bounds below are those of the new data element only, and a requirement that constrains the Satellite is a profile (see [profiles](#profiles)).
+The extension adds a data element to the Satellite Data Object of the planets extension, as [@!I-D.wullink-rpp-extension-guidelines, section 5.1] describes for a change of an existing Data Object. It defines no Data Object, operation, result code, header field, or endpoint of its own. It adds no constraint to the Satellite: the bounds below are those of the new data element only, and a requirement that constrains the Satellite is a profile (see [@!I-D.wullink-rpp-extension-guidelines, section 6], and [rocky-planets](rocky-planets-profile.md) for an example of a profile of the planets extension).
 
 # Extension Overview {#overview}
 

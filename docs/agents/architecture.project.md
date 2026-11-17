@@ -475,7 +475,7 @@ maps its extension id to a typed object of its own `core`, and its SQLite part g
 typed object, to the typed changes of a patch, and back) that the extension adds in its `register` to `PLANET_MEMBERS` or
 `SATELLITE_MEMBERS` (`extensions/planets/rpp/mapping/object_members.py`, process-global and idempotent as the schema registry): the
 planets mappers take the members of the extensions of the request's preset out of the body after step 1, so a member of another
-extension is undeclared (400), and put them back on a read. A patch changes such a member as a whole (`/atmosphere`, `/orbit`),
+extension is undeclared (400), and a read shows those of the extensions of the response's preset (`response_profile()`, which differs from the request's with media-type signalling). A patch changes such a member as a whole (`/atmosphere`, `/orbit`),
 a deeper path is 400. A full update carries `scope`, the extensions of the request's preset: the gateway replaces the members of
 those, and removes one the request omits, and keeps the members of the others (`planet-atmosphere` and `satellite-orbit`, the
 demo extensions that use it, are in [docs/demo/](../demo/)). An Extension Schema may extend a definition of another extension,
