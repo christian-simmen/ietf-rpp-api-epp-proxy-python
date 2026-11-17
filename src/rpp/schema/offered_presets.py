@@ -58,6 +58,15 @@ class OfferedPresets:
             if reference.id not in held_extensions:
                 raise ValueError(f"{label} contains the extension {reference.id}, which the backend does not hold")
             extensions.append(implemented)
+        for extension in extensions:
+            for name, owner_url in extension.owners.items():
+                owner = next((other for other in extensions if other.url == owner_url), None)
+                if owner is None:
+                    known = next((other.id for other in EXTENSIONS.values() if other.url == owner_url), owner_url)
+                    raise ValueError(f"The extension {extension.id} extends {name} of the extension {known}, "
+                                     f"which the preset {preset.id} does not contain")
+                if name not in owner.defs:
+                    raise ValueError(f"The extension {extension.id} extends {name}, which the extension {owner.id} does not define")
         profiles = flattening.profiles(preset)
         if len(set(bound_keys)) != len(bound_keys):
             raise ValueError(f"bound_profiles of {preset.key} names a profile twice")
@@ -85,10 +94,10 @@ class OfferedPresets:
 
     @classmethod
     def _check_schemas(cls, item: OfferedPreset) -> None:
-        for extension in item.extensions:
-            check_additive(extension)
         base = bundle_definitions()
         defs = {**base, **{name: schema for extension in item.extensions for name, schema in extension.defs.items()}}
+        for extension in item.extensions:
+            check_additive(extension, defs)
         taken = {name: "RPP or an extension" for name in defs}
         for profile in item.applicable:
             constraints = ProfileConstraints.of(profile, item.required[profile.id])

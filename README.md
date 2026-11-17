@@ -50,7 +50,9 @@ The `sqlite` backend is a test bed for protocol features, bare RPP over a databa
 objects (their paths answer 501 `02307`), but the planets and satellites of the demo extension
 `org.example.rpp.extension.planets` ([docs/demo/planets-extension.md](docs/demo/planets-extension.md)), with create,
 read, update, partial update, delete, availability and, for planets, the EPP-style transfer with its messages. The
-extension is registered by the config (`rpp_extensions: [extensions.planets]`), and without it the proxy does not know it.
+extension is registered by the config (`rpp_extensions: [extensions.planets]`), and without it the proxy does not know it. Two more demo
+extensions add an atmosphere to a planet and an orbit to a satellite (`extensions.planet_atmosphere`, `extensions.satellite_orbit`),
+with demo profiles and presets for them; they are specified in [docs/demo/](docs/demo/).
 The clients are `rpp_sqlite_clients`, a user and the `scrypt` hash of its password
 (`echo -n secret | python -m registry_adapter.sqlite.hash_password`, from `src/`); the user is the sponsoring client.
 ```

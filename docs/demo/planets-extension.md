@@ -232,6 +232,8 @@ The Update operation allows a client to modify the read-write data elements of a
 
 A server MUST reject an update of a planet with a pending transfer.
 
+An extension may add data elements to the Planet, as the planet atmosphere extension does ([planet-atmosphere-extension.md](planet-atmosphere-extension.md)). A full update replaces the data elements of the extensions that the signalled preset contains: one that the request omits is removed. It leaves the data elements of the extensions that the preset does not contain as they are, as the client cannot see them. A partial update changes such a data element as a whole.
+
 #### Delete Operation
 
 * Identifier: delete
@@ -317,7 +319,7 @@ The Satellite Data Object has the Availability, Create, Read, Update and Delete 
 
 * Create: the planet MUST exist and be sponsored by the client that creates the satellite.
 * Read: any authenticated client is authorised to perform this operation.
-* Update and Delete: only the sponsoring client is authorised to perform them. A server MUST reject them while the planet has a pending transfer.
+* Update and Delete: only the sponsoring client is authorised to perform them. A server MUST reject them while the planet has a pending transfer. An update treats the data elements that other extensions add as for the Planet.
 
 ### Processes
 
@@ -938,3 +940,4 @@ None. The identifiers of planets and satellites are strings of the Identifier ty
 ## 1.0
 
 * initial version: the Planet and Satellite Data Objects with availability, create, read, update, delete and the transfer of a planet #177
+* full update replaces only the data elements of the extensions of the signalled preset, and other extensions may add data elements #179

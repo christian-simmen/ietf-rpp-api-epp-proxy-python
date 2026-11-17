@@ -26,7 +26,7 @@ class ExtensionRegistry:
         return tuple(self._extensions)
 
     def handler_packages(self) -> tuple[str, ...]:
-        return tuple(extension.handlers for extension in self)
+        return tuple(extension.handlers for extension in self if extension.handlers)
 
     def backend_parts(self, backend: str) -> dict[str, str]:
         """The module of each registered extension in the backend, by extension id."""

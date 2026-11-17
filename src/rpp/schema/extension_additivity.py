@@ -20,6 +20,7 @@ be additive, and is refused too, because a whitelist cannot let a schema that co
 import re
 
 from rpp.schema.bundle_definitions import bundle_definitions
+from rpp.schema.extensions import EXTENSIONS
 from rpp.schema.profile_schema_walk import expand
 from rpp.schema.rpp_extension import RppExtension
 
@@ -30,10 +31,9 @@ _OPEN = ("additionalProperties", "unevaluatedProperties")
 
 
 class _Check:
-    def __init__(self, extension: RppExtension, definition: str, base_name: str):
+    def __init__(self, extension: RppExtension, definition: str, base_name: str, base: dict):
         self.label = f"The extension {extension.id}, definition {definition}"
         self.base_name = base_name
-        base = bundle_definitions()
         self.declared = {name for schema in expand([base[base_name]], base) for name in schema.get("properties", {})}
         self.own: set[str] = set()
 
@@ -101,6 +101,11 @@ class _Check:
             self.fail(keyword, f"naming {', '.join(stray)}, which the sub-schema does not declare, so it constrains {self.base_name}")
 
 
-def check_additive(extension: RppExtension) -> None:
+def check_additive(extension: RppExtension, definitions: dict | None = None) -> None:
+    """Checks each sub-schema of the extension against the definition it extends. `definitions` are those of the bundle and of
+    the extensions that define the definition (the owners); by default the bundle and every known extension."""
+    if definitions is None:
+        definitions = {**bundle_definitions(), **{name: schema for known in EXTENSIONS.values() if known.id != extension.id
+                                                  for name, schema in known.defs.items()}}
     for base_name, ext_name in extension.extends.items():
-        _Check(extension, ext_name, base_name).run(extension.defs[ext_name])
+        _Check(extension, ext_name, base_name, definitions).run(extension.defs[ext_name])

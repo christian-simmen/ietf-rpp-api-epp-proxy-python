@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planet-atmosphere-extension.schema.json",
+  "title": "RPP Planet Atmosphere demo extension",
+  "description": "Adds the member atmosphere to the Planet of the planets demo extension. See docs/demo/planet-atmosphere-extension.md.",
+  "rpp:extension": {
+    "name": "RPP Planet Atmosphere",
+    "id": "org.example.rpp.extension.planet-atmosphere",
+    "version": "1.0",
+    "objects": []
+  },
+  "rpp:extends": {
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.create": "#/$defs/ext.atmosphere.planet.create",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.read": "#/$defs/ext.atmosphere.planet.read",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.update": "#/$defs/ext.atmosphere.planet.update"
+  },
+  "$defs": {
+    "atmosphere": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "const": "atmosphere"
+        },
+        "pressure": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dominantGas": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "@type",
+        "pressure"
+      ]
+    },
+    "ext.atmosphere.planet.create": {
+      "type": "object",
+      "properties": {
+        "atmosphere": {
+          "$ref": "#/$defs/atmosphere"
+        }
+      }
+    },
+    "ext.atmosphere.planet.read": {
+      "type": "object",
+      "properties": {
+        "atmosphere": {
+          "$ref": "#/$defs/atmosphere"
+        }
+      }
+    },
+    "ext.atmosphere.planet.update": {
+      "type": "object",
+      "properties": {
+        "atmosphere": {
+          "$ref": "#/$defs/atmosphere"
+        }
+      }
+    }
+  }
+}

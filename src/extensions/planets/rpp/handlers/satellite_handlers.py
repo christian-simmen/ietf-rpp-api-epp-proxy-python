@@ -6,7 +6,7 @@ from extensions.planets.core.flows.satellite_flows import create_satellite, patc
 from extensions.planets.rpp.handlers.planets_gateways import gateways
 from extensions.planets.rpp.mapping import satellite_availability, satellite_patch, satellite_replacement, satellites
 from rpp.handlers.shared.requested_elements import requested_elements
-from rpp.http.context import request_profile
+from rpp.http.context import request_profile, response_profile
 from rpp.http.headers import client_transaction_id, generate_rpp_response_headers
 from rpp.http.operation import map_request, require_empty_body, rpp_operation
 from rpp.http.problem import raise_registry_error
@@ -18,6 +18,11 @@ def _extensions():
     return request_profile().extensions
 
 
+def _shown():
+    """The extensions of the preset of the response: what a response shows."""
+    return response_profile().extensions
+
+
 def _mutation_answer(result, status=200, extra_headers=None):
     """The answer to a mutation: the satellite as read after it, or 202 with no body when that read failed."""
     if isinstance(result, ErrorResponse):
@@ -25,7 +30,7 @@ def _mutation_answer(result, status=200, extra_headers=None):
     headers = {**generate_rpp_response_headers(result.mutation), **(extra_headers or {})}
     if result.stored is None:
         return None, 202, headers
-    return satellites.model_to_rpp(result.stored, _extensions()), status, headers
+    return satellites.model_to_rpp(result.stored, _shown()), status, headers
 
 
 @rpp_operation
@@ -42,7 +47,7 @@ def satellites_read(id):
     response = gateways().satellites.info(id, client_transaction_id=client_transaction_id())
     if isinstance(response, ErrorResponse):
         raise_registry_error(response)
-    return satellites.model_to_rpp(response.payload, _extensions()), 200, generate_rpp_response_headers(response)
+    return satellites.model_to_rpp(response.payload, _shown()), 200, generate_rpp_response_headers(response)
 
 
 @rpp_operation
@@ -87,5 +92,5 @@ def satellites_availabilityHead(id):
 @rpp_operation
 def satellites_availability(id):
     response = _availability(id)
-    return (satellite_availability.model_to_rpp(response.payload, _extensions()),
+    return (satellite_availability.model_to_rpp(response.payload, _shown()),
             200 if response.payload.available else 404, generate_rpp_response_headers(response))
