@@ -7,7 +7,6 @@ from connexion import FlaskApp
 from connexion.datastructures import MediaTypeDict
 from connexion.exceptions import ProblemException
 from connexion.middleware import MiddlewarePosition
-from connexion.resolver import RelativeResolver
 from connexion.validators import VALIDATOR_MAP
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -23,7 +22,9 @@ from rpp.http.middleware.line_feed_path_middleware import LineFeedPathMiddleware
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
-from rpp.http.extension_paths import add_extension_paths
+from registration import ExtensionRegistry
+from rpp.http.extension_paths import add_extension_paths, add_registered_paths
+from rpp.http.extension_resolver import ExtensionResolver
 from rpp.http.profile_schema_path import add_profile_schema_path
 from rpp.schema.extensions import check_known
 from rpp.schema.https_url import https_url
@@ -54,7 +55,8 @@ def public_base_url(discovery_settings) -> str | None:
     return url if https_url(url) else None
 
 
-def create_app(sessions, profile: BackendProfile, discovery_settings=None, signalling=HEADER_SIGNALLING):
+def create_app(sessions, profile: BackendProfile, discovery_settings=None, signalling=HEADER_SIGNALLING,
+               registry: ExtensionRegistry | None = None):
     """
     Builds the application.
 
@@ -65,7 +67,10 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
         discovery_settings: Has rpp_base_url, rpp_tlds, rpp_environment_name and
             rpp_environment_status, which the discovery document states.
         signalling: How a client names the profile of a request (`rpp_profile_signalling`): `header` or `media-type`.
+        registry: The extensions this app registered (`rpp_extensions`): their paths and handlers are the app's, and
+            only its. Without it the app is the drafts' and the extensions of the proxy's own.
     """
+    registry = registry or ExtensionRegistry()
     check_known(profile.extensions)
     profiles = RppProfiles.build(profile.profiles, profile.default_profile, profile.extensions)
     request_profiles = RequestProfiles(profile, profiles)
@@ -90,8 +95,9 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
         allow_headers=["*"],
     )
     # connexion changes the spec it is given, so each app gets its own copy.
-    spec = add_profile_schema_path(add_extension_paths(copy.deepcopy(parsed_spec()), profiles.extensions()))
-    app.add_api(spec, resolver=RelativeResolver('rpp.handlers'), resolver_error=501,
+    spec = add_profile_schema_path(add_registered_paths(
+        add_extension_paths(copy.deepcopy(parsed_spec()), profiles.extensions()), registry))
+    app.add_api(spec, resolver=ExtensionResolver('rpp.handlers', registry.handler_packages()), resolver_error=501,
                 validate_responses=True, options={"swagger_ui": True, "serve_spec": True},
                 validator_map={
                     "body": MediaTypeDict({**VALIDATOR_MAP["body"], "*/*json": RppRequestBodyValidator}),

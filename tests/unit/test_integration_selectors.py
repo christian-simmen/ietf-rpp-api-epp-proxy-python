@@ -93,7 +93,8 @@ def test_every_environment_has_the_profile_tld_and_lgrs_of_its_config():
         env = load(name, with_credentials=False)
         assert env.profile.name
         assert env.facts["tld"] and env.facts["environment_name"]
-        assert env.profile.lgrs == ("latn-1.0",)
+        # a backend without domain names (the SQLite demo) has no IDN
+        assert env.profile.lgrs == (("latn-1.0",) if "domainName" in env.profile.objects else ())
 
 
 def test_a_missing_variable_is_named_and_refused():

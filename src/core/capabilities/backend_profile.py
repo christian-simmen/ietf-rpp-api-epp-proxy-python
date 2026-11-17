@@ -98,28 +98,32 @@ class BackendProfile:
     """A node of the profile tree: an attribute is a leaf, or the node of a field, object or process
     (`profile.contact.fax.supported`). Static per backend; build the root with `from_layers`."""
 
-    def __init__(self, tree: dict, path: str = ""):
+    def __init__(self, tree: dict, path: str = "", extra_leaves: dict[str, type] | None = None):
         self._tree = tree
         self._path = path
+        self._extra_leaves = extra_leaves or {}
 
     @classmethod
-    def from_layers(cls, *layers: dict) -> "BackendProfile":
+    def from_layers(cls, *layers: dict, extra_leaves: dict[str, type] | None = None) -> "BackendProfile":
         """The profile of the layers merged in order. A leaf missing, unknown or of the wrong type is a
-        `ValueError`, so a wrong profile file stops the app."""
+        `ValueError`, so a wrong profile file stops the app. `extra_leaves` are the leaves (path and type) that
+        configured extensions add to `LEAVES`: the list stays closed, and without the extension a leaf of it is unknown."""
+        known = {**LEAVES, **(extra_leaves or {})}
         tree: dict = {}
         for layer in layers:
             tree = _merged(tree, layer or {})
         leaves = _leaves(tree)
-        unknown = sorted(set(leaves) - set(LEAVES))
-        missing = sorted(set(LEAVES) - set(leaves))
+        unknown = sorted(set(leaves) - set(known))
+        missing = sorted(set(known) - set(leaves))
         if unknown or missing:
             raise ValueError(
                 f"backend profile: unknown {', '.join(unknown) or 'none'}; missing {', '.join(missing) or 'none'}")
-        return cls(_frozen({path: _checked(leaves[path], kind, path) for path, kind in LEAVES.items()}))
+        return cls(_frozen({path: _checked(leaves[path], kind, path) for path, kind in known.items()}),
+                   extra_leaves=extra_leaves)
 
     def with_changes(self, changes: dict) -> "BackendProfile":
         """This profile with `changes` merged over it, as another layer."""
-        return BackendProfile.from_layers(self._tree, changes)
+        return BackendProfile.from_layers(self._tree, changes, extra_leaves=self._extra_leaves)
 
     def fact(self, path: str):
         """The leaf at a dotted path. A path that names no leaf is a `KeyError`."""
@@ -138,7 +142,7 @@ class BackendProfile:
         if name not in self._tree:
             raise AttributeError(f"the backend profile has no {self._path}{name}")
         value = self._tree[name]
-        return BackendProfile(value, f"{self._path}{name}.") if isinstance(value, dict) else value
+        return BackendProfile(value, f"{self._path}{name}.", self._extra_leaves) if isinstance(value, dict) else value
 
     def __eq__(self, other) -> bool:
         return isinstance(other, BackendProfile) and (self._tree, self._path) == (other._tree, other._path)

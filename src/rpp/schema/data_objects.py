@@ -16,6 +16,14 @@ _visibility = {
 }
 
 
+def register_data_objects(objects: dict[str, dict[str, str]]) -> None:
+    """Adds the objects a configured extension defines (`{object: {element: visibility}}`). Process-global and keyed by
+    the object, so registering them again is no change."""
+    for identifier, elements in objects.items():
+        _visibility.setdefault(identifier, {element: visibility or DEFAULT_VISIBILITY
+                                            for element, visibility in elements.items()})
+
+
 def visibility_of(object_identifier: str) -> dict[str, str]:
     """The Visibility of each top-level data element of the object, by Identifier."""
     return _visibility[object_identifier]

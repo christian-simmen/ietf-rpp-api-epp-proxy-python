@@ -1,0 +1,32 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-free",
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/planets/{handle:a:-pa1}/availability",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Profile": "{rpp:profile}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "planetAvailability",
+          "available": true
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    }
+  ]
+}

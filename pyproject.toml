@@ -25,7 +25,7 @@ addopts = "--strict-markers --tb=short -p no:warnings"
 [tool.importlinter]
 # main is a module, which import-linter cannot take as a root. An import of it is therefore seen as external and
 # forbidden by name.
-root_packages = ["core", "registry_adapter", "rpp", "settings"]
+root_packages = ["core", "extensions", "registration", "registry_adapter", "rpp", "settings"]
 include_external_packages = true
 
 [[tool.importlinter.contracts]]
@@ -127,7 +127,7 @@ forbidden_modules = ["core", "main", "registry_adapter", "rpp"]
 id = "protocols-independent"
 name = "The protocol adapters never import each other"
 type = "independence"
-modules = ["registry_adapter.epp", "registry_adapter.rri"]
+modules = ["registry_adapter.epp", "registry_adapter.rri", "registry_adapter.sqlite"]
 
 [[tool.importlinter.contracts]]
 id = "rri-layers"
@@ -146,3 +146,97 @@ source_modules = [
 ]
 forbidden_modules = ["registry_adapter.common.transport"]
 allow_indirect_imports = true
+
+# The extensions registered by configuration (#177): the generic code does not know any, and each has its own tree.
+[[tool.importlinter.contracts]]
+id = "registration-standalone"
+name = "registration imports no other package of the proxy"
+type = "forbidden"
+source_modules = ["registration"]
+forbidden_modules = ["core", "extensions", "main", "registry_adapter", "rpp", "settings"]
+
+[[tool.importlinter.contracts]]
+id = "generic-not-extensions"
+name = "No generic package imports an extension"
+type = "forbidden"
+source_modules = [
+    "core", "registration", "rpp", "settings", "registry_adapter.common", "registry_adapter.epp", "registry_adapter.rri",
+    "registry_adapter.sqlite.client_directory", "registry_adapter.sqlite.clock", "registry_adapter.sqlite.common_part",
+    "registry_adapter.sqlite.extension_part", "registry_adapter.sqlite.gateways", "registry_adapter.sqlite.hash_password",
+    "registry_adapter.sqlite.member_hook", "registry_adapter.sqlite.member_refused", "registry_adapter.sqlite.message_store",
+    "registry_adapter.sqlite.migrations", "registry_adapter.sqlite.models", "registry_adapter.sqlite.password_hash",
+    "registry_adapter.sqlite.schema_version_row", "registry_adapter.sqlite.sqlite_backend",
+    "registry_adapter.sqlite.sqlite_context", "registry_adapter.sqlite.sqlite_database",
+    "registry_adapter.sqlite.sqlite_part",
+]
+forbidden_modules = ["extensions"]
+
+[[tool.importlinter.contracts]]
+id = "extension-layers"
+name = "Inside an extension: the registration -> rpp -> core"
+type = "layers"
+containers = ["extensions.planets"]
+layers = ["register_planets", "rpp", "core"]
+
+[[tool.importlinter.contracts]]
+id = "extension-rpp-layers"
+name = "Inside the rpp of an extension: handlers -> mapping -> dto, schema"
+type = "layers"
+containers = ["extensions.planets.rpp"]
+layers = ["handlers", "mapping", "dto | schema"]
+
+[[tool.importlinter.contracts]]
+id = "extension-core-layers"
+name = "Inside the core of an extension: flows -> ports -> model"
+type = "layers"
+containers = ["extensions.planets.core"]
+layers = ["flows", "ports", "model"]
+
+[[tool.importlinter.contracts]]
+id = "extension-core-pure"
+name = "The core of an extension imports the core of the proxy and the standard library only"
+type = "forbidden"
+source_modules = ["extensions.planets.core"]
+forbidden_modules = [
+    "main", "registration", "registry_adapter", "rpp", "settings", "extensions.planets.rpp", "sqlalchemy",
+    "connexion", "dataclasses_json", "flask", "jsonschema", "lxml", "starlette", "werkzeug", "xsdata", "yaml",
+]
+
+[[tool.importlinter.contracts]]
+id = "extension-not-adapter"
+name = "An extension imports no registry adapter, settings or XML"
+type = "forbidden"
+source_modules = ["extensions"]
+forbidden_modules = ["main", "registry_adapter", "settings", "lxml", "sqlalchemy", "xsdata"]
+
+[[tool.importlinter.contracts]]
+id = "sqlite-extensions-core-only"
+name = "The SQLite part of an extension imports the core of an extension only, of the extensions only what it needs"
+type = "forbidden"
+source_modules = ["registry_adapter.sqlite.extensions"]
+forbidden_modules = [
+    "extensions.*.rpp", "extensions.*.core.flows", "extensions.planets.register_planets", "rpp", "core.flows",
+    "core.session", "registration", "settings",
+]
+
+[[tool.importlinter.contracts]]
+id = "sqlite-common-not-extensions"
+name = "The common part of the SQLite backend does not import the part of an extension, which it loads by name"
+type = "forbidden"
+source_modules = [
+    "registry_adapter.sqlite.client_directory", "registry_adapter.sqlite.clock", "registry_adapter.sqlite.common_part",
+    "registry_adapter.sqlite.extension_part", "registry_adapter.sqlite.gateways", "registry_adapter.sqlite.hash_password",
+    "registry_adapter.sqlite.member_hook", "registry_adapter.sqlite.member_refused", "registry_adapter.sqlite.message_store",
+    "registry_adapter.sqlite.migrations", "registry_adapter.sqlite.models", "registry_adapter.sqlite.password_hash",
+    "registry_adapter.sqlite.schema_version_row", "registry_adapter.sqlite.sqlite_backend",
+    "registry_adapter.sqlite.sqlite_context", "registry_adapter.sqlite.sqlite_database",
+    "registry_adapter.sqlite.sqlite_part",
+]
+forbidden_modules = ["registry_adapter.sqlite.extensions"]
+
+[[tool.importlinter.contracts]]
+id = "sqlite-not-xml"
+name = "The SQLite backend has no XML, no transport and no protocol of the registries"
+type = "forbidden"
+source_modules = ["registry_adapter.sqlite"]
+forbidden_modules = ["registry_adapter.common.transport", "registry_adapter.epp", "registry_adapter.rri", "lxml", "xsdata"]

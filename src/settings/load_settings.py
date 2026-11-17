@@ -7,6 +7,7 @@ import yaml
 from settings.discovery_settings import DiscoverySettings
 from settings.epp_settings import EppSettings
 from settings.rri_settings import RriSettings
+from settings.sqlite_settings import SqliteSettings
 from settings.settings import BACKENDS, Settings
 
 # The generic profile of each protocol, which the profile of a server extends.
@@ -28,6 +29,16 @@ def _profile_layers(data: dict, backend: str) -> tuple[dict, ...]:
         return yaml.safe_load(f), specific
 
 
+def _extensions(data: dict) -> tuple[str, ...]:
+    """The module paths of `rpp_extensions`: a list of strings, none twice."""
+    paths = data.get("rpp_extensions") or []
+    if not isinstance(paths, list) or not all(isinstance(path, str) and path for path in paths):
+        raise ValueError("rpp_extensions must be a list of module paths")
+    if len(set(paths)) != len(paths):
+        raise ValueError("rpp_extensions names a module twice")
+    return tuple(paths)
+
+
 def load_settings(config_path: str | None = None) -> Settings:
     """Reads `config_path`, else the file `RPP_CONFIG_FILE` names, else config.yaml. An untracked <name>.local.yaml
     next to it replaces the top-level keys it has, for one machine's settings. Keys the proxy does not know are
@@ -42,6 +53,6 @@ def load_settings(config_path: str | None = None) -> Settings:
     backend = data.get("rpp_backend", "epp")
     return Settings(
         epp=_section(EppSettings, data), discovery=_section(DiscoverySettings, data), rri=_section(RriSettings, data),
-        backend=backend, profile_layers=_profile_layers(data, backend) if backend in BACKENDS else (),
+        sqlite=_section(SqliteSettings, data), extensions=_extensions(data), backend=backend, profile_layers=_profile_layers(data, backend) if backend in BACKENDS else (),
         profile_signalling=data.get("rpp_profile_signalling", "header"),
     )

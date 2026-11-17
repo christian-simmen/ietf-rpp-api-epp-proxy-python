@@ -14,6 +14,13 @@ from registry_adapter.epp.idn_tables import IdnTables
 from registry_adapter.epp.session.epp_client import EPPClient
 from registry_adapter.rri.gateways.rri_backend import RriBackend
 from registry_adapter.rri.session.rri_client import RriClient
+from registry_adapter.sqlite.client_directory import ClientDirectory
+from registry_adapter.sqlite.extension_part import load_extension_parts
+from registry_adapter.sqlite.common_part import COMMON_PART
+from registry_adapter.sqlite.sqlite_backend import SqliteBackend
+from registry_adapter.sqlite.sqlite_database import SqliteDatabase
+from registration import ExtensionRegistry
+from registry_setup import backend_profile, load_registry
 from rpp.http.app import create_app
 from settings.load_settings import load_settings
 from settings.settings import Settings
@@ -48,6 +55,7 @@ class Composition:
     new_backend: Callable
     sessions: SessionPool
     app: object
+    registry: ExtensionRegistry
 
 
 def compose(settings: Settings) -> Composition:
@@ -55,7 +63,8 @@ def compose(settings: Settings) -> Composition:
     tls_context = tls_context_from_config(settings.epp)
     idn_tables = IdnTables(settings.epp.rpp_idn_lgr_tables)
     # The generic profile of the protocol, the server's own over it, and the LGRs of the config.
-    profile = BackendProfile.from_layers(*settings.profile_layers, {"lgrs": list(settings.lgrs)})
+    registry = load_registry(settings)
+    profile = backend_profile(settings, registry)
 
     def new_epp_client(username, password):
         return EPPClient(TCPClient(settings.epp.rpp_epp_host, settings.epp.rpp_epp_port, tls_context), username,
@@ -74,17 +83,29 @@ def compose(settings: Settings) -> Composition:
     def new_rri_backend(username, password):
         return RriBackend(new_rri_client(username, password), profile, settings.rri.rpp_rri_lgr)
 
+    def sqlite_backend_factory():
+        """The database of the demo backend (its tables are created now), and the factory of a client's session."""
+        parts = load_extension_parts(registry.backend_parts("sqlite"))
+        database = SqliteDatabase(settings.sqlite.rpp_sqlite_url, [COMMON_PART, *(part.part for part in parts)])
+        clients = ClientDirectory(settings.sqlite.rpp_sqlite_clients)
+
+        def new_sqlite_backend(username, password):
+            return SqliteBackend(database, clients, profile, parts, username, password)
+        return new_sqlite_backend
+
     # The backend factory of each protocol `rpp_backend` can name.
     backends = {
-        "epp": new_epp_backend,
-        "rri": new_rri_backend,
+        "epp": lambda: new_epp_backend,
+        "rri": lambda: new_rri_backend,
+        "sqlite": sqlite_backend_factory,
     }
-    new_backend = backends[settings.backend]
+    new_backend = backends[settings.backend]()
     sessions = SessionPool(new_backend)
     app = create_app(sessions, profile, discovery_settings=settings.discovery,
-                     signalling=settings.profile_signalling)
+                     signalling=settings.profile_signalling, registry=registry)
     return Composition(settings=settings, profile=profile, tls_context=tls_context, idn_tables=idn_tables,
-                       new_epp_client=new_epp_client, new_backend=new_backend, sessions=sessions, app=app)
+                       new_epp_client=new_epp_client, new_backend=new_backend, sessions=sessions, app=app,
+                       registry=registry)
 
 
 # The app of the settings loaded once (RPP_CONFIG_FILE, else config.yaml), which uvicorn serves as `main:app`.

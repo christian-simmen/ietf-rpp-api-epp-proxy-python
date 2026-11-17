@@ -28,6 +28,9 @@ class RriBackend:
     def connected(self) -> bool:
         return self.rri_client.connected
 
+    def extension(self, extension_id: str):
+        raise KeyError(extension_id)  # the RRI backend holds no configured extension
+
     def connect(self) -> None:
         self.rri_client.connect()
 

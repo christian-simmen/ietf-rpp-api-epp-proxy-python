@@ -27,6 +27,10 @@ class RegistryBackend(Protocol):
     @property
     def connected(self) -> bool: ...
 
+    def extension(self, extension_id: str):
+        """The gateways of a configured extension (its own object, which the extension's flows know), by the id of its
+        RPP extension. A backend that does not hold the extension raises `KeyError`."""
+
     def connect(self) -> None:
         """Opens the session. `connected` tells whether it succeeded."""
 

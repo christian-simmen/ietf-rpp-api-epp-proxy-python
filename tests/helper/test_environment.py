@@ -15,6 +15,7 @@ from pathlib import Path
 import yaml
 
 from core.capabilities.backend_profile import BackendProfile
+from registry_setup import backend_profile, load_registry
 from settings.load_settings import load_settings
 from rpp.http import profile_header
 from rpp.schema.profiles import PROFILES
@@ -107,9 +108,11 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
     regacc_of = REGACC_FORMS[data.get("regacc", "user")]
     missing = []
 
-    def variable(var):
+    def variable(var, literal=False):
         if var is None:
             return None
+        if literal:  # a demo value of the descriptor itself, not the name of a variable
+            return var
         if not with_credentials:
             return f"<{var}>"
         value = environ.get(var)
@@ -119,17 +122,20 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
 
     registrars = {}
     for slot, spec in data["registrars"].items():
-        user = variable(spec["user"])
-        password = variable(spec["password"])
+        literal = bool(spec.get("literal"))
+        user = variable(spec["user"], literal)
+        password = variable(spec["password"], literal)
         regacc = regacc_of(user) if user else ""
         # The prefix the backend requires of the handles of this registrar, which differs between accounts.
-        prefix = variable(spec["prefix"])
+        prefix = variable(spec["prefix"], literal)
         registrars[slot] = Registrar(
             slot=slot, user=user or "", password=password or "", regacc=regacc, handle_prefix=prefix or "")
     if missing:
         raise EnvironmentError(f"Test environment {name!r} needs {', '.join(missing)} in .env or the environment")
     unknown = data.get("unknown_user")
     settings = load_settings(str(REPOSITORY / data["config"]))
+    # The extensions of the config register their RPP profiles, which the descriptor may name.
+    registry = load_registry(settings)
     rpp_profile = data.get("profile")
     if rpp_profile not in PROFILES:
         raise EnvironmentError(
@@ -141,7 +147,7 @@ def load(name: str, environ=None, with_credentials: bool = True) -> TestEnvironm
     return TestEnvironment(
         name=name, config=data["config"], max_workers=int(data.get("max_workers", 8)),
         rpp_requests_per_minute=data.get("rpp_requests_per_minute"), registrars=registrars, facts=facts,
-        profile=BackendProfile.from_layers(*settings.profile_layers, {"lgrs": list(settings.lgrs)}),
+        profile=backend_profile(settings, registry),
         unknown_user=(unknown["user"], unknown["password"]) if unknown else None,
         rpp_profile=rpp_profile, profile_signalling=settings.profile_signalling)
 

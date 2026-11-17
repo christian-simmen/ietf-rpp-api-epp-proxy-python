@@ -9,6 +9,12 @@ A deployment can speak DENIC RRI 5.0 (XML over TCP) to the registry instead of E
 API is the same, with the `de.denic.rpp.rri` extension ([rri-extension.md](../rri/rri-extension.md)) for what RRI
 holds and RPP has no place for; what RRI lacks answers 501. The design and the RRI facts are in [docs/rri/](../rri/).
 
+A third backend, `rpp_backend: sqlite`, is a test bed for protocol features: bare RPP over a SQLite database, with no
+registry behind it and none of the drafts' data objects. Its objects are the planets and satellites of a demo extension
+(`org.example.rpp.extension.planets`, [docs/demo/planets-extension.md](../demo/planets-extension.md)), which a
+deployment registers by its configuration (`rpp_extensions`); see
+[architecture.project.md](architecture.project.md#registered-extensions).
+
 The stack is Connexion 3 (ASGI) on Flask and Starlette middleware, served by
 uvicorn.
 

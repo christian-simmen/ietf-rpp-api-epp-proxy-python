@@ -39,6 +39,9 @@ class EppBackend:
     def connected(self) -> bool:
         return self.epp_client.connected
 
+    def extension(self, extension_id: str):
+        raise KeyError(extension_id)  # the EPP backend holds no configured extension
+
     def connect(self) -> None:
         self.epp_client.connect()
 
