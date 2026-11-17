@@ -69,7 +69,7 @@ is retargeted to `main` once #201 is merged. Clean-main step skipped (maintainer
 ## Open questions
 
 - Q1 D4: a dev dependency `openapi-spec-validator` for the 3.1 check, or the OAS 3.1 meta-schema committed under `tests/`?
-  (Taken as the dependency; open for the maintainer.)
+  Decided (maintainer, 2026-11-17): keep `openapi-spec-validator`.
 
 ## Corrections
 
