@@ -3,6 +3,15 @@
     "smoke"
   ],
   "test_id": "test5-discovery_lists_the_extension_and_its_objects",
+  "when": {
+    "profile.default_preset": "planets",
+    "profile.presets": {
+      "not": {
+        "contains": "planets-atmosphere"
+      }
+    }
+  },
+  "comment": "Skipped where the server offers more than the planets preset (sqlite-demo-extended, -bound and -inherit): demo_discovery/ shows each of those.",
   "steps": [
     {
       "request": {

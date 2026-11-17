@@ -84,7 +84,7 @@ def _value_holds(actual, expected) -> bool:
             raise SelectorError(f"a condition has exactly one of contains, min, max, not: {expected!r}")
         (op, operand), = expected.items()
         if op == "contains":
-            if not isinstance(actual, (tuple, list, set, frozenset)):
+            if not isinstance(actual, (tuple, list, set, frozenset, dict)):
                 raise SelectorError(f"contains needs a collection, the fact is {actual!r}")
             return operand in actual
         if op == "min":

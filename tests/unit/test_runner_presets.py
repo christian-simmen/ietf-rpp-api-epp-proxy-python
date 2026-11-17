@@ -73,3 +73,27 @@ def test_a_placeholder_left_after_the_headers_are_resolved_is_an_error(where):
     case = {"test_id": "t", "steps": [{"request": {"method": "GET", "url": "/x", "headers": {}}, **where}]}
     with pytest.raises(EnvironmentError, match="rpp"):
         process_placeholders(with_rpp_headers(case, ENV), ENV, started=datetime.now())
+
+
+DEMO = load("sqlite-demo-bound", with_credentials=False)
+DEMO_HEADER = replace(DEMO, preset_signalling="header")
+ATMOSPHERE = "org.example.rpp.preset.planets-atmosphere"
+
+
+def test_a_placeholder_with_a_key_stands_for_that_preset_of_the_config_in_either_method():
+    keyed = {"RPP-Preset": "{rpp:preset:planets-atmosphere}", "Accept": "{rpp:accept:planets-atmosphere}",
+             "Content-Type": "{rpp:content-type:planets-atmosphere}"}
+
+    assert headers_of(keyed, DEMO_HEADER) == {"RPP-Preset": f"preset={ATMOSPHERE};version=1.0", "Accept": RPP, "Content-Type": RPP}
+    typed = f'{RPP}; preset="{ATMOSPHERE}"; preset-version="1.0"'
+    assert headers_of(keyed, DEMO) == {"Accept": typed, "Content-Type": typed}
+
+
+def test_a_placeholder_without_a_key_is_the_preset_of_the_descriptor():
+    assert headers_of({"RPP-Preset": "{rpp:preset}"}, DEMO_HEADER) == {
+        "RPP-Preset": "preset=org.example.rpp.preset.planets;version=1.0"}
+
+
+def test_a_key_the_config_does_not_offer_a_definition_of_is_an_error():
+    with pytest.raises(EnvironmentError, match="no preset 'nope'"):
+        headers_of({"Accept": "{rpp:accept:nope}"}, DEMO)

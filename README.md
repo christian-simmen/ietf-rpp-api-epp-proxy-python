@@ -39,7 +39,7 @@ header with a new value.
 |---|---|---|---|
 | `epp` (the default when the key is absent) | EPP (RFC 5730 ff.) over TCP | `rpp_epp_*` | [config.yaml](config.yaml) |
 | `rri` | DENIC RRI 5.0 (XML) over TCP | `rpp_rri_*` | [config.rri-mtest.yaml](config.rri-mtest.yaml) |
-| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [config.demo.yaml](config.demo.yaml) |
+| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [config.demo.yaml](config.demo.yaml), and [extended](config.demo-extended.yaml), [bound](config.demo-bound.yaml), [inherit](config.demo-inherit.yaml) |
 
 One process speaks one protocol: the one `rpp_backend` names is on, the other is off and its settings are ignored.
 The RPP API is the same for both. With RRI, what RPP has no place for is in the `de.denic.rpp.rri` extension
@@ -58,6 +58,8 @@ The clients are `rpp_sqlite_clients`, a user and the `scrypt` hash of its passwo
 ```
 cd src
 RPP_CONFIG_FILE=../config.demo.yaml uvicorn main:app          # clients demo-a and demo-b, passwords demo-a-password ...
+# the demo compositions: config.demo.yaml (bare: the planets preset), config.demo-extended.yaml (all three extensions, no binding),
+# config.demo-bound.yaml (the server binds profiles to presets), config.demo-inherit.yaml (presets and profiles with several bases)
 ```
 
 A config for RRI states at least:

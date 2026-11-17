@@ -12,13 +12,13 @@ Worktree `/home/vscode/worktrees/rpp-presets`, mutex taken there. Clean-main ste
 
 ## Tasks
 
-- [~] T0 Plan approved
-- [ ] T1 Tests first (unit): `tests/unit/test_demo_configurations.py`, `tests/unit/test_refused_configurations.py`; selector `contains` on a map leaf
-- [ ] T2 Test-only definitions `tests/refused_configs/` and the refused configs
-- [ ] T3 Configs `config.demo-extended.yaml`, `config.demo-bound.yaml`, `config.demo-inherit.yaml`
-- [ ] T4 Environments `sqlite-demo-extended`, `sqlite-demo-bound`, `sqlite-demo-inherit`
-- [ ] T5 Integration cases (groups `demo_discovery`, `demo_preset_read`, `demo_binding`) and `when` on the generic cases a binding refuses
-- [ ] T6 Docs: testing.project.md, architecture.project.md, README.md, deploy README mention if needed
+- [x] T0 Plan approved
+- [x] T1 Tests first (unit): `tests/unit/test_demo_configurations.py`, `tests/unit/test_refused_configurations.py`; selector `contains` on a map leaf
+- [x] T2 Test-only definitions `tests/refused_configs/` and the refused configs
+- [x] T3 Configs `config.demo-extended.yaml`, `config.demo-bound.yaml`, `config.demo-inherit.yaml`
+- [x] T4 Environments `sqlite-demo-extended`, `sqlite-demo-bound`, `sqlite-demo-inherit`
+- [x] T5 Integration cases (groups `demo_discovery`, `demo_preset_read`, `demo_binding`) and `when` on the generic cases a binding refuses
+- [~] T6 Docs: testing.project.md, architecture.project.md, README.md, deploy README mention if needed
 - [ ] T7 Checks on the final commit (lint-imports, unit, smoke incl. rri-mtest), draft PR
 
 ## Configurations (all: `rpp_backend: sqlite`, same clients and passwords as config.demo.yaml, in-memory database)
@@ -135,3 +135,15 @@ where the real text differs the test pins the real text and the plan is correcte
 ## Checks (process.project.md), on the final commit, no edits during the run
 
 `PYTHONPATH=src lint-imports`; `pytest -n 4 tests/unit`; `pytest -n 4 -m smoke tests/integration` incl. rri-mtest (no retry of a login refusal).
+
+## Findings
+
+- The risk of Q4 held: `compose` refuses a data-only extension ("rpp_extensions: the extension ... has no part in the sqlite backend",
+  `registry_setup.py`). Resolved without a change under `src/`: the test-only extensions have a SQLite part without tables
+  (`tests/refused_configs/definitions_sqlite_part.py`).
+- The refusal messages are as planned and each names both sides (profile and extension and preset; the whole cycle path; both versions and the preset).
+  The tests pin them; no message was weakened.
+- Placeholders with a key (`{rpp:preset:KEY}` ...) work for both signalling methods, so the extra pairs of `demo_binding/` are integration cases. Unit test in `test_runner_presets.py`.
+- A list in an expected body must have the length of the actual one (`recusive_compare_existing`), so the integration cases assert "each once" too.
+  Mutations (a wrong profile, an extra bound profile) fail the cases.
+- sqlite-demo-bound skips six generic cases (types other than rocky), see the `when`/`comment` in them. `sqlite_drafts_objects/test5` and the planets step of `preset_read/test1` got a `when` for the bare configuration.

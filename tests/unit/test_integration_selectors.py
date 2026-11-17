@@ -276,3 +276,11 @@ def test_an_unknown_environment_is_an_error_that_names_the_known_ones():
 def test_the_unit_tests_compose_the_first_environment_named():
     assert selected_name({}) == "epp-docker"
     assert selected_name({"RPP_TEST_ENV": "rri-mtest,epp-docker"}) == "rri-mtest"
+
+
+def test_contains_on_a_map_leaf_holds_for_a_key():
+    facts = Facts(load("sqlite-demo-bound", with_credentials=False).profile, {})
+
+    assert selectors.holds({"profile.bound_profiles": {"contains": "planets"}}, facts)
+    assert not selectors.holds({"profile.bound_profiles": {"contains": "catalogued-planets"}}, facts)
+    assert selectors.holds({"profile.bound_profiles": {"not": {"contains": "catalogued-planets"}}}, facts)

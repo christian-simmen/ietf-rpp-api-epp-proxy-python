@@ -1,0 +1,45 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test6-the_schema_of_a_preset_with_several_bases_has_the_extensions_and_constraints_of_all",
+  "description": "The Preset Schema of habitable-worlds holds the sub-schemas of the extensions of both bases and of the profiles of its definition and its bases.",
+  "when": {
+    "profile.presets": {
+      "contains": "habitable-worlds"
+    }
+  },
+  "comment": "Runs on sqlite-demo-inherit only.",
+  "steps": [
+    {
+      "comment": "Reads the schema of habitable-worlds. Expects the atmosphere extension and the constraints of rocky-planets, catalogued-satellites, habitable-atmospheres and habitable-rocky-planets.",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.habitable-worlds/schema",
+        "headers": {
+          "Accept": "application/schema+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/schema+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "rpp:preset": {
+            "id": "org.example.rpp.preset.habitable-worlds",
+            "version": "1.0"
+          },
+          "$defs": {
+            "ext.atmosphere.planet.create": {},
+            "profile.rocky.type": {},
+            "profile.catalogued.id": {},
+            "profile.habitable.pressure": {},
+            "profile.habitableRocky.radius": {}
+          }
+        }
+      }
+    }
+  ]
+}

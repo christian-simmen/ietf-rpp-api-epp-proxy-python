@@ -1,0 +1,55 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test5-a_preset_with_several_bases_accepts_a_planet_without_the_constraints",
+  "description": "Accepted half: planets-complete, with no binding, accepts a planet without radius and atmosphere and of another type.",
+  "when": {
+    "profile.presets": {
+      "contains": "planets-complete"
+    },
+    "profile.bound_profiles": {
+      "not": {
+        "contains": "planets-complete"
+      }
+    }
+  },
+  "comment": "Runs where planets-complete has no binding: sqlite-demo-extended and sqlite-demo-inherit.",
+  "steps": [
+    {
+      "comment": "Creates a gas giant without radius and atmosphere under planets-complete. Expects 201.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets-complete}",
+          "RPP-Preset": "{rpp:preset:planets-complete}",
+          "Content-Type": "{rpp:content-type:planets-complete}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db5}",
+          "type": "gas-giant",
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-db5}"
+        }
+      }
+    }
+  ]
+}

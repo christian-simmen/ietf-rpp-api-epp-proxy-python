@@ -86,7 +86,12 @@
     },
     {
       "when": {
-        "profile.default_preset": "planets"
+        "profile.default_preset": "planets",
+        "profile.bound_profiles": {
+          "not": {
+            "contains": "planets"
+          }
+        }
       },
       "request": {
         "method": "GET",

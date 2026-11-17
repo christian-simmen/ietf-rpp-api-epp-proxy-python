@@ -120,6 +120,9 @@ descriptor's `preset` and the `rpp_preset_signalling` of its config (`with_rpp_h
 | `{rpp:preset}` | `preset=<id>;version=1.0` | omitted: the header is not sent |
 | `{rpp:accept}`, `{rpp:content-type}` | `application/rpp+json` | `application/rpp+json; preset="<id>"; preset-version="1.0"` |
 
+Each placeholder takes the key of a preset of the environment's config, `{rpp:preset:planets-atmosphere}`, `{rpp:accept:planets-atmosphere}`
+and `{rpp:content-type:planets-atmosphere}`, for a request under a preset other than the descriptor's, resolved by the same signalling method.
+
 A header the case writes literally is sent as written, so a case can send what the runner would not (a value of another
 media type, a preset the server does not offer). The signalling method is the environment fact `env.preset_signalling`
 (`header` or `media-type`, read from the config, not stated twice). The cases of `preset_signalling_header/` and `preset_signalling_media_type/` hold literal headers and are each active for one
@@ -158,6 +161,32 @@ no selector of its cases reads: every group of the drafts' objects has a `_group
 `{"when": {"profile.objects": {"contains": "contact"}}}` (or the object), so that those groups run where the backend holds
 them. The extension registers its RPP preset `planets`, which the descriptor names: `load` registers the extensions of the
 config before it looks the preset up. The cases are in the smoke suite.
+
+#### The demo configurations
+
+[config.demo.yaml](../../config.demo.yaml) and `sqlite-demo` are the bare configuration (the planets preset only), the `config.demo-bare.yaml` of #180:
+there is no second file. Three more compose the demo extensions, profiles and presets of #179, each with an environment of its own
+(descriptor `preset` = the default preset of its config, no credentials, cases in the smoke suite):
+
+| Config / environment | Presets (default first) | Bound profiles | Signalling |
+|---|---|---|---|
+| `config.demo-extended.yaml` / `sqlite-demo-extended` | planets-complete, planets, planets-atmosphere, planets-orbits | none | header |
+| `config.demo-bound.yaml` / `sqlite-demo-bound` | planets, planets-atmosphere, planets-complete, catalogued-planets | planets: rocky-planets, planets-atmosphere: habitable-atmospheres, planets-complete: habitable-rocky-planets | media-type |
+| `config.demo-inherit.yaml` / `sqlite-demo-inherit` | planets-complete, planets, planets-atmosphere, planets-orbits, catalogued-planets, habitable-worlds | none | header |
+
+The groups of the plain objects run in every one of them. `demo_discovery/`, `demo_preset_read/` and `demo_binding/` show the
+composition of each (a case is selected by `profile.presets`, `profile.default_preset` and `profile.bound_profiles`, whose map
+`contains` tests a preset key), and the criterion pair: the same planet of the type gas-giant is accepted under `planets` on `sqlite-demo` and
+refused with 422 `02308` and the profile rocky-planets on `sqlite-demo-bound`. The generic cases that create other types than rocky are
+skipped on `sqlite-demo-bound`. A list in an expected body must have the length of the actual one, so a profile or extension listed twice fails.
+Exact assertions over each real config file are in [test_demo_configurations.py](../../tests/unit/test_demo_configurations.py).
+
+The configurations that must not start are in [tests/refused_configs/](../../tests/refused_configs/), not in an environment: a binding that lacks
+a required extension (directly, and through a base profile), a preset cycle, a profile cycle and one extension in two versions.
+The definitions of the cycles and of the two versions are test-only (`preset_cycle.py`, `profile_cycle.py`, `version_clash.py`, each a data-only extension
+with a SQLite part without tables), as the demo extensions define valid ones only.
+[test_refused_configurations.py](../../tests/unit/test_refused_configurations.py) composes each file and pins the message, which names both sides
+of the conflict, and starts the server process once to see it exit with the message.
 
 ### DENIC MTEST
 

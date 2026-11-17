@@ -457,6 +457,11 @@ each and calls its `register(registry)` ([registration/](../../src/registration/
 | its part of a backend (`backend_parts`) | the backend: the SQLite backend imports `registry_adapter.sqlite.extensions.<name>`, which has `PART` (its tables, in a metadata of their own, with a schema version) and `gateways(context)` |
 | the leaves it adds to the backend profile (`objects`, `extensions` are added to the generic profile's, other leaves are new) | `BackendProfile.from_layers(..., extra_leaves=...)`: the list of leaves stays closed, and without the extension a leaf of it is unknown |
 
+The demo configurations compose the three demo extensions differently (README, [testing.project.md](testing.project.md#the-demo-configurations)):
+`config.demo.yaml` (planets only), `config.demo-extended.yaml`, `config.demo-bound.yaml` (profiles bound to presets) and
+`config.demo-inherit.yaml` (several bases). A configuration that cannot hold, a binding without a required extension, a cycle or one
+extension in two versions, stops the app at start naming the conflict; those are in `tests/refused_configs/`.
+
 A backend gives the gateways of an extension by its id, `RegistryBackend.extension(extension_id)` (a `KeyError` where the
 backend does not hold it), so no backend names an extension. An extension the configuration names that does not import,
 has no `register`, has a definition named as a base definition or as another extension's, or has no part in the

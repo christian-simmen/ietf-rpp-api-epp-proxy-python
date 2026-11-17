@@ -1,5 +1,5 @@
 """An app of the SQLite demo backend (config.demo.yaml) with the demo extensions and the offers a test composes (the demo
-configurations themselves are #180's): which extensions the configuration names, which presets it offers, and the profiles it binds."""
+configurations of #180, config.demo-*.yaml, are composed from their files, see tests/unit/test_demo_configurations.py): which extensions the configuration names, which presets it offers, and the profiles it binds."""
 import dataclasses
 
 from main import compose

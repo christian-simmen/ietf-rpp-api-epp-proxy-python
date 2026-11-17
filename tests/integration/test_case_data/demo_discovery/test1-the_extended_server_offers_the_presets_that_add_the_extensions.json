@@ -1,0 +1,82 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-the_extended_server_offers_the_presets_that_add_the_extensions",
+  "description": "Discovery of the server with the three demo extensions and no binding: the offered presets (the default is planets-complete) and each extension once, and no profile.",
+  "when": {
+    "profile.default_preset": "planets-complete",
+    "profile.presets": {
+      "not": {
+        "contains": "habitable-worlds"
+      }
+    }
+  },
+  "comment": "Runs on sqlite-demo-extended only: the other demo configurations offer other presets.",
+  "steps": [
+    {
+      "comment": "Reads discovery without authentication. Expects the five offered presets, the three extensions and the default preset planets-complete.",
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "discovery",
+          "presets": [
+            {
+              "@type": "preset",
+              "id": "urn:ietf:params:rpp:preset:base",
+              "defaultPreset": false
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets",
+              "defaultPreset": false
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-atmosphere",
+              "defaultPreset": false
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-orbits",
+              "defaultPreset": false
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-complete",
+              "defaultPreset": true
+            }
+          ],
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planet-atmosphere"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.satellite-orbit"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
