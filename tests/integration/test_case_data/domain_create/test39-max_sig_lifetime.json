@@ -3,6 +3,7 @@
   "description": "The proxy does not map maxSigLifetime of secDNS (dns.controls).",
   "steps": [
     {
+      "comment": "Creates contact V39 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -89,6 +90,7 @@
       }
     },
     {
+      "comment": "Creates domain gc39 with authInfo, registrant V39 (by backend), dns records a, dns controls (by backend); expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

@@ -2,6 +2,7 @@
   "test_id": "test12-put_clears_status",
   "steps": [
     {
+      "comment": "Creates host t12.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t12.….net: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t12.{random_name}.net",
@@ -73,6 +75,7 @@
       }
     },
     {
+      "comment": "Replaces host t12.….net by a full update with dns records ns; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/t12.{random_name}.net",

@@ -7,8 +7,10 @@
     },
     "env.preset_signalling": "media-type"
   },
+  "comment": "Skipped on epp-docker: the EPP server offers no rri profile; the EPP config signals the profile by the RPP-Profile header; profile_signalling_header/ covers the header method.",
   "steps": [
     {
+      "comment": "Creates domain b2 with generalRequest, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"; expects 400 02001. An error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -40,6 +42,7 @@
       }
     },
     {
+      "comment": "Creates request contact RQ2 with uriTemplate, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"; expects 501 02307. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/requestContacts",

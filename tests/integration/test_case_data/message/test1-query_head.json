@@ -3,6 +3,7 @@
   "test_id": "test1-query_head",
   "steps": [
     {
+      "comment": "Polls the message queue; expects one of 200 01300 or 200 01301. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/messages",
@@ -45,6 +46,7 @@
       }
     },
     {
+      "comment": "Polls the message queue (type=transferRequestMessage) as registrar b; expects one of 200 01300 or 200 01301. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/messages?type=transferRequestMessage",

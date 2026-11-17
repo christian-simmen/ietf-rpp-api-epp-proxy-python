@@ -2,6 +2,7 @@
   "test_id": "test11-own_ns_record_missing",
   "steps": [
     {
+      "comment": "Creates host t11.….net; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",

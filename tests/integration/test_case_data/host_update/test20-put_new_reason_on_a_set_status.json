@@ -2,6 +2,7 @@
   "test_id": "test20-put_new_reason_on_a_set_status",
   "steps": [
     {
+      "comment": "Creates host t20.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t20.….net: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t20.{random_name}.net",
@@ -74,6 +76,7 @@
       }
     },
     {
+      "comment": "Replaces host t20.….net by a full update with status clientDeleteProhibited, dns records ns; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/t20.{random_name}.net",

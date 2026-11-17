@@ -3,6 +3,7 @@
   "description": "Thirteen addresses, the most the EPP test server takes.",
   "steps": [
     {
+      "comment": "Creates contact Y5 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -88,6 +89,7 @@
       }
     },
     {
+      "comment": "Creates domain h5 with authInfo, registrant Y5 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -161,6 +163,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.h5 with dns records ns, 13 a; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -301,6 +304,7 @@
       }
     },
     {
+      "comment": "Reads host ns1.h5; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/ns1.h5-{random_name}.{tld}",

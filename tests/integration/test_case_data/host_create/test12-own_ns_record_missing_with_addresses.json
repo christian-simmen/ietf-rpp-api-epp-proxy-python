@@ -2,6 +2,7 @@
   "test_id": "test12-own_ns_record_missing_with_addresses",
   "steps": [
     {
+      "comment": "Creates host t12.….net with dns records a; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",

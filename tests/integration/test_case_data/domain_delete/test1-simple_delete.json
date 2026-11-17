@@ -3,6 +3,7 @@
   "test_id": "test1-simple_delete",
   "steps": [
     {
+      "comment": "Creates contact HD1; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -71,6 +72,7 @@
       }
     },
     {
+      "comment": "Creates domain test1 with authInfo, registrant HD1 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -152,6 +154,7 @@
       }
     },
     {
+      "comment": "Deletes domain test1; expects 200. The operation this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/test1-{random_name}.{tld}",

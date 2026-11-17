@@ -5,9 +5,11 @@
     },
     "profile.domainName.period.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI has no registration period (a domain runs until it is deleted).",
   "test_id": "test5-create",
   "steps": [
     {
+      "comment": "Creates host ns1.d5 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -46,6 +48,7 @@
       }
     },
     {
+      "comment": "Creates host ns2.d5 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -84,6 +87,7 @@
       }
     },
     {
+      "comment": "Creates contact J5 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -194,6 +198,7 @@
       }
     },
     {
+      "comment": "Creates contact S5 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -304,6 +309,7 @@
       }
     },
     {
+      "comment": "Creates domain ex5 with 2 nameservers, registrant J5, contacts admin, tech (by backend), authInfo, processes (includeElements=authInfo); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": {

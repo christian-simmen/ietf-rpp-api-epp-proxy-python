@@ -2,6 +2,7 @@
   "test_id": "test2-reject_without_body",
   "steps": [
     {
+      "comment": "Creates domain t2 with authInfo; expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -31,6 +32,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of domain t2 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/t2-{random_name}.{tld}/processes/transferProcesses",
@@ -63,6 +65,7 @@
       }
     },
     {
+      "comment": "Rejects the pending transfer of domain t2; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/t2-{random_name}.{tld}/processes/transferProcesses/latest/transferReject",
@@ -87,6 +90,7 @@
       }
     },
     {
+      "comment": "Reads domain t2; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/t2-{random_name}.{tld}",

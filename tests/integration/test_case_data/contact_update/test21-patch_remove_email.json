@@ -12,6 +12,7 @@
   "test_id": "test21-patch_remove_email",
   "steps": [
     {
+      "comment": "Creates contact 21A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -128,6 +129,7 @@
       }
     },
     {
+      "comment": "Patches contact 21A: remove /contactInfo/emails/email; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:21A}",

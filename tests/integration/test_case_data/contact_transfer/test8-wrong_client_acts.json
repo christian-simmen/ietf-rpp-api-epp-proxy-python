@@ -2,6 +2,7 @@
   "test_id": "test8-wrong_client_acts",
   "steps": [
     {
+      "comment": "Creates contact C8 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -56,6 +57,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of contact C8 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C8}/processes/transferProcesses",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Cancels the pending transfer of contact C8; expects 403 02201. An error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/contacts/{handle:a:C8}/processes/transferProcesses/latest",
@@ -111,6 +114,7 @@
       }
     },
     {
+      "comment": "Approves the pending transfer of contact C8 as registrar b; expects 403 02201. An error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C8}/processes/transferProcesses/latest/transferApprove",
@@ -134,6 +138,7 @@
       }
     },
     {
+      "comment": "Rejects the pending transfer of contact C8 as registrar b; expects 403 02201. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C8}/processes/transferProcesses/latest/transferReject",

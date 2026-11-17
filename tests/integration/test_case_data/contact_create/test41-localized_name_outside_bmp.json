@@ -4,9 +4,11 @@
     "profile.contact.localization.supported": true,
     "env.contact.name.charset_restricted": true
   },
+  "comment": "Skipped on rri-mtest: RRI holds no localized form of a contact; MTEST does not restrict the characters of a contact name.",
   "description": "A localized name with a character outside the BMP (U+1D504); the server takes fewer characters (env.limit_contact_name_charset_restricted).",
   "steps": [
     {
+      "comment": "Creates contact K41 with authInfo (by backend); expects 400 02005. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

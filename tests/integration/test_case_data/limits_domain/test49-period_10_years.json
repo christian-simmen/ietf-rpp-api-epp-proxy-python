@@ -3,9 +3,11 @@
   "when": {
     "profile.domainName.period.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no registration period (a domain runs until it is deleted).",
   "description": "Ten years, the longest the EPP test server registers.",
   "steps": [
     {
+      "comment": "Creates contact X49 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -91,6 +93,7 @@
       }
     },
     {
+      "comment": "Creates domain t49 with authInfo, registrant X49 (by backend), dns records a (by backend), processes; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -177,6 +180,7 @@
       }
     },
     {
+      "comment": "Deletes domain t49; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/t49-{random_name}.{tld}",

@@ -2,6 +2,7 @@
   "test_id": "test1-simple_delete",
   "steps": [
     {
+      "comment": "Creates contact D01 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -62,6 +63,7 @@
       }
     },
     {
+      "comment": "Deletes contact D01; expects 200. The operation this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/contacts/{handle:a:D01}",

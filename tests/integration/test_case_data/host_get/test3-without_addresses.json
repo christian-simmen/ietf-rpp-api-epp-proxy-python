@@ -2,6 +2,7 @@
   "test_id": "test3-without_addresses",
   "steps": [
     {
+      "comment": "Creates host g3.….net with dns records ns; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Reads host g3.….net; expects 200 01000. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/g3.{random_name}.net",

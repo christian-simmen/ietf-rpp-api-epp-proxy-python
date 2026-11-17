@@ -3,6 +3,7 @@
   "description": "A postcode of 16 characters, the most RFC 5733 holds.",
   "steps": [
     {
+      "comment": "Creates contact Z14 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -83,6 +84,7 @@
       }
     },
     {
+      "comment": "Reads contact Z14; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:Z14}",

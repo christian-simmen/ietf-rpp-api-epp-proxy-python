@@ -3,6 +3,7 @@
   "test_id": "test3-create_all_data",
   "steps": [
     {
+      "comment": "Creates contact 03 with authInfo (by backend) (includeElements=authInfo); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": {

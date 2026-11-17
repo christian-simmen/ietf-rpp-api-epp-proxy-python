@@ -3,6 +3,7 @@
   "description": "kind is optional in JSContact and defaults to individual (RFC 9553 §2.1.4).",
   "steps": [
     {
+      "comment": "Creates contact K26 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -84,6 +85,7 @@
       }
     },
     {
+      "comment": "Reads contact K26; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:K26}",

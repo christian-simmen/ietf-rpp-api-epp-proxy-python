@@ -3,9 +3,11 @@
     "wait.domainName.processes.create.add_grace_period": true,
     "profile.domainName.processes.restore.report_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report.",
   "test_id": "test18-restore_report",
   "steps": [
     {
+      "comment": "Creates contact HR18; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -74,6 +76,7 @@
       }
     },
     {
+      "comment": "Creates domain ex18 with authInfo, registrant HR18 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -148,6 +151,7 @@
       }
     },
     {
+      "comment": "Deletes domain ex18; expects 200. The operation this case checks. Waits first for domainName.processes.create.add_grace_period.",
       "wait": "domainName.processes.create.add_grace_period",
       "request": {
         "method": "DELETE",
@@ -165,6 +169,7 @@
       }
     },
     {
+      "comment": "Requests a restore of domain ex18; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/ex18-{random_name}.{tld}/processes/restoreProcesses",
@@ -192,6 +197,7 @@
       }
     },
     {
+      "comment": "Sends a restore report for domain ex18; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/ex18-{random_name}.{tld}/processes/restoreProcesses/latest",

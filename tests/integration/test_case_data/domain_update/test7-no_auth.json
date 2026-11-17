@@ -2,6 +2,7 @@
   "test_id": "test7-no_auth",
   "steps": [
     {
+      "comment": "Patches domain up-test7: replace /authInfo without credentials, with a fixed RPP-Cltrid; expects 401. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test7-{random_name}.{tld}",

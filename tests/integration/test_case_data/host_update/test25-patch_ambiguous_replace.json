@@ -2,6 +2,7 @@
   "test_id": "test25-patch_ambiguous_replace",
   "steps": [
     {
+      "comment": "Creates host t25.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t25.….net: add /dns/records; add /dns/records; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t25.{random_name}.net",
@@ -89,6 +91,7 @@
       }
     },
     {
+      "comment": "Patches host t25.….net: replace /dns/records with a match; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t25.{random_name}.net",

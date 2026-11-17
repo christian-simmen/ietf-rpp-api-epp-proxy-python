@@ -2,6 +2,7 @@
   "test_id": "test13-put_rename",
   "steps": [
     {
+      "comment": "Creates domain t13 with authInfo; expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -33,6 +34,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.t13 with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -72,6 +74,7 @@
       }
     },
     {
+      "comment": "Replaces host ns1.t13 by a full update with dns records ns; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/ns1.t13-{random_name}.{tld}",
@@ -112,6 +115,7 @@
       }
     },
     {
+      "comment": "Reads host ns1.t13; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/hosts/ns1.t13-{random_name}.{tld}",

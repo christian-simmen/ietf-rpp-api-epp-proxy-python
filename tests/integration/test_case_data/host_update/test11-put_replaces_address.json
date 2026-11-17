@@ -3,6 +3,7 @@
   "test_id": "test11-put_replaces_address",
   "steps": [
     {
+      "comment": "Creates host t11.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -42,6 +43,7 @@
       }
     },
     {
+      "comment": "Patches host t11.….net: add /dns/records; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t11.{random_name}.net",
@@ -78,6 +80,7 @@
       }
     },
     {
+      "comment": "Replaces host t11.….net by a full update with dns records ns, a; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/t11.{random_name}.net",

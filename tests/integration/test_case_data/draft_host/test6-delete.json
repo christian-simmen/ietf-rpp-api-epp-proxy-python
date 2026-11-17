@@ -2,6 +2,7 @@
   "test_id": "test6-delete",
   "steps": [
     {
+      "comment": "Creates domain d6 with authInfo; expects 201 01000. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -33,6 +34,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.d6 with dns records ns; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -72,6 +74,7 @@
       }
     },
     {
+      "comment": "Deletes host ns1.d6; expects 200 01000. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/hosts/ns1.d6-{random_name}.{tld}",

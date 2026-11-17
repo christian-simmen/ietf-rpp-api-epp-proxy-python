@@ -3,9 +3,11 @@
   "when": {
     "profile.contact.region.supported": true
   },
+  "comment": "Skipped on rri-mtest: an RRI address has no region.",
   "description": "A PATCH adds a region.",
   "steps": [
     {
+      "comment": "Creates contact P41 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Patches contact P41: add /contactInfo/addresses/addr/components; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P41}",

@@ -5,9 +5,11 @@
       "min": 2
     }
   },
+  "comment": "Skipped on epp-docker: EPP holds one registrant; several holders are RRI's.",
   "description": "The same contact as two holders.",
   "steps": [
     {
+      "comment": "Creates contact Wg2 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Creates domain t16 with authInfo, registrant Wg2 (by backend), dns records a (by backend), contacts registrant; expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

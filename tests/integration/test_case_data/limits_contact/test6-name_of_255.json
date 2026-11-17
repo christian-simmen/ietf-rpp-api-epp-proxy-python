@@ -3,6 +3,7 @@
   "description": "A name of 255 characters, the most RFC 5733 and RRI hold, is stored whole.",
   "steps": [
     {
+      "comment": "Creates contact Z6 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -83,6 +84,7 @@
       }
     },
     {
+      "comment": "Reads contact Z6; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:Z6}",

@@ -3,6 +3,7 @@
   "description": "A PUT with the number without its extension removes the extension.",
   "steps": [
     {
+      "comment": "Creates contact P48 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -85,6 +86,7 @@
       }
     },
     {
+      "comment": "Replaces contact P48 by a full update; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:P48}",

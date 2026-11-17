@@ -2,6 +2,7 @@
   "test_id": "test6-simple_delete_invalid_auth",
   "steps": [
     {
+      "comment": "Creates contact D06 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -62,6 +63,7 @@
       }
     },
     {
+      "comment": "Deletes contact D06 as a user the server does not know, with a fixed RPP-Cltrid; expects 401. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/contacts/{handle:a:D06}",

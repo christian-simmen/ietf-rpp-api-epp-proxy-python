@@ -4,9 +4,11 @@
       "contains": "cancel"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI's transfer (CHPROV) is immediate, without a pending transfer to query, approve, cancel or reject.",
   "test_id": "test14-transfer_cancel",
   "steps": [
     {
+      "comment": "Creates contact HR14; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -75,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates domain ex14 with authInfo, registrant HR14 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -149,6 +152,7 @@
       }
     },
     {
+      "comment": "Requests a transfer of domain ex14 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/ex14-{random_name}.{tld}/processes/transferProcesses",
@@ -181,6 +185,7 @@
       }
     },
     {
+      "comment": "Cancels the pending transfer of domain ex14 as registrar b; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/ex14-{random_name}.{tld}/processes/transferProcesses/latest",

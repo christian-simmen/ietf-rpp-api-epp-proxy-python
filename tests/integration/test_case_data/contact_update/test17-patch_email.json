@@ -3,6 +3,7 @@
   "test_id": "test17-patch_email",
   "steps": [
     {
+      "comment": "Creates contact 17A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -119,6 +120,7 @@
       }
     },
     {
+      "comment": "Patches contact 17A: replace /contactInfo/emails/email/address; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:17A}",

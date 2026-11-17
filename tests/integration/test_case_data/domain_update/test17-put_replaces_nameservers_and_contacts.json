@@ -7,9 +7,11 @@
       "contains": "admin"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI has no admin, tech or billing contacts.",
   "test_id": "test17-put_replaces_nameservers_and_contacts",
   "steps": [
     {
+      "comment": "Creates contact uk1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -92,6 +94,7 @@
       }
     },
     {
+      "comment": "Creates contact uk2 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -174,6 +177,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.u17 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -212,6 +216,7 @@
       }
     },
     {
+      "comment": "Creates host ns2.u17 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -250,6 +255,7 @@
       }
     },
     {
+      "comment": "Creates domain put17 with authInfo, registrant uk1, contacts tech (by backend), dns records a (by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -336,6 +342,7 @@
       }
     },
     {
+      "comment": "Replaces domain put17 by a full update with registrant uk1, contacts tech (by backend), 2 nameservers; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put17-{random_name}.{tld}",
@@ -436,6 +443,7 @@
       }
     },
     {
+      "comment": "Patches domain put17: replace /nameservers with a match; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/put17-{random_name}.{tld}",
@@ -472,6 +480,7 @@
       }
     },
     {
+      "comment": "Patches domain put17: replace /contacts with a match tech; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/put17-{random_name}.{tld}",
@@ -511,6 +520,7 @@
       }
     },
     {
+      "comment": "Replaces domain put17 by a full update with registrant uk2, 1 nameserver; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put17-{random_name}.{tld}",
@@ -557,6 +567,7 @@
       }
     },
     {
+      "comment": "Patches domain put17: replace /nameservers with a match; expects 422 02308. An error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/put17-{random_name}.{tld}",
@@ -593,6 +604,7 @@
       }
     },
     {
+      "comment": "Patches domain put17: replace /contacts with a match tech; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/put17-{random_name}.{tld}",

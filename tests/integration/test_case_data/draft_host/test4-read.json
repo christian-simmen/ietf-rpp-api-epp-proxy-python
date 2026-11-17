@@ -2,6 +2,7 @@
   "test_id": "test4-read",
   "steps": [
     {
+      "comment": "Creates domain d4 with authInfo; expects 201 01000. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -33,6 +34,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.d4 with dns records ns, a; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -80,6 +82,7 @@
       }
     },
     {
+      "comment": "Reads host ns1.d4; expects 200 01000. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/ns1.d4-{random_name}.{tld}",

@@ -3,6 +3,7 @@
   "test_id": "test3-head_free",
   "steps": [
     {
+      "comment": "Checks whether contact a3 is available with HEAD; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "HEAD",
         "url": "/contacts/{handle:a:-a3}/availability",

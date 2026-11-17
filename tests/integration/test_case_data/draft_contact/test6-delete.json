@@ -2,9 +2,11 @@
   "when": {
     "profile.contact.processes.delete.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI cannot delete a contact.",
   "test_id": "test6-delete",
   "steps": [
     {
+      "comment": "Creates contact J06 with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -115,6 +117,7 @@
       }
     },
     {
+      "comment": "Deletes contact J06; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/contacts/{handle:a:J06}",

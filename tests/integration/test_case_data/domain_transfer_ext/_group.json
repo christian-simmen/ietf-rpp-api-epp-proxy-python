@@ -1,1 +1,1 @@
-{"when": {"profile.extensions": {"contains": "de.denic.rpp.rri"}}}
+{"when": {"profile.extensions": {"contains": "de.denic.rpp.rri"}}, "comment": "Skipped on epp-docker: the de.denic.rpp.rri extension is RRI's; domain_transfer/ covers the EPP transfer process."}

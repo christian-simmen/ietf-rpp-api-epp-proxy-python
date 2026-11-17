@@ -7,8 +7,10 @@
   "when": {
     "env.preset_signalling": "media-type"
   },
+  "comment": "Skipped on epp-docker: the EPP config signals the profile by the RPP-Profile header; profile_signalling_header/ covers the header method.",
   "steps": [
     {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json, Accept application/rpp+json; expects 200 01000. The operation this case checks. Only where the default profile is epp (epp-docker).",
       "when": {
         "profile.default_preset": "epp-compatible"
       },
@@ -36,6 +38,7 @@
       }
     },
     {
+      "comment": "Reads the discovery document, with Accept */*; expects 200 01000. Reads what the steps above created. Only where the default profile is epp (epp-docker).",
       "when": {
         "profile.default_preset": "epp-compatible"
       },
@@ -62,6 +65,7 @@
       }
     },
     {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json, Accept application/rpp+json; expects 200 01000. Reads what the steps above created. Only where the default profile is rri (rri-mtest).",
       "when": {
         "profile.default_preset": "rri"
       },
@@ -89,6 +93,7 @@
       }
     },
     {
+      "comment": "Reads the discovery document, with Accept */*; expects 200 01000. Reads what the steps above created. Only where the default profile is rri (rri-mtest).",
       "when": {
         "profile.default_preset": "rri"
       },

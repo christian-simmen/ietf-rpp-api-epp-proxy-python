@@ -2,6 +2,7 @@
   "test_id": "test3-head_free",
   "steps": [
     {
+      "comment": "Checks whether host t3.….net is available with HEAD; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "HEAD",
         "url": "/hosts/t3.{random_name}.net/availability",

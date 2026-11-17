@@ -3,6 +3,7 @@
   "test_id": "test1-patch_add_status",
   "steps": [
     {
+      "comment": "Creates host t1.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -42,6 +43,7 @@
       }
     },
     {
+      "comment": "Patches host t1.….net: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t1.{random_name}.net",

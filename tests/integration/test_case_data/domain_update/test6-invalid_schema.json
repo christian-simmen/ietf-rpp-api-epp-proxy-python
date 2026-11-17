@@ -1,12 +1,8 @@
 {
-  "when": {
-    "profile.domainName.contacts.labels": {
-      "contains": "admin"
-    }
-  },
   "test_id": "test6-invalid_schema",
   "steps": [
     {
+      "comment": "Patches domain up-test6: add /contacts tech, with a fixed RPP-Cltrid; expects 400. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test6-{random_name}.{tld}",

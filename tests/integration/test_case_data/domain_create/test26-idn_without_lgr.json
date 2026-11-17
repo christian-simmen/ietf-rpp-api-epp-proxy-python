@@ -2,6 +2,7 @@
   "test_id": "test26-idn_without_lgr",
   "steps": [
     {
+      "comment": "Creates contact HC26; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain IDN bücher-t26 with authInfo, registrant HC26 (by backend), dns records a (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -164,6 +166,7 @@
       }
     },
     {
+      "comment": "Deletes domain IDN bücher-t26; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it. Only where an IDN needs no lgr (rri-mtest).",
       "when": {
         "env.domainName.name.lgr.required_for_idn": false
       },

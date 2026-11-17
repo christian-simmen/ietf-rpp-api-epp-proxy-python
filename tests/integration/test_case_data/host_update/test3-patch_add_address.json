@@ -3,6 +3,7 @@
   "test_id": "test3-patch_add_address",
   "steps": [
     {
+      "comment": "Creates host t3.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -42,6 +43,7 @@
       }
     },
     {
+      "comment": "Patches host t3.….net: add /dns/records; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t3.{random_name}.net",

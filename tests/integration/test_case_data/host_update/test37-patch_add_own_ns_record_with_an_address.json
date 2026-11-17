@@ -2,6 +2,7 @@
   "test_id": "test37-patch_add_own_ns_record_with_an_address",
   "steps": [
     {
+      "comment": "Creates host t37.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t37.….net: add /dns/records; add /dns/records; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t37.{random_name}.net",

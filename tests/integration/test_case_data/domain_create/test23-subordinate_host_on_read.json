@@ -4,9 +4,11 @@
       "contains": "host"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "test_id": "test23-subordinate_host_on_read",
   "steps": [
     {
+      "comment": "Creates contact HC23; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -75,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates domain t23 with authInfo, registrant HC23 (by backend), dns records a (by backend); expects 201 01000. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -171,6 +174,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.t23 with dns records ns; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -210,6 +214,7 @@
       }
     },
     {
+      "comment": "Reads domain t23; expects 200 01000. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/domainNames/t23-{random_name}.{tld}",

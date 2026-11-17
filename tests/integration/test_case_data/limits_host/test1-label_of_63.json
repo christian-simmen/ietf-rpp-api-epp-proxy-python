@@ -3,6 +3,7 @@
   "description": "A label of 63 characters (RFC 1035 §2.3.4).",
   "steps": [
     {
+      "comment": "Creates host h1 (a label of 63).net with dns records ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -39,6 +40,7 @@
       }
     },
     {
+      "comment": "Reads host h1 (a label of 63).net; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/{pad:63:h1-{random_name}}.net",

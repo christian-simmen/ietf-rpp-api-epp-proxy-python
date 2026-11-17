@@ -2,6 +2,7 @@
   "test_id": "test13-no-Auth",
   "steps": [
     {
+      "comment": "Creates contact HC13; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain test13 with authInfo, registrant HC13 (by backend), dns records a (by backend) without credentials, with a fixed RPP-Cltrid; expects 401. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

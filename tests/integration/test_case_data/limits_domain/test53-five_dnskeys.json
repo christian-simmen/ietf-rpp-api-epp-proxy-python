@@ -10,9 +10,11 @@
       }
     }
   },
+  "comment": "Skipped on epp-docker: the case needs name servers as ns records of the domain, which a backend with host objects turns into hostAttr; the EPP test server refuses a hostAttr without addresses (pawel-kow/epp#33).",
   "description": "Five DNSKEY records next to two ns records, the most MTEST takes.",
   "steps": [
     {
+      "comment": "Creates contact V53 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -99,6 +101,7 @@
       }
     },
     {
+      "comment": "Creates domain t53 with authInfo, registrant V53 (by backend), dns records 2 ns, 5 dnskey; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -222,6 +225,7 @@
       }
     },
     {
+      "comment": "Deletes domain t53; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/t53-{random_name}.{tld}",

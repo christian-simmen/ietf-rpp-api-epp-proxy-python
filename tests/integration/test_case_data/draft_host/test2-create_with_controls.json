@@ -2,6 +2,7 @@
   "test_id": "test2-create_with_controls",
   "steps": [
     {
+      "comment": "Creates domain d2 with authInfo; expects 201 01000. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -33,6 +34,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.d2 with dns records ns, a, aaaa, dns controls; expects 501 02103. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",

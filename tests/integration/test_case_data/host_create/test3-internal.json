@@ -3,6 +3,7 @@
   "test_id": "test3-internal",
   "steps": [
     {
+      "comment": "Creates domain t3 with authInfo; expects 201 01000. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -34,6 +35,7 @@
       }
     },
     {
+      "comment": "Creates host ns1.t3 with dns records ns, a; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",

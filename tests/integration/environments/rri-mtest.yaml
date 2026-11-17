@@ -32,14 +32,16 @@ facts:
         required_for_idn: false        # an IDN without an lgr is taken
         ascii_supported: true          # an lgr on a name that is not an IDN is taken
         latn_enye_supported: true      # DENIC's repertoire has ñ
+        latn_comma_below_supported: false  # DENIC's repertoire lacks ș (s with comma below)
     authInfo:
       min_length: 8
       upper_and_digit_required: false
       ambiguous_supported: false       # it may not hold I, O, l, o, 0 and 1
+      min_count: 0                     # a create without authInfo is taken
     contacts:
-      foreign_supported: null          # not known
+      foreign_supported: false         # a domain cannot name a contact of another RegAcc
     dns:
-      dnskey_supported: null           # RRI has no secDNS: DENIC computes the DS from the DNSKEY
+      dnskey_supported: true           # DNSKEY records are dnsentry records; RRI has no secDNS, DENIC computes the DS
     # Periods are ISO 8601 durations, the longest a transition takes (null: the server has none). DENIC states some as
     # a time of day (docs/rri/rri-5.0-reference.md §2.5, §6), so the period is the longest it can be.
     processes:
@@ -51,6 +53,8 @@ facts:
           - inactive                   # RRI `failed`, with a `due`: deleted after a day unless fixed
         failed_dns_period: P1D         # a failed domain is deleted after a day on MTEST (30 days in production)
         add_grace_period: PT0S         # none: a domain deleted right after its create goes to redemption
+      update:
+        dns_checked: true              # the delegation of an update is checked: name servers that do not serve the zone are refused
       renew:
         grace_period: null             # no renew
         expiry_grace_period: null      # a domain runs until it is deleted
@@ -93,3 +97,5 @@ facts:
   # Defects of this server, which the cases it breaks do not run on.
   bugs:
     over_max_length_cut: false
+    long_label_cut: false
+    host_attr_without_address_refused: false

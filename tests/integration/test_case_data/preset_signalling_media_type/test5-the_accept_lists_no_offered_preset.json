@@ -7,8 +7,10 @@
   "when": {
     "env.preset_signalling": "media-type"
   },
+  "comment": "Skipped on epp-docker: the EPP config signals the profile by the RPP-Profile header; profile_signalling_header/ covers the header method.",
   "steps": [
     {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept application/rpp+json; profile=\"urn:example:nope\"; profile-version=\"1.0\"; expects 406 02004. An error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/.well-known/rpp",
@@ -33,6 +35,7 @@
       }
     },
     {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"2.0\"; expects 406 02004. An error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/.well-known/rpp",
@@ -57,6 +60,7 @@
       }
     },
     {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\"; q=0; expects 406 02004. An error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/.well-known/rpp",
@@ -81,6 +85,7 @@
       }
     },
     {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json; profile=\"urn:ietf:params:rpp:profile:base\"; profile-version=\"1.0\", Accept text/html; expects 406 02004. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/.well-known/rpp",

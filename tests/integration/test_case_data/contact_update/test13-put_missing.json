@@ -2,6 +2,7 @@
   "test_id": "test13-put_missing",
   "steps": [
     {
+      "comment": "Replaces contact 13Z by a full update (the request differs by backend); expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:13Z}",

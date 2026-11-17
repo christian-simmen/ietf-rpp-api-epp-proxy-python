@@ -3,9 +3,11 @@
   "when": {
     "profile.contact.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a contact.",
   "description": "A PUT replaces one client status by another.",
   "steps": [
     {
+      "comment": "Creates contact P54 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Patches contact P54: add /status clientDeleteProhibited; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P54}",
@@ -118,6 +121,7 @@
       }
     },
     {
+      "comment": "Replaces contact P54 by a full update with status clientTransferProhibited; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:P54}",
@@ -194,6 +198,7 @@
       }
     },
     {
+      "comment": "Patches contact P54: replace /status with a match clientUpdateProhibited; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P54}",

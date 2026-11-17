@@ -3,6 +3,7 @@
   "description": "A contact id of the most characters the server takes (EPP clIDType 16, RRI handle 32).",
   "steps": [
     {
+      "comment": "Sends a contact create without a name or id, with authInfo (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",

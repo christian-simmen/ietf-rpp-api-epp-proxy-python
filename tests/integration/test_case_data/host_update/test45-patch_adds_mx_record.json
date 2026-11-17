@@ -3,6 +3,7 @@
   "description": "A host holds addresses only: an MX record is refused before any command.",
   "steps": [
     {
+      "comment": "Creates host hu45.….net with dns records ns; expects 201. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -40,6 +41,7 @@
       }
     },
     {
+      "comment": "Patches host hu45.….net: add /dns/records; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/hu45.{random_name}.net",

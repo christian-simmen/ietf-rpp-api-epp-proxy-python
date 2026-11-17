@@ -1,15 +1,16 @@
 {
-  "test_id": "test38-contact_of_another_registrar",
   "when": {
     "profile.domainName.contacts.labels": {
       "contains": "tech"
     },
-    "profile.domainName.registrant.min_count": 0,
     "env.domainName.contacts.foreign_supported": false
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts.",
+  "test_id": "test38-contact_of_another_registrar",
   "description": "A contact of another registrar: the drafts leave it to server policy, the server refuses it (env.foreign_contacts_refused).",
   "steps": [
     {
+      "comment": "Creates contact B38 of registrar b with authInfo (by backend) as registrar b; expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -92,6 +93,7 @@
       }
     },
     {
+      "comment": "Creates domain gc38 with authInfo, dns records a (by backend), contacts tech; expects 403 02201. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

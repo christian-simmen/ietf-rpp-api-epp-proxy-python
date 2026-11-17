@@ -2,6 +2,7 @@
   "test_id": "test31-lgr_on_ascii_name",
   "steps": [
     {
+      "comment": "Creates contact HC31; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain test31 with authInfo, lgr, registrant HC31 (by backend), dns records a (by backend); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -186,6 +188,7 @@
       }
     },
     {
+      "comment": "Deletes domain test31; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it. Only where the server takes an lgr on an ASCII name (rri-mtest).",
       "when": {
         "env.domainName.name.lgr.ascii_supported": true
       },

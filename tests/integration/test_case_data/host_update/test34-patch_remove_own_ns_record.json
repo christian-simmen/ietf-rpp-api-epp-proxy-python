@@ -2,6 +2,7 @@
   "test_id": "test34-patch_remove_own_ns_record",
   "steps": [
     {
+      "comment": "Creates host t34.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t34.….net: remove /dns/records with a match; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t34.{random_name}.net",

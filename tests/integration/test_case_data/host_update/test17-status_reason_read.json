@@ -3,6 +3,7 @@
   "skip": "#54",
   "steps": [
     {
+      "comment": "Creates host t17.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -42,6 +43,7 @@
       }
     },
     {
+      "comment": "Patches host t17.….net: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t17.{random_name}.net",

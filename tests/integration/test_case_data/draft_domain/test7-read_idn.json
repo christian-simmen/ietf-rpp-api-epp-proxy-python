@@ -7,6 +7,7 @@
   "test_id": "test7-read_idn",
   "steps": [
     {
+      "comment": "Creates contact HR7; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -75,6 +76,7 @@
       }
     },
     {
+      "comment": "Creates domain IDN bücher-d7 with authInfo, uName, lgr, registrant HR7 (by backend), dns records a (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -151,6 +153,7 @@
       }
     },
     {
+      "comment": "Reads domain IDN bücher-d7; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/domainNames/{alabel:bücher-d7}.{tld}",

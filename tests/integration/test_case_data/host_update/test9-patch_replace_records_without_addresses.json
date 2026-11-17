@@ -2,6 +2,7 @@
   "test_id": "test9-patch_replace_records_without_addresses",
   "steps": [
     {
+      "comment": "Creates host t9.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
@@ -41,6 +42,7 @@
       }
     },
     {
+      "comment": "Patches host t9.….net: replace /dns/records; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t9.{random_name}.net",

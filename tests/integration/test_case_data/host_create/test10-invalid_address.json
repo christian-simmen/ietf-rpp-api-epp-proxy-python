@@ -2,6 +2,7 @@
   "test_id": "test10-invalid_address",
   "steps": [
     {
+      "comment": "Creates host t10.….net with dns records a; expects 400. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",

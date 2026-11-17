@@ -2,6 +2,7 @@
   "test_id": "test7-simple_create_domain_taken",
   "steps": [
     {
+      "comment": "Creates contact HC7; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain c7 with authInfo, registrant HC7 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -144,6 +146,7 @@
       }
     },
     {
+      "comment": "Creates domain c7 with authInfo, registrant HC7 (by backend), dns records a (by backend), with a fixed RPP-Cltrid; expects 409 02302. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",

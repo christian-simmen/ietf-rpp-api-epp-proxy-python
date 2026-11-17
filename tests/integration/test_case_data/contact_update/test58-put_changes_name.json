@@ -3,9 +3,11 @@
   "when": {
     "profile.contact.name.changeable": true
   },
+  "comment": "Skipped on rri-mtest: RRI cannot change a contact's name.",
   "description": "A PUT changes the name.",
   "steps": [
     {
+      "comment": "Creates contact P58 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -88,6 +90,7 @@
       }
     },
     {
+      "comment": "Replaces contact P58 by a full update; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:P58}",
@@ -157,6 +160,7 @@
       }
     },
     {
+      "comment": "Reads contact P58; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:P58}",

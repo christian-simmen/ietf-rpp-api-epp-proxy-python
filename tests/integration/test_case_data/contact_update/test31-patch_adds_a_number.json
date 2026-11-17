@@ -3,6 +3,7 @@
   "test_id": "test31-patch_adds_a_number",
   "steps": [
     {
+      "comment": "Creates contact 31A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -104,6 +105,7 @@
       }
     },
     {
+      "comment": "Patches contact 31A: add /contactInfo/phones; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:31A}",

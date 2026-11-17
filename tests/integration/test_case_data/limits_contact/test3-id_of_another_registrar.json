@@ -3,6 +3,7 @@
   "description": "An id with the prefix of another registrar: refused by policy or as not authorised.",
   "steps": [
     {
+      "comment": "Creates contact Z3 of registrar b with authInfo (by backend); expects one of 400 02001 or 400 02004 or 400 02005 or 403 02201 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
