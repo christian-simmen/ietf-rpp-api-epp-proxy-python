@@ -159,3 +159,8 @@ where the real text differs the test pins the real text and the plan is correcte
 - `pytest -n 4 tests/unit`: 2811 passed.
 - `pytest -n 4 -m smoke tests/integration` (all six environments, credentials of `.env`, including rri-mtest): 202 passed, 338 skipped, 0 failed.
   A second smoke run of rri-mtest and epp-docker was started by mistake while checking the credentials and stopped at once; it is no result.
+
+## Check results after review round 1 (code commit 697fc26)
+
+- `lint-imports`: 28 kept, 0 broken. `pytest -n 4 tests/unit`: 2821 passed.
+- `pytest -n 4 -m smoke tests/integration` (six environments, rri-mtest included): 190 passed, 350 skipped, 0 failed. 12 fewer passes than before: the four `preset_read` cases ran with zero steps on three sqlite environments and are now skipped there.
