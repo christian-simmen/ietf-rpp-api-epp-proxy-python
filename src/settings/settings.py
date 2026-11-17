@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 
 from settings.discovery_settings import DiscoverySettings
 from settings.epp_settings import EppSettings
+from settings.openapi_settings import OpenApiSettings
 from settings.rri_settings import RriSettings
 from settings.sqlite_settings import SqliteSettings
 
@@ -18,7 +19,8 @@ class Settings:
     (`rpp_extensions`): each registers its part of the pipeline. `profile_layers`
     are the layers of its `BackendProfile`, the generic one of the protocol first, then the server's own
     (`rpp_backend_profile`); main merges them with `lgrs`. `preset_signalling` is how a client names the preset of a
-    request (`rpp_preset_signalling`, core §Preset Signalling): `header` (the default), or `media-type`.
+    request (`rpp_preset_signalling`, core §Preset Signalling): `header` (the default), or `media-type`. `openapi` is what the
+    OpenAPI document served leaves out (`rpp_openapi_omit_*`), nothing by default.
     """
     epp: EppSettings
     discovery: DiscoverySettings
@@ -28,6 +30,7 @@ class Settings:
     backend: str = "epp"
     profile_layers: tuple[dict, ...] = ()
     preset_signalling: str = "header"
+    openapi: OpenApiSettings = field(default_factory=OpenApiSettings)
 
     def __post_init__(self):
         if self.backend not in BACKENDS:

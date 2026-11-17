@@ -6,6 +6,7 @@ import yaml
 
 from settings.discovery_settings import DiscoverySettings
 from settings.epp_settings import EppSettings
+from settings.openapi_settings import OpenApiSettings
 from settings.rri_settings import RriSettings
 from settings.sqlite_settings import SqliteSettings
 from settings.settings import BACKENDS, Settings
@@ -54,5 +55,5 @@ def load_settings(config_path: str | None = None) -> Settings:
     return Settings(
         epp=_section(EppSettings, data), discovery=_section(DiscoverySettings, data), rri=_section(RriSettings, data),
         sqlite=_section(SqliteSettings, data), extensions=_extensions(data), backend=backend, profile_layers=_profile_layers(data, backend) if backend in BACKENDS else (),
-        preset_signalling=data.get("rpp_preset_signalling", "header"),
+        preset_signalling=data.get("rpp_preset_signalling", "header"), openapi=_section(OpenApiSettings, data),
     )
