@@ -67,18 +67,13 @@ with a `comment` (skipped on sqlite-demo-bound, where the default preset binds r
      config files (`test_demo_configurations.py`, parametrized over the four files): exact preset list, extension ids each once,
      `profiles`/`boundProfiles` lists, base profiles flattened once (rocky-planets through the preset and through habitable-rocky-planets appears once in `applicable`),
      schema `$defs` exact, discovery `extensions` each once.
-3. Same request accepted without the binding, refused 422 `02308` with it. Group `demo_binding/`, identical request in two cases,
-   each states one answer, selected by the fact that tells them apart (a case never accepts both):
-   - `test1-a_preset_without_the_profile_accepts_a_gas_giant`: POST /planets `type: gas-giant` under `planets`, 201.
-     `when` bound_profiles does not contain planets (runs on sqlite-demo and sqlite-demo-extended with `planets`... see note).
-   - `test2-the_bound_profile_refuses_the_same_request`: same body under `planets`, 422, `RPP-Code 02308`, error `result 02308`, `profile` = rocky-planets.
-     `when` bound_profiles contains planets (sqlite-demo-bound).
-   Note: extended's default is planets-complete and `planets` is offered there too, so the request names `planets` explicitly with
-   literal headers (header-signalling in extended, media type in bound), the case therefore needs `when` on the method per environment;
-   it is written once per method only if the body is not shared (select on `env.preset_signalling`, as `preset_signalling_*` do).
-   Further cases: the same request on `planets-atmosphere` of bound is 422 `habitable-atmospheres` (atmosphere required), accepted on extended `planets-atmosphere` without one;
-   a bound transitive profile (`planets-complete`, planet without radius refused by `habitable-rocky-planets`, on bound; accepted on extended);
-   400 `02001` for an atmosphere member under `planets` (member outside the preset) on extended.
+3. Same request accepted without the binding, refused 422 `02308` with it (decision Q7). The pair needs no explicit preset: group `demo_binding/`,
+   two cases with the identical request POST /planets `type: gas-giant` under the default preset `planets` (headers `{rpp:*}` as every case):
+   - `test1-a_preset_without_the_profile_accepts_a_gas_giant`: 201. `when` `profile.bound_profiles` does not contain `planets` (sqlite-demo; extended and inherit default to planets-complete, so they skip it).
+   - `test2-the_bound_profile_refuses_the_same_request`: 422, `RPP-Code 02308`, error `result` 02308, `profile` = rocky-planets. `when` `profile.bound_profiles` contains `planets` (sqlite-demo-bound).
+   Extra pairs on non-default presets (habitable-atmospheres on planets-atmosphere, habitable-rocky-planets on planets-complete, 400 for an atmosphere member under planets):
+   the runner placeholders get an optional preset key, `{rpp:preset:KEY}`, `{rpp:accept:KEY}`, `{rpp:content-type:KEY}` (KEY = key of a preset of the config, resolved per signalling method),
+   with a unit test; no literal headers per environment. If that is not clean, they are dropped from the integration suite and kept as unit tests on the real configs.
 4. Must-not-start configs: below.
 
 ## The configurations that must not start
@@ -122,7 +117,13 @@ where the real text differs the test pins the real text and the plan is correcte
 - Bound config uses media-type signalling: Content-Type preset must be in Accept (core.md:188, :195); response uses the response preset.
 - PATCH: per-member constraints and unconditional `required` only (so the transitive-profile case uses POST/PUT for radius `required`).
 
-## Open questions (recommendation)
+## Answers of the orchestrator (recorded)
+
+- Q1 yes: `config.demo.yaml` / `sqlite-demo` is the bare configuration (say so in testing.project.md and the PR text, the issue names `config.demo-bare.yaml`). Q2, Q3, Q5, Q6 yes. Q4 yes, but verify first that compose accepts a data-only extension without a sqlite part; if not, stop and report before touching `src/`.
+- Q7: the pair uses the default preset (above); extra pairs via `{rpp:preset:KEY}` placeholders, else unit tests.
+- Refusal messages: tests first, pin the real output. A message that does not name both sides of the conflict (profile and extension, full cycle path, both versions and the preset) is reported, the test is not weakened.
+
+## Open questions (recommendation) -- all answered, see above
 
 1. `config.demo-bare.yaml`: rename `config.demo.yaml`, duplicate it, or keep? Recommend keep `config.demo.yaml`/`sqlite-demo` as the bare config (it is exactly "the planets preset only"; it is referenced by README, deploy example, docs, tests). The set is documented as bare/extended/bound/inherit.
 2. Default of extended and inherit is `planets-complete` (generic cases run with all extensions available) while bound is `planets`. Recommend as written.
