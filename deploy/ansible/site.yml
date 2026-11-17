@@ -1,0 +1,10 @@
+---
+# Deploys rootless Docker for an unprivileged user, the EPP test server and the proxy instances (deploy/README.md).
+- name: RPP proxy on rootless Docker
+  hosts: rpp_hosts
+  become: true
+  roles:
+    - role: rootless_docker
+    - role: epp_server
+      when: epp_server_enabled | bool
+    - role: rpp_proxy

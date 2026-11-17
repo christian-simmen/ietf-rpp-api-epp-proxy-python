@@ -1,0 +1,163 @@
+---
+# What the host has before the role changes anything. Nothing here changes the host: `--tags preflight` runs these
+# tasks (and those of rpp_proxy) alone and prints the summary.
+
+- name: Check the platform
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Ubuntu'
+      - ansible_facts['distribution_major_version'] is version('22', '>=')
+    fail_msg: The deployment is made for Ubuntu 22.04 or later.
+    quiet: true
+
+# From dpkg, not apt: apt fails while its sources conflict, which this role has to repair first.
+- name: Read the installed Docker packages
+  ansible.builtin.command:
+    argv: [dpkg-query, -W, "-f=${Package} ${Version} ${db:Status-Abbrev}\n", docker-ce, docker-ce-cli, docker.io,
+           docker-ce-rootless-extras, docker-compose-plugin, docker-buildx-plugin]
+  register: rootless_docker_dpkg
+  changed_when: false
+  failed_when: false
+
+- name: Keep the installed ones
+  ansible.builtin.set_fact:
+    rootless_docker_packages: >-
+      {{ dict(rootless_docker_dpkg.stdout_lines | select('search', ' ii *$')
+              | map('split', ' ') | map('first')
+              | zip(rootless_docker_dpkg.stdout_lines | select('search', ' ii *$') | map('split', ' ') | map(attribute=1))) }}
+
+- name: Read the users
+  ansible.builtin.getent:
+    database: passwd
+
+- name: Find the definitions of the Docker CE repository
+  ansible.builtin.find:
+    paths: [/etc/apt/sources.list.d]
+    patterns: ["*.list", "*.sources"]
+    contains: '.*download\.docker\.com.*'
+  register: rootless_docker_repos
+
+# docker.sources with keyrings/docker.asc is what both Docker's guide and an earlier version of this role write. It
+# conflicts with another definition only when that one names another key file: apt then refuses all sources.
+- name: Find the other definitions that name another key file
+  ansible.builtin.find:
+    paths: [/etc/apt/sources.list.d]
+    patterns: ["*.list", "*.sources"]
+    contains: '.*download\.docker\.com.*'
+    excludes: [docker.sources]
+  register: rootless_docker_other_repos
+
+- name: Find the other definitions that name the same key file
+  ansible.builtin.find:
+    paths: [/etc/apt/sources.list.d]
+    patterns: ["*.list", "*.sources"]
+    contains: '.*keyrings/docker\.asc.*'
+    excludes: [docker.sources]
+  register: rootless_docker_same_key_repos
+
+- name: Read the services
+  ansible.builtin.service_facts:
+
+- name: Find the rootless daemons of the users
+  ansible.builtin.stat:
+    path: "{{ item.value[4] }}/.config/systemd/user/docker.service"
+  # The login users: uids 1000 to 59999.
+  when: item.value[1] | int >= 1000 and item.value[1] | int < 60000
+  loop: "{{ ansible_facts['getent_passwd'] | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: rootless_docker_user_services
+
+- name: Find which of them run
+  ansible.builtin.stat:
+    path: /run/user/{{ item.item.value[1] }}/docker.sock
+  loop: "{{ rootless_docker_user_services.results | selectattr('stat', 'defined') | selectattr('stat.exists') }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+  register: rootless_docker_user_sockets
+
+- name: Read the daemon configuration of the deployment user
+  when: rootless_docker_user in ansible_facts['getent_passwd']
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['getent_passwd'][rootless_docker_user][4] }}/.config/docker/{{ item }}"
+  loop: [daemon.json, "{{ rootless_docker_marker }}"]
+  register: rootless_docker_user_config
+
+- name: Read the AppArmor profile at the role's path
+  ansible.builtin.slurp:
+    src: /etc/apparmor.d/usr.bin.rootlesskit
+  register: rootless_docker_profile
+  failed_when: false
+
+- name: Find other AppArmor profiles of rootlesskit
+  ansible.builtin.find:
+    paths: [/etc/apparmor.d]
+    file_type: file
+    contains: '.*/usr/bin/rootlesskit.*'
+    excludes: [usr.bin.rootlesskit]
+  register: rootless_docker_other_profiles
+
+- name: Decide what the role may change
+  vars:
+    packages: "{{ rootless_docker_packages }}"
+    user_exists: "{{ rootless_docker_user in ansible_facts['getent_passwd'] }}"
+    service_of_user: "{{ rootless_docker_user_services.results | selectattr('item.key', 'equalto', rootless_docker_user)
+                         | selectattr('stat', 'defined') | selectattr('stat.exists') | list | length > 0 }}"
+    daemon_json: "{{ user_exists and rootless_docker_user_config.results[0].stat.exists }}"
+    marker: "{{ user_exists and rootless_docker_user_config.results[1].stat.exists }}"
+    profile_text: "{{ rootless_docker_profile.content | default('') | b64decode }}"
+  ansible.builtin.set_fact:
+    rootless_docker_has_docker_ce: "{{ 'docker-ce' in packages }}"
+    rootless_docker_has_docker_io: "{{ 'docker.io' in packages }}"
+    rootless_docker_add_repository: >-
+      {{ rootless_docker_install_packages | bool and 'docker-ce' not in packages and rootless_docker_repos.matched == 0 }}
+    # docker.sources conflicts with another definition of the source that names another key file (apt is broken then).
+    rootless_docker_repo_conflict: >-
+      {{ rootless_docker_repos.files | selectattr('path', 'equalto', '/etc/apt/sources.list.d/docker.sources') | list
+         | length > 0 and rootless_docker_other_repos.matched > rootless_docker_same_key_repos.matched }}
+    rootless_docker_running_daemons: >-
+      {{ rootless_docker_user_sockets.results | selectattr('stat', 'defined') | selectattr('stat.exists')
+         | map(attribute='item.item.key') | list }}
+    rootless_docker_installed_daemons: >-
+      {{ rootless_docker_user_services.results | selectattr('stat', 'defined') | selectattr('stat.exists')
+         | map(attribute='item.key') | list }}
+    # The daemon of the deployment user is the role's when the role made its configuration (the marker), or when
+    # there is none yet. Otherwise it is adopted as it is: no configuration written, no restart.
+    rootless_docker_adopted: "{{ service_of_user and daemon_json and not marker }}"
+    rootless_docker_manage_config: "{{ not daemon_json or marker }}"
+    # The profile at the role's path is written only when there is none, or the role wrote it; and not at all when
+    # another profile already covers rootlesskit.
+    rootless_docker_write_profile: >-
+      {{ rootless_docker_apparmor_profile | bool and rootless_docker_other_profiles.matched == 0
+         and (rootless_docker_profile.content is not defined or rootless_docker_profile_marker in profile_text) }}
+
+- name: Summarise the host
+  ansible.builtin.debug:
+    msg:
+      - "Docker packages: docker-ce {{ rootless_docker_packages['docker-ce'] | default('not installed') }},
+        rootless extras {{ rootless_docker_packages['docker-ce-rootless-extras'] | default('not installed') }},
+        docker.io {{ 'installed' if rootless_docker_has_docker_io else 'not installed' }}"
+      - "Docker CE repository: {{ (rootless_docker_repos.files | map(attribute='path') | join(', '))
+         or ('added by the role' if rootless_docker_add_repository else 'none, not added') }}
+        {{ '(docker.sources conflicts with another definition and is removed)' if rootless_docker_repo_conflict else '' }}"
+      - "Root daemon: {{ ansible_facts['services']['docker.service']['state'] | default('not installed') }}"
+      - "Rootless daemons: {{ rootless_docker_installed_daemons | join(', ') or 'none' }}
+        (running: {{ rootless_docker_running_daemons | join(', ') or 'none' }})"
+      - "Deployment user {{ rootless_docker_user }}:
+        {{ 'adopted as it is (its daemon.json was not made by the role)' if rootless_docker_adopted
+           else ('exists' if rootless_docker_user in ansible_facts['getent_passwd'] else 'created') }};
+        daemon.json {{ 'managed by the role' if rootless_docker_manage_config else 'left as it is' }}"
+      - "AppArmor profile: {{ 'written by the role' if rootless_docker_write_profile
+         else ('another profile covers rootlesskit: ' ~ (rootless_docker_other_profiles.files | map(attribute='path') | join(', '))
+               if rootless_docker_other_profiles.matched else 'left as it is') }}"
+      - "Other users' rootless daemons are never changed."
+
+- name: Stop on a Docker the role cannot work with
+  ansible.builtin.assert:
+    that:
+      - not (rootless_docker_install_packages | bool and rootless_docker_has_docker_io)
+    fail_msg: >-
+      Ubuntu's docker.io is installed, which conflicts with Docker CE and has no rootless extras. Replace it with Docker
+      CE, or install the rootless extras and the compose and buildx plugins yourself and set
+      rootless_docker_install_packages to false.
+    quiet: true

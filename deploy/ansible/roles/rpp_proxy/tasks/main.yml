@@ -1,0 +1,165 @@
+---
+- name: Check the instances and their ports before changing anything
+  ansible.builtin.import_tasks: preflight.yml
+  tags: [preflight]
+
+- name: Name the directories and the ids on the host
+  ansible.builtin.set_fact:
+    rpp_proxy_dir: "{{ rootless_docker_home }}/rpp-proxy"
+    # The ids the container's user has on the host: the user namespace maps container id n (n >= 1) to start + n - 1.
+    rpp_proxy_host_uid: "{{ rootless_docker_subuid_start | int + rpp_proxy_container_uid - 1 }}"
+    rpp_proxy_host_gid: "{{ rootless_docker_subgid_start | int + rpp_proxy_container_gid - 1 }}"
+
+- name: Check out the proxy
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.git:
+    repo: "{{ rpp_proxy_repo }}"
+    dest: "{{ rpp_proxy_dir }}/src"
+    version: "{{ rpp_proxy_version }}"
+  register: rpp_proxy_checkout
+
+- name: Name the image after the commit
+  ansible.builtin.set_fact:
+    rpp_proxy_image: "rpp-proxy:{{ rpp_proxy_checkout.after[:12] }}"
+
+- name: Check whether the image exists
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.command: docker image inspect --format '{{ "{{" }}.Id{{ "}}" }}' {{ rpp_proxy_image }}
+  environment:
+    DOCKER_HOST: "{{ rootless_docker_host }}"
+  register: rpp_proxy_image_present
+  changed_when: false
+  failed_when: false
+
+- name: Build the image
+  when: rpp_proxy_image_present.rc != 0
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.command:
+    argv: [docker, build, --pull, -f, deploy/docker/Dockerfile, -t, "{{ rpp_proxy_image }}", .]
+    chdir: "{{ rpp_proxy_dir }}/src"
+  environment:
+    DOCKER_HOST: "{{ rootless_docker_host }}"
+  changed_when: true
+
+- name: Create the directory of each instance
+  ansible.builtin.file:
+    path: "{{ rpp_proxy_dir }}/instances/{{ instance.name }}"
+    state: directory
+    owner: "{{ rootless_docker_user }}"
+    group: "{{ rootless_docker_user }}"
+    mode: "0755"
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name }}"
+
+# The configuration can hold secrets (the client hashes of the SQLite backend): only the container's user reads it.
+- name: Create the configuration directory of each instance
+  ansible.builtin.file:
+    path: "{{ rpp_proxy_dir }}/instances/{{ instance.name }}/config"
+    state: directory
+    owner: "{{ rpp_proxy_host_uid }}"
+    group: "{{ rpp_proxy_host_gid }}"
+    mode: "0500"
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name }}"
+
+- name: Write the configuration of each instance (template)
+  when: instance.config_template is defined
+  ansible.builtin.template:
+    src: "{{ instance.config_template if instance.config_template is abs else inventory_dir ~ '/' ~ instance.config_template }}"
+    dest: "{{ rpp_proxy_dir }}/instances/{{ instance.name }}/config/config.yaml"
+    owner: "{{ rpp_proxy_host_uid }}"
+    group: "{{ rpp_proxy_host_gid }}"
+    mode: "0400"
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name }}"
+
+- name: Write the configuration of each instance (mapping)
+  when: instance.config is defined
+  ansible.builtin.copy:
+    content: "{{ instance.config | to_nice_yaml(indent=2, sort_keys=false) }}"
+    dest: "{{ rpp_proxy_dir }}/instances/{{ instance.name }}/config/config.yaml"
+    owner: "{{ rpp_proxy_host_uid }}"
+    group: "{{ rpp_proxy_host_gid }}"
+    mode: "0400"
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name }}"
+
+- name: Create the data directory of each instance that has one
+  when: instance.data | default(false)
+  ansible.builtin.file:
+    path: "{{ rpp_proxy_dir }}/instances/{{ instance.name }}/data"
+    state: directory
+    owner: "{{ rpp_proxy_host_uid }}"
+    group: "{{ rpp_proxy_host_gid }}"
+    mode: "0700"
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name }}"
+
+# The configuration is read when a worker starts. Its checksum is a label of the container, so that compose recreates
+# the instance whose configuration changed.
+- name: Take the checksum of each configuration
+  ansible.builtin.stat:
+    path: "{{ rpp_proxy_dir }}/instances/{{ instance.name }}/config/config.yaml"
+    checksum_algorithm: sha256
+  loop: "{{ rpp_proxy_instances }}"
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.name }}"
+  register: rpp_proxy_config_stats
+
+- name: Keep the checksums by instance
+  ansible.builtin.set_fact:
+    rpp_proxy_config_checksums: >-
+      {{ dict(rpp_proxy_config_stats.results | map(attribute='instance.name')
+              | zip(rpp_proxy_config_stats.results | map(attribute='stat.checksum'))) }}
+
+- name: Write the compose file of the instances
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ rpp_proxy_dir }}/docker-compose.yml"
+    mode: "0644"
+
+- name: Run the instances
+  become: true
+  become_user: "{{ rootless_docker_user }}"
+  community.docker.docker_compose_v2:
+    project_src: "{{ rpp_proxy_dir }}"
+    docker_host: "{{ rootless_docker_host }}"
+    remove_orphans: true
+    state: present
+    wait: true
+    wait_timeout: 300
+
+- name: Check whether ufw is active
+  ansible.builtin.command: ufw status
+  register: rpp_proxy_ufw
+  changed_when: false
+  failed_when: false
+
+- name: Allow the root daemon's containers (nginx) to the published ports
+  when: "rpp_proxy_ufw.rc == 0 and 'Status: active' in rpp_proxy_ufw.stdout"
+  community.general.ufw:
+    rule: allow
+    proto: tcp
+    from_ip: "{{ item.0 }}"
+    to_ip: "{{ rpp_proxy_bind_address }}"
+    to_port: "{{ item.1.port | string }}"
+    comment: rpp-proxy {{ item.1.name }}
+  loop: "{{ rpp_proxy_ufw_allow_from | product(rpp_proxy_instances) | list }}"
+  loop_control:
+    label: "{{ item.0 }} -> {{ item.1.name }}:{{ item.1.port }}"

@@ -1,0 +1,6 @@
+{{ {
+  "bip": rootless_docker_bip,
+  "default-address-pools": rootless_docker_address_pools,
+  "log-driver": "json-file",
+  "log-opts": {"max-size": rootless_docker_log_max_size, "max-file": rootless_docker_log_max_file | string}
+} | combine({"dns": rootless_docker_dns} if rootless_docker_dns else {}) | to_nice_json }}
