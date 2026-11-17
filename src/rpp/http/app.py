@@ -6,7 +6,8 @@ import yaml
 from connexion import FlaskApp
 from connexion.datastructures import MediaTypeDict
 from connexion.exceptions import ProblemException
-from connexion.middleware import MiddlewarePosition
+from connexion.middleware import ConnexionMiddleware, MiddlewarePosition
+from connexion.middleware.swagger_ui import SwaggerUIMiddleware
 from connexion.validators import VALIDATOR_MAP
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
@@ -19,6 +20,7 @@ from rpp.http.profile_middleware import ProfileMiddleware
 from rpp.http.profile_signalling import HEADER_SIGNALLING, profile_signalling
 from rpp.http.request_profiles import RequestProfiles
 from rpp.http.middleware.line_feed_path_middleware import LineFeedPathMiddleware
+from rpp.http.middleware.spec_snapshot_swagger_ui_middleware import SpecSnapshotSwaggerUIMiddleware
 from rpp.http.security.session_security_handler import SessionSecurityHandler
 from rpp.http.validators.rpp_request_body_validator import RppRequestBodyValidator
 from rpp.http.validators.rpp_response_body_validator import RppResponseBodyValidator
@@ -80,6 +82,9 @@ def create_app(sessions, profile: BackendProfile, discovery_settings=None, signa
     app = FlaskApp(
         __name__,
         security_map={"basic": lambda: SessionSecurityHandler(sessions)},
+        # The spec is served from a copy taken at start, which response validation does not change (#193).
+        middlewares=[SpecSnapshotSwaggerUIMiddleware if middleware is SwaggerUIMiddleware else middleware
+                     for middleware in ConnexionMiddleware.default_middlewares],
     )
     app.add_middleware(LineFeedPathMiddleware, position=MiddlewarePosition.BEFORE_ROUTING)
     app.add_middleware(BodyBufferingMiddleware, position=MiddlewarePosition.BEFORE_VALIDATION)
