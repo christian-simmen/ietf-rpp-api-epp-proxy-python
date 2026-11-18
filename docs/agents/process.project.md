@@ -29,6 +29,17 @@ The deployment image and the Ansible roles are in `deploy/` ([deploy/README.md](
 there is checked with `ansible-lint` and `ansible-playbook --syntax-check site.yml` in `deploy/ansible`, and with the
 image built (`docker build -f deploy/docker/Dockerfile .`).
 
+## Configurations
+
+The configurations a change of a key `rpp_*` (or of its values) updates ([process.md](process.md#general-rules), rule
+5): the repository's `config*.yaml`, and the templates of the example inventory,
+`deploy/ansible/inventory/example/configs/*.yaml.j2`. Each template is made from the repository configuration its
+header names and takes its keys and values, except the instance's own (`{{ instance.* }}`, the vault's). The keys the
+proxy does not know are ignored, so a stale key goes unnoticed at startup: `tests/unit/test_deploy_config_templates.py`
+renders each template and checks it states no key its repository configuration lacks, the same signalling and profile,
+and that the proxy starts with it. A change of keys also tells the maintainer to update the inventories outside git
+(`deploy/ansible/inventory/<name>/`, and any other copy of the templates).
+
 ## Checks before done
 
 There is no CI in this repository. Run these checks from the repository root, in this order:

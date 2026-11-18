@@ -20,16 +20,16 @@ rpp_sqlite_clients:
 rpp_extensions:
   - extensions.planets
 
-rpp_profile_signalling: header
+rpp_preset_signalling: header
 
 # The profile of this server: src/settings/profiles/sqlite.yaml, which holds none of the drafts' objects, and what the
-# planets extension adds. The RPP profile `demo` is the one the extension brings.
+# planets extension adds. The RPP preset `planets` is the one the extension brings.
 rpp_backend_profile:
   extends: sqlite
-  profiles:
+  presets:
     - base
-    - demo
-  default_profile: demo
+    - planets
+  default_preset: planets
 
 # What the discovery document states.
 rpp_base_url: {{ instance.base_url }}

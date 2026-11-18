@@ -27,14 +27,21 @@ of #204 (PR #206, ready for review, nothing in progress) was taken over by the m
 ## Tasks
 
 - [x] T0 Issue #207, plan
-- [~] T1 Test first: the templates rendered and loaded (fails on `main`)
-- [ ] T2 Templates: keys, values and comments
-- [ ] T3 `.deploy/configs/` copies (local)
-- [ ] T4 Process rule (process.md, process.project.md)
-- [ ] T5 Checks: lint-imports, unit, smoke; ansible-lint and syntax check in `deploy/ansible`
+- [x] T1 Test first: the templates rendered and loaded (fails on `main`)
+- [x] T2 Templates: keys, values and comments
+- [x] T3 `.deploy/configs/` copies (local)
+- [x] T4 Process rule (process.md, process.project.md)
+- [x] T5 Checks: lint-imports, unit, smoke; ansible-lint and syntax check in `deploy/ansible`
 
 ## Open questions
 
 ## Corrections
 
 ## Check results
+
+- `lint-imports`: 28 kept, 0 broken.
+- Unit (`pytest -n 4 tests/unit`): 2791 passed, the 9 new ones included (they fail on `main`).
+- Smoke (`pytest -n 4 -m smoke tests/integration`): 107 passed, 112 skipped, 0 failed. No code changed, so no MTEST run.
+- `ansible-lint` and `ansible-playbook --syntax-check`: not run, neither is installed here (pending for the maintainer).
+  Only the config templates changed, which neither checks beyond their rendering, which the unit test covers.
+- The maintainer's `.deploy/configs/` copies: rendered with `.deploy/group_vars`, loaded, and the backend profile built.
