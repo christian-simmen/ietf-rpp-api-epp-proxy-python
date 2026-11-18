@@ -29,11 +29,14 @@ history. The maintainer's local changes (`.vscode/settings.json`, `deploy/ansibl
 ## Tasks
 
 - [x] Merge main into `csi` (conflicts to main's versions, test43 back to main's)
-- [~] `config.rri-local.yaml` and `rri-local.yaml` from the current rri-mtest ones, own `TEST_RRI_LOCAL_*` variables (F3–F6)
-- [ ] `bugs.queue_del_no_msgcnt` in every environment, test6's queue delete on it (D2)
-- [ ] testing.project.md: the local RRI environment and the new bug
-- [ ] Checks: lint-imports, unit tests, smoke on epp-docker (rri-local needs a local RRI: pending unless available)
-- [ ] Push to the PR branch, PR description
+- [x] `config.rri-local.yaml` and `rri-local.yaml` from the current rri-mtest ones, own `TEST_RRI_LOCAL_*` variables (F3–F6)
+- [x] `bugs.queue_del_no_msgcnt` in every environment, test6's queue delete on it (D2)
+- [x] testing.project.md: the local RRI environment and the new bug
+- [x] Checks: lint-imports (28 kept), unit tests (2869 passed), smoke: every epp-docker and sqlite case passes; all 32
+  failures are rri-mtest, each an RRI LOGIN refused with `83000000010` from this machine (not on the allowlist), not
+  this change. rri-local: skipped (no local RRI or `TEST_RRI_LOCAL_*` here), app composes with its config. Pending:
+  MTEST and rri-local smoke runs from a machine that reaches them.
+- [~] Push to the PR branch, PR description
 - [ ] Before merge: `git rm` this plan; pop the stash on `main`; release the mutex
 
 ## Open questions
