@@ -3,13 +3,14 @@
   "test_id": "test1-patch_add_status",
   "steps": [
     {
+      "comment": "Creates host t1.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -42,13 +43,14 @@
       }
     },
     {
+      "comment": "Patches host t1.….net: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t1.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

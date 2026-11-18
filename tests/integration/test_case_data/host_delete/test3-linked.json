@@ -2,13 +2,14 @@
   "test_id": "test3-linked",
   "steps": [
     {
+      "comment": "Creates host t3.….net with dns records ns; expects 201 01000. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -41,13 +42,14 @@
       }
     },
     {
+      "comment": "Creates domain t3 with authInfo, 1 nameserver; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -78,13 +80,14 @@
       }
     },
     {
+      "comment": "Deletes host t3.….net; expects 409 02305. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/hosts/t3.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

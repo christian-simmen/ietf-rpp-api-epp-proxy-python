@@ -4,9 +4,11 @@
       "contains": "host"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "test_id": "test18-create_with_glue",
   "steps": [
     {
+      "comment": "Creates contact HC18; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -63,7 +65,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -75,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates domain t18 with authInfo, dns records ns, a, registrant HC18 (by backend); expects one of 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -130,7 +133,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

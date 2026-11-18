@@ -4,13 +4,14 @@
   "description": "A PATCH replaces the locality component.",
   "steps": [
     {
+      "comment": "Creates contact P45 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -86,13 +87,14 @@
       }
     },
     {
+      "comment": "Patches contact P45: replace /contactInfo/addresses/addr/components with a match; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P45}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -140,13 +142,14 @@
       }
     },
     {
+      "comment": "Reads contact P45; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:P45}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

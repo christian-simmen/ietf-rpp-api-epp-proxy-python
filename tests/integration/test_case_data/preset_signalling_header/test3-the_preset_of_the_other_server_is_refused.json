@@ -1,0 +1,77 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-the_preset_of_the_other_server_is_refused",
+  "description": "A preset the server does not offer is refused even for a request its content fits: a plain domain read under the epp preset where the server has none, and under the rri profile.",
+  "when": {
+    "env.preset_signalling": "header"
+  },
+  "comment": "Skipped on rri-mtest: MTEST's config signals the preset by media type; the twin in preset_signalling_media_type/ covers it.",
+  "steps": [
+    {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=urn:ietf:params:rpp:preset:epp-compatible;version=1.0; expects 400 02004. An error answer this case checks. Only where the server offers no epp-compatible preset (rri-mtest).",
+      "when": {
+        "profile.presets": {
+          "not": {
+            "contains": "epp-compatible"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:epp-compatible;version=1.0",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Preset": null
+        }
+      }
+    },
+    {
+      "comment": "Reads domain b3, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=de.denic.rpp.preset.rri;version=1.0; expects 400 02004. The error answer this case checks. Only where the server offers no rri preset (epp-docker).",
+      "when": {
+        "profile.presets": {
+          "not": {
+            "contains": "rri"
+          }
+        }
+      },
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b3-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Preset": "preset=de.denic.rpp.preset.rri;version=1.0",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02004",
+          "RPP-Preset": null
+        }
+      }
+    }
+  ]
+}

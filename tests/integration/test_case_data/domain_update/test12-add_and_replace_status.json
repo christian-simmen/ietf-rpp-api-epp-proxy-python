@@ -2,9 +2,11 @@
   "when": {
     "profile.domainName.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a domain.",
   "test_id": "test12-add_and_replace_status",
   "steps": [
     {
+      "comment": "Creates contact HU12; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -61,7 +63,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -73,13 +75,14 @@
       }
     },
     {
+      "comment": "Creates domain up-test12 with authInfo, registrant HU12 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -145,13 +148,14 @@
       }
     },
     {
+      "comment": "Patches domain up-test12: add /status clientUpdateProhibited; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test12-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -182,13 +186,14 @@
       }
     },
     {
+      "comment": "Patches domain up-test12: replace /status clientHold; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/up-test12-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

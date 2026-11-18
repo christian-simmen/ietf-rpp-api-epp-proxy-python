@@ -2,17 +2,19 @@
   "when": {
     "wait.contact.processes.transfer.pending_period": true
   },
+  "comment": "Skipped on rri-mtest: it waits for contact.processes.transfer.pending_period, and the server has no such transition.",
   "test_id": "test18-pending_transfer_approved_by_the_server",
   "description": "A contact transfer nobody approves or rejects is approved by the server when its pending period ends.",
   "steps": [
     {
+      "comment": "Creates contact C18 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -60,13 +62,14 @@
       }
     },
     {
+      "comment": "Requests a transfer of contact C18 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C18}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:b}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Authorization": "authinfo value=UGFzc3dvcmQxIUA="
@@ -92,6 +95,7 @@
       }
     },
     {
+      "comment": "Reads contact C18 as registrar b; expects 200. Reads back to prove the change above. Waits first for contact.processes.transfer.pending_period.",
       "wait": "contact.processes.transfer.pending_period",
       "request": {
         "method": "GET",
@@ -99,7 +103,7 @@
         "headers": {
           "Authorization": "{auth:b}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

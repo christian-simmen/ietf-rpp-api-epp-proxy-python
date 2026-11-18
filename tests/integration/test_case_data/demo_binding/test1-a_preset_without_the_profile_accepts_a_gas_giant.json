@@ -1,0 +1,54 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-a_preset_without_the_profile_accepts_a_gas_giant",
+  "description": "The criterion of #180, accepted half: the default preset planets without a bound profile accepts a planet of the type gas-giant.",
+  "when": {
+    "profile.default_preset": "planets",
+    "profile.bound_profiles": {
+      "not": {
+        "contains": "planets"
+      }
+    }
+  },
+  "comment": "Runs on sqlite-demo, where planets is the default and nothing is bound. The same request is refused on sqlite-demo-bound (test2).",
+  "steps": [
+    {
+      "comment": "Creates the planet with type gas-giant under the default preset planets. Expects 201: no profile constrains the type.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db1}",
+          "type": "gas-giant",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-db1}"
+        }
+      }
+    }
+  ]
+}

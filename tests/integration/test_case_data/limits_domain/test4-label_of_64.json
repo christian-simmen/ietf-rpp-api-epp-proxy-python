@@ -4,6 +4,7 @@
   "description": "A label of 64 characters is over the 63 octets of DNS (RFC 1035 §2.3.4).",
   "steps": [
     {
+      "comment": "Creates contact X4 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -15,7 +16,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -89,13 +90,14 @@
       }
     },
     {
+      "comment": "Creates domain t4 (a label of 64) with authInfo, registrant X4 (by backend), dns records a (by backend); expects one of 400 02001 or 400 02005. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

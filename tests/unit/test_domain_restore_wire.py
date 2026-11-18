@@ -187,16 +187,31 @@ def test_report_not_in_pending_restore_is_a_409():
 
 @pytest.mark.parametrize("report", [
     {key: value for key, value in REPORT.items() if key != "preData"},
-    {key: value for key, value in REPORT.items() if key != "restoreTime"},
-    {**REPORT, "statements": ["Only one."]},
     {**REPORT, "deleteTime": "yesterday"},
 ])
 def test_report_epp_cannot_take_is_a_400_without_epp(report):
-    """RFC 3915 §4.2.5, json §6.2.10."""
+    """RFC 3915 §4.2.5, json §6.2.10: the report does not conform to the preset."""
     http, clients = setup()
     response = http.put(LATEST, json={**UPDATE, "restoreReport": report}, headers=BODY_HEADERS)
     assert response.status_code == 400
     assert response.headers["RPP-Code"] == "02001"
+    assert not sent(clients)
+
+
+@pytest.mark.parametrize("report", [
+    {key: value for key, value in REPORT.items() if key != "restoreTime"},
+    {**REPORT, "statements": ["Only one."]},
+])
+def test_report_the_epp_compatibility_profile_refuses_is_a_422_with_the_profile(report):
+    """The constraints of the Profile Schema (draft-kowalik-rpp-epp-compatibility): the report conforms to the preset and
+    breaks the profile, so it is 02308 and names the profile (core, Extensions and Profiles of a Request)."""
+    http, clients = setup()
+    response = http.put(LATEST, json={**UPDATE, "restoreReport": report}, headers=BODY_HEADERS)
+    assert response.status_code == 422
+    assert response.headers["RPP-Code"] == "02308"
+    error = response.json()["errors"][0]
+    assert error["profile"] == "urn:ietf:params:rpp:profile:epp-compatibility"
+    assert error["result"] == "02308" and error["paths"][0].startswith("$.restoreReport")
     assert not sent(clients)
 
 

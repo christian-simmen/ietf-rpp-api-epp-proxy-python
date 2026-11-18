@@ -1,0 +1,73 @@
+# The generic profile of the SQLite demo backend (`rpp_backend: sqlite`): bare RPP over a database. It holds none of
+# the data objects of the drafts (domain name, contact, host, user, organisation): their paths answer 501 `02307`.
+# The objects it holds come from the extensions the configuration registers (`rpp_extensions`), which add their own
+# `objects`, `extensions` and leaves to this profile. The leaves are explained in
+# src/core/capabilities/backend_profile.py.
+name: SQLite
+objects: []                            # an extension adds its own
+presets:                               # the RPP presets offered (src/rpp/schema/schemas/presets); an extension may bring more
+  - base
+default_preset: base                   # applied when a request names none
+bound_profiles: {}                     # per preset, the profiles this server binds to it
+lgrs: []                               # no IDN
+extensions: []                         # an extension adds itself
+
+domainName:
+  registrant:
+    min_count: 0
+    max_count: 0
+  contacts:
+    labels: []
+  generalRequest:
+    min_count: 0
+    max_count: 0
+  abuse:
+    min_count: 0
+    max_count: 0
+  status:
+    client_supported: false
+  authInfo:
+    read_supported: false
+  period:
+    supported: false
+  dns:
+    min_count: 0
+    record_types: []
+  metadata: []
+  processes:
+    renew:
+      supported: false
+    transfer:
+      operations: []
+    restore:
+      report_supported: false
+
+contact:
+  name:
+    changeable: false
+    removable: false
+  email:
+    removable: false
+  phone:
+    min_count: 0
+    max_count: 0
+  fax:
+    supported: false
+  region:
+    supported: false
+  localization:
+    supported: false
+  kind:
+    supported: false
+  org:
+    person_name_supported: false
+  authInfo:
+    supported: false
+  status:
+    client_supported: false
+  metadata: []
+  processes:
+    delete:
+      supported: false
+    transfer:
+      operations: []

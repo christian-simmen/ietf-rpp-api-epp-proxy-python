@@ -11,13 +11,13 @@ from rpp.dto.rpp_profile_reference import RPPProfileReference
 @dataclass_json(undefined=Undefined.RAISE)
 @dataclass(kw_only=True)
 class RPPProfile(RPPObject):
-    """The Profile Data Object (json §6.11)."""
+    """The read view of the Profile Data Object (json §Profile Data Object)."""
     at_type: str = type_field("profile")
+    id: str
     name: str
     description: str
     version: str
     rpp_version: str = field(metadata=config(field_name="rppVersion"))
-    objects: list[str]
-    extensions: Optional[list[RPPExtension]] = None
-    base_profile: Optional[RPPProfileReference] = field(default=None, metadata=config(field_name="baseProfile"))
-    default_profile: bool = field(metadata=config(field_name="defaultProfile"))
+    url: str
+    base_profiles: Optional[list[RPPProfileReference]] = field(default=None, metadata=config(field_name="baseProfiles"))
+    required_extensions: Optional[list[RPPExtension]] = field(default=None, metadata=config(field_name="requiredExtensions"))

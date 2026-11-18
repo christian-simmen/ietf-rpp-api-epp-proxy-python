@@ -1,0 +1,154 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test6-the_request_preset_is_not_in_the_accept",
+  "description": "The preset of the Content-Type, on every request (without content too), must be listed in the Accept: 400 with RPP-Code 02001. A Content-Type without parameters is the default preset of the server (core 14.3).",
+  "when": {
+    "env.preset_signalling": "media-type"
+  },
+  "comment": "Skipped on epp-docker: the EPP config signals the preset by the RPP-Preset header; preset_signalling_header/ covers the header method.",
+  "steps": [
+    {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\"; expects 400 02001. An error answer this case checks. Only where the default preset is epp-compatible (epp-docker).",
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json, Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; expects 400 02001. An error answer this case checks. Only where the default preset is epp-compatible (epp-docker).",
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\"; expects 400 02001. An error answer this case checks. Only where the default preset is rri (rri-mtest).",
+      "when": {
+        "profile.default_preset": "rri"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json, Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; expects 400 02001. An error answer this case checks. Only where the default preset is rri (rri-mtest).",
+      "when": {
+        "profile.default_preset": "rri"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    },
+    {
+      "comment": "Creates contact PB4, with Content-Type application/rpp+json, Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; expects 400 02001. The error answer this case checks.",
+      "request": {
+        "method": "POST",
+        "url": "/contacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json"
+        },
+        "body_json": {
+          "@type": "contact",
+          "id": "{handle:a:PB4}"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

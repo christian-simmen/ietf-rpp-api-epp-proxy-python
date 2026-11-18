@@ -3,13 +3,14 @@
   "description": "An aaaa record whose address is no IPv6 address (RFC 4291).",
   "steps": [
     {
+      "comment": "Creates host ns1.hc15.… with dns records ns, aaaa; expects one of 400 02001 or 400 02005. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

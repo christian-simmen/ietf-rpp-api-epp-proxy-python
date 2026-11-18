@@ -2,13 +2,14 @@
   "test_id": "test2-create_individual_with_organization",
   "steps": [
     {
+      "comment": "Creates contact J02 with authInfo (by backend); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -150,6 +151,7 @@
       }
     },
     {
+      "comment": "Reads contact J02; expects 200 01000. Reads what the steps above created. Only where a contact has a kind (rri-mtest).",
       "when": {
         "profile.contact.kind.supported": true
       },
@@ -159,7 +161,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

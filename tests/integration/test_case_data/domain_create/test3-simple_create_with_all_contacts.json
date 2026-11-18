@@ -3,13 +3,14 @@
   "test_id": "test3-simple_create_with_all_contacts",
   "steps": [
     {
+      "comment": "Creates contact ca1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -85,6 +86,7 @@
       }
     },
     {
+      "comment": "Creates domain test3 with authInfo, registrant ca1, contacts admin, tech, billing (by backend), dns records a (by backend) (includeElements=authInfo); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": {
@@ -181,7 +183,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

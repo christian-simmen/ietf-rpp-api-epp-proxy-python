@@ -7,6 +7,12 @@
 
 ## RPP design notes
 
+- Presets, profiles and extensions (#174, #178): the proxy implements the accepted proposals in `.spec/proposals/174-presets/`.
+  Not implemented: core RC6, a request for an operation that an applicable profile makes unavailable is 02308. No profile
+  of the proxy makes an operation unavailable in its Profile Schema (the EPP Compatibility Profile does so in prose, and the
+  proxy keeps today's 501 or the backend's error for the prose constraints). Where the proxy diverges from a proposal, or the
+  proposals are silent, it is in [.spec/spec-issues.md](.spec/spec-issues.md#presets-profiles-and-extensions).
+
 - client/server transaction ids with incomplete/invalid requests? yes/no?
 - take a look into Retry-After header (to indicate temp errors)
 - BODY missing on GET/DELETE"

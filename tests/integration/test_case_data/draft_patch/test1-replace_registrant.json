@@ -5,16 +5,18 @@
     },
     "profile.domainName.period.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI has no registration period (a domain runs until it is deleted).",
   "test_id": "test1-replace_registrant",
   "steps": [
     {
+      "comment": "Creates host ns1.p1 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -46,13 +48,14 @@
       }
     },
     {
+      "comment": "Creates host ns2.p1 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -84,13 +87,14 @@
       }
     },
     {
+      "comment": "Creates contact N01 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -194,13 +198,14 @@
       }
     },
     {
+      "comment": "Creates contact J1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -304,13 +309,14 @@
       }
     },
     {
+      "comment": "Creates contact S1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -414,6 +420,7 @@
       }
     },
     {
+      "comment": "Creates domain ex1 with 2 nameservers, registrant J1, contacts admin, tech (by backend), authInfo, processes (includeElements=authInfo); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": {
@@ -432,7 +439,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -640,13 +647,14 @@
       }
     },
     {
+      "comment": "Patches domain ex1: replace /registrant; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/ex1-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

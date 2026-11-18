@@ -3,13 +3,14 @@
   "skip": "#50",
   "steps": [
     {
+      "comment": "Creates host t4.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -42,13 +43,14 @@
       }
     },
     {
+      "comment": "Patches host t4.….net: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t4.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -74,13 +76,14 @@
       }
     },
     {
+      "comment": "Deletes host t4.….net; expects 409 02304. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/hosts/t4.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

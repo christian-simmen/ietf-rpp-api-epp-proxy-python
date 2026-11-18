@@ -1,0 +1,28 @@
+{
+  "test_id": "test4-unknown",
+  "steps": [
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "/planets/{handle:a:-pd4}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 404,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 404
+        },
+        "headers": {
+          "RPP-Code": "02303"
+        }
+      }
+    }
+  ]
+}

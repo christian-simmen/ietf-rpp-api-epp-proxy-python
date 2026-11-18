@@ -8,6 +8,7 @@
   "test_id": "test33-put_keeps_the_idn",
   "steps": [
     {
+      "comment": "Creates contact HU33; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -64,7 +65,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -76,6 +77,7 @@
       }
     },
     {
+      "comment": "Creates domain IDN bücher-u33 with authInfo, uName, lgr, registrant HU33 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -139,7 +141,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -152,6 +154,7 @@
       }
     },
     {
+      "comment": "Replaces domain IDN bücher-u33 by a full update with registrant HU33 (by backend), dns records a (by backend); expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/{alabel:bücher-u33}.{tld}",
@@ -207,7 +210,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

@@ -1,0 +1,22 @@
+---
+# The unprivileged user that owns the rootless Docker daemon and every container of the deployment.
+rootless_docker_user: rpp
+# Install Docker CE from download.docker.com. Set false when the host has its Docker packages from elsewhere: the
+# rootless daemon needs docker-ce-rootless-extras, the compose and buildx plugins of the same source.
+rootless_docker_install_packages: true
+# Ubuntu 23.10 and later restrict unprivileged user namespaces with AppArmor; the role then installs a profile that
+# allows rootlesskit one. False skips it (a host without AppArmor, or one whose profile is managed elsewhere).
+rootless_docker_apparmor_profile: true
+# The networks of the rootless daemon. They live in its own network namespace, but distinct ranges keep them apart from
+# the root daemon's 172.17.0.0/16, which nginx and the published ports use, when reading addresses in logs.
+rootless_docker_bip: 10.213.0.1/24
+rootless_docker_address_pools:
+  - base: 10.214.0.0/16
+    size: 24
+# DNS servers for the containers and builds of the rootless daemon. Empty: the host's (/etc/resolv.conf, or with
+# systemd-resolved its upstream servers). Set it where the host resolves through loopback only, or its resolver drops
+# the parallel A and AAAA queries of musl (Alpine) images.
+rootless_docker_dns: []
+# Rotation of container logs. The `epp` instance logs the EPP messages it sends, its logins included (#14).
+rootless_docker_log_max_size: 10m
+rootless_docker_log_max_file: "5"

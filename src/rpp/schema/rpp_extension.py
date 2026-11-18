@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -10,6 +10,8 @@ class RppExtension:
     definition composed with it. `defs` are the extension's definitions; they refer to the base definitions by their
     names in the bundle (`#/$defs/contact.reference`), so they are added to it. `objects` are the data objects the
     extension defines (the "new objects" of its overview), whose definitions are `defs` named `ext.<x>.<object>.<op>`.
+    `owners` names, for a base definition that another extension defines (`planet.create`), the `$id` of that extension's
+    schema: the extension adds members to an object of the owner, so a preset that holds it holds the owner too.
     """
     id: str
     name: str
@@ -18,3 +20,4 @@ class RppExtension:
     extends: dict
     defs: dict
     objects: tuple = ()
+    owners: dict = field(default_factory=dict)

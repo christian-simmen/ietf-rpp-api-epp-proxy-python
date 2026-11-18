@@ -7,6 +7,7 @@
   "test_id": "test7-read_idn",
   "steps": [
     {
+      "comment": "Creates contact HR7; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -63,7 +64,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -75,6 +76,7 @@
       }
     },
     {
+      "comment": "Creates domain IDN bücher-d7 with authInfo, uName, lgr, registrant HR7 (by backend), dns records a (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -138,7 +140,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -151,13 +153,14 @@
       }
     },
     {
+      "comment": "Reads domain IDN bücher-d7; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/domainNames/{alabel:bücher-d7}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

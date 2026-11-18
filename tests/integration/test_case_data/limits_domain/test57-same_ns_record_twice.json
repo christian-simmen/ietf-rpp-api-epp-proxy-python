@@ -1,13 +1,16 @@
 {
-  "test_id": "test57-same_ns_record_twice",
   "when": {
     "profile.domainName.dns.record_types": {
-      "contains": "aaaa"
-    }
+      "contains": "ns"
+    },
+    "env.bugs.host_attr_without_address_refused": false
   },
+  "comment": "Skipped on epp-docker: the case sends ns records of external name servers without addresses, which a backend with host objects sends as hostAttr, and the EPP test server refuses those (pawel-kow/epp#33).",
+  "test_id": "test57-same_ns_record_twice",
   "description": "The same ns record twice: the drafts leave it open, the server takes it.",
   "steps": [
     {
+      "comment": "Creates contact V57 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -19,7 +22,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -94,13 +97,14 @@
       }
     },
     {
+      "comment": "Creates domain t57 with authInfo, registrant V57 (by backend), dns records 3 ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

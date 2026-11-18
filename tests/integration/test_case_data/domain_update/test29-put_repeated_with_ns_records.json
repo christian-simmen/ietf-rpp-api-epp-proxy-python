@@ -4,9 +4,11 @@
       "contains": "host"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "test_id": "test29-put_repeated_with_ns_records",
   "steps": [
     {
+      "comment": "Creates contact HU29; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -63,7 +65,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -75,13 +77,14 @@
       }
     },
     {
+      "comment": "Creates host ns1.u29 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -113,13 +116,14 @@
       }
     },
     {
+      "comment": "Creates host ns2.u29 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -151,13 +155,14 @@
       }
     },
     {
+      "comment": "Creates domain put29 with authInfo, 2 nameservers, registrant HU29 (by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -211,13 +216,14 @@
       }
     },
     {
+      "comment": "Replaces domain put29 by a full update with dns records 2 ns, registrant HU29 (by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put29-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -286,13 +292,14 @@
       }
     },
     {
+      "comment": "Replaces domain put29 by a full update with dns records 2 ns, registrant HU29 (by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put29-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

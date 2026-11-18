@@ -2,9 +2,11 @@
   "when": {
     "profile.contact.localization.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI holds no localized form of a contact.",
   "test_id": "test20-non_ascii_localization",
   "steps": [
     {
+      "comment": "Creates contact 20 with authInfo (by backend); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -64,7 +66,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -89,13 +91,14 @@
       }
     },
     {
+      "comment": "Reads contact 20; expects 200 01000. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:-20}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

@@ -1,0 +1,39 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test7-both_signalling_methods_are_refused",
+  "description": "Core 14: the two methods MUST NOT be used simultaneously. The RPP-Preset header on a server of the media type method is 400 with RPP-Code 02001.",
+  "when": {
+    "env.preset_signalling": "media-type"
+  },
+  "comment": "Skipped on epp-docker: the EPP config signals the preset by the RPP-Preset header; preset_signalling_header/ covers the header method.",
+  "steps": [
+    {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", RPP-Preset preset=urn:ietf:params:rpp:preset:base;version=1.0; expects 400 02001. The error answer this case checks.",
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Preset": null,
+          "Vary": "Accept"
+        },
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        }
+      }
+    }
+  ]
+}

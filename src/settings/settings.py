@@ -2,9 +2,11 @@ from dataclasses import dataclass, field
 
 from settings.discovery_settings import DiscoverySettings
 from settings.epp_settings import EppSettings
+from settings.openapi_settings import OpenApiSettings
 from settings.rri_settings import RriSettings
+from settings.sqlite_settings import SqliteSettings
 
-BACKENDS = ("epp", "rri")
+BACKENDS = ("epp", "rri", "sqlite")
 SIGNALLING_METHODS = ("header", "media-type")
 
 
@@ -12,29 +14,37 @@ SIGNALLING_METHODS = ("header", "media-type")
 class Settings:
     """The configuration, by the part of the proxy it is for. `main` loads it once and passes each section on.
 
-    `backend` is the protocol the proxy speaks to the registry (`rpp_backend`): `epp` or `rri`. `profile_layers`
+    `backend` is the protocol the proxy speaks to the registry (`rpp_backend`): `epp`, `rri`, or `sqlite`, the demo
+    backend over a database. `extensions` are the module paths of the extension packages the app is built with
+    (`rpp_extensions`): each registers its part of the pipeline. `profile_layers`
     are the layers of its `BackendProfile`, the generic one of the protocol first, then the server's own
-    (`rpp_backend_profile`); main merges them with `lgrs`. `profile_signalling` is how a client names the profile of a
-    request (`rpp_profile_signalling`, core §14): `header` (the default, core §14.2), or `media-type` (§14.3).
+    (`rpp_backend_profile`); main merges them with `lgrs`. `preset_signalling` is how a client names the preset of a
+    request (`rpp_preset_signalling`, core §Preset Signalling): `header` (the default), or `media-type`. `openapi` is what the
+    OpenAPI document served leaves out (`rpp_openapi_omit_*`), nothing by default.
     """
     epp: EppSettings
     discovery: DiscoverySettings
     rri: RriSettings = field(default_factory=RriSettings)
+    sqlite: SqliteSettings = field(default_factory=SqliteSettings)
+    extensions: tuple[str, ...] = ()
     backend: str = "epp"
     profile_layers: tuple[dict, ...] = ()
-    profile_signalling: str = "header"
+    preset_signalling: str = "header"
+    openapi: OpenApiSettings = field(default_factory=OpenApiSettings)
 
     def __post_init__(self):
         if self.backend not in BACKENDS:
             raise ValueError(f"rpp_backend must be one of {', '.join(BACKENDS)}, not {self.backend!r}")
-        if self.profile_signalling not in SIGNALLING_METHODS:
+        if self.preset_signalling not in SIGNALLING_METHODS:
             raise ValueError(
-                f"rpp_profile_signalling must be one of {', '.join(SIGNALLING_METHODS)}, not "
-                f"{self.profile_signalling!r}")
+                f"rpp_preset_signalling must be one of {', '.join(SIGNALLING_METHODS)}, not "
+                f"{self.preset_signalling!r}")
 
     @property
     def lgrs(self) -> tuple[str, ...]:
         """The LGRs the backend offers for IDNs: those of the EPP IDN tables, or the one of DENIC's repertoire."""
+        if self.backend == "sqlite":
+            return ()
         if self.backend == "rri":
             return (self.rri.rpp_rri_lgr,) if self.rri.rpp_rri_lgr else ()
         return tuple(sorted(self.epp.rpp_idn_lgr_tables or {}))

@@ -2,13 +2,14 @@
   "test_id": "test2-taken",
   "steps": [
     {
+      "comment": "Creates host t2.….net with dns records ns; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -41,13 +42,14 @@
       }
     },
     {
+      "comment": "Checks whether host t2.….net is available; expects 404 01000. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/hosts/t2.{random_name}.net/availability",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

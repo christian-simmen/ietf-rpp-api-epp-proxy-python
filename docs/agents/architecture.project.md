@@ -12,8 +12,12 @@ registry object (#120). The rules below are checked by `import-linter`.
 ```
 src/
 ├── main.py                  composition root, the only module that knows all others
+├── registry_setup.py        the extensions the settings name, registered, and the backend profile built with them
 ├── settings/                loads config.yaml once into typed sections, which main.py passes on
-│   └── profiles/            epp.yaml, rri.yaml: the generic backend profile of each protocol (not the RPP profiles)
+│   └── profiles/            epp.yaml, rri.yaml, sqlite.yaml: the generic backend profile of each protocol (not the RPP presets and profiles)
+├── registration/            the registry of the extensions a configuration names: stdlib only, knows no other package
+├── extensions/<name>/       one extension (today `planets`, `planet_atmosphere`, `satellite_orbit`): register_<name>.py, core/{model,ports,flows}/ and
+│                            rpp/{dto,mapping,handlers,schema}/, see Registered extensions below
 ├── core/                    pure Python: no I/O, no framework, no protocol
 │   ├── model/{shared,domain,contact,host,message,request_contact}/
 │   ├── result/              ResultCode, UnknownResultCode, OperationResponse, ErrorResponse
@@ -22,14 +26,17 @@ src/
 │   ├── session/             SessionPool
 │   └── flows/               read_back.py, mutation_result.py, sponsor.py, {domain,contact,host,message,request_contact}/
 ├── rpp/                     receiving adapter: RPP over HTTP
-│   ├── http/                app (create_app), extension_paths, middleware/, validators/, security/, problem, headers,
-│   │                        context, operation, profile_signalling, profile_middleware, request_profiles,
-│   │                        profile_selection, header_profile_signalling, media_type_profile_signalling, media_range
-│   ├── handlers/            {domain,contact,host,message,request_contact}/, shared/, discovery.py, profiles.py
-│   ├── mapping/             shared/, {domain,contact,host,message,discovery,profile,request_contact}/
+│   ├── http/                app (create_app), extension_paths, body_definitions, served_document, served_specification,
+│   │                        swagger_ui/ (Swagger UI 5, vendored), middleware/, validators/, security/, problem, headers,
+│   │                        context, operation, preset_signalling, preset_middleware, request_presets,
+│   │                        preset_selection, header_preset_signalling, media_type_preset_signalling, preset_header,
+│   │                        media_range, native_accept
+│   ├── handlers/            {domain,contact,host,message,request_contact}/, shared/, discovery.py, presets.py, profiles.py
+│   ├── mapping/             shared/, {domain,contact,host,message,discovery,preset,profile,request_contact}/
 │   ├── dto/                 the RPP dataclasses
-│   ├── schema/              validator, data_objects, extensions, profiles, rpp_profiles, schemas/ (generated;
-│   │                        extensions/ copied; profiles/ written by hand)
+│   ├── schema/              validator, schema_scope, request_schemas, effective_schema, definitions, offered_presets,
+│   │                        preset_schemas, data_objects, extensions, schemas/ (generated; extensions/ and the
+│   │                        Profile Schemas in profiles/ copied; presets/ and profiles/*.yaml written by hand)
 │   └── openapi.yaml         (generated)
 └── registry_adapter/
     ├── epp/
@@ -39,6 +46,8 @@ src/
     │   ├── gateways/        EppBackend, Epp*Gateway
     │   ├── idn_tables.py    lgr <-> EPP IDN table
     │   └── refusals.py, contact_refusal.py
+    ├── sqlite/              the demo backend over SQLAlchemy: database, migrations, clients, the message queue, the
+    │   │                    session (SqliteBackend); extensions/<name>/ holds the models and gateways of an extension
     ├── rri/
     │   ├── session/         RriClient: LOGIN (no greeting), LOGOUT, lock, re-login, RegAccId of the login
     │   ├── xml/             codec, generated/ (xsdata, from docs/rri/xsd by generate_rri_models.sh)
@@ -67,7 +76,16 @@ Package `__init__.py` files are empty, except `rpp/handlers/__init__.py`, which 
 - `rpp` imports `core` only, never `registry_adapter`.
 - `registry_adapter/<protocol>` imports `core` and `registry_adapter/common`, never another protocol and never `rpp`.
 - `registry_adapter/common` imports no project package: no `core`, no protocol, no `settings`.
-- Only `main` imports more than one adapter. Nobody but `main` imports `settings`.
+- Only `main` imports more than one adapter. Nobody but `main` and `registry_setup` imports `settings`: `registry_setup`
+  is part of the composition root (it builds the registry and the backend profile from the settings, so that the test
+  environments can build a profile without composing an app). `core`, `registration`, `rpp`, `extensions` and
+  `registry_adapter` are forbidden to import `settings` by their contracts.
+- `registration` imports no other package of the proxy. No generic package (`core`, `rpp`, `registry_adapter`,
+  `settings`, `registration`) imports `extensions`, but `registry_adapter/sqlite/extensions/<name>` imports the `core` of
+  its extension and nothing else of it. An extension imports no registry adapter, settings or XML; its `core` imports
+  the `core` of the proxy only; inside it `register_<name> → rpp → core`, `rpp: handlers → mapping → dto, schema`,
+  `core: flows → ports → model`. The common part of `registry_adapter/sqlite` never imports the part of an extension
+  (it loads it by name) and `registry_adapter/sqlite` stays independent of `epp` and `rri`.
 - Inside `core`: `flows → ports → model, result, capabilities`. The object sub-packages of `model` import only
   `model/shared`, except `domain → contact` for contact references.
 - Inside `rpp`: `handlers → mapping, http`; `mapping → dto, schema`. `mapping` never imports `http`, Flask or
@@ -96,7 +114,7 @@ Package `__init__.py` files are empty, except `rpp/handlers/__init__.py`, which 
 [pyproject.toml](../../pyproject.toml) and run with `PYTHONPATH=src lint-imports` (see
 [process.project.md](process.project.md#checks-before-done)). A forbidden contract also follows indirect imports.
 `main.py` is a module, which import-linter cannot take as a root, so an import of `main` is forbidden by name and what
-`main` imports is not checked. `protocols-independent` keeps `epp` and `rri` apart. Every
+`main` imports is not checked. `protocols-independent` keeps `epp`, `rri` and `sqlite` apart. Every
 `ignore_imports` entry is known debt below; never add one for new code. The "must never know" table is not checked
 by imports where it is about names and messages; see the known debt.
 
@@ -263,108 +281,106 @@ the state of the transfer, so they need no follow-up Info. `epp_domains_Transfer
 offers an extension that adds members to `domainTransferProcess.create` (`de.denic.rpp.rri`), `domain_transfer_process` takes them
 out of the request and converts them with `domains.rpp_to_model`, as a create's, into `DomainTransfer.domain`.
 
-## RPP profiles
+## RPP presets and profiles
 
-An RPP profile (json §6.11, core §12.4) is a named, versioned set of data objects and extensions, defined once in
-`src/rpp/schema/schemas/profiles/<key>.yaml` (`RppProfile`, loaded by `rpp/schema/profiles.py`): `base`
-(`urn:ietf:params:rpp:profile:base`: domainName, contact, host), `epp` (`urn:ietf:params:rpp:profile:epp-compatibility`,
-base `base`, and the constraint-only extension `urn:ietf:params:rpp:extension:epp-compatibility`, which adds no schema
-member: the EPP backend enforces the constraints under every profile) and `rri` (`de.denic.rpp.profile.rri`: domainName,
-contact, requestContact, no host; extension `de.denic.rpp.rri`). Every file is complete: `baseProfile` is not an
-inheritance, and is only checked. The definition is the same on every server, and `GET /profiles/{name}`
-(`handlers/profiles.py`, `mapping/profile/profile.py`) publishes it as it is, so base lists `host` on an RRI server too.
-An unknown or not offered name is a 404 `02303`.
+An extension adds functionality, a profile constrains, and a preset is what a client signals: a named, versioned list of
+extensions and of the profiles its definition includes, built on its base presets. A server binds further profiles to a
+preset it offers (data-objects, `.spec/proposals/174-presets/`). All of this is the RPP layer's: a backend never sees a
+preset, a profile or a schema, and no JSON reaches `core`.
 
-A server offers some of them: the `profiles` (keys) and `default_profile` leaves of the `BackendProfile`, from
-`epp.yaml` or `rri.yaml` and what `rpp_backend_profile` of the config states. Its `objects` and `extensions` are what the
-backend holds. `create_app` builds `RppProfiles` (`rpp/schema/rpp_profiles.py`) from them and stops on a wrong choice:
-unknown key, offered twice, the default not offered, an extension listed twice, not implemented or not held by the
-backend, a base profile that is not offered or has a base itself, a profile that is its own base. A profile's objects need
-not be held.
+**Definitions** (`rpp/schema/definitions.py`, `Definitions`, built once per app, so nothing is process-global): the files
+`rpp/schema/schemas/presets/<key>.yaml` (`base`, `epp-compatible`, `rri`) and `profiles/<key>.yaml` (`epp-compatibility`,
+with its Profile Schema `epp-compatibility.schema.json`, copied from `.spec/` by `copy_models.sh`), and what the registered
+extensions bring (`RegisteredExtension.presets` and `.profiles`, as the same files state them; the planets extension brings
+the preset `planets` and the demo profiles and presets that need it, and `planet_atmosphere` and `satellite_orbit` those that need them, each specified under [docs/demo/](../demo/), #179). A definition is the same on every server. A definition that refers to an extension that is not registered is read only where a configuration offers it: an app that registers `planets` and `planet_atmosphere` does not know the presets of `satellite_orbit`. A reference to a base preset, a base profile, an extension
+or a required extension is an identifier and an exact version; an identifier denotes one definition, whatever its kind.
+`GET /presets/{id}` and `GET /profiles/{id}` publish them (`handlers/presets.py`, `handlers/profiles.py`,
+`mapping/preset/`, `mapping/profile/`), flattened.
 
-A request has selected profiles, a `ProfileSelection` (`rpp/http/profile_selection.py`): the `request` profile the request is
-read under (its parsing, checking, routing and backend command), and the `response` profile (what the response shows and
-its media type). The signalling is the `rpp_profile_signalling` of the config
-(`Settings.profile_signalling`, default `header`), and `profile_signalling(method, profiles)` in
-`rpp/http/profile_signalling.py` gives the class of the method. Each has `resolve(scope)`, the one place that chooses
-the profiles, `announce(send, selection)`, which shows the applied profile in the response, and `problem_headers`, which
-does so for the Problem Details an outer error handler renders (`handle_rpp_error`). Only a routed operation selects a
-profile: an unrouted path is the router's 404, and a 401 comes before the profile.
+**Offered presets.** The `presets` (keys), `default_preset` and `bound_profiles` (`{preset key: [profile keys]}`, one map leaf)
+leaves of the `BackendProfile` say which a server offers and binds, from `epp.yaml`, `rri.yaml` or `sqlite.yaml` and what
+`rpp_backend_profile` of the config states. `create_app` builds `OfferedPresets` (`rpp/schema/offered_presets.py`) and stops
+on a wrong choice, naming what conflicts: an unknown preset or profile, a preset offered twice, the default not offered,
+a binding of a preset that is not offered or of a profile twice or one the preset already includes, a cycle, one extension in
+two versions (also through two bases), an extension the proxy does not implement in the version the preset pins or the backend
+does not hold, a profile (also a bound one, and through its base profiles) that requires an extension its preset lacks, a
+Profile Schema that declares a property its target does not (`profile_schema_walk.py`, at any depth), that constrains a
+definition that does not exist, or whose `$defs` keys clash with RPP's, an extension's or another profile's, and an Extension
+Schema that is not additive (`extension_additivity.py`, a whitelist, see [spec-issues.md](../../.spec/spec-issues.md#presets-profiles-and-extensions)). Inheritance is a union without overriding (`preset_flattening.py`),
+each item once; the applicable profiles of a preset are its own, the bound ones and the base profiles of all, bases first.
 
-**`header`** (`HeaderProfileSignalling`, core §14.2) reads `RPP-Profile`, an RFC 9651
-Dictionary (a repeated header's lines combined with a comma, the last repeated key winning) parsed by `http-sfv` and checked in `rpp/http/profile_header.py`: the `profile` member is a Token, its
-`version` parameter a Decimal, compared as one (1.10 is 1.1); other members and parameters are ignored. No header
-selects the default profile, for the request and the response alike. A value it cannot read, a missing member or parameter, a profile or version the server does
-not offer, or profile parameters on an `application/rpp+*` media range of `Accept` or `Content-Type` (both methods in use, core §14) are a 400 with `02005`,
-`02003`, `02004` and `02001` (core §12.4 asks for an RPP client error code). It adds `RPP-Profile` with the applied profile and version to
-the response, with `RPP-Profile` in `Vary` (`handle_rpp_error` does it for the Problem Details an outer handler renders, so the header is on every
-response after the selection, a handler's 500 Problem Detail too, and on none before it or on a framework-level 500).
+**Signalling** is `rpp_preset_signalling` (`Settings.preset_signalling`, default `header`), and
+`preset_signalling(method, presets)` in `rpp/http/preset_signalling.py` gives the class of the method. Each has
+`resolve(scope)`, the one place that chooses the preset, `announce(send, selection)`, which shows the applied preset in the
+response, and `problem_headers`. A request has a `PresetSelection` (`rpp/http/preset_selection.py`): the `request` preset the
+request is read under (its parsing, checking, routing and backend command), and the `response` preset (what the response shows
+and its media type).
 
-**`media-type`** (`MediaTypeProfileSignalling`, core §14.3; `rpp/http/media_range.py` parses the media ranges) takes the
-request profile from the parameters `profile` and `profile-version` of the `Content-Type` of every request, with
-content or without (core §13 asks for one on every request), and the response profile from the `Accept` by weight. The
-request profile alone governs routing, validation, the mappers and the backend command; the `Accept` governs only the
-response. A value is a token or a quoted string (a profile URN needs quotes), names are not
-case sensitive, versions compare as decimals (`1*DIGIT "." 1*DIGIT`, so `1` is a syntax error). A range of
-`application/rpp+json` with the parameters stands for that profile, one without them for the default profile, `application/*`
-and `*/*` for every offered profile. The most specific range gives a profile its weight, a weight of 0 excludes it, the
-highest weight is answered, and on a tie the request profile if it is among the tied ones, else the first range (a wildcard
-means the default profile). No `Accept` is the default. A `Content-Type` without parameters, or none, is the default
-profile. Refusals, each with `Vary: Accept`: 415 `02004` for a
-profile or version of the `Content-Type` that is not offered, 406 `02004` when no profile of the `Accept` is offered, 400
-`02001` when the request profile is not listed in the `Accept` (weight above 0) and when the `RPP-Profile` header is sent
-(both methods in use), 400 `02003` for a `profile` without its `profile-version` or the reverse, 400 `02005` for a
-value that does not parse. The order is unreadable, then 415, 406, 400. A successful response with an RPP
-media type has `application/rpp+json; profile="<name>"; profile-version="<version>"` of the response profile in its
-`Content-Type`, `Vary` lists `Accept` on every response of a routed operation, a Problem Detail has no parameters, and
-there is no `RPP-Profile` response header (core §14: the methods are not both used in a response; see
-[spec-issues.md](../../.spec/spec-issues.md#profile-signalling-with-media-type-parameters)).
+**`header`** (`HeaderPresetSignalling`) reads `RPP-Preset`, an RFC 9651 Dictionary (a repeated header's lines combined with a
+comma, the last repeated key winning) parsed by `http-sfv` and checked in `rpp/http/preset_header.py`: the `preset` member is a
+Token, its `version` parameter a Decimal (compared as a number, so 1.10 is 1.1). A request without the header gets the default
+preset (core RC1), for the request and the response alike. A value it cannot read, a missing member or parameter, a preset or
+version the server does not offer, or preset parameters on an `application/rpp+*` media range of `Accept` or `Content-Type`
+(both methods in use) are a 400 with `02005`, `02003`, `02004` and `02001`. It adds `RPP-Preset` with the applied preset and
+version to the response, with `RPP-Preset` in `Vary` (`handle_rpp_error` does it for the Problem Details an outer handler renders).
 
-**Effective schemas.** `create_app` builds `ProfileSchemas` (`rpp/schema/profile_schemas.py`) once per app, so once per
-uvicorn worker, at startup (about 5 to 10 ms for two profiles): for each offered profile `build_effective` (for its extension tuple, the server's own, and
-both together, which is the document's) of
-`rpp/schema/validator.py` fills the validator of every definition for the profile's extension tuple (json §7.2: the base
-definition and the extension's with `allOf`), and a JSON Schema 2020-12 document is made with `$id` the public URL, `$defs`
-the bundle and the profile's extension definitions, and each extended definition as the `allOf` of the base definition and
-the extension's, which is what validation composes (the bundle references an extended definition from no other, so composing
-it in place changes nothing else). A request only looks a validator up (`validate_schema`); one the app did not build is a `SchemaNotBuilt`
-error. Only the tests, which map without an app, set `validator.LAZY_BUILD` (tests/conftest.py). `GET /profiles/{name}/schema`
-(`profiles_schemaRead`; the path is added by `rpp/http/profile_schema_path.py`, copied from `/profiles/{name}`, as
-extension paths are, with no security) answers the document as `application/schema+json`, a name not offered is 404
-`02303`. It is a document fetch and not an RPP operation: `ProfileMiddleware` exempts it from profile signalling in both
-methods (no selection, no refusal, no `RPP-Profile`), `RPP-Cltrid` and `Accept` are optional on it, and an `Accept` that does
-not allow `application/schema+json`, `application/json`, `application/*` or `*/*` is a 406 `02004`. Discovery lists
-`{profile, version, url}` per offered profile in `profileSchemas`, a member of the server-wide extension
-`urn:ietf:params:rpp:extension:profile-schemas` (`.spec/profile-schemas.schema.json`,
-[profile-schemas-extension.md](../profile-schemas-extension.md); `SERVER_EXTENSIONS` in `rpp/schema/extensions.py`, listed
-in `extensions` after those of the profiles, in no profile). The URL is `rpp_base_url` plus the path with the name
-URL-encoded as one segment; the document's `$id` is that URL only where discovery would state the base URL
-(`rpp/schema/https_url.py`: https, no userinfo, query or fragment), else the document has none and discovery is the 500 it
-already is. The injection does not put the keyword on a node an `allOf`, `anyOf`, `oneOf`, `then`, `else` or
-`dependentSchemas` reaches: the holder's covers it (`effective_schema.py`).
+**`media-type`** (`MediaTypePresetSignalling`; `rpp/http/media_range.py` parses the media ranges) takes the request preset from the
+parameters `preset` and `preset-version` of the `Content-Type` of every request, with content or without, and the response
+preset from the `Accept` by weight. The request preset alone governs routing, validation, the mappers and the backend command;
+the `Accept` governs only the response. `application/rpp+json` with the parameters stands for that preset, one without them for
+the default preset, `application/*` and `*/*` for every offered preset. The most specific range gives a preset its weight, a
+weight of 0 excludes it, the highest weight is answered, and on a tie the request preset if it is among the tied ones, else the
+first range (a wildcard means the default preset). Refusals, each with `Vary: Accept`: 415 `02004` for a preset or version of
+the `Content-Type` that is not offered, 406 `02004` when no preset of the `Accept` is offered, 400 `02001` when the request preset
+is not listed in the `Accept` and when the `RPP-Preset` header is sent (both methods in use), 400 `02003` for a `preset` without
+its `preset-version` or the reverse, 400 `02005` for a value that does not parse. The response media type carries the parameters
+of the response preset; there is no `RPP-Preset` response header.
 
-`ProfileMiddleware` (after the authentication) stores the selection in the request context (`profile_selection()`) and
-refuses a routed operation on a data object that the request profile does not have or the
-backend does not hold with 501 `02307` before validation and any object command (the session login of authentication comes first; core §16.1.6, "404 or 501" for an endpoint a server does not
-implement, and the result code table). `request_profile()` is the backend profile as the request is read under
-(`RequestProfiles`): `extensions` those of the request profile, so the combined schema of
-[RPP extensions](#rpp-extensions) holds only them (guidelines §8.6), and `objects` those of the profile the backend
-holds. Handlers pass it to the mappers that read `extensions` or `objects`; `response_profile()` is the same for what a
-response shows (the extensions a domain is rendered with, so an object the response profile lacks members of is shown without them); discovery and refusals use `backend_profile()`.
-The extension paths exist for the extensions of every offered profile, so those of another are a 404.
+**Preset Schema.** `create_app` builds `PresetSchemas` (`rpp/schema/preset_schemas.py`) once per app, so once per uvicorn worker,
+at startup: for each offered preset a `SchemaScope` (`rpp/schema/schema_scope.py`) with the validators of every definition for
+the preset's extensions without its applicable profiles, with them, and one per profile where there are several (to name the
+profile a failure belongs to), and the document (json §Preset Schema). `rpp/schema/effective_schema.py` composes it: the
+definitions of the bundle, the extension definitions and the Profile Schemas' `$defs` under their keys, a definition an
+extension extends or a profile constrains the `allOf` of the base definition in place and the references to the extension and
+profile sub-schemas, and an extension sub-schema a profile constrains the `allOf` of itself in place and the references to the
+profile sub-schemas. The published document has no `unevaluatedProperties` (json §Preset Schema: a validator adds them), the
+validators have them injected at every object-schema node. A request only looks a validator up. `GET /presets/{id}/schema` is
+a Direct Access data element in its native media type: `application/schema+json`, no authentication, a 404 `02303` for a preset
+not offered, and a 406 `02004` where `Accept` is neither the type, a range that includes it nor absent (core §Native Media
+Types). It is outside preset signalling in both methods (core RC7): `PresetMiddleware` exempts it (no selection, no refusal, no
+`RPP-Preset`), `RPP-Cltrid` is optional and echoed. `$id` is `rpp_base_url` plus the path, and only where discovery would accept
+the base URL (`rpp/schema/https_url.py`).
+
+**Two-step validation** (json §Profiles and Validation). `rpp_operation` makes the schemas of the request's preset the
+mappers' own for the handler (`rpp/schema/request_schemas.py`, a context variable set in the handler's thread), so no mapper is
+passed it. `validate_schema(name, data, extensions)` is the preset schema alone (a failure is the `ValidationError` or `ValueError`
+that `map_request` makes a 400, as before). `validate_request_schema` is for what a client sent: step 1 as `validate_schema`, then
+step 2 against the schema with the applicable profiles, whose failure is a `ProfileConstraintViolation` and answers 422 `02308`
+with `profile` and `paths` in the error (`profile_constraint_problem` in `rpp/http/problem.py`; the reason never holds a value of
+the request). A patch or a replacement is validated as the object it results in (`patched=True`) and a failure that concerns a
+read-only member of the base definition, which the server manages, is not the client's; under a preset with applicable profiles a patch of a contact, domain or host runs the same conversion that needs no read as without profiles (so it is refused alike), and is then applied to the object read for it; the native patch
+of an extension (no read) checks the value of each operation as the member it sets and refuses the removal of a member a profile requires, see [spec-issues.md](../../.spec/spec-issues.md#two-step-validation-of-a-patch).
+A mapper runs the checks that RPP or an extension states in prose and the schema cannot express after step 1 and before `validate_request_schema` (as `contacts.check_rpp_rules` does for the JSContact profile), so that a request that breaks one is refused as RPP defines it, under every preset, and not with 02308 (core §Extensions and Profiles of a Request, core.md:235); the profiles of an extension (the demo presets on planets, #179 and #180) follow this too. A response is validated with the preset schema without profiles, never with them. The prose constraints of a profile keep
+today's behaviour (the mapper's 501 or the backend's error), as does a request under a preset without the profile.
+
+`PresetMiddleware` (after the authentication) stores the selection in the request context (`preset_selection()`) and refuses a
+routed operation on a data object of an extension that the request preset does not contain (400 `02001`, the code the proxy gives
+to content that does not conform, core RC4) and on one the backend does not hold (501 `02307`). `request_profile()` is the backend
+profile as the request is read under (`RequestPresets`): its `extensions` those of the request preset, so the combined schema of
+[RPP extensions](#rpp-extensions) holds only them (guidelines §8.6); `response_profile()` is the same for what a response shows.
+Discovery lists the presets (read view), the profiles applicable to them (reference view) and the extensions of the presets.
+The extension paths exist for the extensions of every offered preset, so those of another are a 404.
 
 ## RPP extensions
 
 An RPP extension (json §7) is a schema file in `.spec/`, copied by [copy_models.sh](../../copy_models.sh) to
-`src/rpp/schema/schemas/extensions/`, and specified in the structure of the extension guidelines (§9) under
-`docs/` (`de.denic.rpp.rri`: [rri-extension.md](../rri/rri-extension.md), in I-D markdown for mmark, with the
-section structure of the RPP drafts; `tests/unit/test_rri_extension_doc.py` validates its examples marked
-`<!-- example valid|invalid <definition> -->` and checks that each `<!-- definition <name> -->` it shows is the
-schema's). `rpp/schema/extensions.py` loads them (`RppExtension`): the
+`src/rpp/schema/schemas/extensions/` (or, for an extension registered by configuration, to its own package, see
+[Registered extensions](#registered-extensions)), and specified under `docs/` as
+[specification.project.md](specification.project.md#kinds-of-specification) describes. `rpp/schema/extensions.py` loads them (`RppExtension`): the
 Extension Object discovery states, the definitions each adds to a base definition, and the data objects it defines
-(`objects` of `rpp:extension`). A deployment offers those of its offered profiles; `create_app`
-refuses one the proxy does not know or the backend does not hold. `validate_schema(name, data, extensions=profile.extensions)` composes the
-effective schema (json §7.2) with `allOf`, and `added_members` names the members an extension adds, so a mapper names
+(`objects` of `rpp:extension`). A deployment offers those of its offered presets; `create_app`
+refuses one the proxy does not know or the backend does not hold. `validate_schema(name, data, extensions=profile.extensions)` takes the validator the app built for the
+effective schema of the preset (json §7.2, composed with `allOf`, see [RPP presets and profiles](#rpp-presets-and-profiles)), and `added_members` names the members an extension adds, so a mapper names
 no extension. Without the extension those members are undeclared, a 400 as before. An extension's own objects are
 validated by the names a base object's definitions would have (`requestContact.create` for
 `ext.rri.requestContact.create`).
@@ -403,6 +419,28 @@ used to fall through to Flask as a 500, so the middleware raises a 404, which `h
 404 Problem with 02001, as for an unknown path (detail `Not Found`) (#98). Only the line feed is refused. Swagger UI
 paths are matched before the guard, so `/ui/` or `/openapi.json` followed by a trailing line feed still serves them.
 
+**The OpenAPI document served** (#204). Connexion routes with the generated spec, OpenAPI 3.0, which is all it loads
+(Connexion 3.2 and 3.3 refuse `openapi: 3.1.0`). What `/openapi.json`, `/openapi.yaml` and `/ui/` serve is another document,
+OpenAPI 3.1, which `served_document` (`rpp/http/served_document.py`) makes when the app is built: the routing spec (with the
+extension paths), the `$defs` of the default preset's Preset Schema under `components/schemas` by their keys (references
+rewritten from `#/$defs/`), each body that stands for a definition pointing at the preset's (`domainName.create`, an extension's
+own object at its key: `ext.rri.requestContact.create`), the schemas nothing refers to any more left out, and `info.x-rpp-preset`
+naming the preset. It is the same as `GET /presets/{id}/schema` publishes, profile constraints included. A body of no
+definition (`protocol.PartialUpdate`) or of one the default preset lacks keeps its generated schema. Other presets are #205.
+Two switches (`OpenApiSettings`, off by default, a deviation from the drafts' API contract) leave operations out of it:
+`rpp_openapi_omit_unheld_objects` those on a data object the backend does not hold under the default preset (by the first path
+segment, `collections` in `extension_paths`), `rpp_openapi_omit_unimplemented` those no handler serves
+(`ExtensionResolver.implements`). A path left without an operation goes, a tag no operation has, and every schema nothing refers to,
+the Preset Schema's definitions too (`omitted_operations` in `app.py`, `served_document(omit=...)`). Routing does not change: those
+requests answer 501 as before. The demo configurations turn both on.
+`ServedDocumentSwaggerUIMiddleware` in `rpp/http/middleware/` takes the place of Connexion's `SwaggerUIMiddleware` in the
+middleware list `create_app` gives `FlaskApp` (a `functools.partial` with the document, as Connexion builds a middleware with the
+app alone), and serves it as a `ServedSpecification` (`rpp/http/served_specification.py`: not checked against Connexion's 3.0
+meta-schema, references not resolved). Connexion's response validation, which writes `components` into the response schemas of
+the spec its middlewares share (#193), does not reach it. Swagger UI is `swagger-ui-dist` 5 in `rpp/http/swagger_ui/`
+(`swagger_ui_bundle` ships 4.15.5, which renders no 3.1; the version and how to update are in its README.md).
+`MiddlewarePosition.BEFORE_SWAGGER` names Connexion's class and cannot be used with this list.
+
 The restore handlers are `domainNameRestoreProcesses_create`, `_update`, `_updatePartial` and `_read` in
 `rpp/handlers/domain/domain_handlers.py`. A request and a report are a domain update with the RFC 3915 `rgp:restore`
 extension, sent by `epp_domains_Restore`, and answer 200 without `Location`. `read_domain_restore` in
@@ -417,7 +455,78 @@ The EPP renew reply carries the new expiry date, so there is no read-back, and t
 `Location`, see [spec-issues.md](../../.spec/spec-issues.md#renew-process).
 
 `RppRequestBodyValidator` and `RppResponseBodyValidator` in `rpp/http/validators/` let a body be absent where the
-OpenAPI allows it, which Connexion's validators do not. The handler then gets an empty dict.
+OpenAPI allows it, which Connexion's validators do not. The handler then gets an empty dict. `mark_body_definitions`
+(`rpp/http/body_definitions.py`) marks each body schema of the routing spec whose definition some offered preset has with
+`x-rpp-definition` next to its `$ref` (Connexion keeps it when it resolves the reference): `gen.<definition>` and
+`ext.<definition>`, named as the mappers validate with it. Such a body is validated with that definition of the request's preset
+(`RequestSchemas`, which `PresetMiddleware` puts in the request context), JSON Schema 2020-12 without profiles: a failure is a 400
+`02001`, as the mappers' first step. The profiles stay the mappers' second step (422 `02308`), which knows what a patch or a
+replacement results in. A response is validated with the response preset's definition, or the request preset's for an object
+only the request preset has (as it is rendered). Any other body is validated by Connexion with its schema (Draft 4). The detail
+of a refusal is the message only (a response's: the definition), never the body.
+
+### Registered extensions
+
+An extension of the proxy's own that is not built into the generic code is registered by the configuration: `rpp_extensions`
+lists the module paths of the extension packages (`extensions.planets`), and `registry_setup.load_registry` imports
+each and calls its `register(registry)` ([registration/](../../src/registration/)). The module registers one
+`RegisteredExtension`, every element of the pipeline as data, and imports nothing of an adapter:
+
+| Element | Is read by |
+|---|---|
+| the RPP extension schema, the data model of its objects (Visibility) | `rpp.schema` (`register_all`), process-global, keyed by extension id, so registering twice is no change. Nothing registers by import; a process that composes no app with the extension never sees it |
+| the OpenAPI fragment of its paths, and the package of its handlers (every operationId is a fully qualified function name) | `create_app` (`add_registered_paths`, `ExtensionResolver`), per app |
+| the presets and the profiles it brings | `Definitions.load(registry)` in `create_app`, per app: nothing of them is process-global, and an app without the extension does not know them |
+| its objects | `PresetMiddleware` and discovery, through the extension's schema |
+| its part of a backend (`backend_parts`) | the backend: the SQLite backend imports `registry_adapter.sqlite.extensions.<name>`, which has `PART` (its tables, in a metadata of their own, with a schema version) and `gateways(context)` |
+| the leaves it adds to the backend profile (`objects`, `extensions` are added to the generic profile's, other leaves are new) | `BackendProfile.from_layers(..., extra_leaves=...)`: the list of leaves stays closed, and without the extension a leaf of it is unknown |
+
+The demo configurations compose the three demo extensions differently (README, [testing.project.md](testing.project.md#the-demo-configurations)):
+`config.demo.yaml` (planets only), `config.demo-extended.yaml`, `config.demo-bound.yaml` (profiles bound to presets) and
+`config.demo-inherit.yaml` (several bases). A configuration that cannot hold, a binding without a required extension, a cycle or one
+extension in two versions, stops the app at start naming the conflict; those are in `tests/refused_configs/`.
+
+A backend gives the gateways of an extension by its id, `RegistryBackend.extension(extension_id)` (a `KeyError` where the
+backend does not hold it), so no backend names an extension. An extension the configuration names that does not import,
+has no `register`, has a definition named as a base definition or as another extension's, or has no part in the
+configured backend, stops the app. The extension schema and the data model are process-global (registration is idempotent); what depends on the configuration is
+per app: the presets, the profiles, the effective schema and the validators (`PresetSchemas`), see
+[RPP presets and profiles](#rpp-presets-and-profiles).
+
+A full and a partial update are native in the gateways of the planets extension (`replace(replacement)` and
+`patch(id, changes)`, one unit of work each: lookup, sponsor and state checks, write, and the invariants of the result,
+`02004` when broken), so there is no read-modify-write across requests. `rpp/mapping` translates a JSON Patch (json
+§5.2) into `PlanetChanges` or `SatelliteChanges` (members to set, `cleared`), after checking each value against the update
+schema: no JSON Patch, JSON pointer, `@type` or JSON dict reaches `core` or a backend. Another extension adds members to a
+planet or a satellite without editing these classes: `extensions` of the replacement, the change set and the read model
+maps its extension id to a typed object of its own `core`, and its SQLite part gives a `MemberHook` (`HOOKS` of its module,
+`{object: hook}`) that the planets gateways call in the same unit of work. The rpp side is a `MemberMapper` (JSON members to the
+typed object, to the typed changes of a patch, and back) that the extension adds in its `register` to `PLANET_MEMBERS` or
+`SATELLITE_MEMBERS` (`extensions/planets/rpp/mapping/object_members.py`, process-global and idempotent as the schema registry): the
+planets mappers take the members of the extensions of the request's preset out of the body after step 1, so a member of another
+extension is undeclared (400), and a read shows those of the extensions of the response's preset (`response_profile()`, which differs from the request's with media-type signalling). A patch changes such a member as a whole (`/atmosphere`, `/orbit`),
+a deeper path is 400. A full update carries `scope`, the extensions of the request's preset: the gateway replaces the members of
+those, and removes one the request omits, and keeps the members of the others (`planet-atmosphere` and `satellite-orbit`, the
+demo extensions that use it, are in [docs/demo/](../demo/)). An Extension Schema may extend a definition of another extension,
+keyed `<$id of the owner>#/$defs/<definition>`: the owner must be in the preset (checked at start, naming both), and the
+additivity check reads the owner's definition. An extension without data objects registers no `handlers` and no `openapi`.
+
+The SQLite backend (`rpp_backend: sqlite`, [config.demo.yaml](../../config.demo.yaml)) is made as a test bed: the clients
+are `rpp_sqlite_clients` (user to a `scrypt$...` hash, made by `python -m registry_adapter.sqlite.hash_password`, compared
+in constant time; the user is the sponsoring client; `ClientDirectory` checks each hash with `check_hash` at start, and a
+hash that cannot be used stops the app with a `ValueError` naming the client and never the hash, as `settings` may not
+import an adapter), the database is `rpp_sqlite_url` (a file, or `sqlite://` in
+memory), and every unit of work holds one lock. A file may be shared by the worker processes of one instance (#184): it
+is in WAL mode, every unit of work begins `IMMEDIATE` (pysqlite's own transaction handling is off, as it would let a read
+go stale before the first write), and waits for the lock of another process up to a busy timeout. The tables of each
+part are created at start with their schema version (`schema_versions`), in one such transaction, so workers starting
+together on a new file create them once; a version that differs stops the app: there is no migration yet. Its generic profile
+(`settings/profiles/sqlite.yaml`) holds none of the drafts' objects, so their paths answer 501 `02307` from
+`PresetMiddleware`; the stub gateways of those objects (`UnsupportedGateway`) are never what answers. The message queue
+holds the events of a transfer (`TransferEvent`, object type `planet`). The planets extension
+([docs/demo/planets-extension.md](../demo/planets-extension.md)) follows EPP for the transfer of a planet (RFC 5731
+section 3.2.4): a pull that waits for the sponsor, its satellites have no sponsor of their own and so move with it, and
+only the planet's events queue messages.
 
 ## Generated artifacts: do not hand-edit
 
@@ -483,7 +592,7 @@ leaf and its type, and `BackendProfile` is the one class over the tree: an attri
 (`profile.contact.fax.supported`). It is built in two layers, merged in order (a map merges, a list or a value
 replaces): the generic profile of the protocol, `src/settings/profiles/epp.yaml` (RFC 5730 to 5733, 5910 and 3915 as
 the EPP Compatibility Profile takes them, with the gaps commented) or `rri.yaml` (DENIC RRI 5.0), then the server's own,
-`rpp_backend_profile` in the config, which names the generic one with `extends` and states only what differs. Another
+`rpp_backend_profile` in the config, which names the generic one with `extends` and states only what differs, among it the RPP presets the server offers (`presets`, `default_preset`) and the profiles it binds to them (`bound_profiles`, one map leaf: `{preset key: [profile keys]}`). Another
 EPP server starts from `extends: epp` alone. `main.py` adds `lgrs` from the config (`Settings.lgrs`: the LGRs of
 `rpp_idn_lgr_tables`, or `rpp_rri_lgr`). A missing, unknown or mistyped leaf stops the app at start.
 `domainName.registrant.min_count`, `domainName.dns.min_count`, `domainName.generalRequest.*` and
@@ -507,7 +616,8 @@ The third kind is known only from the EPP greeting, which mappers cannot reach, 
 
 The frozen contract covers the OpenAPI paths and schemas, the core §18.1 result code
 to HTTP status mapping, and the `RPP-*` headers. RPP result codes are EPP codes with a
-leading `0`.
+leading `0`. The document served is OpenAPI 3.1 with the default preset's body schemas, a decision of #204; the routing spec
+stays the generated 3.0.
 
 ## Configuration
 
@@ -525,17 +635,20 @@ turns both checks off, for test backends only, and `main.py` warns when it is on
 `rpp_epp_objects`, `rpp_epp_extensions` and `rpp_epp_connection_cache` are read into `EppSettings`, but nothing uses
 them.
 
-`rpp_backend` names the protocol (`Settings.backend`). `RriSettings` holds `rpp_rri_host`, `rpp_rri_port` (51131),
+`rpp_extensions` lists the extension modules to register, see [Registered extensions](#registered-extensions). `OpenApiSettings` holds
+`rpp_openapi_omit_unheld_objects` and `rpp_openapi_omit_unimplemented` (both `false` by default, a value that is not a boolean
+stops the configuration), see [The OpenAPI document served](#request-lifecycle).
+`SqliteSettings` holds `rpp_sqlite_url` and `rpp_sqlite_clients`. `rpp_backend` names the protocol (`Settings.backend`). `RriSettings` holds `rpp_rri_host`, `rpp_rri_port` (51131),
 `rpp_rri_use_tls`, `rpp_rri_tls_insecure_skip_verify` (test backends only, main warns), `rpp_rri_timeout` (unused,
 like the EPP one) and `rpp_rri_lgr`, the one LGR a client may name for DENIC's repertoire (gap Q11). There is no
 RegAccId setting: it is taken from the login.
 
 `rpp_base_url`, `rpp_tlds`, `rpp_environment_name` and `rpp_environment_status` are what the
 discovery document (`GET /.well-known/rpp`, no authentication, no EPP) states. `rpp/handlers/discovery.py`
-adds the RPP version, a constant, the data objects the `BackendProfile` holds, and the offered profiles and extensions. Without all four, it
+adds the RPP version, a constant, the data objects the `BackendProfile` holds (the presets name none), and the offered presets, the profiles applicable to them and the extensions of the presets (the discovery mapper takes them from `OfferedPresets`, and core `Discovery` has none). Without all four, it
 answers 500 (`02400`) and logs the keys, never the values. A setting is also missing when it has the wrong shape:
-`rpp_base_url` must be an absolute `https` URL, `rpp_tlds` a non-empty list of non-empty strings. `profiles` are the
-RPP profiles the server offers, `extensions` those of their extensions, see [RPP profiles](#rpp-profiles). The base URL is never taken from the request. The proxy
+`rpp_base_url` must be an absolute `https` URL, `rpp_tlds` a non-empty list of non-empty strings. `presets` are the
+RPP presets the server offers, `profiles` the profiles applicable to them and `extensions` those of the presets, see [RPP presets and profiles](#rpp-presets-and-profiles). The base URL is never taken from the request. The proxy
 does not check the `version` parameter of the media type, so core §12's 406 is not enforced (#41). See
 [spec-issues.md](../../.spec/spec-issues.md#discovery).
 
@@ -543,8 +656,9 @@ does not check the `version` parameter of the media type, so core §12's 406 is 
 
 [src/main.py](../../src/main.py) is the composition root. `compose(settings)` builds the app of one settings, and
 `main` composes the settings it loads once as `main:app`; the integration tests compose one per test environment.
-`rpp_backend` (`epp` by default, or `rri`) picks
-`new_epp_backend` or `new_rri_backend` from `backends`, and builds the `BackendProfile` from the layers of the
+`rpp_backend` (`epp` by default, `rri`, or `sqlite`) picks
+`new_epp_backend`, `new_rri_backend` or the SQLite factory from `backends`, after `load_registry` has registered the
+extensions of `rpp_extensions`, and builds the `BackendProfile` from the layers of the
 settings, which both the backend and the app get; nothing else knows which backend runs.
 `new_epp_backend` builds an `EppBackend` over the default
 `EPPClient`, with the namespace map and the `IdnTables`, and `new_rri_backend` an `RriBackend` over an `RriClient`
@@ -554,7 +668,8 @@ on a `TCPClient` with payload-only framing. The chosen one is `new_backend`, the
 `DiscoverySettings`, which the handlers read through [context.py](../../src/rpp/http/context.py). `create_app` hands
 `SessionSecurityHandler` to Connexion through `security_map`, because Connexion would otherwise resolve the function
 by name and it could not receive dependencies; the handler puts the user's backend into the token info (key
-`backend`).
+`backend`). The spec's `BearerAuth` gets `BearerRefusingSecurityHandler`, which skips the scheme as Connexion does
+for one without a function, without its warning per operation (#189): a Bearer token is unauthenticated, 401.
 
 ## Known debt
 

@@ -2,13 +2,14 @@
   "test_id": "test6-status_is_unsupported",
   "steps": [
     {
+      "comment": "Creates host t6.….net with status clientUpdateProhibited; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

@@ -2,6 +2,7 @@
   "test_id": "test17-create_with_dnskey",
   "steps": [
     {
+      "comment": "Creates contact HC17; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -58,7 +59,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain t17 with authInfo, dns records dnskey, registrant HC17 (by backend); expects 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -120,7 +122,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

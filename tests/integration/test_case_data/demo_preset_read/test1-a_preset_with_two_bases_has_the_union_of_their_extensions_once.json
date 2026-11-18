@@ -1,0 +1,61 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-a_preset_with_two_bases_has_the_union_of_their_extensions_once",
+  "description": "The extended server publishes planets-complete, which builds on planets-atmosphere and planets-orbits: the three extensions once, no profile, none bound.",
+  "when": {
+    "profile.default_preset": "planets-complete",
+    "profile.presets": {
+      "not": {
+        "contains": "habitable-worlds"
+      }
+    }
+  },
+  "comment": "Runs on sqlite-demo-extended only.",
+  "steps": [
+    {
+      "comment": "Reads the preset planets-complete. Expects the three extensions (planets once, although both bases hold it), no profile and no bound profile.",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets-complete",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "org.example.rpp.preset.planets-complete",
+          "version": "1.0",
+          "defaultPreset": true,
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planet-atmosphere"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.satellite-orbit"
+            }
+          ],
+          "profiles": [],
+          "boundProfiles": []
+        }
+      }
+    }
+  ]
+}

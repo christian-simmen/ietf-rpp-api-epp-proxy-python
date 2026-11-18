@@ -1,13 +1,15 @@
 {
-  "test_id": "test32-null_mx_record",
   "when": {
     "profile.domainName.dns.record_types": {
-      "contains": "aaaa"
+      "contains": "mx"
     }
   },
+  "comment": "Skipped on epp-docker: EPP has no MX records of the domain.",
+  "test_id": "test32-null_mx_record",
   "description": "A null MX (RFC 7505) next to an a record.",
   "steps": [
     {
+      "comment": "Creates contact X32 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -19,7 +21,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -93,13 +95,14 @@
       }
     },
     {
+      "comment": "Creates domain t32 with authInfo, registrant X32 (by backend), dns records a, mx; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -161,13 +164,14 @@
       }
     },
     {
+      "comment": "Deletes domain t32; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/t32-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

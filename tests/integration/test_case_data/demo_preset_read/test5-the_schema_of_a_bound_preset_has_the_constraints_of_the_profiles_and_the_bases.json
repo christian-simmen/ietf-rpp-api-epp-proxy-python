@@ -1,0 +1,71 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test5-the_schema_of_a_bound_preset_has_the_constraints_of_the_profiles_and_the_bases",
+  "description": "The Preset Schema of the bound planets-complete holds the sub-schemas of the extensions and of the bound profile and its two bases.",
+  "when": {
+    "profile.bound_profiles": {
+      "contains": "planets"
+    }
+  },
+  "comment": "Runs on sqlite-demo-bound only.",
+  "steps": [
+    {
+      "comment": "Reads the schema of planets-complete without authentication. Expects the extension sub-schemas and the constraints of habitable-rocky-planets, habitable-atmospheres and rocky-planets.",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets-complete/schema",
+        "headers": {
+          "Accept": "application/schema+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/schema+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "rpp:preset": {
+            "id": "org.example.rpp.preset.planets-complete",
+            "version": "1.0"
+          },
+          "$defs": {
+            "ext.atmosphere.planet.create": {},
+            "ext.orbit.satellite.create": {},
+            "profile.rocky.type": {},
+            "profile.habitable.pressure": {},
+            "profile.habitableRocky.radius": {}
+          }
+        }
+      }
+    },
+    {
+      "comment": "Reads the schema of planets, which binds rocky-planets only. Expects its constraint.",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets/schema",
+        "headers": {
+          "Accept": "application/schema+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/schema+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "rpp:preset": {
+            "id": "org.example.rpp.preset.planets",
+            "version": "1.0"
+          },
+          "$defs": {
+            "profile.rocky.type": {}
+          }
+        }
+      }
+    }
+  ]
+}

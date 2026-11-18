@@ -2,6 +2,7 @@
   "test_id": "test6-simple_delete_invalid_auth",
   "steps": [
     {
+      "comment": "Deletes domain test6 as a user the server does not know, with a fixed RPP-Cltrid; expects 401. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/test6-{random_name}.{tld}",
@@ -10,7 +11,7 @@
           "RPP-Cltrid": "test6-{random_name}-clTRID",
           "Authorization": "{auth:unknown_user}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

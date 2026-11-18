@@ -3,13 +3,14 @@
   "description": "A name in upper case: DNS names are case-insensitive (RFC 4343).",
   "steps": [
     {
+      "comment": "Creates host hc13.….net with dns records ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -40,13 +41,14 @@
       }
     },
     {
+      "comment": "Reads host hc13.….net; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/hc13.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

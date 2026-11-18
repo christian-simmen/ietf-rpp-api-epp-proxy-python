@@ -1,0 +1,33 @@
+{
+  "test_id": "test10-unknown_planet",
+  "steps": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/planets/{handle:a:-pt10}/processes/transferProcesses",
+        "headers": {
+          "Authorization": "{auth:b}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Authorization": "authinfo value=U2VjcmV0LVdvcmQx"
+        },
+        "body_json": {
+          "@type": "transferProcess",
+          "transferDir": "pull"
+        }
+      },
+      "response": {
+        "status": 404,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 404
+        },
+        "headers": {
+          "RPP-Code": "02303"
+        }
+      }
+    }
+  ]
+}

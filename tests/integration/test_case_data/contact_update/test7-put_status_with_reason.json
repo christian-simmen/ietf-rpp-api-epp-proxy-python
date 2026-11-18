@@ -2,17 +2,19 @@
   "when": {
     "profile.contact.status.client_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no client statuses of a contact.",
   "test_id": "test7-put_status_with_reason",
   "description": "The backend accepts a status with a reason and repeats the label as its text (#54), so the reason is not read back: this case proves the update with a reason is accepted and the status is set and cleared, not that the reason is stored. The reason itself is covered by unit tests.",
   "steps": [
     {
+      "comment": "Creates contact 07A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -122,13 +124,14 @@
       }
     },
     {
+      "comment": "Replaces contact 07A by a full update with status clientDeleteProhibited (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:07A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -232,13 +235,14 @@
       }
     },
     {
+      "comment": "Replaces contact 07A by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:07A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

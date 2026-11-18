@@ -3,13 +3,14 @@
   "test_id": "test24-patch_add_organisation",
   "steps": [
     {
+      "comment": "Creates contact 24A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -119,13 +120,14 @@
       }
     },
     {
+      "comment": "Patches contact 24A: add /contactInfo/organizations; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:24A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

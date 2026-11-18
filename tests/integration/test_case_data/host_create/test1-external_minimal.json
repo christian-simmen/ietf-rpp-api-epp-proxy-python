@@ -3,13 +3,14 @@
   "test_id": "test1-external_minimal",
   "steps": [
     {
+      "comment": "Creates host t1.….net with dns records ns; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

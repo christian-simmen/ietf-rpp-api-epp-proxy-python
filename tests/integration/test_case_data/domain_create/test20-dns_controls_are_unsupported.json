@@ -2,6 +2,7 @@
   "test_id": "test20-dns_controls_are_unsupported",
   "steps": [
     {
+      "comment": "Creates contact HC20; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -58,7 +59,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain t20 with authInfo, dns records dns controls, registrant HC20 (by backend); expects 501 02103. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -113,7 +115,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

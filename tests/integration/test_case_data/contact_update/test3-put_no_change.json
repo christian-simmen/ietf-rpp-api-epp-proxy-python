@@ -2,13 +2,14 @@
   "test_id": "test3-put_no_change",
   "steps": [
     {
+      "comment": "Creates contact 03A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -118,13 +119,14 @@
       }
     },
     {
+      "comment": "Replaces contact 03A by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:03A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

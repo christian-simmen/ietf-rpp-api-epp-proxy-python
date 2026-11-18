@@ -3,13 +3,14 @@
   "description": "A PUT replaces the aaaa record by another.",
   "steps": [
     {
+      "comment": "Creates host hu41.….net with dns records ns; expects 201. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -40,13 +41,14 @@
       }
     },
     {
+      "comment": "Patches host hu41.….net: add /dns/records; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/hu41.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -74,13 +76,14 @@
       }
     },
     {
+      "comment": "Replaces host hu41.….net by a full update with dns records ns, aaaa; expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/hu41.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -139,13 +142,14 @@
       }
     },
     {
+      "comment": "Patches host hu41.….net: replace /dns/records with a match; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/hu41.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

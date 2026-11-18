@@ -2,6 +2,7 @@
   "test_id": "test12-simple_create-clTRID",
   "steps": [
     {
+      "comment": "Creates contact 12 with authInfo (by backend), with a fixed RPP-Cltrid; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -71,7 +72,7 @@
           "RPP-Cltrid": "test12-{random_name}-clTRID",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

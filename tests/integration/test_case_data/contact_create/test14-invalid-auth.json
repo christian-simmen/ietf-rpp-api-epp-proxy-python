@@ -2,6 +2,7 @@
   "test_id": "test14-invalid-auth",
   "steps": [
     {
+      "comment": "Creates contact 01 with authInfo (by backend) as a user the server does not know, with a fixed RPP-Cltrid; expects 401 02200. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -71,7 +72,7 @@
           "RPP-Cltrid": "test14-{random_name}-clTRID",
           "Authorization": "{auth:unknown_user}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/habitable-atmospheres-profile.schema.json",
+  "rpp:profile": {
+    "id": "org.example.rpp.profile.habitable-atmospheres",
+    "version": "1.0"
+  },
+  "rpp:constraints": {
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.create": "#/$defs/profile.habitable.atmosphere",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/planet.update": "#/$defs/profile.habitable.atmosphere",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planet-atmosphere-extension.schema.json#/$defs/atmosphere": "#/$defs/profile.habitable.pressure"
+  },
+  "$defs": {
+    "profile.habitable.atmosphere": {
+      "required": [
+        "atmosphere"
+      ]
+    },
+    "profile.habitable.pressure": {
+      "properties": {
+        "pressure": {
+          "minimum": 0.5,
+          "maximum": 2
+        }
+      }
+    }
+  }
+}

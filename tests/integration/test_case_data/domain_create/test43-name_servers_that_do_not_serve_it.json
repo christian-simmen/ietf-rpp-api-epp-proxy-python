@@ -3,12 +3,13 @@
   "when": {
     "env.domainName.processes.create.failed_dns_status": {
       "not": null
-    },
-    "env.pdc.pdc_always_true": false
+    }
   },
+  "comment": "Skipped on epp-docker: the EPP test server does not check the name servers of a new domain.",
   "description": "A create whose name servers do not serve the domain succeeds where the registry checks them after the create, and the domain reads with the status of a failed check (RRI `failed`, with a `due`). Only for a registry that checks; every other case gives DNS data that passes.",
   "steps": [
     {
+      "comment": "Creates contact G43 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -20,7 +21,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -94,13 +95,14 @@
       }
     },
     {
+      "comment": "Creates domain dc43 with authInfo, registrant G43 (by backend), dns records 2 ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -167,13 +169,14 @@
       }
     },
     {
+      "comment": "Reads domain dc43; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/domainNames/dc43-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -193,13 +196,14 @@
       }
     },
     {
+      "comment": "Deletes domain dc43; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/dc43-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

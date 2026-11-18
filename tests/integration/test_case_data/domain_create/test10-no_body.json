@@ -2,6 +2,7 @@
   "test_id": "test10-no_body",
   "steps": [
     {
+      "comment": "Sends a domain create without a name or id, with a fixed RPP-Cltrid; expects 400. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -10,7 +11,7 @@
           "RPP-Cltrid": "test10-{random_name}-clTRID",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

@@ -2,13 +2,14 @@
   "test_id": "test1-approve_moves_the_contact",
   "steps": [
     {
+      "comment": "Creates contact C1 with authInfo; expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -56,13 +57,14 @@
       }
     },
     {
+      "comment": "Requests a transfer of contact C1 with transferDir as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C1}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:b}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Authorization": "authinfo value=UGFzc3dvcmQxIUA="
@@ -88,13 +90,14 @@
       }
     },
     {
+      "comment": "Approves the pending transfer of contact C1; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts/{handle:a:C1}/processes/transferProcesses/latest/transferApprove",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -112,13 +115,14 @@
       }
     },
     {
+      "comment": "Reads contact C1 as registrar b; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:C1}",
         "headers": {
           "Authorization": "{auth:b}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

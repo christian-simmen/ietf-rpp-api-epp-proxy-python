@@ -1,0 +1,161 @@
+{
+  "when": {
+    "profile.lgrs": {
+      "contains": "latn-1.0"
+    },
+    "env.domainName.name.lgr.latn_comma_below_supported": false
+  },
+  "comment": "Skipped on epp-docker: whether latn-1.0 of the EPP test server holds ș is not known; test29 covers a code point outside its table.",
+  "skip": "#139",
+  "test_id": "test45-code_point_outside_denic_repertoire",
+  "steps": [
+    {
+      "comment": "Creates contact HC45; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
+      "when": {
+        "profile.domainName.registrant.min_count": {
+          "min": 1
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "/contacts",
+        "body_json": {
+          "@type": "contact",
+          "id": "{handle:a:HC45}",
+          "contactInfo": {
+            "@type": "Card",
+            "version": "2.0",
+            "kind": "individual",
+            "name": {
+              "full": "Erika Mustermann"
+            },
+            "addresses": {
+              "addr": {
+                "components": [
+                  {
+                    "kind": "name",
+                    "value": "Musterweg 12"
+                  },
+                  {
+                    "kind": "locality",
+                    "value": "Frankfurt am Main"
+                  },
+                  {
+                    "kind": "postcode",
+                    "value": "60596"
+                  }
+                ],
+                "countryCode": "DE"
+              }
+            },
+            "emails": {
+              "email": {
+                "address": "erika@example.com"
+              }
+            },
+            "phones": {
+              "voice": {
+                "number": "tel:+49.6912345678",
+                "features": {
+                  "voice": true
+                }
+              }
+            }
+          }
+        },
+        "headers": {
+          "Content-Type": "{rpp:content-type}",
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "@type": "contact"
+        }
+      }
+    },
+    {
+      "comment": "Creates domain IDN bucureș-t45 with authInfo, lgr, registrant HC45 (by backend), dns records a (by backend); expects 422 02306. The error answer this case checks: ș (s with comma below) is outside DENIC's repertoire. MTEST refuses it by its XML schema, which the proxy answers with 500 (#139).",
+      "request": {
+        "method": "POST",
+        "url": "/domainNames",
+        "body_json": {
+          "@type": "domainName",
+          "name": "{alabel:bucureș-t45}.{tld}",
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Abc2345678"
+          },
+          "lgr": "latn-1.0",
+          "registrant": {
+            "select": [
+              {
+                "when": {
+                  "profile.domainName.registrant.min_count": {
+                    "min": 1
+                  }
+                },
+                "then": {
+                  "@type": "contact",
+                  "id": "{handle:a:HC45}"
+                }
+              },
+              {
+                "omit": true
+              }
+            ]
+          },
+          "dns": {
+            "select": [
+              {
+                "when": {
+                  "profile.domainName.dns.min_count": {
+                    "min": 1
+                  }
+                },
+                "then": {
+                  "@type": "dnsData",
+                  "records": [
+                    {
+                      "@type": "dnsRecord",
+                      "name": "@",
+                      "type": "a",
+                      "rdata": {
+                        "address": "192.0.2.10"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "omit": true
+              }
+            ]
+          }
+        },
+        "headers": {
+          "Content-Type": "{rpp:content-type}",
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02306"
+        }
+      }
+    }
+  ]
+}

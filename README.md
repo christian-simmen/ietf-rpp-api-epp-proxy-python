@@ -26,7 +26,18 @@ keys it has, for one machine's settings.
 The proxy speaks EPP to the registry by default; see [EPP or RRI behind the API](#epp-or-rri-behind-the-api) for
 DENIC RRI.
 
-Swagger UI shall be available at http://127.0.0.1:8000/ui/
+Swagger UI shall be available at http://127.0.0.1:8000/ui/. The OpenAPI document it shows (`/openapi.json`,
+`/openapi.yaml`) is OpenAPI 3.1, with the body schemas of the default preset: the members of its extensions and the
+constraints of its profiles, as `GET /presets/{id}/schema` publishes them. It lists every operation of the drafts' API
+contract, also those the server answers with 501. Two switches leave those out, against the contract, so each is off by
+default; the demo configurations turn both on, so their document shows the planets and satellites only:
+
+```yaml
+rpp_openapi_omit_unheld_objects: true   # the operations on a data object the backend does not hold (501 02307)
+rpp_openapi_omit_unimplemented: true    # the operations no handler serves (501 02101)
+```
+
+Requests to what they leave out still answer 501.
 
 The username and password of HTTP Basic are the EPP login (`clID`/`pw`), and every request needs an `RPP-Cltrid`
 header with a new value.
@@ -39,11 +50,28 @@ header with a new value.
 |---|---|---|---|
 | `epp` (the default when the key is absent) | EPP (RFC 5730 ff.) over TCP | `rpp_epp_*` | [config.yaml](config.yaml) |
 | `rri` | DENIC RRI 5.0 (XML) over TCP | `rpp_rri_*` | [config.rri-mtest.yaml](config.rri-mtest.yaml) |
+| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [config.demo.yaml](config.demo.yaml), and [extended](config.demo-extended.yaml), [bound](config.demo-bound.yaml), [inherit](config.demo-inherit.yaml) |
 
 One process speaks one protocol: the one `rpp_backend` names is on, the other is off and its settings are ignored.
 The RPP API is the same for both. With RRI, what RPP has no place for is in the `de.denic.rpp.rri` extension
 ([docs/rri/rri-extension.md](docs/rri/rri-extension.md)), and what RRI cannot hold or do answers 501: host objects,
 client statuses, renew, transfers, contact deletion, a readable authInfo. See [docs/rri/](docs/rri/) for the mapping.
+
+The `sqlite` backend is a test bed for protocol features, bare RPP over a database. It holds none of the drafts' data
+objects (their paths answer 501 `02307`), but the planets and satellites of the demo extension
+`org.example.rpp.extension.planets` ([docs/demo/planets-extension.md](docs/demo/planets-extension.md)), with create,
+read, update, partial update, delete, availability and, for planets, the EPP-style transfer with its messages. The
+extension is registered by the config (`rpp_extensions: [extensions.planets]`), and without it the proxy does not know it. Two more demo
+extensions add an atmosphere to a planet and an orbit to a satellite (`extensions.planet_atmosphere`, `extensions.satellite_orbit`),
+with demo profiles and presets for them; they are specified in [docs/demo/](docs/demo/).
+The clients are `rpp_sqlite_clients`, a user and the `scrypt` hash of its password
+(`echo -n secret | python -m registry_adapter.sqlite.hash_password`, from `src/`); the user is the sponsoring client.
+```
+cd src
+RPP_CONFIG_FILE=../config.demo.yaml uvicorn main:app          # clients demo-a and demo-b, passwords demo-a-password ...
+# the demo compositions: config.demo.yaml (bare: the planets preset), config.demo-extended.yaml (all three extensions, no binding),
+# config.demo-bound.yaml (the server binds profiles to presets), config.demo-inherit.yaml (presets and profiles with several bases)
+```
 
 A config for RRI states at least:
 ```yaml
@@ -53,19 +81,23 @@ rpp_rri_port: 51131
 rpp_rri_use_tls: true
 rpp_backend_profile:
   extends: rri                    # the generic RRI profile, src/settings/profiles/rri.yaml
-  profiles: [base, rri]           # the RPP profiles offered (src/rpp/schema/schemas/profiles)
-  default_profile: rri            # the one a request gets when it names none
-rpp_profile_signalling: header    # how a client names the profile: the RPP-Profile header field (the default), or media-type
+  presets: [base, rri]            # the RPP presets offered (src/rpp/schema/schemas/presets)
+  default_preset: rri             # the one a request gets when it names none
+  bound_profiles: {}              # per preset, the profiles this server binds to it: {rri: [my-policy]}
+rpp_preset_signalling: header     # how a client names the preset: the RPP-Preset header field (the default), or media-type
 rpp_tlds:
   - de
 ```
-A client names the profile of a request with `RPP-Profile: profile=<name>;version=1.0` (core §14.2), or, with
-`rpp_profile_signalling: media-type`, with the parameters of the media type, `Accept: application/rpp+json;
-profile="<name>"; profile-version="1.0"` and the same in the `Content-Type` of every request, with content or without (core §13); without it the request is
-under `default_profile`, which the `Accept` must then list. The two methods are not mixed. With the header method a request that names none gets `default_profile`. The response names the profile applied, in
-`RPP-Profile` or in its `Content-Type`. Discovery lists, in `profileSchemas`, the URL of the effective JSON Schema of each
-offered profile (`GET /profiles/<name>/schema`, no authentication): the data definitions and those of the profile's
-extensions, the schema the proxy validates with ([docs/profile-schemas-extension.md](docs/profile-schemas-extension.md)). `rpp_backend_profile.extends` names the generic profile of the protocol and defaults to `rpp_backend`. HTTP Basic is
+A preset names extensions and the profiles of its definition (a profile constrains, an extension adds). A client names the
+preset of a request with `RPP-Preset: preset=<id>;version=1.0` (core, Preset Signalling), or, with
+`rpp_preset_signalling: media-type`, with the parameters of the media type, `Accept: application/rpp+json;
+preset="<id>"; preset-version="1.0"` and the same in the `Content-Type` of every request, with content or without; without
+it the request is under `default_preset`, with the header method, and under it as well with the media type method. The two
+methods are not mixed. The response names the preset applied, in `RPP-Preset` or in its `Content-Type`. A request that breaks
+a constraint of a profile that applies to its preset is 422 `02308`, and the error names the profile. Discovery lists the
+presets (`GET /presets/<id>`, with the profiles of the definition and the bound ones) and the profiles (`GET /profiles/<id>`);
+`GET /presets/<id>/schema` is the JSON Schema of the preset at this server, with the constraints of every profile that applies,
+as `application/schema+json` and without authentication. `rpp_backend_profile.extends` names the generic profile of the protocol and defaults to `rpp_backend`. HTTP Basic is
 passed through as the RRI LOGIN, as it is as the EPP login. DENIC lets in only addresses on the allowlist of the
 RegAcc.
 
@@ -130,6 +162,11 @@ curl -I -u foo:bar -H 'Accept: application/rpp+json' -H "RPP-Cltrid: $(uuidgen)"
 
 For the integration tests, copy [.env.example](.env.example) to `.env` and fill in the `TEST_EPP_*` variables with
 these registrars; see [docs/agents/testing.project.md](docs/agents/testing.project.md#backend).
+
+## Deployment
+
+To deploy on an Ubuntu host with Ansible (rootless Docker, a hardened image, one instance per configuration, the EPP
+test server, TLS terminated by nginx), see [deploy/README.md](deploy/README.md).
 
 ## Building docker
 ```

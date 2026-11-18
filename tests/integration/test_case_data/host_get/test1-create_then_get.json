@@ -3,13 +3,14 @@
   "test_id": "test1-create_then_get",
   "steps": [
     {
+      "comment": "Creates domain t1 with authInfo; expects 201 01000. Setup: the domain the steps below name.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -34,13 +35,14 @@
       }
     },
     {
+      "comment": "Creates host ns1.t1 with dns records ns, a; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -81,13 +83,14 @@
       }
     },
     {
+      "comment": "Reads host ns1.t1; expects 200 01000. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/ns1.t1-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

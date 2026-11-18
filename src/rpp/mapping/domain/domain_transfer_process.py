@@ -8,7 +8,7 @@ from rpp.mapping.domain import domains
 from rpp.mapping.shared import rpp_authorization
 from rpp.mapping.shared.common import parse_rpp, period_duration, PULL, reject_push
 from rpp.schema.extensions import added_members
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 SCHEMA = "domainTransferProcess.create"
 
@@ -27,7 +27,7 @@ def _domain_data(name: str, rpp: dict, profile: BackendProfile):
 
 def rpp_to_model(name: str, rpp: dict, authorization: str | None, *, profile: BackendProfile) -> DomainTransfer:
     """Converts a transfer request, with the value of its RPP-Authorization header."""
-    validate_schema(SCHEMA, rpp, extensions=profile.extensions)
+    validate_request_schema(SCHEMA, rpp, extensions=profile.extensions)
     request, domain = _domain_data(name, rpp, profile)
     request_rpp = parse_rpp(RPPDomainTransferRequest, request)
     reject_push(request_rpp.transferDir, request_rpp.gainingClientId)

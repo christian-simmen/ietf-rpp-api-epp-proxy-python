@@ -7,17 +7,19 @@
       "min": 1
     }
   },
+  "comment": "Skipped on epp-docker: EPP has no General Request or Abuse contact of a domain.",
   "test_id": "test37-remove_and_add_a_request_contact",
   "description": "A request contact of a domain is removed and added again: the counterpart of the admin and tech cases (test4, test9) for the members of RRI. A second removal answers 422, which proves the first.",
   "steps": [
     {
+      "comment": "Creates request contact RG19 with uriTemplate; expects 201 01000. Setup: the General Request contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
@@ -39,13 +41,14 @@
       }
     },
     {
+      "comment": "Creates request contact RA19 with uriTemplate; expects 201 01000. Setup: the Abuse contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
@@ -67,13 +70,14 @@
       }
     },
     {
+      "comment": "Creates contact U37 with authInfo (the request differs by backend); expects 201 01000. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
@@ -194,13 +198,14 @@
       }
     },
     {
+      "comment": "Creates domain t37 with registrant U37, generalRequest, abuse, dns records a, authInfo (the request differs by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         },
@@ -285,13 +290,14 @@
       }
     },
     {
+      "comment": "Patches domain t37: remove /abuse; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/t37-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -313,13 +319,14 @@
       }
     },
     {
+      "comment": "Patches domain t37: remove /abuse; expects 422 02308. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/t37-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -342,13 +349,14 @@
       }
     },
     {
+      "comment": "Patches domain t37: add /abuse; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/t37-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -378,13 +386,14 @@
       }
     },
     {
+      "comment": "Deletes domain t37; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/t37-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

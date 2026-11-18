@@ -2,13 +2,14 @@
   "test_id": "test2-read_id_not_at_the_head",
   "steps": [
     {
+      "comment": "Reads message MSG37-nosuch; expects one of 404 02303 or 501 02102. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/messages/MSG37-nosuch-{random_id_10}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -39,13 +40,14 @@
       }
     },
     {
+      "comment": "Reads message MSG37-nosuch as registrar b; expects one of 404 02303 or 501 02102. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/messages/MSG37-nosuch-{random_id_10}",
         "headers": {
           "Authorization": "{auth:b}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

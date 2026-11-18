@@ -2,13 +2,14 @@
   "test_id": "test31-patch_missing_needs_read",
   "steps": [
     {
+      "comment": "Patches host t31.….net: replace /status []; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t31.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

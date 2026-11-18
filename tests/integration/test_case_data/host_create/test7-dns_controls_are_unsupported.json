@@ -2,13 +2,14 @@
   "test_id": "test7-dns_controls_are_unsupported",
   "steps": [
     {
+      "comment": "Creates host t7.….net with dns records a, dns controls; expects 501 02103. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

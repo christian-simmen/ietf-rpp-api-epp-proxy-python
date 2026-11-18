@@ -2,13 +2,14 @@
   "test_id": "test14-put_missing",
   "steps": [
     {
+      "comment": "Replaces host t14.….net by a full update with dns records ns; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/t14.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

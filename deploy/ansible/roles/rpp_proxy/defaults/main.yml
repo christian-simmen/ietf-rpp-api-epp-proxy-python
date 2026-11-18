@@ -1,0 +1,43 @@
+---
+rpp_proxy_repo: https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python.git
+# A branch, tag or commit. The image is tagged with the commit it is built from.
+rpp_proxy_version: main
+rpp_proxy_project: rpp-proxy
+# Where the instances publish their ports: the gateway of the root daemon's default bridge (docker0, usually 172.17.0.1),
+# which the nginx container reaches as host.docker.internal (extra_hosts: host-gateway). Nothing outside the host
+# reaches it. Without a value it is the address docker0 has, so the root daemon must run when the playbook does.
+rpp_proxy_bind_address: "{{ ansible_facts['docker0']['ipv4']['address'] | default('') }}"
+# The UID and GID the image runs as (deploy/docker/Dockerfile). On the host they are subordinate ids of the user.
+rpp_proxy_container_uid: 10001
+rpp_proxy_container_gid: 10001
+
+# The defaults of every instance; an instance overrides any of them with a key of its own.
+rpp_proxy_workers: 3
+rpp_proxy_mem_limit: 1g
+rpp_proxy_cpus: 2
+rpp_proxy_pids_limit: 256
+rpp_proxy_tmpfs_size: 64m
+# How long the playbook waits for each instance to be healthy, in seconds. The instances start one after the other.
+rpp_proxy_wait_timeout: 300
+# Which peers uvicorn takes X-Forwarded-* from. Behind the rootless daemon's port forwarding every connection comes
+# from inside its network namespace, never from nginx's address, so the address cannot tell nginx apart: the published
+# port is reachable from the host and the root daemon's containers only. The proxy uses the headers in its access log.
+rpp_proxy_forwarded_allow_ips: "*"
+
+# The network of the EPP test server, which instances with `epp_network: true` join (role epp_server).
+rpp_proxy_epp_network: "{{ epp_server_network | default('rpp-epp') }}"
+
+# With ufw active, allow these sources (the root daemon's container networks) to the published ports.
+rpp_proxy_ufw_allow_from: [172.16.0.0/12]
+
+# The instances: one container each, with its own configuration and port. Adding an instance is adding an entry.
+#   name             [a-z0-9-], unique: the compose service and the directory of the instance
+#   port             unique: published on rpp_proxy_bind_address
+#   config_template  a Jinja2 template of the proxy's config.yaml, relative to the inventory directory or absolute;
+#                    it sees the entry as `instance`
+#   config           or the configuration itself, as a mapping
+#   data             true: a directory mounted at /data, for rpp_sqlite_url: sqlite:////data/<file>.db
+#   epp_network      true: on epp_server_network, to reach epp-server:743
+#   workers, mem_limit, cpus, pids_limit   override the defaults above
+#   environment      further environment variables of the container
+rpp_proxy_instances: []

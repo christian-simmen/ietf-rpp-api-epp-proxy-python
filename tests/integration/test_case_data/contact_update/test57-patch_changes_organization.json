@@ -3,16 +3,18 @@
   "when": {
     "profile.contact.org.person_name_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI holds no person name on an organisation contact.",
   "description": "A PATCH changes the name of the organization.",
   "steps": [
     {
+      "comment": "Creates contact P57 with authInfo (by backend); expects 201. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -93,13 +95,14 @@
       }
     },
     {
+      "comment": "Patches contact P57: replace /contactInfo/organizations/org/name; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:P57}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

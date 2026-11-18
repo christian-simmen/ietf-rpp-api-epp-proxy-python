@@ -1,0 +1,32 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-free",
+  "steps": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/satellites/{handle:a:-sa1}/availability",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "body": {
+          "@type": "satelliteAvailability",
+          "available": true
+        },
+        "headers": {
+          "RPP-Code": "01000"
+        }
+      }
+    }
+  ]
+}

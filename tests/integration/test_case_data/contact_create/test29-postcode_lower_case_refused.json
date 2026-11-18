@@ -3,16 +3,18 @@
   "when": {
     "env.contact.postcode.lower_case_supported": false
   },
+  "comment": "Skipped on rri-mtest: MTEST takes a postcode in lower case; test42 is its twin.",
   "description": "A British postcode in lower case: the drafts put no case on it, the server refuses it (env.limit_postcode_lower_case_refused).",
   "steps": [
     {
+      "comment": "Creates contact K29 with authInfo (by backend); expects 400 02005. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

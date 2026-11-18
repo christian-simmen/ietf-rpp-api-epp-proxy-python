@@ -1,0 +1,32 @@
+{
+  "test_id": "test8-unknown_planet",
+  "steps": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "/planets/{handle:a:-pu8}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "type": "rocky"
+        }
+      },
+      "response": {
+        "status": 404,
+        "content_type": "application/problem+json",
+        "body": {
+          "status": 404
+        },
+        "headers": {
+          "RPP-Code": "02303"
+        }
+      }
+    }
+  ]
+}

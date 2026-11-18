@@ -3,13 +3,14 @@
   "test_id": "test1-put_replaces_data",
   "steps": [
     {
+      "comment": "Creates contact 01A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -119,13 +120,14 @@
       }
     },
     {
+      "comment": "Replaces contact 01A by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:01A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -245,13 +247,14 @@
       }
     },
     {
+      "comment": "Reads contact 01A; expects 200 01000. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:01A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

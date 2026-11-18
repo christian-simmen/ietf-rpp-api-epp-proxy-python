@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/catalogued-satellites-profile.schema.json",
+  "rpp:profile": {
+    "id": "org.example.rpp.profile.catalogued-satellites",
+    "version": "1.0"
+  },
+  "rpp:constraints": {
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/satellite.create": "#/$defs/profile.catalogued.id"
+  },
+  "$defs": {
+    "profile.catalogued.id": {
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*-[ivx]+$"
+        }
+      }
+    }
+  }
+}

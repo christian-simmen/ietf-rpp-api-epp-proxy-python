@@ -3,13 +3,14 @@
   "test_id": "test31-patch_adds_a_number",
   "steps": [
     {
+      "comment": "Creates contact 31A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -104,13 +105,14 @@
       }
     },
     {
+      "comment": "Patches contact 31A: add /contactInfo/phones; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:31A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

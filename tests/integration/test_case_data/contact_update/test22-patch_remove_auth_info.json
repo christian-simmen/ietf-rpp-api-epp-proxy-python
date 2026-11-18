@@ -2,16 +2,18 @@
   "when": {
     "profile.contact.authInfo.supported": true
   },
+  "comment": "Skipped on rri-mtest: an RRI contact has no authInfo.",
   "test_id": "test22-patch_remove_auth_info",
   "steps": [
     {
+      "comment": "Creates contact 22A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -121,13 +123,14 @@
       }
     },
     {
+      "comment": "Patches contact 22A: remove /authInfo; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/contacts/{handle:a:22A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

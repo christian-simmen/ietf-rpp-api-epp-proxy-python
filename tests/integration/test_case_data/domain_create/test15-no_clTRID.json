@@ -2,6 +2,7 @@
   "test_id": "test15-no_clTRID",
   "steps": [
     {
+      "comment": "Creates contact HC15; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -58,7 +59,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -70,6 +71,7 @@
       }
     },
     {
+      "comment": "Creates domain test1 with authInfo, registrant HC15 (by backend), dns records a (by backend), with no RPP-Cltrid; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -131,7 +133,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

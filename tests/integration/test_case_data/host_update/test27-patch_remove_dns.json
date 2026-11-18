@@ -2,13 +2,14 @@
   "test_id": "test27-patch_remove_dns",
   "steps": [
     {
+      "comment": "Creates host t27.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -41,13 +42,14 @@
       }
     },
     {
+      "comment": "Patches host t27.….net: add /dns/records; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t27.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -77,13 +79,14 @@
       }
     },
     {
+      "comment": "Patches host t27.….net: remove /dns; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t27.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

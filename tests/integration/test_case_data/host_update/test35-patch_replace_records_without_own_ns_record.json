@@ -2,13 +2,14 @@
   "test_id": "test35-patch_replace_records_without_own_ns_record",
   "steps": [
     {
+      "comment": "Creates host t35.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -41,13 +42,14 @@
       }
     },
     {
+      "comment": "Patches host t35.….net: replace /dns/records; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t35.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

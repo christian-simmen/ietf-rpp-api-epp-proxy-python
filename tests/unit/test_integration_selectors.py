@@ -93,7 +93,23 @@ def test_every_environment_has_the_profile_tld_and_lgrs_of_its_config():
         env = load(name, with_credentials=False)
         assert env.profile.name
         assert env.facts["tld"] and env.facts["environment_name"]
-        assert env.profile.lgrs == ("latn-1.0",)
+        # a backend without domain names (the SQLite demo) has no IDN
+        assert env.profile.lgrs == (("latn-1.0",) if "domainName" in env.profile.objects else ())
+
+
+def _fact_paths(facts: dict, prefix: str = "") -> set[str]:
+    paths = set()
+    for key, value in facts.items():
+        paths |= _fact_paths(value, f"{prefix}{key}.") if isinstance(value, dict) else {f"{prefix}{key}"}
+    return paths
+
+
+def test_every_environment_states_the_same_facts():
+    # A case's selectors are checked against every environment when it loads, so a fact one environment lacks fails
+    # the cases that name it everywhere. An environment states a fact it does not know as null.
+    paths = {name: _fact_paths(load(name, with_credentials=False).facts) for name in environment_names()}
+    every = set().union(*paths.values())
+    assert {name: sorted(every - own) for name, own in paths.items() if every - own} == {}
 
 
 def test_a_missing_variable_is_named_and_refused():
@@ -260,3 +276,11 @@ def test_an_unknown_environment_is_an_error_that_names_the_known_ones():
 def test_the_unit_tests_compose_the_first_environment_named():
     assert selected_name({}) == "epp-docker"
     assert selected_name({"RPP_TEST_ENV": "rri-mtest,epp-docker"}) == "rri-mtest"
+
+
+def test_contains_on_a_map_leaf_holds_for_a_key():
+    facts = Facts(load("sqlite-demo-bound", with_credentials=False).profile, {})
+
+    assert selectors.holds({"profile.bound_profiles": {"contains": "planets"}}, facts)
+    assert not selectors.holds({"profile.bound_profiles": {"contains": "catalogued-planets"}}, facts)
+    assert selectors.holds({"profile.bound_profiles": {"not": {"contains": "catalogued-planets"}}}, facts)

@@ -2,9 +2,11 @@
   "when": {
     "profile.domainName.authInfo.read_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI does not show a domain's authInfo (it holds only its hash), so the case cannot read it back.",
   "test_id": "test26-put_auth_info",
   "steps": [
     {
+      "comment": "Creates contact HU26; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -61,7 +63,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -73,13 +75,14 @@
       }
     },
     {
+      "comment": "Creates domain put26 with authInfo, registrant HU26 (by backend), dns records a (by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -150,6 +153,7 @@
       }
     },
     {
+      "comment": "Replaces domain put26 by a full update with authInfo, registrant HU26 (by backend), dns records a (by backend) (includeElements=authInfo); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": {
@@ -168,7 +172,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -255,13 +259,14 @@
       }
     },
     {
+      "comment": "Replaces domain put26 by a full update with registrant HU26 (by backend), dns records a (by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put26-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -326,6 +331,7 @@
       }
     },
     {
+      "comment": "Reads domain put26 (includeElements=authInfo) (the request differs by backend); expects 200 01000. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": {
@@ -344,7 +350,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

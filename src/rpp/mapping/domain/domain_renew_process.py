@@ -5,7 +5,7 @@ from core.model.domain.domain_renew_process import DomainRenewProcess
 from rpp.dto.rpp_domain_renew_process import RPPDomainRenewProcess
 from rpp.mapping.shared.common import parse_rpp, period_duration, reject_set
 from rpp.mapping.shared.date_time import rfc3339
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 
 def _utc_date(timestamp: str) -> str:
@@ -17,7 +17,7 @@ def _utc_date(timestamp: str) -> str:
 def rpp_to_model(name: str, rpp: dict, authorization: str | None) -> DomainRenew:
     """Converts a renew request. The date is the UTC date of `expiryDate`, None when the client gave none.
     EPP's renew has no authInfo, so the value of the RPP-Authorization header is refused."""
-    validate_schema("renewProcess.create", rpp)
+    validate_request_schema("renewProcess.create", rpp)
     process_rpp = parse_rpp(RPPDomainRenewProcess, rpp)
     cur_exp_date = _utc_date(process_rpp.expiryDate) if process_rpp.expiryDate is not None else None
     reject_set(**{"RPP-Authorization": authorization})

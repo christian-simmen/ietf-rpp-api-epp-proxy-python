@@ -5,12 +5,12 @@ from rpp.dto.rpp_transfer_process import RPPTransferProcess
 from rpp.dto.rpp_transfer_request import RPPTransferRequest
 from rpp.mapping.shared import rpp_authorization
 from rpp.mapping.shared.common import parse_rpp, PULL, reject_push
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 
 def rpp_to_model(id: str, rpp: dict, authorization: str | None) -> ContactTransfer:
     """Converts a transfer request, with the value of its RPP-Authorization header."""
-    validate_schema("transferProcess.create", rpp)
+    validate_request_schema("transferProcess.create", rpp)
     request_rpp = parse_rpp(RPPTransferRequest, rpp)
     reject_push(request_rpp.transferDir, request_rpp.gainingClientId)
     return ContactTransfer(

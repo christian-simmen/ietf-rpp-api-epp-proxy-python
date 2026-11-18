@@ -5,16 +5,18 @@
       "contains": "tech"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no admin, tech or billing contacts.",
   "description": "Five tech contacts, the most the EPP test server takes per role.",
   "steps": [
     {
+      "comment": "Creates contact Qa0 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -88,13 +90,14 @@
       }
     },
     {
+      "comment": "Creates contact Qb0 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -168,13 +171,14 @@
       }
     },
     {
+      "comment": "Creates contact Qc0 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -248,13 +252,14 @@
       }
     },
     {
+      "comment": "Creates contact Qd0 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -328,13 +333,14 @@
       }
     },
     {
+      "comment": "Creates contact Qe0 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -408,13 +414,14 @@
       }
     },
     {
+      "comment": "Creates domain t17 with authInfo, registrant Qa0 (by backend), dns records a (by backend), contacts tech, tech, tech, tech, tech; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

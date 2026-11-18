@@ -3,6 +3,7 @@
   "description": "uName is create-only: a PATCH that adds it is refused.",
   "steps": [
     {
+      "comment": "Creates contact R39 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -14,7 +15,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -89,13 +90,14 @@
       }
     },
     {
+      "comment": "Creates domain gu39 with authInfo, registrant R39 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -163,13 +165,14 @@
       }
     },
     {
+      "comment": "Patches domain gu39: add /uName; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/gu39-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -193,13 +196,14 @@
       }
     },
     {
+      "comment": "Deletes domain gu39; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/gu39-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

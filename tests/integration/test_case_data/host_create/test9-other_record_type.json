@@ -2,13 +2,14 @@
   "test_id": "test9-other_record_type",
   "steps": [
     {
+      "comment": "Creates host t9.….net with dns records txt; expects 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

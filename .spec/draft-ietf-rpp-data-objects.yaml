@@ -4706,12 +4706,23 @@ resources:
     direct_access: false
     visibility: default
     notes: []
+  - identifier: presets
+    name: Presets
+    cardinality: 1+
+    mutability: read-only
+    data_type: Aggregation[Preset Data Object]
+    description: The presets the server offers.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
   - identifier: profiles
     name: Profiles
     cardinality: 0+
     mutability: read-only
-    data_type: String
-    description: The names of the profiles supported by the server.
+    data_type: Aggregation[Profile Data Object]
+    description: The profiles that are applicable to at least one preset the server offers.
     constraints: []
     restrictions: {}
     direct_access: false
@@ -4798,32 +4809,204 @@ resources:
   subsections: []
   supported_processes: []
   conditions: []
-- identifier: profile
-  name: Profile Data Object
+- identifier: preset
+  name: Preset Data Object
   object_type: Resource
-  unique_identifier: name
+  unique_identifier: id
   owner: ''
   extends: ''
   abstract: false
-  description: A Profile Data Object represents a named set of protocol features and versions that defines
-    the compatibility and capabilities of RPP server implementations. A profile is published by the server,
-    and a client can retrieve it to determine which features, objects and extensions it can use.
+  description: 'A Preset Data Object represents a preset offered by the server: the extensions a client
+    uses when it signals the preset, the profiles of the preset definition, and the profiles the server
+    binds to it. The object is flattened.'
   preamble:
-  - The following data elements are defined for the Profile Data Object. All data elements are managed
+  - The following data elements are defined for the Preset Data Object. All data elements are managed
     by the server.
   elements:
+  - identifier: id
+    name: Identifier
+    cardinality: '1'
+    mutability: read-only
+    data_type: String
+    description: The unique identifier of the preset.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
   - identifier: name
     name: Name
     cardinality: '1'
     mutability: read-only
     data_type: String
-    description: A unique name that identifies the profile.
-    constraints:
-    - The name of a standard profile, which is published in the IANA registry for RPP profiles, MUST use
-      the RPP URN namespace, for example `urn:ietf:params:rpp:profile:{profile_name}`, and MUST be unique
-      within that namespace. It SHOULD be descriptive of the features and versions included in the profile.
-    - The name of a private profile, which is not published in the IANA registry, MUST be globally unique.
-      The use of reverse domain name notation is RECOMMENDED.
+    description: A short human-readable name of the preset.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: description
+    name: Description
+    cardinality: '1'
+    mutability: read-only
+    data_type: String
+    description: A human-readable description of the preset and its intended use.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: version
+    name: Version
+    cardinality: '1'
+    mutability: read-only
+    data_type: String
+    description: The version of the preset.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: rppVersion
+    name: RPP Version
+    cardinality: '1'
+    mutability: read-only
+    data_type: String
+    description: The minimum version of RPP that the preset requires.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: url
+    name: URL
+    cardinality: 0-1
+    mutability: read-only
+    data_type: URL
+    description: The location of the preset specification.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: basePresets
+    name: Base Presets
+    cardinality: 0+
+    mutability: read-only
+    data_type: Aggregation[Preset Data Object]
+    description: The presets this preset builds on.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: extensions
+    name: Extensions
+    cardinality: 0+
+    mutability: read-only
+    data_type: Extension Object
+    description: The extensions of the preset, including the extensions of its base presets.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: profiles
+    name: Profiles
+    cardinality: 0+
+    mutability: read-only
+    data_type: Aggregation[Profile Data Object]
+    description: The profiles of the preset definition, including the profiles of its base presets.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: boundProfiles
+    name: Bound Profiles
+    cardinality: 0+
+    mutability: read-only
+    data_type: Aggregation[Profile Data Object]
+    description: The profiles the server binds to the preset.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: defaultPreset
+    name: Default Preset
+    cardinality: '1'
+    mutability: read-only
+    data_type: Boolean
+    description: Indicates whether the preset is the default preset of the server.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: schema
+    name: Schema
+    cardinality: '1'
+    mutability: read-only
+    data_type: Representation Schema
+    description: The schema of the preset at the server, which combines the schemas of RPP and of the
+      extensions of the preset, constrained by its applicable profiles.
+    constraints: []
+    restrictions: {}
+    direct_access: true
+    visibility: onDemand
+    notes: []
+  operations:
+  - identifier: read
+    name: Read Operation
+    description: The Read operation allows a client to retrieve the Preset Data Object identified by its
+      identifier, and its Direct Access data element Schema (`schema`). It is the only operation supported
+      for this object.
+    authorisation:
+    - Any authenticated client is authorised to perform this operation.
+    input:
+    - kind: Reference
+      target: This Object
+      cardinality: '1'
+    output:
+    - kind: Object
+      target: This Object
+      cardinality: '1'
+    notes: []
+  subsections: []
+  supported_processes: []
+  conditions: []
+- identifier: profile
+  name: Profile Data Object
+  object_type: Resource
+  unique_identifier: id
+  owner: ''
+  extends: ''
+  abstract: false
+  description: A Profile Data Object represents a profile that is applicable to at least one preset offered
+    by the server. The object is flattened.
+  preamble:
+  - The following data elements are defined for the Profile Data Object. All data elements are managed
+    by the server.
+  elements:
+  - identifier: id
+    name: Identifier
+    cardinality: '1'
+    mutability: read-only
+    data_type: String
+    description: The unique identifier of the profile.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: name
+    name: Name
+    cardinality: '1'
+    mutability: read-only
+    data_type: String
+    description: A short human-readable name of the profile.
+    constraints: []
     restrictions: {}
     direct_access: false
     visibility: default
@@ -4855,64 +5038,41 @@ resources:
     cardinality: '1'
     mutability: read-only
     data_type: String
-    description: The minimum version of the RPP protocol that is supported or required for the profile.
+    description: The minimum version of RPP that the profile requires.
     constraints: []
     restrictions: {}
     direct_access: false
     visibility: default
     notes: []
-  - identifier: objects
-    name: Objects
-    cardinality: 1+
+  - identifier: url
+    name: URL
+    cardinality: '1'
     mutability: read-only
-    data_type: String
-    description: The list of identifiers of data objects supported by the server
+    data_type: URL
+    description: The location of the profile specification, which states the constraints of the profile.
     constraints: []
     restrictions: {}
     direct_access: false
     visibility: default
     notes: []
-  - identifier: extensions
-    name: Extensions
+  - identifier: baseProfiles
+    name: Base Profiles
+    cardinality: 0+
+    mutability: read-only
+    data_type: Aggregation[Profile Data Object]
+    description: The profiles this profile builds on.
+    constraints: []
+    restrictions: {}
+    direct_access: false
+    visibility: default
+    notes: []
+  - identifier: requiredExtensions
+    name: Required Extensions
     cardinality: 0+
     mutability: read-only
     data_type: Extension Object
-    description: The extensions, including their names and versions, that are supported or required for
-      the profile.
-    constraints:
-    - A profile MUST NOT list the same extension name more than once.
-    - The server MUST support all extensions listed in the profile.
-    restrictions: {}
-    direct_access: false
-    visibility: default
-    notes: []
-  - identifier: baseProfile
-    name: Base Profile
-    cardinality: 0-1
-    mutability: read-only
-    data_type: Aggregation[Profile Data Object]
-    description: A base profile that is extended by this profile. The features and versions of the base
-      profile are included in this profile, which MAY add to them or override them, for example the version
-      of an extension.
-    constraints:
-    - The base profile MUST be published in the IANA registry for RPP profiles, or be made available to
-      the client using other means.
-    - 'The depth of inheritance MUST be limited to 1: the base profile MUST NOT itself have a base profile.'
-    - A profile MUST NOT be its own base profile.
-    restrictions: {}
-    direct_access: false
-    visibility: default
-    notes: []
-  - identifier: defaultProfile
-    name: Default Profile
-    cardinality: '1'
-    mutability: read-only
-    data_type: Boolean
-    description: The default profile that is used when no specific profile is requested by the client.
-    constraints:
-    - The default profile MUST be published in the IANA registry for RPP profiles, or be made available
-      to the client using other means.
-    - Only one profile MUST be designated as the default profile.
+    description: The extensions the profile requires, including those its base profiles require.
+    constraints: []
     restrictions: {}
     direct_access: false
     visibility: default
@@ -4921,7 +5081,7 @@ resources:
   - identifier: read
     name: Read Operation
     description: The Read operation allows a client to retrieve the Profile Data Object identified by
-      its name. It is the only operation supported for this object.
+      its identifier. It is the only operation supported for this object.
     authorisation:
     - Any authenticated client is authorised to perform this operation.
     input:

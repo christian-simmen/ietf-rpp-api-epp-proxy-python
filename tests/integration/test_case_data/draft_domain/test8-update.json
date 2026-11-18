@@ -2,16 +2,18 @@
   "when": {
     "profile.domainName.authInfo.read_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI does not show a domain's authInfo (it holds only its hash), so the case cannot read it back.",
   "test_id": "test8-update",
   "steps": [
     {
+      "comment": "Creates contact dt1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -87,13 +89,14 @@
       }
     },
     {
+      "comment": "Creates contact dt2 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -169,13 +172,14 @@
       }
     },
     {
+      "comment": "Creates domain ex8 with registrant dt1, authInfo, dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -229,6 +233,7 @@
       }
     },
     {
+      "comment": "Replaces domain ex8 by a full update with registrant dt2, authInfo, dns records a (by backend) (includeElements=authInfo); expects 200. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": {
@@ -247,7 +252,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

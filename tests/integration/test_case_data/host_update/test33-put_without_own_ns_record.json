@@ -2,13 +2,14 @@
   "test_id": "test33-put_without_own_ns_record",
   "steps": [
     {
+      "comment": "Creates host t33.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -41,13 +42,14 @@
       }
     },
     {
+      "comment": "Replaces host t33.….net by a full update; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/hosts/t33.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

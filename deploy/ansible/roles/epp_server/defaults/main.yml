@@ -1,0 +1,19 @@
+---
+# Deploy the EPP test server (site.yml skips the role when false).
+epp_server_enabled: true
+
+# The EPP test server (pawel-kow/EPP-server-docker), the backend of the instances with `epp_network: true`. It is
+# internal: none of its ports is published, and the proxy reaches it as epp-server:743 on epp_server_network.
+epp_server_repo: https://github.com/pawel-kow/EPP-server-docker.git
+# A branch, tag or commit. Pin a commit for repeatable deployments.
+epp_server_version: main
+# Its submodule epp-server is named by an SSH URL; it is fetched over HTTPS, so the host needs no GitHub key.
+epp_server_git_https_rewrite: true
+epp_server_project: epptest
+# The network the proxy instances share with epp-server (made by this role, external to the proxy's project).
+epp_server_network: rpp-epp
+# The database user of the registry. The password is required (keep it in the vault).
+epp_server_mysql_user: epp_registry
+# epp_server_mysql_password:
+# Further entries of its .env: the TLD, the periods of RFC 3915 in minutes, the cron schedules (its README).
+epp_server_env: {}

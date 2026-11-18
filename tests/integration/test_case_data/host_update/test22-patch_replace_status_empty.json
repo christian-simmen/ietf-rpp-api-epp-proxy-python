@@ -2,13 +2,14 @@
   "test_id": "test22-patch_replace_status_empty",
   "steps": [
     {
+      "comment": "Creates host t22.….net with dns records ns; expects 201 01000. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -41,13 +42,14 @@
       }
     },
     {
+      "comment": "Patches host t22.….net: add /status clientDeleteProhibited; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t22.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -73,13 +75,14 @@
       }
     },
     {
+      "comment": "Patches host t22.….net: replace /status []; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/t22.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

@@ -2,6 +2,7 @@
   "test_id": "test4-request_with_body_json_and_content_type",
   "steps": [
     {
+      "comment": "Deletes domain test4, with a fixed RPP-Cltrid; expects 400. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/test4-{random_name}.{tld}",
@@ -19,7 +20,7 @@
           "RPP-Cltrid": "test4-{random_name}-clTRID",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

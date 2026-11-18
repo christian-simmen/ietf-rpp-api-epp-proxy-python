@@ -11,7 +11,7 @@ from rpp.dto.rpp_labelled_contact import RPPLabelledContact
 from rpp.mapping.domain import domain_dns, domain_request_contacts
 from rpp.mapping.shared import auth_info, prov_metadata, statuses
 from rpp.mapping.shared.common import parse_rpp, period_duration, reject_set
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema, validate_schema
 
 REGISTRANT = "registrant"
 
@@ -108,7 +108,7 @@ def _rpp_to_idn(domain_rpp: RPPDomain, profile: BackendProfile) -> DomainIdn | N
 def rpp_to_model(rpp: dict, *, profile: BackendProfile) -> Domain:
     """Converts a create request to a Domain, with what the backend of `profile` can hold, and the members its
     extensions add."""
-    validate_schema("domainName.create", rpp, extensions=profile.extensions)
+    validate_request_schema("domainName.create", rpp, extensions=profile.extensions)
     rpp, requests = domain_request_contacts.split(rpp, "domainName.create", profile.extensions)
     domain_rpp = parse_rpp(RPPDomain, rpp)
     reject_set(status=domain_rpp.status)

@@ -3,16 +3,18 @@
     "wait.domainName.processes.create.add_grace_period": true,
     "profile.domainName.processes.restore.report_supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI's RESTORE is one step, without a restore report.",
   "test_id": "test12-restore_cycle_with_patch",
   "steps": [
     {
+      "comment": "Creates domain rs12 with authInfo; expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -35,6 +37,7 @@
       }
     },
     {
+      "comment": "Deletes domain rs12; expects 200. The operation this case checks. Waits first for domainName.processes.create.add_grace_period.",
       "wait": "domainName.processes.create.add_grace_period",
       "request": {
         "method": "DELETE",
@@ -42,7 +45,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -52,13 +55,14 @@
       }
     },
     {
+      "comment": "Reads the restore process of domain rs12; expects 404 02303. An error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/domainNames/rs12-{random_name}.{tld}/processes/restoreProcesses/latest",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -75,13 +79,14 @@
       }
     },
     {
+      "comment": "Sends a restore report for domain rs12; expects 409 02304. An error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/rs12-{random_name}.{tld}/processes/restoreProcesses/latest",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -113,13 +118,14 @@
       }
     },
     {
+      "comment": "Requests a restore of domain rs12; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/rs12-{random_name}.{tld}/processes/restoreProcesses",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -140,13 +146,14 @@
       }
     },
     {
+      "comment": "Requests a restore of domain rs12; expects 409 02304. An error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/rs12-{random_name}.{tld}/processes/restoreProcesses",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -166,13 +173,14 @@
       }
     },
     {
+      "comment": "Reads the restore process of domain rs12; expects 200 01000. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/rs12-{random_name}.{tld}/processes/restoreProcesses/latest",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -190,13 +198,14 @@
       }
     },
     {
+      "comment": "Sends a restore report for domain rs12 by PATCH; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/rs12-{random_name}.{tld}/processes/restoreProcesses/latest",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -232,13 +241,14 @@
       }
     },
     {
+      "comment": "Reads the restore process of domain rs12; expects 404 02303. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/domainNames/rs12-{random_name}.{tld}/processes/restoreProcesses/latest",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -255,13 +265,14 @@
       }
     },
     {
+      "comment": "Reads domain rs12; expects 200 01000. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/rs12-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

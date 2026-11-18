@@ -6,7 +6,7 @@ import pytest
 from rpp.http import media_range
 from rpp.http.media_range_error import MediaRangeError
 
-URN = "urn:ietf:params:rpp:profile:base"
+URN = "urn:ietf:params:rpp:preset:base"
 
 
 def one(value):
@@ -15,25 +15,25 @@ def one(value):
 
 
 def test_a_quoted_and_a_token_value_are_the_same():
-    assert one(f'application/rpp+json; profile="{URN}"; profile-version="1.0"').profile() == (URN, Decimal("1.0"))
-    assert one("application/rpp+json; profile=de.denic.rpp.profile.rri; profile-version=1.0").profile() \
-        == ("de.denic.rpp.profile.rri", Decimal("1.0"))
+    assert one(f'application/rpp+json; preset="{URN}"; preset-version="1.0"').preset() == (URN, Decimal("1.0"))
+    assert one("application/rpp+json; preset=de.denic.rpp.preset.rri; preset-version=1.0").preset() \
+        == ("de.denic.rpp.preset.rri", Decimal("1.0"))
 
 
 def test_names_are_not_case_sensitive_and_a_quoted_pair_is_unescaped():
-    assert one('Application/RPP+json; PROFILE="a\\"b"; Profile-Version=1.0').profile() == ('a"b', Decimal("1.0"))
+    assert one('Application/RPP+json; PRESET="a\\"b"; Preset-Version=1.0').preset() == ('a"b', Decimal("1.0"))
 
 
 def test_the_weight_ends_the_media_type_parameters_and_commas_in_quotes_do_not_split():
-    items = media_range.parse_accept(['application/rpp+json; profile="a,b"; profile-version=1.0; q=0.5; x=1, */*;q=0'])
+    items = media_range.parse_accept(['application/rpp+json; preset="a,b"; preset-version=1.0; q=0.5; x=1, */*;q=0'])
 
     assert [item.kind for item in items] == ["application/rpp+json", "*/*"]
     assert items[0].quality == Decimal("0.5") and items[1].quality == 0
-    assert items[0].profile() == ("a,b", Decimal("1.0"))
+    assert items[0].preset() == ("a,b", Decimal("1.0"))
 
 
 def test_a_range_without_the_parameters_names_no_profile():
-    assert one("application/rpp+json").profile() is None
+    assert one("application/rpp+json").preset() is None
     assert one("application/rpp+json").quality == 1
 
 
@@ -42,36 +42,36 @@ def test_field_lines_are_joined():
         == ["text/html", "application/*"]
 
 
-@pytest.mark.parametrize("value", ["application/rpp+json; profile=x", "application/rpp+json; profile-version=1.0"])
+@pytest.mark.parametrize("value", ["application/rpp+json; preset=x", "application/rpp+json; preset-version=1.0"])
 def test_a_profile_without_its_version_or_the_reverse_is_a_missing_parameter(value):
     with pytest.raises(MediaRangeError) as error:
-        one(value).profile()
+        one(value).preset()
 
     assert error.value.code.value[0] == "2003"
 
 
 @pytest.mark.parametrize("value", [
-    "application/rpp+json; profile=x; profile-version=1",        # the ABNF requires a point
-    "application/rpp+json; profile=x; profile-version=1.0.0",
-    "application/rpp+json; profile=x; profile-version=a",
+    "application/rpp+json; preset=x; preset-version=1",        # the ABNF requires a point
+    "application/rpp+json; preset=x; preset-version=1.0.0",
+    "application/rpp+json; preset=x; preset-version=a",
 ])
 def test_a_version_that_is_not_digits_point_digits_is_a_syntax_error(value):
     with pytest.raises(MediaRangeError) as error:
-        one(value).profile()
+        one(value).preset()
 
     assert error.value.code.value[0] == "2005"
 
 
 @pytest.mark.parametrize("value", [
     "application",                                   # no subtype
-    "application/rpp+json; profile",                 # no value
-    'application/rpp+json; profile="x',              # not closed
-    "application/rpp+json; profile=a:b",             # a colon is no token character
+    "application/rpp+json; preset",                 # no value
+    'application/rpp+json; preset="x',              # not closed
+    "application/rpp+json; preset=a:b",             # a colon is no token character
     "application/rpp+json; q=1.5",
     "application/rpp+json; q=0.1234",
     "application/rpp+json; q=a",
-    "application/rpp+json; profile=a; profile=b",    # twice
-    "application/rpp+json; profile-version=1.0; profile-version=1.1",
+    "application/rpp+json; preset=a; preset=b",    # twice
+    "application/rpp+json; preset-version=1.0; preset-version=1.1",
 ])
 def test_a_value_that_does_not_parse_is_a_syntax_error(value):
     with pytest.raises(MediaRangeError) as error:
@@ -87,7 +87,7 @@ def test_a_content_type_has_no_weight():
 
 
 def test_a_range_of_another_media_type_only_has_to_split():
-    items = media_range.parse_accept(["application/ld+json; profile=a; profile=b; q=x, application/rpp+json"])
+    items = media_range.parse_accept(["application/ld+json; preset=a; preset=b; q=x, application/rpp+json"])
 
     assert [item.kind for item in items] == ["application/ld+json", "application/rpp+json"]
 

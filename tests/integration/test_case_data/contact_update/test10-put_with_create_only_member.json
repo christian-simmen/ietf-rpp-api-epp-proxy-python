@@ -2,13 +2,14 @@
   "test_id": "test10-put_with_create_only_member",
   "steps": [
     {
+      "comment": "Creates contact 10A with authInfo (by backend); expects 201 01000. Setup: the contact the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -118,13 +119,14 @@
       }
     },
     {
+      "comment": "Replaces contact 10A by a full update (the request differs by backend); expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{handle:a:10A}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

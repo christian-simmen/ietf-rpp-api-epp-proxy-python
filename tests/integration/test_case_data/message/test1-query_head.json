@@ -3,13 +3,14 @@
   "test_id": "test1-query_head",
   "steps": [
     {
+      "comment": "Polls the message queue; expects one of 200 01300 or 200 01301. The operation this case checks.",
       "request": {
         "method": "GET",
         "url": "/messages",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -45,13 +46,14 @@
       }
     },
     {
+      "comment": "Polls the message queue (type=transferRequestMessage) as registrar b; expects one of 200 01300 or 200 01301. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/messages?type=transferRequestMessage",
         "headers": {
           "Authorization": "{auth:b}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

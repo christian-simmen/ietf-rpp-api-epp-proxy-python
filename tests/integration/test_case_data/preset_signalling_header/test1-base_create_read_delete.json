@@ -1,0 +1,328 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test1-base_create_read_delete",
+  "description": "Under the base preset, with no element of the epp or rri preset, a contact and a domain are created, the domain is read and deleted on every server.",
+  "when": {
+    "env.preset_signalling": "header"
+  },
+  "comment": "Skipped on rri-mtest: MTEST's config signals the preset by media type; the twin in preset_signalling_media_type/ covers it.",
+  "steps": [
+    {
+      "comment": "Creates contact PB1 with authInfo, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=urn:ietf:params:rpp:preset:base;version=1.0 (the request differs by backend); expects 201 01000. Setup: the registrant of the domain below.",
+      "request": {
+        "method": "POST",
+        "url": "/contacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+        },
+        "body_json": {
+          "select": [
+            {
+              "when": {
+                "profile.contact.authInfo.supported": true
+              },
+              "then": {
+                "@type": "contact",
+                "id": "{handle:a:PB1}",
+                "contactInfo": {
+                  "@type": "Card",
+                  "version": "2.0",
+                  "kind": "individual",
+                  "name": {
+                    "full": "Erika Mustermann"
+                  },
+                  "addresses": {
+                    "addr": {
+                      "components": [
+                        {
+                          "kind": "name",
+                          "value": "Musterweg 12"
+                        },
+                        {
+                          "kind": "locality",
+                          "value": "Frankfurt am Main"
+                        },
+                        {
+                          "kind": "postcode",
+                          "value": "60596"
+                        }
+                      ],
+                      "countryCode": "DE"
+                    }
+                  },
+                  "emails": {
+                    "email": {
+                      "address": "erika@example.com"
+                    }
+                  },
+                  "phones": {
+                    "voice": {
+                      "number": "tel:+49.6912345678",
+                      "features": {
+                        "voice": true
+                      }
+                    }
+                  }
+                },
+                "authInfo": {
+                  "@type": "authInfo",
+                  "method": "authinfo",
+                  "authdata": "Abc2345678"
+                }
+              }
+            },
+            {
+              "then": {
+                "@type": "contact",
+                "id": "{handle:a:PB1}",
+                "contactInfo": {
+                  "@type": "Card",
+                  "version": "2.0",
+                  "kind": "individual",
+                  "name": {
+                    "full": "Erika Mustermann"
+                  },
+                  "addresses": {
+                    "addr": {
+                      "components": [
+                        {
+                          "kind": "name",
+                          "value": "Musterweg 12"
+                        },
+                        {
+                          "kind": "locality",
+                          "value": "Frankfurt am Main"
+                        },
+                        {
+                          "kind": "postcode",
+                          "value": "60596"
+                        }
+                      ],
+                      "countryCode": "DE"
+                    }
+                  },
+                  "emails": {
+                    "email": {
+                      "address": "erika@example.com"
+                    }
+                  },
+                  "phones": {
+                    "voice": {
+                      "number": "tel:+49.6912345678",
+                      "features": {
+                        "voice": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+        },
+        "body": {
+          "@type": "contact",
+          "id": "{handle:a:PB1}"
+        }
+      }
+    },
+    {
+      "comment": "Creates domain b1 with registrant PB1, dns records a, authInfo, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=urn:ietf:params:rpp:preset:base;version=1.0 (the request differs by backend); expects 201 01000. Setup: the domain the steps below work on.",
+      "request": {
+        "method": "POST",
+        "url": "/domainNames",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+        },
+        "body_json": {
+          "select": [
+            {
+              "when": {
+                "profile.domainName.dns.min_count": {
+                  "min": 1
+                }
+              },
+              "then": {
+                "@type": "domainName",
+                "name": "b1-{random_id_10}.{tld}",
+                "registrant": {
+                  "@type": "contact",
+                  "id": "{handle:a:PB1}"
+                },
+                "dns": {
+                  "@type": "dnsData",
+                  "records": [
+                    {
+                      "@type": "dnsRecord",
+                      "name": "@",
+                      "type": "a",
+                      "rdata": {
+                        "address": "192.0.2.10"
+                      }
+                    }
+                  ]
+                },
+                "authInfo": {
+                  "@type": "authInfo",
+                  "method": "authinfo",
+                  "authdata": "Abc2345678"
+                }
+              }
+            },
+            {
+              "then": {
+                "@type": "domainName",
+                "name": "b1-{random_id_10}.{tld}",
+                "registrant": {
+                  "@type": "contact",
+                  "id": "{handle:a:PB1}"
+                },
+                "authInfo": {
+                  "@type": "authInfo",
+                  "method": "authinfo",
+                  "authdata": "Abc2345678"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "RPP-Code": "01000",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+        },
+        "body": {
+          "@type": "domainName",
+          "name": "b1-{random_id_10}.{tld}",
+          "registrant": {
+            "id": "{handle:a:PB1}"
+          }
+        },
+        "fields": {
+          "provMetadata.spClientId": {
+            "type": "not_null"
+          }
+        }
+      }
+    },
+    {
+      "comment": "Reads domain b1, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=urn:ietf:params:rpp:preset:base;version=1.0; expects 200. Reads what the steps above created.",
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b1-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "@type": "domainName",
+          "registrant": {
+            "@type": "contact",
+            "id": "{handle:a:PB1}"
+          }
+        },
+        "headers": {
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+        }
+      }
+    },
+    {
+      "comment": "Deletes domain b1, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=urn:ietf:params:rpp:preset:base;version=1.0; expects 200. The operation this case checks.",
+      "request": {
+        "method": "DELETE",
+        "url": "/domainNames/b1-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+        }
+      }
+    },
+    {
+      "comment": "Reads domain b1, with Content-Type application/rpp+json, Accept application/rpp+json, RPP-Preset preset=urn:ietf:params:rpp:preset:base;version=1.0; expects 200. Reads back to prove the change above.",
+      "request": {
+        "method": "GET",
+        "url": "/domainNames/b1-{random_id_10}.{tld}",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "select": [
+          {
+            "when": {
+              "env.domainName.processes.delete.readable_after": true
+            },
+            "then": {
+              "status": 200,
+              "body": {
+                "@type": "domainName",
+                "status": [
+                  {
+                    "@type": "domainStatus",
+                    "label": "pendingDelete"
+                  }
+                ],
+                "provMetadata": {
+                  "spClientId": "unknown"
+                }
+              },
+              "headers": {
+                "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 404,
+              "headers": {
+                "RPP-Code": "02303",
+                "RPP-Preset": "preset=urn:ietf:params:rpp:preset:base;version=1.0"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

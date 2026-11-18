@@ -7,9 +7,11 @@
       "contains": "ds"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI takes no DS records (DENIC computes the DS from the DNSKEY).",
   "test_id": "test24-put_nameservers_and_ds",
   "steps": [
     {
+      "comment": "Creates contact HU24; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -66,7 +68,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -78,13 +80,14 @@
       }
     },
     {
+      "comment": "Creates host ns1.u24 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -116,13 +119,14 @@
       }
     },
     {
+      "comment": "Creates domain put24 with authInfo, dns records ds, registrant HU24 (by backend); expects 201 01000. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -182,13 +186,14 @@
       }
     },
     {
+      "comment": "Replaces domain put24 by a full update with 1 nameserver, dns records ds, registrant HU24 (by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/domainNames/put24-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

@@ -2,6 +2,7 @@
   "test_id": "test4-availability_head_taken",
   "steps": [
     {
+      "comment": "Creates contact HR4; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -58,7 +59,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -70,13 +71,14 @@
       }
     },
     {
+      "comment": "Creates domain ex4 with authInfo, registrant HR4 (by backend), dns records a (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -142,13 +144,14 @@
       }
     },
     {
+      "comment": "Checks whether domain ex4 is available with HEAD; expects 404. The error answer this case checks.",
       "request": {
         "method": "HEAD",
         "url": "/domainNames/ex4-{random_name}.{tld}/availability",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

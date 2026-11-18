@@ -1,0 +1,57 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test2-the_bound_profile_refuses_the_same_request",
+  "description": "The criterion of #180, refused half: the server binds rocky-planets to the default preset planets, so the same request is refused with 422 02308 and the profile.",
+  "when": {
+    "profile.default_preset": "planets",
+    "profile.bound_profiles": {
+      "contains": "planets"
+    }
+  },
+  "comment": "Runs on sqlite-demo-bound only. The same request is accepted on sqlite-demo (test1).",
+  "steps": [
+    {
+      "comment": "Creates the planet with type gas-giant under the default preset planets, as test1 does. Expects 422 with RPP-Code 02308 and the profile rocky-planets in the error.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db2}",
+          "type": "gas-giant",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "body": {
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308",
+              "profile": "org.example.rpp.profile.rocky-planets"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

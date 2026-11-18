@@ -31,6 +31,7 @@ touches:
 | Area | Read when | Generic | Project |
 |---|---|---|---|
 | Requirements | Specifying a feature nobody has specified yet | [requirements.md](docs/agents/requirements.md) | — |
+| Specification | Writing or changing a specification: an extension specification, a proposal for a draft, or the specification part of an issue | [specification.md](docs/agents/specification.md) | [specification.project.md](docs/agents/specification.project.md) |
 | Architecture | Changing or adding code | [architecture.md](docs/agents/architecture.md) | [architecture.project.md](docs/agents/architecture.project.md) |
 | Testing | Writing or running tests | [testing.md](docs/agents/testing.md) | [testing.project.md](docs/agents/testing.project.md) |
 | Security | Touching input handling, credentials, logging or error output | [security.md](docs/agents/security.md) | [security.project.md](docs/agents/security.project.md) |

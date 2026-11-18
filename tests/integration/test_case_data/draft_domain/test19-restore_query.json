@@ -5,6 +5,7 @@
   "test_id": "test19-restore_query",
   "steps": [
     {
+      "comment": "Creates contact HR19; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -61,7 +62,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -73,13 +74,14 @@
       }
     },
     {
+      "comment": "Creates domain ex19 with authInfo, registrant HR19 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -147,6 +149,7 @@
       }
     },
     {
+      "comment": "Deletes domain ex19; expects 200. The operation this case checks. Waits first for domainName.processes.create.add_grace_period.",
       "wait": "domainName.processes.create.add_grace_period",
       "request": {
         "method": "DELETE",
@@ -154,7 +157,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -164,13 +167,14 @@
       }
     },
     {
+      "comment": "Requests a restore of domain ex19; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/ex19-{random_name}.{tld}/processes/restoreProcesses",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -203,13 +207,14 @@
       }
     },
     {
+      "comment": "Reads the restore process of domain ex19; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/ex19-{random_name}.{tld}/processes/restoreProcesses/latest",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

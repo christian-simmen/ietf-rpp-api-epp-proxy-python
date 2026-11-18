@@ -1,11 +1,13 @@
 {
-  "test_id": "test3-label_of_63",
   "when": {
-    "env.bugs.over_max_length_cut": false
+    "env.bugs.long_label_cut": false
   },
+  "comment": "Skipped on epp-docker: the EPP test server stores a label of 61 to 63 characters cut and sends no reply (pawel-kow/epp#30).",
+  "test_id": "test3-label_of_63",
   "description": "A label of 63 characters, within the 63 octets of DNS (RFC 1035 §2.3.4), is registered and read back whole.",
   "steps": [
     {
+      "comment": "Creates contact X3 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -17,7 +19,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -91,13 +93,14 @@
       }
     },
     {
+      "comment": "Creates domain t3 (a label of 63) with authInfo, registrant X3 (by backend), dns records a (by backend); expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -164,13 +167,14 @@
       }
     },
     {
+      "comment": "Reads domain t3 (a label of 63); expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/domainNames/{pad:63:t3-{random_name}}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -183,13 +187,14 @@
       }
     },
     {
+      "comment": "Deletes domain t3 (a label of 63); expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/{pad:63:t3-{random_name}}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

@@ -2,6 +2,7 @@
   "test_id": "test18-additional_email",
   "steps": [
     {
+      "comment": "Creates contact 18 with authInfo (by backend); expects 422 02308 under the EPP compatible preset (EPP Compatibility Profile), else 501 02102. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
@@ -73,19 +74,49 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
       "response": {
-        "status": 501,
-        "content_type": "application/problem+json",
-        "body": {
-          "type": "urn:ietf:params:rpp:error"
-        },
-        "headers": {
-          "RPP-Code": "02102"
-        }
+        "select": [
+          {
+            "when": {
+              "profile.default_preset": "epp-compatible"
+            },
+            "then": {
+              "status": 422,
+              "headers": {
+                "RPP-Code": "02308"
+              },
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error",
+                "errors": [
+                  {
+                    "result": "02308",
+                    "profile": "urn:ietf:params:rpp:profile:epp-compatibility",
+                    "paths": [
+                      "$.contactInfo.emails"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "then": {
+              "status": 501,
+              "content_type": "application/problem+json",
+              "body": {
+                "type": "urn:ietf:params:rpp:error"
+              },
+              "headers": {
+                "RPP-Code": "02102"
+              }
+            }
+          }
+        ]
       }
     }
   ]

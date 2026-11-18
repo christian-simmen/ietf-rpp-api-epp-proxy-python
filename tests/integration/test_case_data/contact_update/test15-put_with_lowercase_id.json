@@ -2,13 +2,14 @@
   "test_id": "test15-put_with_lowercase_id",
   "steps": [
     {
+      "comment": "Creates contact 15A with authInfo (by backend); expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -118,13 +119,14 @@
       }
     },
     {
+      "comment": "Replaces contact 15a (in lower case) by a full update (the request differs by backend); expects 200 01000. The operation this case checks.",
       "request": {
         "method": "PUT",
         "url": "/contacts/{lower:{handle:a:15a}}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

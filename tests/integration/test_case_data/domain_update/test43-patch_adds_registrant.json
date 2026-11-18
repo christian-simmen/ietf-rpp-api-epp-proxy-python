@@ -3,16 +3,18 @@
   "when": {
     "profile.domainName.registrant.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI requires a holder, so a domain cannot be without a registrant.",
   "description": "A domain without a registrant gets one by PATCH.",
   "steps": [
     {
+      "comment": "Creates contact R43 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -88,13 +90,14 @@
       }
     },
     {
+      "comment": "Creates domain gu43 with authInfo, dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -144,13 +147,14 @@
       }
     },
     {
+      "comment": "Patches domain gu43: add /registrant; expects 200. The operation this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/domainNames/gu43-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -177,13 +181,14 @@
       }
     },
     {
+      "comment": "Reads domain gu43; expects 200. Reads back to prove the change above.",
       "request": {
         "method": "GET",
         "url": "/domainNames/gu43-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -200,13 +205,14 @@
       }
     },
     {
+      "comment": "Deletes domain gu43; expects 200. Cleanup: MTEST keeps what a case creates, so the case deletes it.",
       "request": {
         "method": "DELETE",
         "url": "/domainNames/gu43-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

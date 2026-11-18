@@ -2,6 +2,7 @@
   "test_id": "test10-correct_expiry_date_given",
   "steps": [
     {
+      "comment": "Creates domain rn10 with authInfo; expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -17,7 +18,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         }
@@ -31,13 +32,14 @@
       }
     },
     {
+      "comment": "Reads domain rn10; expects 200. Reads what the steps above created. Keeps expiry for later steps.",
       "request": {
         "method": "GET",
         "url": "/domainNames/rn10-{random_name}.{tld}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -59,6 +61,7 @@
       }
     },
     {
+      "comment": "Renews domain rn10 with expiryDate, renewalPeriod; expects 200 01000. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/rn10-{random_name}.{tld}/processes/renewProcesses",
@@ -74,7 +77,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         }

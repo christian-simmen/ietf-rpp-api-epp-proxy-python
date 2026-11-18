@@ -4,7 +4,7 @@ from rpp.mapping.request_contact import request_contacts
 from rpp.mapping.request_contact.request_contact_replacement import CHANGEABLE
 from rpp.mapping.shared import json_patch
 from rpp.mapping.shared.common import parse_rpp
-from rpp.schema.validator import validate_schema
+from rpp.schema.validator import validate_request_schema
 
 PATHS = tuple(f"/{member}" for member in CHANGEABLE)
 
@@ -24,5 +24,5 @@ def rpp_to_model_with_current(contact_id: str, rpp: list, current: RequestContac
     for operation in operations:
         _check(operation)
     patched = json_patch.apply(request_contacts.model_to_rpp(current, extensions), operations, array_paths=())
-    validate_schema("requestContact.read", patched, extensions)
+    validate_request_schema("requestContact.read", patched, extensions, patched=True)
     return RequestContact(id=contact_id, uriTemplate=patched["uriTemplate"])

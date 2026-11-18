@@ -1,0 +1,123 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test9-without_parameters_the_default_preset_applies",
+  "description": "Without preset parameters in the Accept and Content-Type, or with no Content-Type and a wildcard Accept, the default preset of the server applies and is named in the Content-Type of the response (core 14.3).",
+  "when": {
+    "env.preset_signalling": "media-type"
+  },
+  "comment": "Skipped on epp-docker: the EPP config signals the preset by the RPP-Preset header; preset_signalling_header/ covers the header method.",
+  "steps": [
+    {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json, Accept application/rpp+json; expects 200 01000. The operation this case checks. Only where the default preset is epp-compatible (epp-docker).",
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000",
+          "RPP-Preset": null,
+          "Vary": "Accept",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\""
+        },
+        "body": {
+          "@type": "discovery"
+        }
+      }
+    },
+    {
+      "comment": "Reads the discovery document, with Accept */*; expects 200 01000. Reads what the steps above created. Only where the default preset is epp-compatible (epp-docker).",
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "*/*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000",
+          "RPP-Preset": null,
+          "Vary": "Accept",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:epp-compatible\"; preset-version=\"1.0\""
+        },
+        "body": {
+          "@type": "discovery"
+        }
+      }
+    },
+    {
+      "comment": "Reads the discovery document, with Content-Type application/rpp+json, Accept application/rpp+json; expects 200 01000. Reads what the steps above created. Only where the default preset is rri (rri-mtest).",
+      "when": {
+        "profile.default_preset": "rri"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "application/rpp+json",
+          "Content-Type": "application/rpp+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000",
+          "RPP-Preset": null,
+          "Vary": "Accept",
+          "Content-Type": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\""
+        },
+        "body": {
+          "@type": "discovery"
+        }
+      }
+    },
+    {
+      "comment": "Reads the discovery document, with Accept */*; expects 200 01000. Reads what the steps above created. Only where the default preset is rri (rri-mtest).",
+      "when": {
+        "profile.default_preset": "rri"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Accept": "*/*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "RPP-Code": "01000",
+          "RPP-Preset": null,
+          "Vary": "Accept",
+          "Content-Type": "application/rpp+json; preset=\"de.denic.rpp.preset.rri\"; preset-version=\"1.0\""
+        },
+        "body": {
+          "@type": "discovery"
+        }
+      }
+    }
+  ]
+}

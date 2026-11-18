@@ -6,16 +6,18 @@
     },
     "profile.domainName.registrant.min_count": 0
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain); RRI requires a holder, so a domain cannot be without a registrant.",
   "description": "The same nameserver twice: the drafts leave it open, the server refuses it as an object that exists.",
   "steps": [
     {
+      "comment": "Creates host ns1.n56 with dns records ns; expects 201. Setup: a nameserver of the domain below.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -46,13 +48,14 @@
       }
     },
     {
+      "comment": "Creates domain t56 with authInfo, dns records a (by backend), 2 nameservers; expects 409 02302. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

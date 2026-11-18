@@ -2,13 +2,14 @@
   "test_id": "test5-unknown_user",
   "steps": [
     {
+      "comment": "Checks whether contact a5 is available as a user the server does not know; expects 401 02200. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:-a5}/availability",
         "headers": {
           "Authorization": "{auth:unknown_user}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

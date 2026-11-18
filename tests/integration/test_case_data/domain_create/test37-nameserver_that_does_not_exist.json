@@ -5,16 +5,18 @@
       "contains": "host"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no host objects (a name server is an ns record of the domain).",
   "description": "A host object that does not exist is refused by the registry.",
   "steps": [
     {
+      "comment": "Creates domain gc37 with authInfo, dns records a (by backend), 1 nameserver; expects one of 404 02303 or 409 02305 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

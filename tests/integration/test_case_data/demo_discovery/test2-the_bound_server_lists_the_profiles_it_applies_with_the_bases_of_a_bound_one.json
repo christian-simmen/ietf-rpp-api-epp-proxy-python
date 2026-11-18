@@ -1,0 +1,126 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test2-the_bound_server_lists_the_profiles_it_applies_with_the_bases_of_a_bound_one",
+  "description": "Discovery of the server that binds profiles: the presets, each extension once, and each profile that applies once, among them the base profiles of the bound habitable-rocky-planets.",
+  "when": {
+    "profile.bound_profiles": {
+      "contains": "planets"
+    }
+  },
+  "comment": "Runs on sqlite-demo-bound only: it is the one that binds profiles.",
+  "steps": [
+    {
+      "comment": "Reads discovery without authentication. Expects the five offered presets, each with the profiles of its definition and the bound ones apart, three extensions and four profiles, each once.",
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "discovery",
+          "presets": [
+            {
+              "@type": "preset",
+              "id": "urn:ietf:params:rpp:preset:base",
+              "profiles": [],
+              "boundProfiles": []
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets",
+              "profiles": [],
+              "boundProfiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.rocky-planets"
+                }
+              ]
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-atmosphere",
+              "profiles": [],
+              "boundProfiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.habitable-atmospheres"
+                }
+              ]
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-complete",
+              "profiles": [],
+              "boundProfiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.habitable-rocky-planets"
+                }
+              ]
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.catalogued-planets",
+              "profiles": [
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.rocky-planets"
+                },
+                {
+                  "@type": "profile",
+                  "id": "org.example.rpp.profile.catalogued-satellites"
+                }
+              ],
+              "boundProfiles": []
+            }
+          ],
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planet-atmosphere"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.satellite-orbit"
+            }
+          ],
+          "profiles": [
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.rocky-planets"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.catalogued-satellites"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.habitable-atmospheres"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.habitable-rocky-planets"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

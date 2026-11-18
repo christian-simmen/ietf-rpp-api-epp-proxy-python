@@ -3,13 +3,14 @@
   "description": "A name of 253 characters, the most of DNS in text form.",
   "steps": [
     {
+      "comment": "Creates host h3 (a label of 63).a (a label of 63).b (a label of 63).c (a label of 57).net with dns records ns; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -39,13 +40,14 @@
       }
     },
     {
+      "comment": "Reads host h3 (a label of 63).a (a label of 63).b (a label of 63).c (a label of 57).net; expects 200. Reads what the steps above created.",
       "request": {
         "method": "GET",
         "url": "/hosts/{pad:63:h3-{random_name}}.{pad:63:a}.{pad:63:b}.{pad:57:c}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

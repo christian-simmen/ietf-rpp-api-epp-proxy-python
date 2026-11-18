@@ -171,7 +171,7 @@ domainName:
     rri-mtest: {min: 2, max: 13, over: 53300102920, expected: "422 02306", note: "a class-5 code: the proxy answers 500 02400 (#139, seen on MTEST for 1 and 14)", source: doc, ref: "§5.2 Nserver, message 53300102920"}
     duplicate: {rpp: "open", rri-mtest: "taken, 201"}
     update: {rri-mtest: "an update that keeps or adds name servers which do not serve the zone is refused, 53300102912 (class 5, #139)"}
-    probe: [limits_domain/test25-one_ns_record, limits_domain/test26-two_ns_records, limits_domain/test27-thirteen_ns_records, limits_domain/test28-fourteen_ns_records, limits_domain/test57-same_ns_record_twice]
+    probe: [limits_domain/test25-one_ns_record, limits_domain/test26-two_ns_records, limits_domain/test22-thirteen_nameservers, limits_domain/test28-fourteen_ns_records, limits_domain/test57-same_ns_record_twice]
     verified: {epp-docker: "n/a", rri-mtest: "passed except defect #139"}
   - path: /dns/records
     kind: count

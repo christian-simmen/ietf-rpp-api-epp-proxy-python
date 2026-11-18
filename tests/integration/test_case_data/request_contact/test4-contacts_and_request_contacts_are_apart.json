@@ -2,13 +2,14 @@
   "description": "RRI holds both in one namespace of handles, RPP as objects of their own: neither reads as the other, and a handle of either is not available to the other.",
   "steps": [
     {
+      "comment": "Creates request contact RQ4 with uriTemplate; expects 201 01000. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/requestContacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -36,13 +37,14 @@
       }
     },
     {
+      "comment": "Creates contact RQ4P; expects 201. The create this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -100,13 +102,14 @@
       }
     },
     {
+      "comment": "Reads contact RQ4; expects 404 02303. An error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/contacts/{handle:a:RQ4}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -123,13 +126,14 @@
       }
     },
     {
+      "comment": "Reads request contact RQ4P; expects 404 02303. An error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/requestContacts/{handle:a:RQ4P}",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
@@ -146,13 +150,14 @@
       }
     },
     {
+      "comment": "Checks whether request contact RQ4P is available; expects 404. The error answer this case checks.",
       "request": {
         "method": "GET",
         "url": "/requestContacts/{handle:a:RQ4P}/availability",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Cltrid": "{unique_cltrid}"
         }

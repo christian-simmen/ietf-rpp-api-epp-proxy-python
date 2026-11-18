@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/satellite-orbit-extension.schema.json",
+  "title": "RPP Satellite Orbit demo extension",
+  "description": "Adds the member orbit to the Satellite of the planets demo extension. See docs/demo/satellite-orbit-extension.md.",
+  "rpp:extension": {
+    "name": "RPP Satellite Orbit",
+    "id": "org.example.rpp.extension.satellite-orbit",
+    "version": "1.0",
+    "objects": []
+  },
+  "rpp:extends": {
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/satellite.create": "#/$defs/ext.orbit.satellite.create",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/satellite.read": "#/$defs/ext.orbit.satellite.read",
+    "https://github.com/pawel-kow/ietf-rpp-api-epp-proxy-python/blob/main/.spec/planets-extension.schema.json#/$defs/satellite.update": "#/$defs/ext.orbit.satellite.update"
+  },
+  "$defs": {
+    "orbit": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string",
+          "const": "orbit"
+        },
+        "semiMajorAxis": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "eccentricity": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "inclination": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 180
+        }
+      },
+      "required": [
+        "@type",
+        "semiMajorAxis"
+      ]
+    },
+    "ext.orbit.satellite.create": {
+      "type": "object",
+      "properties": {
+        "orbit": {
+          "$ref": "#/$defs/orbit"
+        }
+      }
+    },
+    "ext.orbit.satellite.read": {
+      "type": "object",
+      "properties": {
+        "orbit": {
+          "$ref": "#/$defs/orbit"
+        }
+      }
+    },
+    "ext.orbit.satellite.update": {
+      "type": "object",
+      "properties": {
+        "orbit": {
+          "$ref": "#/$defs/orbit"
+        }
+      }
+    }
+  }
+}

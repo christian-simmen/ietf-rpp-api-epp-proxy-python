@@ -3,13 +3,14 @@
   "description": "A status label the data objects do not define is refused.",
   "steps": [
     {
+      "comment": "Creates host hu46.….net with dns records ns; expects 201. Setup: the host the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/hosts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -40,13 +41,14 @@
       }
     },
     {
+      "comment": "Patches host hu46.….net: add /status clientFrozen; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "PATCH",
         "url": "/hosts/hu46.{random_name}.net",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

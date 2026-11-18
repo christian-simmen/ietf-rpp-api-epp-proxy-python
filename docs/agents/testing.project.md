@@ -109,22 +109,25 @@ by [pacer.py](../../tests/helper/pacer.py)), the registrars, a user the backend 
 `BackendProfile`, the TLD, the environment name and the LGRs are read from that config, as the app reads them, and not
 repeated. A run with more workers than an environment it tests allows does not start.
 
-The descriptor's `profile` is the key of the RPP profile (`epp`, `rri`, `base`) that the placeholders of the profile
-headers stand for. The runner adds and rewrites nothing: every request of every case states its profile headers in the
-case, `"RPP-Profile": "{rpp:profile}"`, `"Accept": "{rpp:accept}"` and `"Content-Type": "{rpp:content-type}"` (on
+The descriptor's `preset` is the key of the RPP preset (`epp-compatible`, `rri`, `planets`, `base`) that the placeholders of
+the preset headers stand for. The runner adds and rewrites nothing: every request of every case states its preset headers in
+the case, `"RPP-Preset": "{rpp:preset}"`, `"Accept": "{rpp:accept}"` and `"Content-Type": "{rpp:content-type}"` (on
 every request, one without a body too, core §13), and the runner resolves each as a whole header value from the
-descriptor's `profile` and the `rpp_profile_signalling` of its config (`with_rpp_headers`):
+descriptor's `preset` and the `rpp_preset_signalling` of its config (`with_rpp_headers`):
 
 | Placeholder | `header` | `media-type` |
 |---|---|---|
-| `{rpp:profile}` | `profile=<name>;version=1.0` | omitted: the header is not sent |
-| `{rpp:accept}`, `{rpp:content-type}` | `application/rpp+json` | `application/rpp+json; profile="<name>"; profile-version="1.0"` |
+| `{rpp:preset}` | `preset=<id>;version=1.0` | omitted: the header is not sent |
+| `{rpp:accept}`, `{rpp:content-type}` | `application/rpp+json` | `application/rpp+json; preset="<id>"; preset-version="1.0"` |
+
+Each placeholder takes the key of a preset of the environment's config, `{rpp:preset:planets-atmosphere}`, `{rpp:accept:planets-atmosphere}`
+and `{rpp:content-type:planets-atmosphere}`, for a request under a preset other than the descriptor's, resolved by the same signalling method.
 
 A header the case writes literally is sent as written, so a case can send what the runner would not (a value of another
-media type, a profile the server does not offer). The signalling method is the environment fact `env.profile_signalling`
-(`header` or `media-type`, read from the config, not stated twice). The cases of `profile_signalling_header/` and `profile_signalling_media_type/` hold literal headers and are each active for one
+media type, a preset the server does not offer). The signalling method is the environment fact `env.preset_signalling`
+(`header` or `media-type`, read from the config, not stated twice). The cases of `preset_signalling_header/` and `preset_signalling_media_type/` hold literal headers and are each active for one
 method (a case-level `when` on that fact), so a case that needs a backend as well as a method runs only where an
-environment has both (the rri-only refusals are in `profile_signalling_media_type/`, as no RRI environment uses the header); a step that differs per server selects by the facts, for example `profile.profiles` contains `rri`, never by the
+environment has both (the rri-only refusals are in `preset_signalling_media_type/`, as no RRI environment uses the header); a step that differs per server selects by the facts, for example `profile.presets` contains `rri`, never by the
 backend's name. An expected `content_type` without parameters is the media type of the response whatever its
 parameters; one with parameters is the whole value.
 
@@ -139,12 +142,51 @@ into the `Authorization` header when it sends the request, never into the case, 
 | `{auth:a}`, `{auth:b}` | HTTP Basic of registrar `a` or `b` |
 | `{auth:unknown_user}` | a user the backend does not know. No case logs in to a test account with a wrong password, which could lock it |
 | `{handle:a:SUFFIX}` | `<prefix of a>{random_id_10}SUFFIX`, a contact id `a` may create |
-| `{regacc:a}` | the sponsor id of `a`: its login on EPP, the RegAccId of its login on RRI |
+| `{regacc:a}` | the sponsor id of `a`: its login on EPP, the RegAccId of its login on RRI, its user on the SQLite demo backend |
 | `{tld}` | the TLD the environment registers under, the first of `rpp_tlds` of its config |
 | `{env:environment_name}` | `rpp_environment_name` of its config |
-| `{env:profile_signalling}` | `rpp_profile_signalling` of its config |
+| `{env:preset_signalling}` | `rpp_preset_signalling` of its config |
 | `{env:<path>}` | a fact of the environment. A list fact is a whole value only, and the response may hold any of its entries: `"label": "{env:domainName.processes.create.success_status}"` |
 | `{lower:TEXT}` | TEXT in lower case, after the placeholders in it, for an id sent in another case than stored |
+
+### The SQLite demo backend
+
+`RPP_TEST_ENV=sqlite-demo pytest -n 4 tests/integration` runs the cases of the demo backend (`planet_*`, `satellite_*`,
+`planet_transfer`, `planet_message`, `sqlite_drafts_objects`) against an app composed from
+[config.demo.yaml](../../config.demo.yaml), with a database in memory per worker. It needs no credentials and no server:
+the descriptor marks its registrars `literal`, so `user`, `password` and `prefix` are the values themselves, the DEMO
+values of the config (they are no secrets). It has four registrars: `a` and `b` for the cases, and `c` and `d` for the
+cases of the message queue only, so that no other case adds to those queues. Its `facts` are those of `epp-docker`, which
+no selector of its cases reads: every group of the drafts' objects has a `_group.json` with
+`{"when": {"profile.objects": {"contains": "contact"}}}` (or the object), so that those groups run where the backend holds
+them. The extension registers its RPP preset `planets`, which the descriptor names: `load` registers the extensions of the
+config before it looks the preset up. The cases are in the smoke suite.
+
+#### The demo configurations
+
+[config.demo.yaml](../../config.demo.yaml) and `sqlite-demo` are the bare configuration (the planets preset only), the `config.demo-bare.yaml` of #180:
+there is no second file. Three more compose the demo extensions, profiles and presets of #179, each with an environment of its own
+(descriptor `preset` = the default preset of its config, no credentials, cases in the smoke suite):
+
+| Config / environment | Presets (default first) | Bound profiles | Signalling |
+|---|---|---|---|
+| `config.demo-extended.yaml` / `sqlite-demo-extended` | base, planets-complete, planets, planets-atmosphere, planets-orbits | none | header |
+| `config.demo-bound.yaml` / `sqlite-demo-bound` | base, planets, planets-atmosphere, planets-complete, catalogued-planets | planets: rocky-planets, planets-atmosphere: habitable-atmospheres, planets-complete: habitable-rocky-planets | media-type |
+| `config.demo-inherit.yaml` / `sqlite-demo-inherit` | base, planets-complete, planets, planets-atmosphere, planets-orbits, catalogued-planets, habitable-worlds | none | header |
+
+The groups of the plain objects run in every one of them. `demo_discovery/`, `demo_preset_read/` and `demo_binding/` show the
+composition of each (a case is selected by `profile.presets`, `profile.default_preset` and `profile.bound_profiles`, whose map
+`contains` tests a preset key), and the criterion pair: the same planet of the type gas-giant is accepted under `planets` on `sqlite-demo` and
+refused with 422 `02308` and the profile rocky-planets on `sqlite-demo-bound`. Five generic cases that create other types than rocky are
+skipped on `sqlite-demo-bound`, and `sqlite_drafts_objects/test5` (the discovery of the bare server) where more presets are offered. A list in an expected body must have the length of the actual one, so a profile or extension listed twice fails.
+Exact assertions over each real config file are in [test_demo_configurations.py](../../tests/unit/test_demo_configurations.py).
+
+The configurations that must not start are in [tests/refused_configs/](../../tests/refused_configs/), not in an environment: a binding that lacks
+a required extension (directly, and through a base profile), a preset cycle, a profile cycle and one extension in two versions.
+The definitions of the cycles and of the two versions are test-only (`preset_cycle.py`, `profile_cycle.py`, `version_clash.py`, each a data-only extension
+with a SQLite part without tables), as the demo extensions define valid ones only.
+[test_refused_configurations.py](../../tests/unit/test_refused_configurations.py) composes each file and pins the message, which names both sides
+of the conflict, and starts the server process once to see it exit with the message.
 
 ### DENIC MTEST
 
@@ -159,7 +201,7 @@ sessions out when the run ends (`pytest_sessionfinish`, `SessionPool.close`); a 
 within 5 minutes may be refused. Two runs at once (a terminal and VS Code) share the 4 sessions. 10 failed LOGINs lock a user for an hour,
 so the failed logins are of an unknown user. A RESTORE is one step and needs no wait; the RGP and the purge after it
 take up to two days, which a run waits for only with `RPP_TEST_MAX_WAIT` of `P2DT6H` or more. MTEST keeps what the cases create: they delete their domains, and the contacts stay (RRI cannot delete
-one), which the random part of the handle keeps apart. Every case runs on both backends unless it needs a function one of them lacks, which its `when`
+one), which the random part of the handle keeps apart from other runs. The random part is the same for the whole run, so a handle's suffix is unique across all cases (#188). Every case runs on both backends unless it needs a function one of them lacks, which its `when`
 names: host objects, client statuses, `ds` records, registration periods, renew, a transfer process (`domain_transfer/`, which RRI's
 immediate CHPROV has not; `domain_transfer_ext/` is its counterpart with the `rri` extension, run on MTEST only), the
 request contact object (`request_contact/`, `profile.objects` contains `requestContact`) or a domain's request contacts
@@ -176,9 +218,12 @@ show (`profile.domainName.metadata`) and a domain's authInfo are left out where 
 reads with right after its create is one of `env.domainName.processes.create.success_status` (`ok` on the EPP test
 server; on MTEST `pendingCreate` while the predelegation check runs, `ok` once it passed). A case gives DNS data that
 passes the check (an `a` record DENIC serves itself), unless the check is its subject: name servers that do not serve
-the domain make it `inactive` (`env.domainName.processes.create.failed_dns_status`, `domain_create/test43`). Passwords
+the domain make it `inactive` (`env.domainName.processes.create.failed_dns_status`, `domain_create/test43`), and an
+update with them is refused where `env.domainName.processes.update.dns_checked` (`domain_update/test48`). Passwords
 are of the characters an RRI AuthInfo takes. Where a function exists on one backend only, a counterpart case covers
-the other (`domain_update/test35` to `test37`, `domain_lifecycle/`).
+the other (`domain_update/test37`, `domain_lifecycle/`). Where the cases would have the same subject and differ only in
+steps of a function one backend lacks, they are one case whose steps say where they run (`domain_restore/test1`,
+`domain_update/test30`, `limits_domain/test22`, `message/test6`).
 
 Behaviour of MTEST the cases depend on: every reply carries info `13000000011`; a new domain is `pendingCreate`, or
 `failed` when its name servers do not pass the predelegation check (the create still succeeds, and the domain reads
@@ -217,8 +262,10 @@ an object. A leaf means the same wherever it is:
 | `<what>_required` | whether a value must have it, such as `upper_and_digit_required` |
 | `changeable`, `removable` | whether an update can change or clear the field |
 
-`null` says the field is not there or the limit is not known. A defect of a server that breaks cases is a fact under
-`bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`).
+`null` says the field is not there or the limit is not known. Every environment states the same facts, with `null` for one it does not know: a
+case's selectors are checked against every environment when it loads (`test_every_environment_states_the_same_facts`). A defect of a server that breaks cases is a fact under
+`bugs`, with its issue in the comment, so the cases it breaks do not run there (`env.bugs.over_max_length_cut`). A `when` names the fact the case depends on,
+not another that happens to go with it on today's backends (`aaaa` records do not stand in for "no host objects").
 Facts are in block style, without `{}`.
 
 | Where | Form | Effect |
@@ -227,6 +274,11 @@ Facts are in block style, without `{}`.
 | A case | `"when"` at the top level | the case is skipped where it does not hold |
 | A step | `"when"` in the step | the step is left out. A step with `when` cannot `capture` |
 | Any value of a step | `{"select": [{"when": …, "then": …}, …, {"then": …}]}` | the `then` of the first entry that holds; the last entry is the default. An entry `{"omit": true}` instead of `then` leaves the member or list element out |
+
+A group or case `when` that skips it somewhere has a `"comment"` next to it, which says in which environment it is
+skipped and why, in terms of the backend; the runner ignores it. Every step starts with a `"comment"` too: what it
+sends, what it expects, and why it is there (setup, the check of the case, a read back, cleanup), and where it runs
+when it has a `when`. A comment holds no `{` or `}`, since the runner replaces placeholders in every string.
 
 Selectors are resolved first, then the placeholders, then the captures. A selector key that names no fact, in any
 known environment, fails the case at load. A skip names the facts that did not hold. A case whose selectors skip it
@@ -266,7 +318,7 @@ Unit tests in `tests/unit/` inject test doubles through constructors:
 - `SessionPool(backend_factory)` takes a factory returning a backend.
   [epp_backends](../../tests/helper/epp_backends.py) turns a factory of fake EPP clients into one, so the test still
   sees the clients.
-- `create_app(sessions, profile)` builds a full app around that session pool and a `BackendProfile`
+- `create_app(sessions, profile, registry=...)` builds a full app around that session pool and a `BackendProfile`
   (`EPP_PROFILE` or `RRI_PROFILE` of [profiles.py](../../tests/helper/profiles.py), the generic profiles; a test
   changes one with `with_changes({"contact": {"fax": {"supported": False}}})`), so a handler can be tested through
   `test_client()` without a registry. See [test_app_injection.py](../../tests/unit/test_app_injection.py).
@@ -352,7 +404,9 @@ What the drafts define is the oracle; a limit they leave to the server is expect
 `02004`, `02005`) or 422 (`02306`), never 500 or 501. A limit that differs by server is a fact of the environment
 (`contact.city.max_length`), and `bugs.over_max_length_cut` marks a server that stores a value cut instead of refusing
 it, where the cases over a column do not run. The EPP test server cuts strings (pawel-kow/epp#21) and phone extensions (pawel-kow/epp#31),
-breaks on a label of 61 to 63 characters under `.example` (pawel-kow/epp#30), and counts nameservers, contacts a role
+breaks on a label of 61 to 63 characters under `.example` (pawel-kow/epp#30, `bugs.long_label_cut`), refuses a
+`hostAttr` without addresses, which is what `ns` records become on a backend with host objects (pawel-kow/epp#33,
+`bugs.host_attr_without_address_refused`), and counts nameservers, contacts a role
 and host addresses per command, so an update can pass its limits (pawel-kow/epp#29). It sends no reply to a domain
 create that names one contact twice in a role (pawel-kow/epp#32), and refuses a `hostAttr` without addresses, also of
 an external host (pawel-kow/epp#33), so `ns` records cannot be added to a domain there. A duplicate the drafts leave
@@ -378,3 +432,22 @@ Isolate one update facet per file (authInfo-only, hostObj add/remove,
 contacts+registrant, …). `domainNames_create`, `domainNames_updatePartial` and `domainNames_update` build their
 success body from a follow-up EPP **Info** call, so a passing update test also transitively
 exercises Info and `domains.model_to_rpp`.
+
+### Presets and profiles
+
+The proxy criteria of #174 are unit tests over the wire and without an app:
+[test_offered_presets.py](../../tests/unit/test_offered_presets.py) (the checks at start, each refusal naming what conflicts),
+[test_schema_scope.py](../../tests/unit/test_schema_scope.py) (the two steps of validation and the validators of a preset),
+[test_preset_schemas.py](../../tests/unit/test_preset_schemas.py) (the Preset Schema and its endpoint),
+[test_preset_profile_constraints_wire.py](../../tests/unit/test_preset_profile_constraints_wire.py) (a profile constrains, 422
+and the same request without it), [test_presets_wire.py](../../tests/unit/test_presets_wire.py) (Preset and Profile Data
+Objects, discovery) and the signalling tests (`test_preset_header_wire.py`, `test_preset_media_type_wire.py`). The presets and
+profiles of the tests are registered as an extension brings them, with
+[test_demo_profiles_wire.py](../../tests/unit/test_demo_profiles_wire.py) (the demo profiles on the SQLite demo backend: each constraint
+refused with 422 `02308` and the same request accepted without the profile, 400 for a member outside the preset, built with
+[demo_app.py](../../tests/helper/demo_app.py)), [test_demo_presets_wire.py](../../tests/unit/test_demo_presets_wire.py) and
+[test_demo_docs.py](../../tests/unit/test_demo_docs.py) (the specifications under docs/demo/: marked examples, `violates` for a
+profile, the Preset Overview), and with
+[preset_fixtures.py](../../tests/helper/preset_fixtures.py) (`registry_with(presets, profiles)`), so the multiple inheritance
+and the bindings of #180 are covered without its configurations. A mapper called without an app takes its schemas from
+`SchemaScope.of(extensions)`, built on first use and without profiles; an app gives a request the schemas of its preset.

@@ -1,0 +1,141 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test8-a_preset_that_applies_a_profile_with_two_bases_enforces_both",
+  "description": "habitable-worlds applies habitable-rocky-planets through its definition: the constraints of the profile and of both bases hold, and a planet that meets them is accepted.",
+  "when": {
+    "profile.presets": {
+      "contains": "habitable-worlds"
+    }
+  },
+  "comment": "Runs on sqlite-demo-inherit only.",
+  "steps": [
+    {
+      "comment": "Creates a gas giant with atmosphere and radius under habitable-worlds. Expects 422 02308 with rocky-planets.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:habitable-worlds}",
+          "RPP-Preset": "{rpp:preset:habitable-worlds}",
+          "Content-Type": "{rpp:content-type:habitable-worlds}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db8a}",
+          "type": "gas-giant",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          },
+          "atmosphere": {
+            "@type": "atmosphere",
+            "pressure": 1.0
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "body": {
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308",
+              "profile": "org.example.rpp.profile.rocky-planets"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comment": "Creates a rocky planet without atmosphere under habitable-worlds. Expects 422 02308 with habitable-atmospheres.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:habitable-worlds}",
+          "RPP-Preset": "{rpp:preset:habitable-worlds}",
+          "Content-Type": "{rpp:content-type:habitable-worlds}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db8b}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "body": {
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308",
+              "profile": "org.example.rpp.profile.habitable-atmospheres"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comment": "Creates a rocky planet with radius and an atmosphere of 1 bar. Expects 201.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:habitable-worlds}",
+          "RPP-Preset": "{rpp:preset:habitable-worlds}",
+          "Content-Type": "{rpp:content-type:habitable-worlds}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db8c}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          },
+          "atmosphere": {
+            "@type": "atmosphere",
+            "pressure": 1.0
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-db8c}"
+        }
+      }
+    }
+  ]
+}

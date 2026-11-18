@@ -7,6 +7,7 @@
   "test_id": "test27-uname_without_lgr",
   "steps": [
     {
+      "comment": "Creates contact HC27; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -63,7 +64,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -75,6 +76,7 @@
       }
     },
     {
+      "comment": "Creates domain IDN bücher-t27 with authInfo, uName, registrant HC27 (by backend), dns records a (by backend); expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -137,7 +139,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },

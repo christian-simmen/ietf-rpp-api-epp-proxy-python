@@ -1,0 +1,74 @@
+{
+  "test_id": "test2-base_refuses_the_rri_specifics",
+  "description": "Under the base preset a server that holds the rri preset refuses what only the rri extension adds: a domain member of the extension is undeclared, and the request contact object is not in the profile.",
+  "when": {
+    "profile.presets": {
+      "contains": "rri"
+    },
+    "env.preset_signalling": "media-type"
+  },
+  "comment": "Skipped on epp-docker: the EPP server offers no rri preset; the EPP config signals the preset by the RPP-Preset header; preset_signalling_header/ covers the header method.",
+  "steps": [
+    {
+      "comment": "Creates domain b2 with generalRequest, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; expects 400 02001. An error answer this case checks.",
+      "request": {
+        "method": "POST",
+        "url": "/domainNames",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
+        },
+        "body_json": {
+          "@type": "domainName",
+          "name": "b2-{random_id_10}.{tld}",
+          "generalRequest": {
+            "@type": "requestContact",
+            "id": "{handle:a:RG2}"
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02001",
+          "RPP-Preset": null
+        }
+      }
+    },
+    {
+      "comment": "Creates request contact RQ2 with uriTemplate, with Content-Type application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\", Accept application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"; expects 501 02307. The error answer this case checks.",
+      "request": {
+        "method": "POST",
+        "url": "/requestContacts",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\"",
+          "RPP-Cltrid": "{unique_cltrid}",
+          "Content-Type": "application/rpp+json; preset=\"urn:ietf:params:rpp:preset:base\"; preset-version=\"1.0\""
+        },
+        "body_json": {
+          "@type": "requestContact",
+          "id": "{handle:a:RQ2}",
+          "uriTemplate": "https://example.com/contact?domain={Alabel}"
+        }
+      },
+      "response": {
+        "status": 501,
+        "content_type": "application/problem+json",
+        "body": {
+          "type": "urn:ietf:params:rpp:error"
+        },
+        "headers": {
+          "RPP-Code": "02307",
+          "RPP-Preset": null
+        }
+      }
+    }
+  ]
+}

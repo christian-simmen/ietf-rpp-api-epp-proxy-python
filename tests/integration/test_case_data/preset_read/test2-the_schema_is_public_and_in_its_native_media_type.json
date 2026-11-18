@@ -1,0 +1,96 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test2-the_schema_is_public_and_in_its_native_media_type",
+  "description": "The schema of the default preset is read without authentication and without a preset signal, as application/schema+json.",
+  "when": [
+    {
+      "profile.default_preset": "epp-compatible"
+    },
+    {
+      "profile.default_preset": "rri"
+    },
+    {
+      "profile.default_preset": "planets"
+    }
+  ],
+  "comment": "Skipped where no step names the default preset of the environment: sqlite-demo-extended and sqlite-demo-inherit (default planets-complete, read by demo_preset_read/).",
+  "steps": [
+    {
+      "when": {
+        "profile.default_preset": "epp-compatible"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/urn:ietf:params:rpp:preset:epp-compatible/schema",
+        "headers": {
+          "Accept": "application/schema+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/schema+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "rpp:preset": {
+            "id": "urn:ietf:params:rpp:preset:epp-compatible",
+            "version": "1.0"
+          }
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.default_preset": "rri"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/de.denic.rpp.preset.rri/schema",
+        "headers": {
+          "Accept": "application/schema+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/schema+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "rpp:preset": {
+            "id": "de.denic.rpp.preset.rri",
+            "version": "1.0"
+          }
+        }
+      }
+    },
+    {
+      "when": {
+        "profile.default_preset": "planets"
+      },
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets/schema",
+        "headers": {
+          "Accept": "application/schema+json"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/schema+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "rpp:preset": {
+            "id": "org.example.rpp.preset.planets",
+            "version": "1.0"
+          }
+        }
+      }
+    }
+  ]
+}

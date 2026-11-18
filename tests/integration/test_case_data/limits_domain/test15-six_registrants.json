@@ -4,16 +4,18 @@
   "when": {
     "profile.domainName.registrant.max_count": 5
   },
+  "comment": "Skipped on epp-docker: EPP holds one registrant; several holders are RRI's.",
   "description": "Six holders, one over the most the backend takes: a limit of the server, so 4xx and not 501.",
   "steps": [
     {
+      "comment": "Creates contact Wg1 with authInfo (by backend); expects 201. Setup: the registrant of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -87,13 +89,14 @@
       }
     },
     {
+      "comment": "Creates contact Wh1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -167,13 +170,14 @@
       }
     },
     {
+      "comment": "Creates contact Wi1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -247,13 +251,14 @@
       }
     },
     {
+      "comment": "Creates contact Wj1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -327,13 +332,14 @@
       }
     },
     {
+      "comment": "Creates contact Wk1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -407,13 +413,14 @@
       }
     },
     {
+      "comment": "Creates contact Wl1 with authInfo (by backend); expects 201. Setup: a contact of the domain below.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -487,13 +494,14 @@
       }
     },
     {
+      "comment": "Creates domain t15 with authInfo, registrant Wg1 (by backend), dns records a (by backend), contacts registrant, registrant, registrant, registrant, registrant; expects one of 400 02001 or 400 02004 or 400 02005 or 422 02306. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

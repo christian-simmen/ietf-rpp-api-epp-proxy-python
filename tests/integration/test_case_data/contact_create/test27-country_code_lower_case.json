@@ -3,13 +3,14 @@
   "description": "countryCode is an upper case ISO 3166-1 alpha-2 code (RFC 9553 §2.5.1.1).",
   "steps": [
     {
+      "comment": "Creates contact K27 with authInfo (by backend); expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/contacts",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

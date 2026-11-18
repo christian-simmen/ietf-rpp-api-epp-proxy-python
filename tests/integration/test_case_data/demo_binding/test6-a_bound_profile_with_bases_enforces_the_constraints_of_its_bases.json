@@ -1,0 +1,185 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test6-a_bound_profile_with_bases_enforces_the_constraints_of_its_bases",
+  "description": "Refused half: the server binds habitable-rocky-planets to planets-complete. Its bases habitable-atmospheres and rocky-planets apply too, so each constraint is refused with the profile that owns it.",
+  "when": {
+    "profile.bound_profiles": {
+      "contains": "planets-complete"
+    }
+  },
+  "comment": "Runs on sqlite-demo-bound only.",
+  "steps": [
+    {
+      "comment": "Creates a rocky planet with radius and without atmosphere. Expects 422 02308 with habitable-atmospheres, the profile the bound one builds on.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets-complete}",
+          "RPP-Preset": "{rpp:preset:planets-complete}",
+          "Content-Type": "{rpp:content-type:planets-complete}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db6a}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "body": {
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308",
+              "profile": "org.example.rpp.profile.habitable-atmospheres"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comment": "Creates a rocky planet with atmosphere and without radius. Expects 422 02308 with habitable-rocky-planets.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets-complete}",
+          "RPP-Preset": "{rpp:preset:planets-complete}",
+          "Content-Type": "{rpp:content-type:planets-complete}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db6b}",
+          "type": "rocky",
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          },
+          "atmosphere": {
+            "@type": "atmosphere",
+            "pressure": 1.0
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "body": {
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308",
+              "profile": "org.example.rpp.profile.habitable-rocky-planets"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comment": "Creates a gas giant with atmosphere and radius. Expects 422 02308 with rocky-planets, the base of the base.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets-complete}",
+          "RPP-Preset": "{rpp:preset:planets-complete}",
+          "Content-Type": "{rpp:content-type:planets-complete}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db6c}",
+          "type": "gas-giant",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          },
+          "atmosphere": {
+            "@type": "atmosphere",
+            "pressure": 1.0
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "body": {
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308",
+              "profile": "org.example.rpp.profile.rocky-planets"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comment": "Creates a rocky planet with radius and an atmosphere of 1 bar. Expects 201: it meets every constraint.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets-complete}",
+          "RPP-Preset": "{rpp:preset:planets-complete}",
+          "Content-Type": "{rpp:content-type:planets-complete}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db6d}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          },
+          "atmosphere": {
+            "@type": "atmosphere",
+            "pressure": 1.0
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-db6d}"
+        }
+      }
+    }
+  ]
+}

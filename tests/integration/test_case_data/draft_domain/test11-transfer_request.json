@@ -5,9 +5,11 @@
       "contains": "request"
     }
   },
+  "comment": "Skipped on rri-mtest: RRI has no registration period (a domain runs until it is deleted).",
   "test_id": "test11-transfer_request",
   "steps": [
     {
+      "comment": "Creates contact HR11; expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -64,7 +66,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -76,6 +78,7 @@
       }
     },
     {
+      "comment": "Creates domain ex11 with authInfo, registrant HR11 (by backend), dns records a (by backend); expects 201. Setup: the domain the steps below work on.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -137,7 +140,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
@@ -150,13 +153,14 @@
       }
     },
     {
+      "comment": "Requests a transfer of domain ex11 with transferDir, transferPeriod as registrar b; expects 201 01001. The operation this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames/ex11-{random_name}.{tld}/processes/transferProcesses",
         "headers": {
           "Authorization": "{auth:b}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}",
           "RPP-Authorization": "authinfo value=QWJjMjM0NTY3OA=="

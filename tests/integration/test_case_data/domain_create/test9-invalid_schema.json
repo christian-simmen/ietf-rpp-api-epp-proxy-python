@@ -2,6 +2,7 @@
   "test_id": "test9-invalid_schema",
   "steps": [
     {
+      "comment": "Sends a domain create without a name or id, with domain_name, authInfo, with a fixed RPP-Cltrid; expects 400. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
@@ -16,7 +17,7 @@
           "RPP-Cltrid": "test9-{random_name}-clTRID",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}"
+          "RPP-Preset": "{rpp:preset}"
         }
       },
       "response": {

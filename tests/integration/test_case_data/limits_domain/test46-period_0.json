@@ -3,9 +3,11 @@
   "when": {
     "profile.domainName.period.supported": true
   },
+  "comment": "Skipped on rri-mtest: RRI has no registration period (a domain runs until it is deleted).",
   "description": "A period of 0 is under the 1 of data-objects §9.1.",
   "steps": [
     {
+      "comment": "Creates contact X46 with authInfo (by backend); expects 201. Setup: the registrant of the domain below. Only where a domain needs a registrant (rri-mtest).",
       "when": {
         "profile.domainName.registrant.min_count": {
           "min": 1
@@ -17,7 +19,7 @@
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },
@@ -91,13 +93,14 @@
       }
     },
     {
+      "comment": "Creates domain t46 with authInfo, registrant X46 (by backend), dns records a (by backend), processes; expects 400 02001. The error answer this case checks.",
       "request": {
         "method": "POST",
         "url": "/domainNames",
         "headers": {
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}",
           "Content-Type": "{rpp:content-type}"
         },

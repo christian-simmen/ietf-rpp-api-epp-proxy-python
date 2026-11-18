@@ -2,6 +2,7 @@
   "test_id": "test3-delete_not_existing",
   "steps": [
     {
+      "comment": "Deletes contact D03; expects [404]. The error answer this case checks.",
       "request": {
         "method": "DELETE",
         "url": "/contacts/{handle:a:D03}",
@@ -9,7 +10,7 @@
           "Content-Type": "{rpp:content-type}",
           "Authorization": "{auth:a}",
           "Accept": "{rpp:accept}",
-          "RPP-Profile": "{rpp:profile}",
+          "RPP-Preset": "{rpp:preset}",
           "RPP-Cltrid": "{unique_cltrid}"
         }
       },
