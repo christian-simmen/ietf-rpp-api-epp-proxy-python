@@ -1,0 +1,56 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test4-a_profile_bound_to_a_preset_with_the_extension_constrains_the_extension",
+  "description": "Refused half: the server binds habitable-atmospheres, which requires the atmosphere extension, to planets-atmosphere.",
+  "when": {
+    "profile.bound_profiles": {
+      "contains": "planets-atmosphere"
+    }
+  },
+  "comment": "Runs on sqlite-demo-bound only.",
+  "steps": [
+    {
+      "comment": "Creates the planet of test3 under planets-atmosphere. Expects 422 02308 with the profile habitable-atmospheres: the atmosphere is required.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets-atmosphere}",
+          "RPP-Preset": "{rpp:preset:planets-atmosphere}",
+          "Content-Type": "{rpp:content-type:planets-atmosphere}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db4}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 422,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02308"
+        },
+        "body": {
+          "status": 422,
+          "errors": [
+            {
+              "result": "02308",
+              "profile": "org.example.rpp.profile.habitable-atmospheres"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

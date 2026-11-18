@@ -1,0 +1,147 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test2-the_profiles_of_the_definition_and_the_bound_ones_are_apart",
+  "description": "The server that binds profiles publishes the profiles of a preset definition and the bound ones in different data elements.",
+  "when": {
+    "profile.bound_profiles": {
+      "contains": "planets"
+    }
+  },
+  "comment": "Runs on sqlite-demo-bound only.",
+  "steps": [
+    {
+      "comment": "Reads planets. Expects no profile of the definition and rocky-planets bound.",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "org.example.rpp.preset.planets",
+          "version": "1.0",
+          "defaultPreset": true,
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            }
+          ],
+          "profiles": [],
+          "boundProfiles": [
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.rocky-planets"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "comment": "Reads catalogued-planets. Expects the two profiles of its definition and none bound.",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.catalogued-planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "org.example.rpp.preset.catalogued-planets",
+          "version": "1.0",
+          "defaultPreset": false,
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            }
+          ],
+          "profiles": [
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.rocky-planets"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.catalogued-satellites"
+            }
+          ],
+          "boundProfiles": []
+        }
+      }
+    },
+    {
+      "comment": "Reads planets-complete. Expects the three extensions of its two bases and habitable-rocky-planets bound (its base profiles are not listed as bound).",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.planets-complete",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "org.example.rpp.preset.planets-complete",
+          "version": "1.0",
+          "defaultPreset": false,
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planet-atmosphere"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.satellite-orbit"
+            }
+          ],
+          "profiles": [],
+          "boundProfiles": [
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.habitable-rocky-planets"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

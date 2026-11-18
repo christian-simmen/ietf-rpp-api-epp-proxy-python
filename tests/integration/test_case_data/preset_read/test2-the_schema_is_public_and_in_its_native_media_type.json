@@ -4,6 +4,18 @@
   ],
   "test_id": "test2-the_schema_is_public_and_in_its_native_media_type",
   "description": "The schema of the default preset is read without authentication and without a preset signal, as application/schema+json.",
+  "when": [
+    {
+      "profile.default_preset": "epp-compatible"
+    },
+    {
+      "profile.default_preset": "rri"
+    },
+    {
+      "profile.default_preset": "planets"
+    }
+  ],
+  "comment": "Skipped where no step names the default preset of the environment: sqlite-demo-extended and sqlite-demo-inherit (default planets-complete, read by demo_preset_read/).",
   "steps": [
     {
       "when": {

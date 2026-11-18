@@ -1,0 +1,67 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-a_preset_that_reaches_a_profile_through_a_base_and_its_own_has_it_once",
+  "description": "habitable-worlds builds on planets-atmosphere and catalogued-planets and applies habitable-rocky-planets, which builds on rocky-planets, a profile catalogued-planets has too: each profile is listed once.",
+  "when": {
+    "profile.presets": {
+      "contains": "habitable-worlds"
+    }
+  },
+  "comment": "Runs on sqlite-demo-inherit only.",
+  "steps": [
+    {
+      "comment": "Reads habitable-worlds. Expects the extensions of both bases, once each, and the three profiles of its definition and its bases, once each.",
+      "request": {
+        "method": "GET",
+        "url": "/presets/org.example.rpp.preset.habitable-worlds",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "preset",
+          "id": "org.example.rpp.preset.habitable-worlds",
+          "version": "1.0",
+          "defaultPreset": false,
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planet-atmosphere"
+            }
+          ],
+          "profiles": [
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.rocky-planets"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.catalogued-satellites"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.habitable-rocky-planets"
+            }
+          ],
+          "boundProfiles": []
+        }
+      }
+    }
+  ]
+}

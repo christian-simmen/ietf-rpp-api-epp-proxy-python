@@ -26,7 +26,18 @@ keys it has, for one machine's settings.
 The proxy speaks EPP to the registry by default; see [EPP or RRI behind the API](#epp-or-rri-behind-the-api) for
 DENIC RRI.
 
-Swagger UI shall be available at http://127.0.0.1:8000/ui/
+Swagger UI shall be available at http://127.0.0.1:8000/ui/. The OpenAPI document it shows (`/openapi.json`,
+`/openapi.yaml`) is OpenAPI 3.1, with the body schemas of the default preset: the members of its extensions and the
+constraints of its profiles, as `GET /presets/{id}/schema` publishes them. It lists every operation of the drafts' API
+contract, also those the server answers with 501. Two switches leave those out, against the contract, so each is off by
+default; the demo configurations turn both on, so their document shows the planets and satellites only:
+
+```yaml
+rpp_openapi_omit_unheld_objects: true   # the operations on a data object the backend does not hold (501 02307)
+rpp_openapi_omit_unimplemented: true    # the operations no handler serves (501 02101)
+```
+
+Requests to what they leave out still answer 501.
 
 The username and password of HTTP Basic are the EPP login (`clID`/`pw`), and every request needs an `RPP-Cltrid`
 header with a new value.
@@ -39,7 +50,7 @@ header with a new value.
 |---|---|---|---|
 | `epp` (the default when the key is absent) | EPP (RFC 5730 ff.) over TCP | `rpp_epp_*` | [config.yaml](config.yaml) |
 | `rri` | DENIC RRI 5.0 (XML) over TCP | `rpp_rri_*` | [config.rri-mtest.yaml](config.rri-mtest.yaml) |
-| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [config.demo.yaml](config.demo.yaml) |
+| `sqlite` | no registry: a SQLite database, the demo objects Planet and Satellite | `rpp_sqlite_*`, `rpp_extensions` | [config.demo.yaml](config.demo.yaml), and [extended](config.demo-extended.yaml), [bound](config.demo-bound.yaml), [inherit](config.demo-inherit.yaml) |
 
 One process speaks one protocol: the one `rpp_backend` names is on, the other is off and its settings are ignored.
 The RPP API is the same for both. With RRI, what RPP has no place for is in the `de.denic.rpp.rri` extension
@@ -58,6 +69,8 @@ The clients are `rpp_sqlite_clients`, a user and the `scrypt` hash of its passwo
 ```
 cd src
 RPP_CONFIG_FILE=../config.demo.yaml uvicorn main:app          # clients demo-a and demo-b, passwords demo-a-password ...
+# the demo compositions: config.demo.yaml (bare: the planets preset), config.demo-extended.yaml (all three extensions, no binding),
+# config.demo-bound.yaml (the server binds profiles to presets), config.demo-inherit.yaml (presets and profiles with several bases)
 ```
 
 A config for RRI states at least:

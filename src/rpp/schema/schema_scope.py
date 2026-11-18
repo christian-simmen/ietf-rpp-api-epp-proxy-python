@@ -83,6 +83,10 @@ class SchemaScope:
             raise SchemaNotBuilt(f"No schema {name} was built for the extensions {', '.join(self.extensions) or '(none)'}")
         return validator
 
+    def has(self, name: str) -> bool:
+        """Whether the scope built a validator of the definition (without the fallback of a scope without an app)."""
+        return name in self._plain
+
     def validate(self, name: str, data) -> None:
         """Validates `data` against a definition of the preset without profiles. A member no schema declares is refused as an
         undeclared property (json §4.9.1), the same `ValueError` the dataclasses' check raises."""

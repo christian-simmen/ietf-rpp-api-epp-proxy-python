@@ -1,0 +1,68 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test4-a_profile_with_two_bases_is_read_with_its_bases_and_the_extensions_they_require",
+  "description": "habitable-rocky-planets builds on rocky-planets and habitable-atmospheres: its Profile Data Object lists both bases, and the extensions they require flattened.",
+  "when": [
+    {
+      "profile.bound_profiles": {
+        "contains": "planets"
+      }
+    },
+    {
+      "profile.presets": {
+        "contains": "habitable-worlds"
+      }
+    }
+  ],
+  "comment": "Runs where the profile is applicable: sqlite-demo-bound and sqlite-demo-inherit.",
+  "steps": [
+    {
+      "comment": "Reads the profile. Expects the two base profiles and the two extensions required through the bases and by itself.",
+      "request": {
+        "method": "GET",
+        "url": "/profiles/org.example.rpp.profile.habitable-rocky-planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "profile",
+          "id": "org.example.rpp.profile.habitable-rocky-planets",
+          "version": "1.0",
+          "baseProfiles": [
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.rocky-planets"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.habitable-atmospheres"
+            }
+          ],
+          "requiredExtensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planet-atmosphere"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-a_preset_with_the_atmosphere_extension_accepts_a_planet_without_one",
+  "description": "Accepted half: planets-atmosphere makes the atmosphere optional, and the server binds no profile to it.",
+  "when": {
+    "profile.presets": {
+      "contains": "planets-atmosphere"
+    },
+    "profile.bound_profiles": {
+      "not": {
+        "contains": "planets-atmosphere"
+      }
+    }
+  },
+  "comment": "Runs where the server offers planets-atmosphere without a binding: sqlite-demo-extended and sqlite-demo-inherit. The same request is refused on sqlite-demo-bound (test4).",
+  "steps": [
+    {
+      "comment": "Creates a planet without an atmosphere under planets-atmosphere. Expects 201.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets-atmosphere}",
+          "RPP-Preset": "{rpp:preset:planets-atmosphere}",
+          "Content-Type": "{rpp:content-type:planets-atmosphere}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db3}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "planet",
+          "id": "{handle:a:-db3}"
+        }
+      }
+    }
+  ]
+}

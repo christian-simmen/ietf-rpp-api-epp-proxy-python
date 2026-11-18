@@ -200,17 +200,23 @@ def replace_fact(value: str, env: TestEnvironment):
 
 RPP_MEDIA_TYPE = "application/rpp+json"
 RPP_PLACEHOLDER = re.compile(r"\{rpp:[^{}]*\}")
+RPP_HEADER_PLACEHOLDER = re.compile(r"\{rpp:(preset|accept|content-type)(?::([A-Za-z0-9_.-]+))?\}")
 OMIT = object()  # what a placeholder gives when the header it stands for is not sent
 
 
-def rpp_headers(env: TestEnvironment) -> dict:
+def rpp_headers(env: TestEnvironment, key: str | None = None) -> dict:
     """What the placeholders of the preset headers stand for in `env`, by the signalling method of its config
-    (`rpp_preset_signalling`), for the preset of its descriptor (`preset`). `OMIT`: the header is not sent.
+    (`rpp_preset_signalling`), for the preset of its descriptor (`preset`), or for the preset `key` of its config
+    (`{rpp:preset:planets-atmosphere}`). `OMIT`: the header is not sent.
 
     - `header`: `{rpp:preset}` is the value of `RPP-Preset`, `{rpp:accept}` and `{rpp:content-type}` the plain media type.
     - `media-type`: `{rpp:preset}` is omitted, the others are the media type with the preset parameters.
     """
-    preset = Definitions.load(load_registry(load_settings(str(REPOSITORY / env.config))), EXTENSIONS).presets[env.rpp_preset]
+    presets = Definitions.load(load_registry(load_settings(str(REPOSITORY / env.config))), EXTENSIONS).presets
+    key = key or env.rpp_preset
+    if key not in env.profile.fact("presets"):
+        raise EnvironmentError(f"{env.name}: no preset {key!r} among the offered presets of {env.config}")
+    preset = presets[key]
     if env.preset_signalling == "header":
         return {"{rpp:preset}": preset_header.format_preset(preset), "{rpp:accept}": RPP_MEDIA_TYPE,
                 "{rpp:content-type}": RPP_MEDIA_TYPE}
@@ -223,17 +229,19 @@ def rpp_headers(env: TestEnvironment) -> dict:
 def with_rpp_headers(case: dict, env: TestEnvironment) -> dict:
     """The case with the placeholders of the preset headers resolved in the headers of every request. A placeholder
     stands for a whole header value; one that resolves to `OMIT` takes the header out of the request. Nothing is added:
-    a request sends the preset headers its case states."""
-    known = rpp_headers(env)
+    a request sends the preset headers its case states. `{rpp:preset:KEY}`, `{rpp:accept:KEY}` and `{rpp:content-type:KEY}`
+    stand for the preset `KEY` of the config instead of the one of the descriptor."""
     steps = []
     for step in case["steps"]:
         request = step["request"]
         headers = {}
         for name, value in request.get("headers", {}).items():
             if isinstance(value, str) and RPP_PLACEHOLDER.search(value):
-                if value not in known:
-                    raise EnvironmentError(f"{value}: not one of {', '.join(known)}, which are a whole header value")
-                value = known[value]
+                match = RPP_HEADER_PLACEHOLDER.fullmatch(value)
+                if match is None:
+                    raise EnvironmentError(f"{value}: not one of {{rpp:preset}}, {{rpp:accept}}, {{rpp:content-type}}, "
+                                           "each with an optional :KEY, which are a whole header value")
+                value = rpp_headers(env, match.group(2))[f"{{rpp:{match.group(1)}}}"]
             if value is not OMIT:
                 headers[name] = value
         steps.append({**step, "request": {**request, "headers": headers}})

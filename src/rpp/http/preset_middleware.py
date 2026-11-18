@@ -1,20 +1,19 @@
 from connexion import ProblemException
 
 from core.result.result_code import ResultCode
-from rpp.http.extension_paths import plural
+from rpp.http.extension_paths import collections, plural
 from rpp.http.headers import problem_headers
 from rpp.http.request_presets import RequestPresets
 from rpp.schema.extensions import EXTENSIONS
 
-# The keys of the request context that hold the `PresetSelection` of the request and the signalling method that made it.
+# The keys of the request context that hold the `PresetSelection` of the request, the signalling method that made it and the
+# `RequestSchemas` of the selection (what the body validators and the mappers validate with).
 SELECTED_PRESET = "rpp_preset"
 SIGNALLING = "rpp_preset_signalling"
+REQUEST_SCHEMAS = "rpp_request_schemas"
 
 # The operation that reads the schema of a preset: a document in its native media type, outside preset signalling.
 SCHEMA_OPERATION = "presets_schemaRead"
-
-# The first path segment of the data objects of the drafts, and the object it addresses.
-COLLECTIONS = {plural(obj): obj for obj in ("domainName", "contact", "host")}
 
 
 class PresetMiddleware:
@@ -35,8 +34,7 @@ class PresetMiddleware:
         # The objects an extension defines are in the plural of their identifier (core §16.1). Only those of the
         # offered extensions have paths: any other is a 404, as without the extension.
         self.owners = {plural(obj): ext for ext in extensions for obj in EXTENSIONS[ext].objects}
-        self.collections = {**COLLECTIONS, **{
-            plural(obj): obj for extension in extensions for obj in EXTENSIONS[extension].objects}}
+        self.collections = collections(extensions)
         self.signalling = signalling
         self.request_presets = request_presets
 
@@ -54,6 +52,7 @@ class PresetMiddleware:
             context = scope.setdefault("extensions", {}).setdefault("connexion_context", {})
             context[SELECTED_PRESET] = selection
             context[SIGNALLING] = self.signalling
+            context[REQUEST_SCHEMAS] = self.request_presets.schemas(selection)
             send = self.signalling.announce(send, selection)
             segment = scope["path"].lstrip("/").split("/", 1)[0]
             obj = self.collections.get(segment)

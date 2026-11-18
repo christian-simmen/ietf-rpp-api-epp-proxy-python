@@ -3,6 +3,14 @@
     "smoke"
   ],
   "test_id": "test1-full_update",
+  "when": {
+    "profile.bound_profiles": {
+      "not": {
+        "contains": "planets"
+      }
+    }
+  },
+  "comment": "Skipped on sqlite-demo-bound: the server binds rocky-planets to the default preset planets, so a planet of another type is refused with 422 02308 there (demo_binding/ shows it).",
   "steps": [
     {
       "request": {

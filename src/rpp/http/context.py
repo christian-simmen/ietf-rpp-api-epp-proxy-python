@@ -2,7 +2,7 @@ from connexion import request
 from flask import current_app
 
 from core.capabilities.backend_profile import BackendProfile
-from rpp.http.preset_middleware import SELECTED_PRESET
+from rpp.http.preset_middleware import REQUEST_SCHEMAS, SELECTED_PRESET
 from rpp.http.preset_selection import PresetSelection
 from rpp.http.request_presets import RequestPresets
 from rpp.schema.offered_presets import OfferedPresets
@@ -70,12 +70,7 @@ def response_profile() -> BackendProfile:
 def request_schemas() -> RequestSchemas | None:
     """The schemas the request is validated with: those of the preset it is read under, which `rpp_operation` makes the
     mappers' own for the handler. None for an operation without a preset (a document, the router's 404)."""
-    selection = request.context.get(SELECTED_PRESET)
-    if selection is None:
-        return None
-    requests: RequestPresets = current_app.config[REQUEST_PRESETS]
-    return RequestSchemas(request=requests.scope_of(selection.request), response=requests.scope_of(selection.response),
-                          scopes=requests.scopes())
+    return request.context.get(REQUEST_SCHEMAS)
 
 
 def discovery_settings():

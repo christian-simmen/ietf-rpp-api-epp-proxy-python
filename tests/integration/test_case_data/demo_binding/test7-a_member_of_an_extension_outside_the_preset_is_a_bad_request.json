@@ -1,0 +1,54 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test7-a_member_of_an_extension_outside_the_preset_is_a_bad_request",
+  "description": "A planet with an atmosphere under planets, whose extensions are the planets extension only, is refused with 400 02001 before any profile, also where the server binds a profile to planets.",
+  "when": {
+    "profile.presets": {
+      "contains": "planets-atmosphere"
+    }
+  },
+  "comment": "Runs where the atmosphere extension is registered: sqlite-demo-extended, -bound and -inherit.",
+  "steps": [
+    {
+      "comment": "Creates a planet with an atmosphere member under the preset planets. Expects 400 with RPP-Code 02001.",
+      "request": {
+        "method": "POST",
+        "url": "/planets",
+        "headers": {
+          "Authorization": "{auth:a}",
+          "Accept": "{rpp:accept:planets}",
+          "RPP-Preset": "{rpp:preset:planets}",
+          "Content-Type": "{rpp:content-type:planets}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        },
+        "body_json": {
+          "@type": "planet",
+          "id": "{handle:a:-db7}",
+          "type": "rocky",
+          "radius": 3389.5,
+          "authInfo": {
+            "@type": "authInfo",
+            "method": "authinfo",
+            "authdata": "Secret-Word1"
+          },
+          "atmosphere": {
+            "@type": "atmosphere",
+            "pressure": 1.0
+          }
+        }
+      },
+      "response": {
+        "status": 400,
+        "content_type": "application/problem+json",
+        "headers": {
+          "RPP-Code": "02001"
+        },
+        "body": {
+          "status": 400
+        }
+      }
+    }
+  ]
+}

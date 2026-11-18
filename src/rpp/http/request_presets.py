@@ -1,7 +1,9 @@
 from core.capabilities.backend_profile import BackendProfile
 from rpp.schema.offered_preset import OfferedPreset
 from rpp.schema.offered_presets import OfferedPresets
+from rpp.http.preset_selection import PresetSelection
 from rpp.schema.preset_schemas import PresetSchemas
+from rpp.schema.request_schemas import RequestSchemas
 from rpp.schema.schema_scope import SchemaScope
 
 
@@ -27,3 +29,8 @@ class RequestPresets:
 
     def scopes(self) -> tuple[SchemaScope, ...]:
         return tuple(scope for _, scope in self._by_id.values())
+
+    def schemas(self, selection: PresetSelection) -> RequestSchemas:
+        """The schemas a request under `selection` is validated with: those of its request preset and its response preset."""
+        return RequestSchemas(request=self.scope_of(selection.request), response=self.scope_of(selection.response),
+                              scopes=self.scopes())

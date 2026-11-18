@@ -1,0 +1,100 @@
+{
+  "markers": [
+    "smoke"
+  ],
+  "test_id": "test3-the_inheriting_server_offers_the_presets_with_several_bases",
+  "description": "Discovery of the server with presets and profiles that build on several bases: seven presets, each extension once, four profiles, each once.",
+  "when": {
+    "profile.presets": {
+      "contains": "habitable-worlds"
+    }
+  },
+  "comment": "Runs on sqlite-demo-inherit only.",
+  "steps": [
+    {
+      "comment": "Reads discovery without authentication. Expects the seven offered presets, three extensions and the four profiles that apply, each once.",
+      "request": {
+        "method": "GET",
+        "url": "/.well-known/rpp",
+        "headers": {
+          "Accept": "{rpp:accept}",
+          "RPP-Preset": "{rpp:preset}",
+          "Content-Type": "{rpp:content-type}",
+          "RPP-Cltrid": "{unique_cltrid}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "content_type": "application/rpp+json",
+        "headers": {
+          "RPP-Code": "01000"
+        },
+        "body": {
+          "@type": "discovery",
+          "presets": [
+            {
+              "@type": "preset",
+              "id": "urn:ietf:params:rpp:preset:base"
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets"
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-atmosphere"
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-orbits"
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.planets-complete"
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.catalogued-planets"
+            },
+            {
+              "@type": "preset",
+              "id": "org.example.rpp.preset.habitable-worlds"
+            }
+          ],
+          "extensions": [
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planets"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.planet-atmosphere"
+            },
+            {
+              "@type": "extension",
+              "id": "org.example.rpp.extension.satellite-orbit"
+            }
+          ],
+          "profiles": [
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.rocky-planets"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.catalogued-satellites"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.habitable-atmospheres"
+            },
+            {
+              "@type": "profile",
+              "id": "org.example.rpp.profile.habitable-rocky-planets"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

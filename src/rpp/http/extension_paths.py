@@ -26,6 +26,15 @@ def plural(identifier: str) -> str:
     return f"{identifier}s"
 
 
+# The data objects of the drafts that have paths of their own.
+DRAFT_OBJECTS = ("domainName", "contact", "host")
+
+
+def collections(extensions) -> dict[str, str]:
+    """The first path segment of each data object, of the drafts and of the offered extensions, and the object it addresses."""
+    return {plural(obj): obj for obj in (*DRAFT_OBJECTS, *(obj for ext in extensions for obj in EXTENSIONS[ext].objects))}
+
+
 def _renamed(node, template: str, identifier: str, schemas: dict):
     """The node of a path of the template object, for the extension's object: its operationIds and schemas renamed,
     and its descriptions left out, as they describe the template object."""
