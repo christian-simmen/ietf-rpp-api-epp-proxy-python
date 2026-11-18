@@ -21,6 +21,11 @@ in [process.project.md](process.project.md).
 4. **Behaviour changes are explicit.** Wire contracts (paths, field names, status
    and error codes, headers) are frozen. Changing one is a deliberate, documented
    decision with coordinated test updates, never a side effect.
+5. **Configuration changes reach every configuration.** A change that adds,
+   renames, removes or changes the meaning of a configuration key updates every
+   configuration that states it in the same change: the example and sample
+   configurations, and the deployment templates. A configuration a deployment
+   renders is as much a consumer as the code.
 
 ## Mutex and plan protocol
 
